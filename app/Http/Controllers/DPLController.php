@@ -27,7 +27,7 @@ class DPLController extends Controller
   	$outlets = OutletDistributor::join('customers','customers.id','outlet_distributor.outlet_id')
   															->get();
 
-  	$outlet_list = array();
+  	$outlet_list = array('---Pilih---');
   	$distributor_list = array('---Silakan Pilih Outlet---');
 
   	foreach ($outlets as $key => $outlet) {

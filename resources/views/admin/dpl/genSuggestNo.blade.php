@@ -12,7 +12,7 @@
     </div>
   @endif
 
-  {!! Form::open(['url' => '/dpl/suggestno/generate']) !!}
+  {!! Form::open(['url' => '/dpl/suggestno/generate', 'id'=>'generate-sugg-no-form']) !!}
   <div class="container">
     <table class="col-xs-12">
       <tr>
