@@ -14,8 +14,16 @@
 
   {!! Form::open(['url' => '/dpl/suggestno/generate']) !!}
   <div class="container text-center">
-    No. Usulan Anda adalah
-    <h1>{{ $suggest_no }}</h1>
+    <div class="row">
+      <div class="col-md-6 col-sm-offset-3">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <p>No. Usulan Anda adalah</p>
+            <h1>{{ $suggest_no }}</h1>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   {{ Form::close() }}
 @endsection

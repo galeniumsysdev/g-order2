@@ -1,0 +1,18 @@
+/* Created by WK Productions */
+
+.dpl-form-wrapper {
+  padding: 15px 0 0;
+}
+.dpl-form-wrapper .dpl-form-label {
+  padding: 6px 0 0;
+  text-align: right;
+}
+
+/* Media Queries */
+
+@media (max-width: 992px) {
+  .dpl-form-wrapper .dpl-form-label {
+    padding: 0;
+    text-align: left;
+  }
+}
