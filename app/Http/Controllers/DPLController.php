@@ -27,18 +27,11 @@ class DPLController extends Controller
   	$outlets = OutletDistributor::join('customers','customers.id','outlet_distributor.outlet_id')
   															->get();
 
-  	$distributors = OutletDistributor::join('customers','customers.id','outlet_distributor.distributor_id')
-  															->get();
-
   	$outlet_list = array();
-  	$distributor_list = array();
+  	$distributor_list = array('---Silakan Pilih Outlet---');
 
   	foreach ($outlets as $key => $outlet) {
   		$outlet_list[$outlet->id] = $outlet->customer_name;
-  	}
-
-  	foreach ($distributors as $key => $distributor) {
-  		$distributor_list[$distributor->id] = $distributor->customer_name;
   	}
 
   	return view('admin.dpl.genSuggestNo', array(
@@ -85,6 +78,15 @@ class DPLController extends Controller
   	{
   		return redirect('/dpl/suggestno/form');
   	}
+  }
+
+  public function getDistributorList($outlet_id)
+  {
+  	$distributors = OutletDistributor::join('customers','customers.id','outlet_distributor.distributor_id')
+  																		->where('outlet_id',$outlet_id)
+  																		->get(); 
+   	
+   	return response()->json($distributors);
   }
 
 }
