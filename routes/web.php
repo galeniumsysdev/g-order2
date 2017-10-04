@@ -213,3 +213,11 @@ Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->nam
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));
 });*/
+
+/**
+* created by WK Productions
+*/
+Route::get('/dpl/suggestno/form','DPLController@generateSuggestNoForm')->name('dpl.generateForm');
+Route::post('/dpl/suggestno/generate','DPLController@generateExec')->name('dpl.generateExec');
+Route::get('/dpl/suggestno/success','DPLController@generateSuccess')->name('dpl.generateSuccess');
+Route::get('/dpl/distlist/{outlet_id}','DPLController@getDistributorList')->name('dpl.distributorList');

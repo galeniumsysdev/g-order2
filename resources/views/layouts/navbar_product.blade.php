@@ -13,7 +13,7 @@
     <!-- Styles -->
 		<!--<link rel="stylesheet" href="product.css">-->
 	<link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,700&subset=latin-ext,vietnamese" rel="stylesheet">
-	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<!-- <link href="css/bootstrap.min.css" rel="stylesheet"> -->
   <link href="https://fonts.googleapis.com/css?family=Pacifico&subset=latin-ext,vietnamese" rel="stylesheet">
 	<link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
   <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">-->
