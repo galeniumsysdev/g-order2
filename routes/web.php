@@ -221,3 +221,6 @@ Route::get('/dpl/suggestno/form','DPLController@generateSuggestNoForm')->name('d
 Route::post('/dpl/suggestno/generate','DPLController@generateExec')->name('dpl.generateExec');
 Route::get('/dpl/suggestno/success','DPLController@generateSuccess')->name('dpl.generateSuccess');
 Route::get('/dpl/distlist/{outlet_id}','DPLController@getDistributorList')->name('dpl.distributorList');
+
+Route::get('/dpl/discount/form/{suggest_no}','DPLController@discountForm')->name('dpl.discountForm');
+Route::post('/dpl/discount/set','DPLController@discountSet')->name('dpl.generateExec');
