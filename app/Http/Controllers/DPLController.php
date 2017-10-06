@@ -8,6 +8,7 @@ namespace App\Http\Controllers;
 use App\Customer;
 use App\OutletDistributor;
 use App\DPLSuggestNo;
+use App\DPLLog;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -116,7 +117,60 @@ class DPLController extends Controller
     $dpl = DPLSuggestNo::where('suggest_no',$suggest_no)
                         ->update(array('discount'=>$discount));
 
+    $this->dplLog($suggest_no,'Input Discount');
+
     return redirect()->back();
+  }
+
+  public function discountApprovalForm($suggest_no)
+  {
+    $dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
+                                'users.name as dpl_mr_name',
+                                'outlet.id as dpl_outlet_id',
+                                'outlet.customer_name as dpl_outlet_name',
+                                'distributor.id as dpl_distributor_id',
+                                'distributor.customer_name as dpl_distributor_name',
+                                'suggest_no',
+                                'discount')
+                        ->join('users','users.id','dpl_suggest_no.mr_id')
+                        ->join('customers as outlet','outlet.id','dpl_suggest_no.outlet_id')
+                        ->join('customers as distributor','distributor.id','dpl_suggest_no.distributor_id')
+                        ->where('suggest_no',$suggest_no)
+                        ->where('active',1)
+                        ->first();
+
+    return view('admin.dpl.discountApprovalForm',array('dpl'=>$dpl));
+  }
+
+  public function discountApprovalSet(Request $request, $action)
+  {
+    $suggest_no = $request->suggest_no;
+    if($action == 'Approve')
+      $approved_by = Auth::user()->id;
+    else
+      $approved_by = '';
+
+    $this->dplLog($suggest_no,$action);
+
+    $dpl = DPLSuggestNo::where('suggest_no',$suggest_no)
+                        ->update(array('approved_by'=>$approved_by));
+    print_r($action);
+  }
+
+  public function dplLog($suggest_no, $type)
+  {
+    $log = new DPLLog;
+    $log->suggest_no = $suggest_no;
+    $log->type = $type;
+    $log->done_by = Auth::user()->id;
+    $log->save();
+  }
+
+  public function dplLogHistory($suggest_no)
+  {
+    $dpl = DPLLog::where('suggest_no',$suggest_no)->get();
+
+    return view('admin.dpl.dplHistory',array('dpl'=>$dpl));
   }
 
 }
