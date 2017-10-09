@@ -26,7 +26,7 @@
       @foreach($dpl as $history)
       <tr>
         <td>{{ $history->type }}</td>
-        <td>{{ $history->done_by }}</td>
+        <td>{{ $history->name }}</td>
         <td>{{ $history->done_by }}</td>
         <td>{{ $history->created_at }}</td>
       </tr>

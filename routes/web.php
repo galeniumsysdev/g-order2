@@ -222,7 +222,7 @@ Route::post('/dpl/suggestno/generate','DPLController@generateExec')->name('dpl.g
 Route::get('/dpl/suggestno/success','DPLController@generateSuccess')->name('dpl.generateSuccess');
 Route::get('/dpl/distlist/{outlet_id}','DPLController@getDistributorList')->name('dpl.distributorList');
 
-Route::get('/dpl/discount/form/{suggest_no}','DPLController@discountForm')->name('dpl.discountForm');
+Route::get('/dpl/discount/form/{suggest_no?}','DPLController@discountForm')->name('dpl.discountForm');
 Route::post('/dpl/discount/set','DPLController@discountSet')->name('dpl.discountSet');
 Route::get('/dpl/discount/approval/{suggest_no}','DPLController@discountApprovalForm')->name('dpl.discountApproval');
 Route::post('/dpl/discount/approval/{action}','DPLController@discountApprovalSet')->name('dpl.discountApprovalSet');
