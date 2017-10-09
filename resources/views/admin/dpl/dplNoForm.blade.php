@@ -13,6 +13,7 @@
     </div>
   @endif
 
+  {!! Form::open(['url' => '/dpl/input/set', 'id'=>'dpl-no-input-form']) !!}
   <div class="container dpl-container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
@@ -71,6 +72,20 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="dpl-form-label">
+                          <label for="suggest-no">No. Usulan</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="dpl-default-value">{{ $dpl['suggest_no'] }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="dpl-form-label">
                           <label for="discount">Discount</label>
                         </div>
                       </div>
@@ -84,24 +99,25 @@
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
+                        <div class="dpl-form-label">
+                          <label for="dpl-no">No. DPL</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="dpl-default-value">{{ Form::text('dpl_no',$dpl_no,array('class'=>'form-control','id'=>'dpl-no',$readonly)) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
                         &nbsp;
                       </div>
                       <div class="col-md-10">
-                      <!-- Form Approve -->
-                        <div class="dpl-button-wrapper">
-                          {!! Form::open(['url' => '/dpl/discount/approval/Approve', 'id'=>'generate-sugg-no-form']) !!}
-                            {{ Form::hidden('action','Approve') }}
-                            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
-                            {{ Form::submit('Approve',array('class'=>'btn btn-primary')) }}
-                          {{ Form::close() }}
-                        </div>
-                      <!-- Form Reject -->
-                        <div class="dpl-button-wrapper">
-                          {!! Form::open(['url' => '/dpl/discount/approval/Reject', 'id'=>'generate-sugg-no-form']) !!}
-                            {{ Form::hidden('action','Reject') }}
-                            {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
-                          {{ Form::close() }}
-                        </div>
+                        {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
+                        {{ Form::submit('Save',array('class'=>'btn btn-primary')) }}
                       </div>
                     </div>
                   </div>
@@ -113,6 +129,7 @@
       </div>
     </div>
   </div>
+  {{ Form::close() }}
 @endsection
 @section('js')
 

@@ -9,6 +9,7 @@ use App\Customer;
 use App\OutletDistributor;
 use App\DPLSuggestNo;
 use App\DPLLog;
+use App\DPLNo;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -147,9 +148,10 @@ class DPLController extends Controller
     return view('admin.dpl.discountApprovalForm',array('dpl'=>$dpl));
   }
 
-  public function discountApprovalSet(Request $request, $action)
+  public function discountApprovalSet(Request $request)
   {
     $suggest_no = $request->suggest_no;
+    $action = $request->action;
     if($action == 'Approve')
       $approved_by = Auth::user()->id;
     else
@@ -178,6 +180,67 @@ class DPLController extends Controller
                   ->get();
 
     return view('admin.dpl.dplHistory',array('dpl'=>$dpl));
+  }
+
+  public function dplNoInputForm($suggest_no)
+  {
+    $dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
+                                'users.name as dpl_mr_name',
+                                'outlet.id as dpl_outlet_id',
+                                'outlet.customer_name as dpl_outlet_name',
+                                'distributor.id as dpl_distributor_id',
+                                'distributor.customer_name as dpl_distributor_name',
+                                'dpl_suggest_no.suggest_no',
+                                'discount',
+                                'dpl_no')
+                        ->join('users','users.id','dpl_suggest_no.mr_id')
+                        ->join('customers as outlet','outlet.id','dpl_suggest_no.outlet_id')
+                        ->join('customers as distributor','distributor.id','dpl_suggest_no.distributor_id')
+                        ->leftjoin('dpl_no','dpl_no.suggest_no','dpl_suggest_no.suggest_no')
+                        ->where('dpl_suggest_no.suggest_no',$suggest_no)
+                        ->where('active',1)
+                        ->first();
+
+    if(empty($dpl->dpl_no)){
+      $max_dpl_no = DPLNo::max('dpl_no');
+      $readonly = '';
+
+      if($max_dpl_no){
+        $max_no = intval(substr($max_dpl_no, 6));
+        $dpl_no = date('Ym').str_pad($max_no+1, 5, 0, STR_PAD_LEFT);
+      }
+      else{
+        $dpl_no = date('Ym').str_pad(1, 5, 0, STR_PAD_LEFT);
+      }
+    }
+    else{
+      $dpl_no = $dpl->dpl_no;
+      $readonly = 'readonly';
+    }
+
+    return view('admin.dpl.dplNoForm',array('dpl'=>$dpl,'readonly'=>$readonly,'dpl_no'=>$dpl_no));
+  }
+
+  public function dplNoInputSet(Request $request)
+  {
+    $suggest_no = $request->suggest_no;
+    $dpl_no = $request->dpl_no;
+
+    $this->dplLog($suggest_no,'Input DPL No #'.$dpl_no);
+
+    $check_dpl = DPLNo::where('dpl_no',$dpl_no)->count();
+
+    if(!$check_dpl){
+      $dpl = new DPLNo;
+      $dpl->dpl_no = $dpl_no;
+      $dpl->suggest_no = $suggest_no;
+      $dpl->save();
+
+      print_r($dpl);
+    }
+    else{
+      return redirect()->back()->withInput()->with('msg','DPL No #'.$dpl_no.' already exist.');
+    }
   }
 
 }
