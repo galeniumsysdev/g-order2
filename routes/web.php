@@ -213,3 +213,11 @@ Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->nam
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));
 });*/
+Route::group(['middleware' => ['permission:UploadCMO']], function () {
+Route::get('uploadCMO', 'FilesController@upload')->name('files.uploadcmo');
+    Route::post('/handleUpload', 'FilesController@handleUpload');
+    Route::get('viewAlldownloadfile', 'FilesController@downfunc')->name('files.viewfile');
+    Route::get('/downloadCMO/{file}', function ($file='') {
+        return response()->download(storage_path('app/uploads/'.$file));
+  });
+});

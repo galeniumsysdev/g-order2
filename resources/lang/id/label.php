@@ -68,5 +68,7 @@ return [
     'sent' => 'Dikirim',
     'read' => 'Dibaca',
     'to' => 'Tujuan',
-    'type'=> 'Tipe'
+    'type'=> 'Tipe',
+    'upload' =>'Unggah',
+    'download' => 'Unduh'
 ];

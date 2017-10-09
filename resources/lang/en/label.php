@@ -69,5 +69,8 @@ return [
     'sent' => 'Sent',
     'read' => 'Read',
     'to' => 'To',
-    'type'=> 'Type'
+    'type'=> 'Type',
+    'upload' =>'Upload',
+    'download' => 'Download'
+
 ];

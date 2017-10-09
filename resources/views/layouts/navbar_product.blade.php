@@ -108,6 +108,19 @@
                           <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; Login</strong></a></li>
                           <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; Register</strong></a></li>
                         @else
+                          @if(Auth::user()->can('uploadCMO') or Auth::user()->can('DownloadCMO'))
+                            <li class="dropdown">
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>CMO</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                              <ul class="dropdown-menu">
+                              @if(Auth::user()->can('UploadCMO'))
+                                <li><a href="{{route('files.uploadcmo')}}">@lang('label.upload') CMO</a></li>
+                              @endif
+                              @if(Auth::user()->can('DownloadCMO'))
+                                  <li><a href="{{route('files.viewfile')}}">@lang('label.download') CMO</a></li>
+                              @endif
+                              </ul>
+                            </li>
+                          @endif
                           @if(Auth::user()->hasRole('Distributor') or Auth::user()->hasRole('Distributor Cabang') or Auth::user()->hasRole('Outlet') or Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Principal'))
                           <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>List Order</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
@@ -116,11 +129,12 @@
                               <li><a href="{{route('order.listSO')}}">Check SO</a></li>
                             @endif
                             @if(Auth::user()->can('Create PO'))
-                                <li><a href="{{route('order.listPO')}}">Check PO</a></li>
+                              <li><a href="{{route('order.listPO')}}">Check PO</a></li>
                             @endif
                             </ul>
                           </li>
-                        @endif
+                          @endif
+
                         @if(Auth::user()->can('Create PO'))
                             <li class="dropdown">
                               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>@lang('label.categoryproduct')</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
@@ -135,7 +149,7 @@
                             </a></li>
                         @endif
 
-                        @if (Auth::user()->can('POS'))
+                        @if (Auth::user()->hasRole('Apotik/Klinik'))
                         <li class="dropdown">
                           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Upload</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                           <ul class="dropdown-menu">
@@ -144,10 +158,6 @@
                           </ul>
                         </li>
                         @endif
-                        @if(Auth::user()->hasRole('Marketing Pharma'))
-
-                        @endif
-
                         <!--{{--notification--}}
                         <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>-->
                         <li class="dropdown">

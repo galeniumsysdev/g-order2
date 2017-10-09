@@ -17,6 +17,9 @@ return [
     'org_id'=> 106,
     'order_source_id'=>1001,
     'warehouseid_YMP' =>99,
-    'warehouseid_GPL' =>141
+    'warehouseid_GPL' =>141,
+    'allowedFileTypes' => 'pdf','xls',
+    'maxFileSize' => 1000*2,
+     'fileDestinationPath' => 'uploads',
 
 ];
