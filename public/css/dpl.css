@@ -1,11 +1,25 @@
 /* Created by WK Productions */
 
+.dpl-container .panel-heading {
+  font-size: 20px;
+}
+
 .dpl-form-wrapper {
   padding: 15px 0 0;
 }
 .dpl-form-wrapper .dpl-form-label {
   padding: 6px 0 0;
   text-align: right;
+}
+.dpl-form-wrapper .dpl-default-value {
+  padding: 6px 0 0;
+  display: block;
+}
+.dpl-form-wrapper .dpl-button-wrapper {
+  float: left;
+}
+.dpl-form-wrapper .dpl-button-wrapper + .dpl-button-wrapper {
+  margin: 0 0 0 10px;
 }
 
 /* Media Queries */

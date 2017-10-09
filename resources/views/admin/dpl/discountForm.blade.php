@@ -15,7 +15,7 @@
 
   {!! Form::open(['url' => '/dpl/discount/set', 'id'=>'generate-sugg-no-form']) !!}
   {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
-  <div class="container">
+  <div class="container dpl-container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
@@ -33,7 +33,7 @@
                       </div>
                       <div class="col-md-10">
                         {{ Form::hidden('mr',$dpl['dpl_mr_name'],array('id'=>'mr')) }}
-                        {{ $dpl['dpl_mr_name'] }}
+                        <span class="dpl-default-value">{{ $dpl['dpl_mr_name'] }}</span>
                       </div>
                     </div>
                   </div>
@@ -48,7 +48,7 @@
                       </div>
                       <div class="col-md-10">
                         {{ Form::hidden('outlet',$dpl['dpl_outlet_name'],array('id'=>'outlet')) }}
-                        {{ $dpl['dpl_outlet_name'] }}
+                        <span class="dpl-default-value">{{ $dpl['dpl_outlet_name'] }}</span>
                       </div>
                     </div>
                   </div>
@@ -63,7 +63,7 @@
                       </div>
                       <div class="col-md-10">
                         {{ Form::hidden('distributor',$dpl['dpl_distributor_name'],array('id'=>'distributor')) }}
-                        {{ $dpl['dpl_distributor_name'] }}
+                        <span class="dpl-default-value">{{ $dpl['dpl_distributor_name'] }}</span>
                       </div>
                     </div>
                   </div>
