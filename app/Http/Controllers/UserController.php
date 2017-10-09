@@ -8,6 +8,9 @@ use App\User;
 use App\Role;
 use DB;
 use Hash;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Response;
+use Webpatser\Uuid\Uuid;
 
 
 class UserController extends Controller
@@ -55,6 +58,7 @@ class UserController extends Controller
         ]);
 
         $input = $request->all();
+        $input['id']= Uuid::generate()->string;
         $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
         foreach ($request->input('roles') as $key => $value) {
@@ -139,6 +143,27 @@ class UserController extends Controller
         User::find($id)->delete();
         return redirect()->route('users.index')
                         ->with('success','User deleted successfully');
+    }
+
+    public function getListCity()
+    {
+        $id = Input::get('id');
+        $city = DB::table('regencies')->where('province_id','=',$id)->get();
+        return Response::json($city);
+    }
+
+    public function getListDistrict()
+    {
+      $id = Input::get('id');
+        $districts = DB::table('districts')->where('regency_id','=',$id)->get();
+        return Response::json($districts);
+    }
+
+    public function getListSubdistrict()
+    {
+      $id = Input::get('id');
+        $subdistricts = DB::table('villages')->where('district_id','=',$id)->get();
+        return Response::json($subdistricts);
     }
 
 }

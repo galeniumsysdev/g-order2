@@ -20,6 +20,10 @@ Route::get('/getPrice',[
     ,'as' => 'product.getPrice'
   ]);
 
+Route::get('/ajax/getCity', 'UserController@getListCity');
+Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
+Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');  
+
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
 
 Route::get('detail/{id}', [

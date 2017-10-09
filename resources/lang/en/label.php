@@ -21,6 +21,7 @@ return [
     'address' => 'Address',
     'province' => 'Province',
     'city' => 'City',
+    'regency' => 'Regency',
     'state' => 'Subdistrict',
     'postalcode' => 'Postal Code',
     'hp1' => 'Handphone 1',
@@ -31,8 +32,11 @@ return [
     'needproduct' => 'Product Type',
     'password' => 'Password',
     'confpass' => 'Confirm Password',
+    'newpassword' => 'New Password',
+    'newconfpass' => 'New Confirm Password',
     'cp' => 'Contact Name',
     'forgotpassword' => 'Forgot Your Password?',
+    'pwdminlength'=>'Minimum password length is 6 characters',
     'remember'=> 'Remember Me',
     'resetpassword'=> 'Reset Password',
     'SendPasswordResetLink' => 'Send Password Reset Link',
@@ -71,6 +75,8 @@ return [
     'to' => 'To',
     'type'=> 'Type',
     'upload' =>'Upload',
-    'download' => 'Download'
+    'download' => 'Download',
+    'mandatoryfield' => 'Mandatory Field',
+    'searchproduct' => 'Search Product'
 
 ];

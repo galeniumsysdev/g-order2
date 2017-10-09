@@ -99,8 +99,8 @@
                             </li>
                           </ul>
                         </li>
-                        <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; Login</strong></a></li>
-                        <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; Register</strong></a></li>
+                        <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; @lang('label.login')</strong></a></li>
+                        <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; @lang('label.register')</strong></a></li>
                         @else
                             @if(Auth::user()->can('Create PO'))
                                 <li><a href="#"><strong>New Order</strong></a></li>

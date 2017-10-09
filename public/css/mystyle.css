@@ -1,10 +1,112 @@
-.price{font-size: 16px;
+.price{font-size: 14px;
     font-weight: bold;
   }
 
+.thumbnail .caption h4 a{
+    font-size: 14px;
+  }
 
 
-body { /*padding-top: 70px;*/
+.row.display-flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.row.display-flex .col-md-2 {
+  padding-left: 0px;
+  padding-right:10px;
+}
+
+.row.display-flex .col-xs-6 {
+  padding-left: 15px;
+  padding-right:15px;
+}
+
+.img.product{
+  height: 100px;
+  width: 100%;
+  display: block;
+}
+
+
+@media (max-width: 767px) {
+  .img.product{
+    height: 100px;
+    width: 100%;
+    display: block;
+  }
+  .caption h4 a{
+    font-size: 12px;
+  }
+  .price{font-size: 12px;
+      font-weight: bold;
+    }
+
+  .thumbnail {
+    display: block;
+    flex-direction: column;
+    padding: 2px;
+    margin-bottom: 10px;
+    margin-left: -10px;
+    margin-right: -10px;
+    line-height: 1.6;
+    background-color: #f5f8fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    -webkit-transition: border 0.2s ease-in-out;
+    transition: border 0.2s ease-in-out;
+  }
+
+
+  .thumbnail > img,
+  .thumbnail a > img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .thumbnail .caption {
+
+    padding: 1px;
+    color: #636b6f;
+    margin-top: -10px;
+  }
+  .details input, .thumbnail input, .details .input-group-addon{
+    height: 22px;
+  padding: 2px 5px;
+  font-size: 12px;
+  line-height: 1.5; /* If Placeholder of the input is moved up, rem/modify this. */
+  border-radius: 3px;
+  }
+  .details select, .thumbnail select{
+    height: 22px;
+  padding: 2px 5px;
+  font-size: 10px;
+  line-height: 1.5; /* If Placeholder of the input is moved up, rem/modify this. */
+  border-radius: 3px;
+  }
+
+  .clearfix .btn{
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+  }
+  .clearfix .btn .pull-right{
+    float:right !important;
+  }
+
+  a.thumbnail:hover,
+  a.thumbnail:focus,
+  a.thumbnail.active {
+    border-color: #3097D1;
+  }
+}
+
+
+body { /*padding-top: 30px;*/
       height: 100%;
       background-repeat: no-repeat;
     /*  background-color: #214b6c;*/
@@ -18,6 +120,7 @@ body { /*padding-top: 70px;*/
   background-color:  #3366FF;
   color: rgb(0,0,0);
 }
+
 
 .navbar-inverse .navbar-brand:focus .navbar-inverse .navbar-brand:hover{
   color:rgb(0,0,0);background-color:transparent;
@@ -114,11 +217,12 @@ body { /*padding-top: 70px;*/
 /*register*/
 .country-code {
 	width: 20%;
-	padding-right: 10px;
+	padding-right: 5px;
 }
 
 .country-code>input {
 	text-align: center;
+  font-size: 12px;
 }
 
 .country-code + .col-xs-10 {
@@ -185,7 +289,8 @@ body { /*padding-top: 70px;*/
 }
 .item img{
   object-fit:cover;
-  height:300px !important;
+  max-height:300px !important;
+  height:auto;
   width:100%;
 }
 
@@ -194,6 +299,27 @@ body { /*padding-top: 70px;*/
     width: 100%;
     height: 300px;
     background-color: rgb(41, 128, 185);
+}
+
+@media (max-width: 550px), only screen and (max-device-width: 736px) and (orientation: portrait) {
+  .item img{
+    object-fit:cover;
+    max-height:auto !important;
+    height:auto;
+    width:100%;
+    font-size: 3vw;
+  }
+
+
+  .box{
+      width: 100%;
+      height: auto;
+      background-color: rgb(41, 128, 185);
+  }
+  h3{
+    font-size: 3vw;
+  }
+
 }
 
 /*li menu item untuk notification*/
@@ -270,4 +396,11 @@ ul.dropdown-notif li .item-right button{
 	margin-bottom: 25px;
 	height: 40px;
 	padding-right: 5px;
+}
+
+.navbar-right-xs{
+  padding-top: 15px;
+  padding-right: 15px;
+  padding-bottom: 5px;
+  color: #fff;
 }

@@ -15,6 +15,9 @@ use Mail;
 use App\Notifications\VerificationUser;
 use App\Notifications\MarketingGaleniumNotif;
 use Webpatser\Uuid\Uuid;
+use DB;
+use Image;
+use File;
 
 class RegisterController extends Controller
 {
@@ -60,7 +63,10 @@ class RegisterController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|string|email|max:100|unique:users',
             'address' => 'required|string|max:255',
+            'province' => 'required',
             'city' => 'required|string|max:100',
+            'subdistricts' => 'required',
+            'district' => 'required',
             'postal_code' => 'required|digits:5',
             'HP_1' => 'required|regex:/(8)[0-9]{8,}/',
             'HP_2' => 'nullable|regex:/(8)[0-9]{8,}/',
@@ -135,8 +141,13 @@ class RegisterController extends Controller
 	      //return Redirect::back()->withErrors('psc', trans('auth.pscflag'))->withInput();
         return redirect(route('register'))->withErrors(['psc'=> [trans('auth.pscflag')]])->withInput();
       }
+      if($request->hasFile('imgphoto')) {
+        $validator = Validator::make($request->all(), [
+            'imgphoto' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ])->validate();
+      }
       $customer = Customer::create([
-          'customer_name' => $request->name,
+          'customer_name' => strtoupper($request->name),
           'status' => 'X',
           'tax_reference' => $request->NPWP,
           'pharma_flag' => $request->pharma,
@@ -144,13 +155,19 @@ class RegisterController extends Controller
           'outlet_type_id' => $request->category,
         ]);
         $customer->save();
+      $province=DB::table('provinces')->where('id','=',$request->province)->first();
+      $city=DB::table('regencies')->where('id','=',$request->city)->first();
+      $district=DB::table('districts')->where('id','=',$request->district)->first();
+      $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
 
        $custsites = new CustomerSite();
        $custsites->site_use_code = "SHIP_TO";
        $custsites->status = "A";
        $custsites->address1 = strtoupper($request->address);
-       $custsites->state = strtoupper($request->state);
-       $custsites->city = strtoupper($request->city);
+       $custsites->province = $province->name;
+       $custsites->city = $city->name;
+       $custsites->district = $district->name;
+       $custsites->state = $state->name;
        $custsites->postalcode = $request->postal_code;
        $custsites->Country = 'ID';
        $custsites->customer_id = $customer->id;
@@ -164,7 +181,7 @@ class RegisterController extends Controller
         $custcontact->save();
 
         $custcontact1= new CustomerContact();
-        $custcontact->contact_name = $request->cp;
+        $custcontact1->contact_name = $request->contact_person;
         $custcontact1->contact_type = 'PHONE';
         $custcontact1->contact ='+62'.$request->HP_1;
         $custcontact1->customer_id=$customer->id;
@@ -172,6 +189,7 @@ class RegisterController extends Controller
 
         if(isset($request->HP_2)){
             $custcontact2= new CustomerContact();
+            $custcontact2->contact_name = $request->contact_person;
             $custcontact2->contact_type = 'PHONE';
             $custcontact2->contact ='+62'.$request->HP_2;
             $custcontact2->customer_id=$customer->id;
@@ -179,18 +197,22 @@ class RegisterController extends Controller
         }
         if(isset($request->no_tlpn)){
             $custcontact3= new CustomerContact();
+            $custcontact3->contact_name = $request->contact_person;
              $custcontact3->contact_type = 'PHONE';
              $custcontact3->contact ='+62'.$request->no_tlpn;
              $custcontact3->customer_id=$customer->id;
              $custcontact3->save();
         }
 
-
+        $avatar = $request->file('imgphoto');
+        $filename = time() . '.' . $avatar->getClientOriginalExtension();
+        Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
       //$user=$this->create($input);
       $user= new User();
       $user->id = Uuid::generate()->string;
-      $user->name = $request->name;
+      $user->name = strtoupper($request->name);
       $user->email = $request->email;
+      $user->avatar = $filename;
       $user->api_token =str_random(60);
       $customer->users()->save($user);
 

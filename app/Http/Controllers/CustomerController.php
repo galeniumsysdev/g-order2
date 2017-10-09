@@ -22,6 +22,9 @@ use App\Notifications\RejectbyGPLNotif;
 use App\OutletDistributor;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Input;
+use Image;
+use File;
+use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
 {
@@ -67,7 +70,7 @@ class CustomerController extends Controller
         }
         $groupdcs = GroupDatacenter::all();//where('enabled_flag','1');
         $categories = CategoryOutlet::where('enable_flag','Y')->get();
-        $roles = Role::whereIn('name',['Outlet','Distributor','Distributor Cabang'])->get();
+        $roles = Role::whereIn('name',['Outlet','Apotik/Klinik'])->get();
         $distributors = DB::table('customers as a')
                         ->join('outlet_distributor as b','a.id','=','b.outlet_id')
                         ->join('customers as c','b.distributor_id','=','c.id')
@@ -221,53 +224,87 @@ class CustomerController extends Controller
 
   public function update(Request $request, $id)
   {//approve outlet by gpl
+    $pesan = "";
+    if($request->save=="save" or $request->save=="approve")
+    {
       $user = User::find($id);
+      if($request->hasFile('avatar')) {
+        $validator = Validator::make($request->all(), [
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ])->validate();
+        $tmp = $user->avatar ;
+        if (File::exists(public_path('uploads/avatars/'.$tmp ))){
+          unlink(public_path('uploads/avatars/'.$tmp ));
+          //echo ("<br>delete image");
+        }
+        $avatar = $request->file('avatar');
+        $filename = time() . '.' . $avatar->getClientOriginalExtension();
+        Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
+        $user->avatar = $filename;
+      }
+      $user->name=$request->name;
+      $user->save();
       $user->detachRoles($user->roles);
       $user->roles()->attach($request->role);
       $customer = Customer::find($user->customer_id);
-      if($customer->psc_flag <>  $request->psc_flag and $request->psc_flag==1) {
-        //jika sebelumnya psc belum dipilih maka buat notification ke marketing psc
-        $marketings_psc = User::whereHas('roles', function($q){
-            $q->where('name','Marketing PSC');
-        })->get();
-        foreach ($marketings_psc as $mpsc)
-        {
-            $mpsc->notify(new MarketingGaleniumNotif($user));
-        }
-      }
-      if($customer->pharma_flag <>  $request->pharma_flag and $request->pharma_flag==1) {
-        //jika sebelumnya pharma belum dipilih maka buat notification ke marketing pharma
-        $marketings_pharma = User::whereHas('roles', function($q){
-            $q->where('name','Marketing Pharma');
-        })->get();
-        //$marketings_pharma = Role::with('users')->where('name', 'Marketing Pharma')->get();
-        //dd($marketings_pharma);
-        foreach ($marketings_pharma as $mpharma)
-        {
-            $mpharma->notify(new MarketingGaleniumNotif($user));
-        }
-      }
-      $customer->psc_flag =$request->psc_flag;
-      $customer->pharma_flag =$request->pharma_flag;
-      $customer->status = 'A';
-      if($request->role==4){//$user->hasRole('Outlet'//jika outlet
+      $customer->tax_reference = $request->npwp;
+      $customer->customer_name = $request->name;
+
+      if(Auth::User()->hasRole('Marketing PSC')){
         $customer->outlet_type_id =$request->category;
         $customer->subgroup_dc_id =$request->subgroupdc;
       }else{
         $customer->outlet_type_id =null;
         $customer->subgroup_dc_id =null;
       }
-      if(Auth::User()->hasRole('Marketing PSC'))
+    }
+    if($request->save=="approve")
+    {
+      if((Auth::User()->hasRole('Marketing PSC') and $request->psc_flag=="1") or (Auth::User()->hasRole('Marketing Pharma') and $request->pharma_flag=="1"))
       {
-        $customer->id_approval_psc = Auth::User()->id;
-        $customer->date_approval_psc =Carbon::now();
+        if($customer->psc_flag <>  $request->psc_flag and $request->psc_flag==1) {
+          //jika sebelumnya psc belum dipilih maka buat notification ke marketing psc
+          $marketings_psc = User::whereHas('roles', function($q){
+              $q->where('name','Marketing PSC');
+          })->get();
+          foreach ($marketings_psc as $mpsc)
+          {
+              $mpsc->notify(new MarketingGaleniumNotif($user));
+          }
+        }
+        if($customer->pharma_flag <>  $request->pharma_flag and $request->pharma_flag==1) {
+          //jika sebelumnya pharma belum dipilih maka buat notification ke marketing pharma
+          $marketings_pharma = User::whereHas('roles', function($q){
+              $q->where('name','Marketing Pharma');
+          })->get();
+          //$marketings_pharma = Role::with('users')->where('name', 'Marketing Pharma')->get();
+          //dd($marketings_pharma);
+          foreach ($marketings_pharma as $mpharma)
+          {
+              $mpharma->notify(new MarketingGaleniumNotif($user));
+          }
+        }
+          $customer->status = 'A';
+          if(Auth::User()->hasRole('Marketing PSC'))
+          {
+            $customer->id_approval_psc = Auth::User()->id;
+            $customer->date_approval_psc =Carbon::now();
+          }
+          if(Auth::User()->hasRole('Marketing Pharma'))
+          {
+            $customer->id_approval_pharma = Auth::User()->id;
+            $customer->date_approval_pharma =Carbon::now();
+          }
+      }else{
+        return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.cantapprove"));
       }
-      if(Auth::User()->hasRole('Marketing Pharma'))
-      {
-        $customer->id_approval_pharma = Auth::User()->id;
-        $customer->date_approval_pharma =Carbon::now();
-      }
-      $customer->save();
+    }
+
+    $customer->psc_flag =$request->psc_flag;
+    $customer->pharma_flag =$request->pharma_flag;
+    $customer->save();
+    if($request->save=="approve")
+    {
       $userlogin = Auth::user();
       $notifications = $userlogin->notifications()
                       ->where([
@@ -293,6 +330,7 @@ class CustomerController extends Controller
         //mark as read notification for user login and outlet
         $pesan = "";
       }
+    }
       //dd($request->notif_id."aaaa");
       //return response()->json(['message'=>'success']);
       return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.update").$pesan);
@@ -464,4 +502,5 @@ class CustomerController extends Controller
         }
 
     }
+
 }
