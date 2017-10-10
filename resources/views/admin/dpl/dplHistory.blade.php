@@ -13,26 +13,34 @@
     </div>
   @endif
 
-  <table class="table table-striped table-hover">
-    <thead>
-      <tr>
-        <th>Action</th>
-        <th>Done By</th>
-        <th>Role</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody>
-      @foreach($dpl as $history)
-      <tr>
-        <td>{{ $history->type }}</td>
-        <td>{{ $history->name }}</td>
-        <td>{{ $history->done_by }}</td>
-        <td>{{ $history->created_at }}</td>
-      </tr>
-      @endforeach
-    </tbody>
-  </table>
+  <div class="container dpl-container">
+    <div class="row">
+      <div class="col-md-10 col-sm-offset-1">
+        <div class="panel panel-default">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Done By</th>
+                <th>Role</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($dpl as $history)
+              <tr>
+                <td>{{ $history->type }}</td>
+                <td>{{ $history->name }}</td>
+                <td>{{ $history->done_by }}</td>
+                <td>{{ $history->created_at }}</td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 @endsection
 @section('js')
 

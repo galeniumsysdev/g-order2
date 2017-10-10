@@ -104,7 +104,7 @@
                         </div>
                       </div>
                       <div class="col-md-10">
-                        <span class="dpl-default-value">{{ Form::text('dpl_no',$dpl_no,array('class'=>'form-control','id'=>'dpl-no',$readonly)) }}</span>
+                        {{ Form::text('dpl_no',$dpl_no,array('class'=>'form-control','id'=>'dpl-no',$readonly)) }}
                       </div>
                     </div>
                   </div>
