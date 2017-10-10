@@ -69,5 +69,7 @@ return [
     'sent' => 'Sent',
     'read' => 'Read',
     'to' => 'To',
-    'type'=> 'Type'
+    'type'=> 'Type',
+    'generatesuggestno' => 'Create Suggest No#',
+    'listsuggestno' => 'List Suggest No#'
 ];
