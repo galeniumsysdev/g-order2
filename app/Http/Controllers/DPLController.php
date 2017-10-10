@@ -10,6 +10,8 @@ use App\OutletDistributor;
 use App\DPLSuggestNo;
 use App\DPLLog;
 use App\DPLNo;
+use App\User;
+use App\SoLine;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -82,6 +84,17 @@ class DPLController extends Controller
   	}
   }
 
+  public function suggestNoValidation($outlet_id, $suggest_no){
+    $check_dpl = DPLSuggestNo::where('outlet_id',$outlet_id)
+                  ->where('suggest_no',$suggest_no)
+                  ->count();
+    
+    if($check_dpl)
+      return response()->json(array('valid'=>true));
+    else
+      return response()->json(array('valid'=>false));
+  }
+
   public function getDistributorList($outlet_id)
   {
   	$distributors = OutletDistributor::join('customers','customers.id','outlet_distributor.distributor_id')
@@ -108,7 +121,7 @@ class DPLController extends Controller
                           ->where('suggest_no',$suggest_no)
                           ->where('active',1)
                           ->first();
-                          
+      
       return view('admin.dpl.discountForm',array('dpl'=>$dpl));
     }
     else{
@@ -119,13 +132,22 @@ class DPLController extends Controller
   public function discountSet(Request $request)
   {
     $discount = $request->discount;
+    $bonus = $request->bonus;
     $suggest_no = $request->suggest_no;
+    
+    foreach ($discount as $key => $disc) {
+      $so_line = SoLine::where('line_id',$key)
+                        ->update(array('discount'=>($disc ? $disc : 0),
+                                        'bonus'=>($bonus[$key] ? $bonus[$key] : 0)
+                                      ));
+    }
+
     $dpl = DPLSuggestNo::where('suggest_no',$suggest_no)
-                        ->update(array('discount'=>$discount));
+                        ->update(array('fill_in'=>0));
 
     $this->dplLog($suggest_no,'Input Discount');
 
-    return redirect()->back();
+    return redirect('/dpl/list');
   }
 
   public function discountApprovalForm($suggest_no)
@@ -134,34 +156,50 @@ class DPLController extends Controller
                                 'users.name as dpl_mr_name',
                                 'outlet.id as dpl_outlet_id',
                                 'outlet.customer_name as dpl_outlet_name',
-                                'distributor.id as dpl_distributor_id',
-                                'distributor.customer_name as dpl_distributor_name',
                                 'suggest_no',
-                                'discount')
+                                'notrx',
+                                'fill_in')
                         ->join('users','users.id','dpl_suggest_no.mr_id')
                         ->join('customers as outlet','outlet.id','dpl_suggest_no.outlet_id')
-                        ->join('customers as distributor','distributor.id','dpl_suggest_no.distributor_id')
                         ->where('suggest_no',$suggest_no)
                         ->where('active',1)
                         ->first();
 
-    return view('admin.dpl.discountApprovalForm',array('dpl'=>$dpl));
+    if($dpl['fill_in'])
+        return redirect('/dpl/discount/form/'.$suggest_no);
+
+    $header = DB::table('so_header_v as sh')
+            ->where('notrx','=',$dpl['notrx'])->first();
+    if(!$header)
+    {
+      return view('errors.403');
+    }
+    $lines =DB::table('so_lines_v')->where('header_id','=',$header->id)->get();
+
+    $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
+
+    return view('admin.dpl.discountApprovalForm',compact('dpl','header','lines'));
   }
 
   public function discountApprovalSet(Request $request)
   {
     $suggest_no = $request->suggest_no;
     $action = $request->action;
-    if($action == 'Approve')
+    if($action == 'Approve'){
       $approved_by = Auth::user()->id;
-    else
+      $dpl = DPLSuggestNo::where('suggest_no',$suggest_no)
+                          ->update(array('approved_by'=>$approved_by));
+    }
+    else{
       $approved_by = '';
+      $dpl = DPLSuggestNo::where('suggest_no',$suggest_no)
+                          ->update(array('approved_by'=>$approved_by,'fill_in'=>1));
+    }
 
     $this->dplLog($suggest_no,$action);
 
-    $dpl = DPLSuggestNo::where('suggest_no',$suggest_no)
-                        ->update(array('approved_by'=>$approved_by));
-    print_r($action);
+    
+    return redirect('/dpl/list');
   }
 
   public function dplLog($suggest_no, $type)
@@ -175,11 +213,41 @@ class DPLController extends Controller
 
   public function dplLogHistory($suggest_no)
   {
-    $dpl = DPLLog::join('users','users.id','dpl_log.done_by')
+    $dpl = DPLLog::select('users.name','dpl_log.*')
+                  ->join('users','users.id','dpl_log.done_by')
                   ->where('suggest_no',$suggest_no)
                   ->get();
 
     return view('admin.dpl.dplHistory',array('dpl'=>$dpl));
+  }
+
+  public function dplList()
+  {
+    $dpl = DPLSuggestNo::select('mr.id as dpl_mr_id',
+                                'mr.name as dpl_mr_name',
+                                'outlet.id as dpl_outlet_id',
+                                'outlet.customer_name as dpl_outlet_name',
+                                'distributor.id as dpl_distributor_id',
+                                'distributor.customer_name as dpl_distributor_name',
+                                'approver.id as dpl_appr_id',
+                                'approver.name as dpl_appr_name',
+                                'dpl_suggest_no.suggest_no',
+                                'dpl_no')
+                        ->join('users as mr','mr.id','dpl_suggest_no.mr_id')
+                        ->join('customers as outlet','outlet.id','dpl_suggest_no.outlet_id')
+                        ->join('customers as distributor','distributor.id','dpl_suggest_no.distributor_id')
+                        ->leftJoin('users as approver','approver.id','dpl_suggest_no.approved_by')
+                        ->leftJoin('dpl_no','dpl_no.suggest_no','dpl_suggest_no.suggest_no')
+                        ->where('active',1)
+                        ->get();
+
+    foreach ($dpl as $key => $list) {
+      $dpl[$key]->btn_discount = (!$list->discount) ? "<a href='/dpl/discount/form/".$list->suggest_no."' class='btn btn-danger'>Discount</a>" : "";
+      $dpl[$key]->btn_confirm = '<a href="/dpl/discount/approval/'.$list->suggest_no.'" class="btn btn-primary">Confirmation</a>';
+      $dpl[$key]->btn_dpl_no = (!$list->dpl_no) ? '<a href="/dpl/input/form/'.$list->suggest_no.'" class="btn btn-warning">DPL No.</a>' : '';
+    }
+
+    return view('admin.dpl.dplList',array('dpl'=>$dpl));
   }
 
   public function dplNoInputForm($suggest_no)
@@ -241,6 +309,38 @@ class DPLController extends Controller
     else{
       return redirect()->back()->withInput()->with('msg','DPL No #'.$dpl_no.' already exist.');
     }
+  }
+
+  public function inputDiscount($suggest_no)
+  {
+    $dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
+                                'users.name as dpl_mr_name',
+                                'outlet.id as dpl_outlet_id',
+                                'outlet.customer_name as dpl_outlet_name',
+                                'dpl_suggest_no.suggest_no',
+                                'notrx',
+                                'fill_in')
+                        ->join('users','users.id','dpl_suggest_no.mr_id')
+                        ->join('customers as outlet','outlet.id','dpl_suggest_no.outlet_id')
+                        ->leftjoin('dpl_no','dpl_no.suggest_no','dpl_suggest_no.suggest_no')
+                        ->where('dpl_suggest_no.suggest_no',$suggest_no)
+                        ->where('active',1)
+                        ->first();
+
+    if(!$dpl['fill_in'])
+      return redirect('/dpl/discount/approval/'.$suggest_no);
+
+    $header = DB::table('so_header_v as sh')
+            ->where('notrx','=',$dpl['notrx'])->first();
+    if(!$header)
+    {
+      return view('errors.403');
+    }
+    $lines =DB::table('so_lines_v')->where('header_id','=',$header->id)->get();
+
+    $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
+
+    return view('admin.dpl.discountForm',compact('dpl','header','lines'));
   }
 
 }

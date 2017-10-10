@@ -62,28 +62,74 @@
                         </div>
                       </div>
                       <div class="col-md-10">
-                        {{ Form::hidden('distributor',$dpl['dpl_distributor_name'],array('id'=>'distributor')) }}
-                        <span class="dpl-default-value">{{ $dpl['dpl_distributor_name'] }}</span>
+                        {{-- Form::hidden('distributor',$dpl['dpl_distributor_name'],array('id'=>'distributor')) --}}
+                        <span class="dpl-default-value">{{-- $dpl['dpl_distributor_name'] --}}</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="form-group">
-                  <div class="container-fluid">
-                    <div class="row">
-                      <div class="col-md-2">
-                        <div class="dpl-form-label">
-                          <label for="outlet">Discount</label>
-                        </div>
-                      </div>
-                      <div class="col-md-10">
-                        <div class="input-prepend input-group">
-                          {{ Form::number('discount',$dpl['discount'],array('class'=>'form-control','id'=>'outlet','min'=>0)) }}
-                          <span class="add-on input-group-addon">%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <table id="cart" class="table table-hover table-condensed">
+                      <thead>
+                      <tr>
+                        <th style="width:45%" class="text-center">@lang('shop.Product')</th>
+                        <th style="width:10%" class="text-center">@lang('shop.Price')</th>
+                        <th style="width:5%" class="text-center">@lang('shop.uom')</th>
+                        <th style="width:5%" class="text-center">@lang('shop.qtyorder')</th>
+                        <th style="width:15%" class="text-center">@lang('shop.SubTotal')</th>
+                        <th style="width:10%" class="text-center">Discount</th>
+                        <th style="width:10%" class="text-center">Bonus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @php ($totamount = 0)
+                      @foreach($lines as $line)
+                        @php ($id  = $line->line_id)
+                      <tr>
+                        <td >
+                          <div class="row">
+                            <div class="col-sm-2 hidden-xs"><img src="{{ asset('img//'.$line->imagePath) }}" alt="..." class="img-responsive"/></div>
+                            <div class="col-sm-10">
+                              <h4 >{{ $line->title }}</h4>
+                            </div>
+                          </div>
+                        </td>
+                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->unit_price,2) }}</td>
+                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
+                        <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
+                            {{ $line->qty_request }}
+                        </td>
+                        <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
+                          @if($header->status<=0)
+                            {{  number_format($line->amount,2) }}
+                            @php ($amount  = $line->amount)
+                          @elseif($header->status==3)
+                            @php ($amount  = $line->qty_accept*$line->unit_price)
+                            {{ number_format($amount,2)}}
+                          @elseif($header->status==1)
+                          @php ($amount  = $line->qty_confirm*$line->unit_price)
+                          {{ number_format($amount,2)}}
+                          @elseif($header->status>0 and $header->status<3)
+                            @php ($amount  = $line->qty_shipping*$line->unit_price)
+                            {{ number_format($amount,2)}}
+                          @endif
+                          @php ($totamount  += $amount)
+                        </td>
+                        <td>
+                          <div class="input-prepend input-group">
+                            <input type="number" name="discount[{{$id}}]" id="discount-{{$id}}" class="form-control text-center" value="{{ $line->discount }}" style="min-width:80px;">
+                            <span class="add-on input-group-addon">%</span>
+                          </div>
+                        </td>
+                        <td>
+                          <input type="number" name="bonus[{{$id}}]" id="bonus-{{$id}}" class="form-control text-center" value="{{ $line->bonus }}" style="min-width:80px;">
+                        </td>
+                      </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                    </tfoot>
+                  </table>
                 </div>
                 <div class="form-group">
                   <div class="container-fluid">
@@ -92,7 +138,7 @@
                         &nbsp;
                       </div>
                       <div class="col-md-10">
-                        {{ Form::submit('Set',array('class'=>'btn btn-primary')) }}
+                        {{ Form::submit('Save',array('class'=>'btn btn-primary')) }}
                       </div>
                     </div>
                   </div>
@@ -105,6 +151,7 @@
     </div>
   </div>
   {{ Form::close() }}
+      
 @endsection
 @section('js')
 

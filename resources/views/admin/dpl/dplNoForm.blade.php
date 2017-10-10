@@ -117,7 +117,7 @@
                       </div>
                       <div class="col-md-10">
                         {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
-                        {{ Form::submit('Save',array('class'=>'btn btn-primary')) }}
+                        {!! Form::submit(Lang::get('label.save'),array('class'=>'btn btn-primary')) !!}
                       </div>
                     </div>
                   </div>

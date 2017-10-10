@@ -67,18 +67,64 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <div class="container-fluid">
-                    <div class="row">
-                      <div class="col-md-2">
-                        <div class="dpl-form-label">
-                          <label for="discount">Discount</label>
-                        </div>
-                      </div>
-                      <div class="col-md-10">
-                        <span class="dpl-default-value">{{ $dpl['discount'] }} %</span>
-                      </div>
-                    </div>
-                  </div>
+                  <table id="cart" class="table table-hover table-condensed">
+                      <thead>
+                      <tr>
+                        <th style="width:45%" class="text-center">@lang('shop.Product')</th>
+                        <th style="width:10%" class="text-center">@lang('shop.Price')</th>
+                        <th style="width:5%" class="text-center">@lang('shop.uom')</th>
+                        <th style="width:5%" class="text-center">@lang('shop.qtyorder')</th>
+                        <th style="width:15%" class="text-center">@lang('shop.SubTotal')</th>
+                        <th style="width:10%" class="text-center">Discount</th>
+                        <th style="width:10%" class="text-center">Bonus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @php ($totamount = 0)
+                      @foreach($lines as $line)
+                        @php ($id  = $line->line_id)
+                      <tr>
+                        <td >
+                          <div class="row">
+                            <div class="col-sm-2 hidden-xs"><img src="{{ asset('img//'.$line->imagePath) }}" alt="..." class="img-responsive"/></div>
+                            <div class="col-sm-10">
+                              <h4 >{{ $line->title }}</h4>
+                            </div>
+                          </div>
+                        </td>
+                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->unit_price,2) }}</td>
+                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
+                        <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
+                            {{ $line->qty_request }}
+                        </td>
+                        <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
+                          @if($header->status<=0)
+                            {{  number_format($line->amount,2) }}
+                            @php ($amount  = $line->amount)
+                          @elseif($header->status==3)
+                            @php ($amount  = $line->qty_accept*$line->unit_price)
+                            {{ number_format($amount,2)}}
+                          @elseif($header->status==1)
+                          @php ($amount  = $line->qty_confirm*$line->unit_price)
+                          {{ number_format($amount,2)}}
+                          @elseif($header->status>0 and $header->status<3)
+                            @php ($amount  = $line->qty_shipping*$line->unit_price)
+                            {{ number_format($amount,2)}}
+                          @endif
+                          @php ($totamount  += $amount)
+                        </td>
+                        <td class="text-center">
+                          {{ $line->discount }} %
+                        </td>
+                        <td class="text-center">
+                          {{ $line->bonus }}
+                        </td>
+                      </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                    </tfoot>
+                  </table>
                 </div>
                 <div class="form-group">
                   <div class="container-fluid">
@@ -89,7 +135,7 @@
                       <div class="col-md-10">
                       <!-- Form Approve -->
                         <div class="dpl-button-wrapper">
-                          {!! Form::open(['url' => '/dpl/discount/approval/Approve', 'id'=>'generate-sugg-no-form']) !!}
+                          {!! Form::open(['url' => '/dpl/discount/approval', 'id'=>'generate-sugg-no-form']) !!}
                             {{ Form::hidden('action','Approve') }}
                             {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
                             {{ Form::submit('Approve',array('class'=>'btn btn-primary')) }}
@@ -97,8 +143,9 @@
                         </div>
                       <!-- Form Reject -->
                         <div class="dpl-button-wrapper">
-                          {!! Form::open(['url' => '/dpl/discount/approval/Reject', 'id'=>'generate-sugg-no-form']) !!}
+                          {!! Form::open(['url' => '/dpl/discount/approval', 'id'=>'generate-sugg-no-form']) !!}
                             {{ Form::hidden('action','Reject') }}
+                            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
                             {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
                           {{ Form::close() }}
                         </div>

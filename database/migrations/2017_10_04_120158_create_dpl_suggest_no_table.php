@@ -21,7 +21,8 @@ class CreateDplSuggestNoTable extends Migration
             $table->uuid('outlet_id');
             $table->uuid('distributor_id');
             $table->char('suggest_no',8);
-            $table->smallInteger('discount')->default(0);
+            $table->string('notrx',50)->nullable();
+            $table->boolean('fill_in')->default(1);
             $table->uuid('approved_by')->default('');
             $table->string('approver_role',191)->default('');
             $table->string('next_approver_role',191)->default('');
