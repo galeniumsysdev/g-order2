@@ -22,6 +22,10 @@
   margin: 0 0 0 10px;
 }
 
+table.table-dpl tr th {
+  text-align: center;
+}
+
 /* Media Queries */
 
 @media (max-width: 992px) {
