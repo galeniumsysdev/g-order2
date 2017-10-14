@@ -1,7 +1,7 @@
 <template>
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i>
-          <span class="badge">{{unreadNotifications.length}}</span>
+          <!-- <span class="badge">{{unreadNotifications.length}}</span> -->
         </a>
         <ul class="dropdown-menu alert-dropdown">
           <li>
@@ -25,13 +25,13 @@
               },
         data(){
           return {
-            unreadNotifications: []
+            unreadNotifications: this.tipe
           }
         },
         mounted() {
             console.log('Component mounted.');
-            Echo.channel('demo')
-                .listen('.my-event', (notification) => {
+            Echo.private('App.User.' + this.userid)
+                .notification((notification) => {
                     console.log(notification);
                     let newUnreadNotifications={data:{tipe:notification.tipe,subject:notification.subject}};
                     this.unreadNotifications.push(newUnreadNotifications);
