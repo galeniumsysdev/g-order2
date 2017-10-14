@@ -23,12 +23,16 @@ class HelloPusherEvent implements ShouldBroadcast {
 		$this->message = $message;
 	}
 
+	public function broadcastAs() {
+		return 'my-event';
+	}
+
 	/**
 	 * Get the channels the event should broadcast on.
 	 *
 	 * @return Channel|array
 	 */
 	public function broadcastOn() {
-		return ['my-channel'];
+		return ['demo'];
 	}
 }
