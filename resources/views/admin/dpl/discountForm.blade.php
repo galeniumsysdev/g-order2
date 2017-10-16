@@ -15,6 +15,7 @@
 
   {!! Form::open(['url' => '/dpl/discount/set', 'id'=>'generate-sugg-no-form']) !!}
   {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
+  {{ Form::hidden('notrx',$dpl['notrx'],array('id'=>'suggest_no')) }}
   <div class="container dpl-container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
@@ -62,7 +63,7 @@
                         </div>
                       </div>
                       <div class="col-md-10">
-                        {{-- Form::hidden('distributor',$dpl['dpl_distributor_name'],array('id'=>'distributor')) --}}
+                        {{ Form::select('distributor', $distributor_list, $header->distributor_id, array('class'=>'form-control', 'id'=>'distributor')) }}
                         <span class="dpl-default-value">{{-- $dpl['dpl_distributor_name'] --}}</span>
                       </div>
                     </div>
@@ -72,11 +73,15 @@
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>
                       <tr>
-                        <th style="width:45%" class="text-center">@lang('shop.Product')</th>
-                        <th style="width:10%" class="text-center">@lang('shop.Price')</th>
-                        <th style="width:5%" class="text-center">@lang('shop.uom')</th>
-                        <th style="width:5%" class="text-center">@lang('shop.qtyorder')</th>
-                        <th style="width:15%" class="text-center">@lang('shop.SubTotal')</th>
+                        <th style="width:45%" class="text-center" rowspan="2">@lang('shop.Product')</th>
+                        <th style="width:10%" class="text-center" rowspan="2">@lang('shop.Price')</th>
+                        <th style="width:5%" class="text-center" rowspan="2">@lang('shop.uom')</th>
+                        <th style="width:5%" class="text-center" rowspan="2">@lang('shop.qtyorder')</th>
+                        <th style="width:15%" class="text-center" rowspan="2">@lang('shop.SubTotal')</th>
+                        <th style="width:10%" class="text-center" rowspan="2">Discount<br/>Distributor</th>
+                        <th class="text-center" colspan="2">GPL</th>
+                      </tr>
+                      <tr>
                         <th style="width:10%" class="text-center">Discount</th>
                         <th style="width:10%" class="text-center">Bonus</th>
                       </tr>
@@ -122,7 +127,13 @@
                           </div>
                         </td>
                         <td>
-                          <input type="number" name="bonus[{{$id}}]" id="bonus-{{$id}}" class="form-control text-center" value="{{ $line->bonus }}" style="min-width:80px;">
+                          <div class="input-prepend input-group">
+                            <input type="number" name="discount_gpl[{{$id}}]" id="discount-gpl-{{$id}}" class="form-control text-center" value="{{ $line->discount_gpl }}" style="min-width:80px;">
+                            <span class="add-on input-group-addon">%</span>
+                          </div>
+                        </td>
+                        <td>
+                          <input type="number" name="bonus_gpl[{{$id}}]" id="bonus-gpl-{{$id}}" class="form-control text-center" value="{{ $line->bonus_gpl }}" style="min-width:80px;">
                         </td>
                       </tr>
                         @endforeach

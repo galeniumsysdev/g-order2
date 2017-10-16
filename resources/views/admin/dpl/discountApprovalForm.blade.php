@@ -60,8 +60,7 @@
                         </div>
                       </div>
                       <div class="col-md-10">
-                        {{ Form::hidden('distributor',$dpl['dpl_distributor_name'],array('id'=>'distributor')) }}
-                        <span class="dpl-default-value">{{ $dpl['dpl_distributor_name'] }}</span>
+                        <span class="dpl-default-value">{{ $header->distributor_name }}</span>
                       </div>
                     </div>
                   </div>
@@ -70,11 +69,15 @@
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>
                       <tr>
-                        <th style="width:45%" class="text-center">@lang('shop.Product')</th>
-                        <th style="width:10%" class="text-center">@lang('shop.Price')</th>
-                        <th style="width:5%" class="text-center">@lang('shop.uom')</th>
-                        <th style="width:5%" class="text-center">@lang('shop.qtyorder')</th>
-                        <th style="width:15%" class="text-center">@lang('shop.SubTotal')</th>
+                        <th style="width:45%" class="text-center" rowspan="2">@lang('shop.Product')</th>
+                        <th style="width:10%" class="text-center" rowspan="2">@lang('shop.Price')</th>
+                        <th style="width:5%" class="text-center" rowspan="2">@lang('shop.uom')</th>
+                        <th style="width:5%" class="text-center" rowspan="2">@lang('shop.qtyorder')</th>
+                        <th style="width:15%" class="text-center" rowspan="2">@lang('shop.SubTotal')</th>
+                        <th style="width:10%" class="text-center" rowspan="2">Discount<br/>Distributor</th>
+                        <th class="text-center" colspan="2">GPL</th>
+                      </tr>
+                      <tr>
                         <th style="width:10%" class="text-center">Discount</th>
                         <th style="width:10%" class="text-center">Bonus</th>
                       </tr>
@@ -117,7 +120,10 @@
                           {{ $line->discount }} %
                         </td>
                         <td class="text-center">
-                          {{ $line->bonus }}
+                          {{ $line->discount_gpl }} %
+                        </td>
+                        <td class="text-center">
+                          {{ $line->bonus_gpl }}
                         </td>
                       </tr>
                         @endforeach
