@@ -217,7 +217,7 @@ Route::get('/test',function () {
 /**
 * created by WK Productions
 */
-Route::get('/dpl/list/','DPLController@dplList')->name('dpl.distributorList');
+Route::get('/dpl/list/','DPLController@dplList')->name('dpl.list');
 Route::get('/dpl/suggestno/form','DPLController@generateSuggestNoForm')->name('dpl.generateForm');
 Route::post('/dpl/suggestno/generate','DPLController@generateExec')->name('dpl.generateExec');
 Route::get('/dpl/suggestno/success','DPLController@generateSuccess')->name('dpl.generateSuccess');
@@ -234,3 +234,8 @@ Route::get('/dpl/history/{suggest_no}','DPLController@dplLogHistory')->name('dpl
 
 Route::get('/dpl/input/form/{suggest_no}','DPLController@dplNoInputForm')->name('dpl.dplNoForm');
 Route::post('/dpl/input/set','DPLController@dplNoInputSet')->name('dpl.dplNoSet');
+
+//Organization Structure
+Route::get('/Organization','OrgStructureController@index')->name('org.list');
+Route::get('/Organization/{user_id}/setting','OrgStructureController@setting')->name('org.setting');
+Route::post('/Organization/{user_id}/setting/save','OrgStructureController@saveSetting')->name('org.saveSetting');
