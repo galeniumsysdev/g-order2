@@ -17,7 +17,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <table class="table table-striped table-hover">
+          <table class="table table-striped table-hover table-dpl">
             <thead>
               <tr>
                 <th>Suggest No.</th>
