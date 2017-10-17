@@ -13,40 +13,30 @@
     </div>
   @endif
 
-  <div class="container dpl-container">
+  <div class="container">
     <div class="row">
-      <div class="col-md-10 col-sm-offset-1">
+      <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading"><strong>Product List</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
-            <div class="panel panel-default">
-              <div class="dpl-form-wrapper">
-                <div class="form-group">
-                  <div class="container-fluid">
-                    <div class="row">
-                      <div class="col-md-12">
-                        <span class="dpl-default-value">
-                          <table class="table table-striped table-hover table-dpl">
-                            <tr>
-                              <th>ID</th>
-                              <th>Title</th>
-                              <th>Stok</th>
-                            </tr>
-                          @foreach ($stock as $cell)
-                            <tr>
-                              <td>{{ $cell['op_id'] }}</td>
-                              <td>{{ $cell['title'] }}</td>
-                              <td>{{ $cell['product_qty'] }}</td>
-                            </tr>
-                          @endforeach
-                          </table>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <table class="table table-striped table-hover table-center-header">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Stok</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($stock as $cell)
+                  <tr>
+                    <td>{{ $cell['op_id'] }}</td>
+                    <td>{{ $cell['title'] }}</td>
+                    <td>{{ $cell['product_qty'] }}</td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

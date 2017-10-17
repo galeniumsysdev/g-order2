@@ -13,7 +13,7 @@
     </div>
   @endif
 
-  <div class="container dpl-container">
+  <div class="container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">

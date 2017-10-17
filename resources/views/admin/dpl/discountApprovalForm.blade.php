@@ -13,25 +13,25 @@
     </div>
   @endif
 
-  <div class="container dpl-container">
+  <div class="container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
           <div class="panel-heading"><strong>Discount Form</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
-              <div class="dpl-form-wrapper">
+              <div class="form-wrapper">
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
-                        <div class="dpl-form-label">
+                        <div class="form-label">
                           <label for="outlet">MR</label>
                         </div>
                       </div>
                       <div class="col-md-10">
                         {{ Form::hidden('mr',$dpl['dpl_mr_name'],array('id'=>'mr')) }}
-                        <span class="dpl-default-value">{{ $dpl['dpl_mr_name'] }}</span>
+                        <span class="default-value">{{ $dpl['dpl_mr_name'] }}</span>
                       </div>
                     </div>
                   </div>
@@ -40,13 +40,13 @@
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
-                        <div class="dpl-form-label">
+                        <div class="form-label">
                           <label for="outlet">Outlet</label>
                         </div>
                       </div>
                       <div class="col-md-10">
                         {{ Form::hidden('outlet',$dpl['dpl_outlet_name'],array('id'=>'outlet')) }}
-                        <span class="dpl-default-value">{{ $dpl['dpl_outlet_name'] }}</span>
+                        <span class="default-value">{{ $dpl['dpl_outlet_name'] }}</span>
                       </div>
                     </div>
                   </div>
@@ -55,12 +55,12 @@
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
-                        <div class="dpl-form-label">
+                        <div class="form-label">
                           <label for="distributor">Distributor</label>
                         </div>
                       </div>
                       <div class="col-md-10">
-                        <span class="dpl-default-value">{{ $header->distributor_name }}</span>
+                        <span class="default-value">{{ $header->distributor_name }}</span>
                       </div>
                     </div>
                   </div>
@@ -140,7 +140,7 @@
                       </div>
                       <div class="col-md-10">
                       <!-- Form Approve -->
-                        <div class="dpl-button-wrapper">
+                        <div class="button-wrapper">
                           {!! Form::open(['url' => '/dpl/discount/approval', 'id'=>'generate-sugg-no-form']) !!}
                             {{ Form::hidden('action','Approve') }}
                             {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
@@ -148,7 +148,7 @@
                           {{ Form::close() }}
                         </div>
                       <!-- Form Reject -->
-                        <div class="dpl-button-wrapper">
+                        <div class="button-wrapper">
                           {!! Form::open(['url' => '/dpl/discount/approval', 'id'=>'generate-sugg-no-form']) !!}
                             {{ Form::hidden('action','Reject') }}
                             {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}

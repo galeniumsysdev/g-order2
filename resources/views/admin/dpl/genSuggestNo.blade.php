@@ -14,19 +14,19 @@
   @endif
 
   {!! Form::open(['url' => '/dpl/suggestno/generate', 'id'=>'generate-sugg-no-form']) !!}
-  <div class="container dpl-container">
+  <div class="container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
           <div class="panel-heading"><strong>DPL Suggestion Number</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
-              <div class="dpl-form-wrapper">
+              <div class="form-wrapper">
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
-                        <div class="dpl-form-label">
+                        <div class="form-label">
                           <label for="outlet">Outlet</label>
                         </div>
                       </div>
@@ -40,7 +40,7 @@
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
-                        <div class="dpl-form-label">
+                        <div class="form-label">
                           <label for="distributor">Distributor</label>
                         </div>
                       </div>

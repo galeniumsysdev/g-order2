@@ -13,19 +13,19 @@
     </div>
   @endif
 
-  <div class="container dpl-container">
+  <div class="container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
           <div class="panel-heading"><strong>Upload Stock</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
-              <div class="dpl-form-wrapper">
+              <div class="form-wrapper">
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-12">
-                        <div class="dpl-default-value">
+                        <div class="default-value">
                           <label for="outlet">
                             [ <a href="/outlet/product/download/stock">Download Template</a> ]
                           </label>
@@ -34,37 +34,46 @@
                     </div>
                   </div>
                 </div>
-                <div class="form-group">
-                  <div class="container-fluid">
-                    <div class="row">
-                      <div class="col-md-2">
-                        <div class="dpl-form-label">
-                          <label for="outlet">Choose File</label>
+                {!! Form::open(['url' => '/outlet/product/import/stock/view', 'files'=>'true']) !!}
+                  <div class="form-group">
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-md-2">
+                          <div class="form-label">
+                            <label for="file-import">Choose File</label>
+                          </div>
                         </div>
-                      </div>
-                      <div class="col-md-10">
-                        <span class="dpl-default-value">
-                          {!! Form::open(['url' => '/outlet/product/import/stock/view', 'files'=>'true']) !!}
+                        <div class="col-md-10">
                           {{ Form::file('file_import', array('class'=>'form-control','id'=>'file-import'))}}
-                          {{ Form::submit('Submit', array('class'=>'btn btn-info', 'id'=>'btn-import')) }}
-                          {{ Form::close() }}
-                        </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                  <div class="form-group">
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-md-2">
+                          &nbsp;
+                        </div>
+                        <div class="col-md-10">
+                          {{ Form::submit('Submit', array('class'=>'btn btn-info', 'id'=>'btn-import')) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {{ Form::close() }}
                 @if ($data)
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
-                        <div class="dpl-form-label">
+                        <div class="form-label">
                           <label for="outlet">Confirmation</label>
                         </div>
                       </div>
                       <div class="col-md-10">
-                        <span class="dpl-default-value">
-                          <table class="table table-striped table-hover table-dpl">
+                        <span class="default-value">
+                          <table class="table table-striped table-hover table-center-header">
                             <tr>
                               <th>ID</th>
                               <th>Title</th>
