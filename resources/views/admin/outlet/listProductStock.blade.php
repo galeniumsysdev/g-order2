@@ -19,7 +19,7 @@
         <div class="panel panel-default">
           <div class="panel-heading"><strong>Product List</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
-            <table class="table table-striped table-hover table-center-header">
+            <table id="product-list" class="table table-striped table-hover table-center-header">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -32,7 +32,7 @@
                   <tr>
                     <td>{{ $cell['op_id'] }}</td>
                     <td>{{ $cell['title'] }}</td>
-                    <td>{{ $cell['product_qty'] }}</td>
+                    <td>{{ number_format($cell['product_qty'],0,',','.') }}</td>
                   </tr>
                 @endforeach
               </tbody>
@@ -45,6 +45,11 @@
 @endsection
 @section('js')
 
-<script src="{{ asset('js/dpl.js') }}"></script>
+<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+<script
+    src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<link rel="stylesheet"
+    href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+<script src="{{ asset('js/outletproduct.js') }}"></script>
 
 @endsection

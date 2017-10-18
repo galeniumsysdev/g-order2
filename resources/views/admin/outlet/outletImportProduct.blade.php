@@ -60,19 +60,23 @@
                         </div>
                         <div class="col-md-10">
                           <span class="default-value">
-                            <table class="table table-striped table-hover table-center-header">
-                              <tr>
-                                <th>Title</th>
-                                <th>Satuan</th>
-                                <th>Harga</th>
-                              </tr>
-                            @foreach ($data as $cell)
-                              <tr>
-                                <td>{{ $cell['title'] }}</td>
-                                <td>{{ $cell['unit'] }}</td>
-                                <td>{{ $cell['price'] }}</td>
-                              </tr>
-                            @endforeach
+                            <table id="import-product" class="table table-striped table-hover table-center-header">
+                              <thead>
+                                <tr>
+                                  <th>Title</th>
+                                  <th>Satuan</th>
+                                  <th>Harga</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                              @foreach ($data as $cell)
+                                <tr>
+                                  <td>{{ $cell['title'] }}</td>
+                                  <td>{{ $cell['unit'] }}</td>
+                                  <td>{{ number_format($cell['price'],0,',','.') }}</td>
+                                </tr>
+                              @endforeach
+                              </tbody>
                             </table>
                             {!! Form::open(['url' => '/outlet/product/import/process']) !!}
                             {{ Form::hidden('data',$data) }}
@@ -94,6 +98,11 @@
 @endsection
 @section('js')
 
-<script src="{{ asset('js/dpl.js') }}"></script>
+<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+<script
+    src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<link rel="stylesheet"
+    href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+<script src="{{ asset('js/outletproduct.js') }}"></script>
 
 @endsection

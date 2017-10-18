@@ -125,6 +125,16 @@ class OutletProductController extends Controller
   	return redirect('/outlet/product/import/stock');
   }
 
+	public function getListProductStock()
+  {
+  	$stock = OutletProducts::select('outlet_products.id as op_id','outlet_products.unit','title',DB::raw('sum(qty) as product_qty'))
+  													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
+  													->groupBy('op_id','unit','title')
+  													->get();
+
+  	return response()->json($stock);
+  }  
+
   public function listProductStock()
   {
   	$stock = OutletProducts::select('outlet_products.id as op_id','title',DB::raw('sum(qty) as product_qty'))
@@ -132,5 +142,16 @@ class OutletProductController extends Controller
   													->groupBy('op_id','title')
   													->get();
   	return view('admin.outlet.listProductStock', array('stock'=>$stock));
+  }
+
+  public function outletTrx()
+  {
+  	return view('admin.outlet.outletTrx');
+  }
+
+  public function outletTrxInProcess()
+  {
+  	/*$instock = new Stock;
+  	$instock->product_id = */
   }
 }
