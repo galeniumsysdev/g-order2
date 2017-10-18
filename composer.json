@@ -13,6 +13,7 @@
         "laravelcollective/html": "^5.4.0",
         "pusher/pusher-php-server": "~2.6",
         "unisharp/laravel-ckeditor": "^4.6",
+        "maatwebsite/excel": "~2.1.0",
         "webpatser/laravel-uuid": "^2.0",
         "yajra/laravel-oci8": "5.4.*"
     },
