@@ -11,6 +11,7 @@
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
         "laravelcollective/html": "^5.4.0",
+        "pesakitan22/pusher-push-notifications": "dev-master",
         "pusher/pusher-php-server": "~2.6",
         "unisharp/laravel-ckeditor": "^4.6",
         "webpatser/laravel-uuid": "^2.0",

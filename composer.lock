@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "9e688d3d772171d9862023b3ae90523b",
+    "content-hash": "4f4669d057c94cc76ad9adf69339c5e7",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -1082,6 +1082,79 @@
                 "random"
             ],
             "time": "2017-03-13T16:27:32+00:00"
+        },
+        {
+            "name": "pesakitan22/pusher-push-notifications",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pesakitan22/pusher-push-notifications.git",
+                "reference": "acba116ecc18292ff2ac794ffdbb12c9ed7797c8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pesakitan22/pusher-push-notifications/zipball/acba116ecc18292ff2ac794ffdbb12c9ed7797c8",
+                "reference": "acba116ecc18292ff2ac794ffdbb12c9ed7797c8",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/events": "5.4.*",
+                "illuminate/notifications": "5.4.*",
+                "illuminate/queue": "5.4.*",
+                "illuminate/support": "5.4.*",
+                "php": ">=5.6.4",
+                "pusher/pusher-php-server": "2.6.*"
+            },
+            "require-dev": {
+                "mockery/mockery": "^0.9.5",
+                "phpunit/phpunit": "4.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "NotificationChannels\\PusherPushNotifications\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be"
+                },
+                {
+                    "name": "Marcel Pociot",
+                    "email": "hello@marcelpociot.com",
+                    "homepage": "http://marcelpociot.com"
+                },
+                {
+                    "name": "Sebastian De Deyne",
+                    "email": "sebastian@spatie.be",
+                    "homepage": "https://sebastiandedeyne.com"
+                },
+                {
+                    "name": "Mohamed Said",
+                    "email": "themsaid@gmail.com",
+                    "homepage": "https://themsaid.com"
+                },
+                {
+                    "name": "Deni Putra Perdana",
+                    "email": "pesakitan22@about.me",
+                    "homepage": "https://about.me/pesakitan22"
+                }
+            ],
+            "description": "Pusher native Push Notifications driver.",
+            "homepage": "https://github.com/LaravelNotificationChannels/pusher-push-notifications",
+            "keywords": [
+                "laravel",
+                "notifications",
+                "pusher",
+                "pusher-push-notifications"
+            ],
+            "time": "2017-10-18 14:51:16"
         },
         {
             "name": "phenx/php-font-lib",
@@ -4138,6 +4211,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "pesakitan22/pusher-push-notifications": 20,
         "zizaco/entrust": 20
     },
     "prefer-stable": false,
