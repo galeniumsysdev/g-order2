@@ -23,9 +23,8 @@ class CreateDplSuggestNoTable extends Migration
             $table->char('suggest_no',8);
             $table->string('notrx',50)->nullable();
             $table->boolean('fill_in')->default(1);
-            $table->uuid('approved_by')->default('');
-            $table->string('approver_role',191)->default('');
-            $table->string('next_approver_role',191)->default('');
+            $table->uuid('approved_by')->nullable();
+            $table->uuid('next_approver')->nullable();
             $table->boolean('active')->default(1);
 
             $table->timestamps();
