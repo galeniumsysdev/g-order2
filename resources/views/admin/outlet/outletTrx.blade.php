@@ -30,7 +30,7 @@
               <!-- Transaction In -->
               <div id="trx-in"> 
                 <div class="form-wrapper">
-                  {!! Form::open(['url' => '/outlet/transaction/in/process']) !!}
+                  {!! Form::open(['url' => '/outlet/transaction/in/process', 'class'=>'form-trx']) !!}
                     <div class="form-group">
                       <div class="container-fluid">
                         <div class="row">
@@ -40,7 +40,7 @@
                             </div>
                           </div>
                           <div class="col-md-4">
-                            {{ Form::text('trx_in_date', date('d M Y'), array('class'=>'form-control','autocomplete'=>'off', 'id'=>'trx-in-date')) }}
+                            {{ Form::text('trx_in_date', date('d M Y'), array('class'=>'form-control','autocomplete'=>'off', 'id'=>'trx-in-date', 'required'=>'required')) }}
                           </div>
                         </div>
                       </div>
@@ -53,9 +53,10 @@
                               <label for="product-name-in">Product</label>
                             </div>
                           </div>
-                          <div class="col-md-4">
-                            {{ Form::text('product_name_in', '', array('class'=>'form-control','autocomplete'=>'off', 'data-provide'=>'typeahead', 'id'=>'product-name-in')) }}
-                            {{ Form::hidden('product_code_in', '', array('id'=>'product-code-in')) }}
+                          <div class="col-md-4 product-container">
+                            {{ Form::text('product_name_in', '', array('class'=>'form-control product-name','autocomplete'=>'off', 'data-provide'=>'typeahead', 'id'=>'product-name-in', 'required'=>'required')) }}
+                            {{ Form::button('X', array('class'=>'btn btn-link text-danger change-product','id'=>'change-product-in')) }}
+                            {{ Form::hidden('product_code_in', '', array('class'=>'form-control product-code', 'id'=>'product-code-in', 'readonly'=>'readonly', 'required'=>'required')) }}
                           </div>
                         </div>
                       </div>
@@ -70,8 +71,8 @@
                           </div>
                           <div class="col-md-4">
                             <div class="input-prepend input-group">
-                              {{ Form::number('qty_in', '', array('class'=>'form-control','autocomplete'=>'off', 'id'=>'qty-in', 'min'=>1)) }}
-                              <span class="add-on input-group-addon" id="unit-sell-in"></span>
+                              {{ Form::number('qty_in', '', array('class'=>'form-control qty','autocomplete'=>'off', 'id'=>'qty-in', 'min'=>1, 'required'=>'required')) }}
+                              <span class="add-on input-group-addon unit-sell" id="unit-sell-in"></span>
                             </div>
                           </div>
                         </div>
@@ -95,7 +96,7 @@
               <!-- Transaction Out -->
               <div id="trx-out"> 
                 <div class="form-wrapper">
-                  {!! Form::open(['url' => '/outlet/transaction/out/process']) !!}
+                  {!! Form::open(['url' => '/outlet/transaction/out/process', 'class'=>'form-trx']) !!}
                     <div class="form-group">
                       <div class="container-fluid">
                         <div class="row">
@@ -105,7 +106,7 @@
                             </div>
                           </div>
                           <div class="col-md-4">
-                            {{ Form::text('trx_out_date', date('d M Y'), array('class'=>'form-control','autocomplete'=>'off', 'id'=>'trx-out-date')) }}
+                            {{ Form::text('trx_out_date', date('d M Y'), array('class'=>'form-control','autocomplete'=>'off', 'id'=>'trx-out-date', 'required'=>'required')) }}
                           </div>
                         </div>
                       </div>
@@ -118,9 +119,10 @@
                               <label for="product-name-out">Product</label>
                             </div>
                           </div>
-                          <div class="col-md-4">
-                            {{ Form::text('product_name_out', '', array('class'=>'form-control','autocomplete'=>'off', 'data-provide'=>'typeahead', 'id'=>'product-name-out')) }}
-                            {{ Form::hidden('product_code_out', '', array('id'=>'product-code-out')) }}
+                          <div class="col-md-4 product-container">
+                            {{ Form::text('product_name_out', '', array('class'=>'form-control product-name','autocomplete'=>'off', 'data-provide'=>'typeahead', 'id'=>'product-name-out', 'required'=>'required')) }}
+                            {{ Form::button('X', array('class'=>'btn btn-link text-danger change-product','id'=>'change-product-out')) }}
+                            {{ Form::hidden('product_code_out', '', array('class'=>'form-control product-code', 'id'=>'product-code-out', 'readonly'=>'readonly', 'required'=>'required')) }}
                           </div>
                         </div>
                       </div>
@@ -135,8 +137,8 @@
                           </div>
                           <div class="col-md-4">
                             <div class="input-prepend input-group">
-                              {{ Form::number('qty_out', '', array('class'=>'form-control','autocomplete'=>'off', 'id'=>'qty-out', 'min'=>1)) }}
-                              <span class="add-on input-group-addon" id="unit-sell-out"></span>
+                              {{ Form::number('qty_out', '', array('class'=>'form-control qty', 'autocomplete'=>'off', 'id'=>'qty-out', 'min'=>1, 'required'=>'required')) }}
+                              <span class="add-on input-group-addon unit-sell" id="unit-sell-out"></span>
                             </div>
                           </div>
                         </div>

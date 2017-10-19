@@ -51,7 +51,7 @@ class OutletProductController extends Controller
   	}
   	$insert_product = OutletProducts::insert($product);
 
-  	return redirect('/outlet/product/import');
+  	return redirect('/outlet/product/import')->with('msg','Product imported successfully.');
   }
 
   public function downloadTemplate()
@@ -122,7 +122,7 @@ class OutletProductController extends Controller
   	}
   	$insert_stock = OutletStock::insert($stock);
 
-  	return redirect('/outlet/product/import/stock');
+  	return redirect('/outlet/product/import/stock')->with('msg','Stock imported successfully.');
   }
 
 	public function getListProductStock()
@@ -149,9 +149,25 @@ class OutletProductController extends Controller
   	return view('admin.outlet.outletTrx');
   }
 
-  public function outletTrxInProcess()
+  public function outletTrxInProcess(Request $request)
   {
-  	/*$instock = new Stock;
-  	$instock->product_id = */
+  	$instock = new OutletStock;
+  	$instock->product_id = $request->product_code_in;
+  	$instock->event = 'trx_in';
+  	$instock->qty = $request->qty_in;
+  	$instock->save();
+
+  	return redirect()->back()->with('msg','Transaction In has been done successfully.');
+  }
+
+  public function outletTrxOutProcess(Request $request)
+  {
+  	$outstock = new OutletStock;
+  	$outstock->product_id = $request->product_code_out;
+  	$outstock->event = 'trx_out';
+  	$outstock->qty = '-'.$request->qty_out;
+  	$outstock->save();
+
+  	return redirect('/outlet/transaction#trx-out')->with('msg','Transaction Out has been done successfully.');
   }
 }
