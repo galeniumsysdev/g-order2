@@ -13,6 +13,7 @@ use App\DPLNo;
 use App\User;
 use App\SoHeader;
 use App\SoLine;
+use App\OrgStructure;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -217,8 +218,9 @@ class DPLController extends Controller
     $action = $request->action;
     if($action == 'Approve'){
       $approved_by = Auth::user()->id;
+      $next_approver = OrgStructure::where('user_id',Auth::user()->id)->first();
       $dpl = DPLSuggestNo::where('suggest_no',$suggest_no)
-                          ->update(array('approved_by'=>$approved_by));
+                          ->update(array('approved_by'=>$approved_by, 'next_approver'=> ($next_approver) ? $next_approver->directsup_user_id : ''));
     }
     else{
       $approved_by = '';
@@ -262,7 +264,9 @@ class DPLController extends Controller
                                 'approver.id as dpl_appr_id',
                                 'approver.name as dpl_appr_name',
                                 'dpl_suggest_no.suggest_no',
-                                'dpl_no')
+                                'dpl_no',
+                                'fill_in',
+                                'next_approver')
                         ->join('users as mr','mr.id','dpl_suggest_no.mr_id')
                         ->join('customers as outlet','outlet.id','dpl_suggest_no.outlet_id')
                         ->leftJoin('users as approver','approver.id','dpl_suggest_no.approved_by')
@@ -273,9 +277,13 @@ class DPLController extends Controller
                         ->get();
 
     foreach ($dpl as $key => $list) {
-      $dpl[$key]->btn_discount = (!$list->discount) ? "<a href='/dpl/discount/form/".$list->suggest_no."' class='btn btn-danger'>Discount</a>" : "";
-      $dpl[$key]->btn_confirm = '<a href="/dpl/discount/approval/'.$list->suggest_no.'" class="btn btn-primary">Confirmation</a>';
-      $dpl[$key]->btn_dpl_no = (!$list->dpl_no) ? '<a href="/dpl/input/form/'.$list->suggest_no.'" class="btn btn-warning">DPL No.</a>' : '';
+      $allowed = DB::select('SELECT privilegeSuggestNo(?,?) AS allowed', [$list->suggest_no,Auth::user()->id]);
+      
+      $dpl[$key]->btn_discount = ($list->fill_in && $allowed[0]->allowed) ? '<a href="/dpl/discount/form/'.$list->suggest_no.'" class="btn btn-danger">Discount</a>' : '';
+
+      $dpl[$key]->btn_confirm = (!$list->fill_in && $allowed[0]->allowed && $list->next_approver == Auth::user()->id) ? '<a href="/dpl/discount/approval/'.$list->suggest_no.'" class="btn btn-primary">Confirmation</a>' : '';
+      
+      $dpl[$key]->btn_dpl_no = (!$list->fill_in && empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="/dpl/input/form/'.$list->suggest_no.'" class="btn btn-warning">DPL No.</a>' : '';
     }
 
     return view('admin.dpl.dplList',array('dpl'=>$dpl));
@@ -290,7 +298,6 @@ class DPLController extends Controller
                                 'distributor.id as dpl_distributor_id',
                                 'distributor.customer_name as dpl_distributor_name',
                                 'dpl_suggest_no.suggest_no',
-                                'discount',
                                 'dpl_no')
                         ->join('users','users.id','dpl_suggest_no.mr_id')
                         ->join('customers as outlet','outlet.id','dpl_suggest_no.outlet_id')

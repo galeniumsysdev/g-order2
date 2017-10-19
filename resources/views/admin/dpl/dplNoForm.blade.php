@@ -86,20 +86,6 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="discount">Discount</label>
-                        </div>
-                      </div>
-                      <div class="col-md-10">
-                        <span class="default-value">{{ $dpl['discount'] }} %</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="container-fluid">
-                    <div class="row">
-                      <div class="col-md-2">
-                        <div class="form-label">
                           <label for="dpl-no">No. DPL</label>
                         </div>
                       </div>
