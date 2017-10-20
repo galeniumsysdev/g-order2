@@ -36,6 +36,8 @@ table.table-center-header tbody tr td.action-column {
 .no-padding {
   padding: 0;
 }
+
+/* Custom tabs */
 .simple-tabs.ui-tabs,
 .simple-tabs.ui-tabs .ui-tabs-nav {
   padding: 0;
@@ -58,6 +60,23 @@ table.table-center-header tbody tr td.action-column {
 .simple-tabs.ui-tabs .ui-tabs-nav li a:active,
 .simple-tabs.ui-tabs .ui-tabs-nav li a:focus {
   outline: none;
+}
+
+/* Panel */
+.panel-body {
+  overflow: initial !important;
+}
+
+/* Custom buttons */
+.btn-remove {
+  position: absolute;
+  top: 0;
+  right: 15px;
+  color: #FF0000;
+}
+.btn-remove:hover {
+  text-decoration: none;
+  color: #FF0000;
 }
 
 /* Media Queries */

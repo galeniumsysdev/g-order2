@@ -55,7 +55,7 @@
                           </div>
                           <div class="col-md-4 product-container">
                             {{ Form::text('product_name_in', '', array('class'=>'form-control product-name','autocomplete'=>'off', 'data-provide'=>'typeahead', 'id'=>'product-name-in', 'required'=>'required')) }}
-                            {{ Form::button('X', array('class'=>'btn btn-link text-danger change-product','id'=>'change-product-in')) }}
+                            {{ Form::button('X', array('class'=>'btn btn-link btn-remove text-danger change-product','id'=>'change-product-in')) }}
                             {{ Form::hidden('product_code_in', '', array('class'=>'form-control product-code', 'id'=>'product-code-in', 'readonly'=>'readonly', 'required'=>'required')) }}
                           </div>
                         </div>
@@ -121,7 +121,7 @@
                           </div>
                           <div class="col-md-4 product-container">
                             {{ Form::text('product_name_out', '', array('class'=>'form-control product-name','autocomplete'=>'off', 'data-provide'=>'typeahead', 'id'=>'product-name-out', 'required'=>'required')) }}
-                            {{ Form::button('X', array('class'=>'btn btn-link text-danger change-product','id'=>'change-product-out')) }}
+                            {{ Form::button('X', array('class'=>'btn btn-link btn-remove text-danger change-product','id'=>'change-product-out')) }}
                             {{ Form::hidden('product_code_out', '', array('class'=>'form-control product-code', 'id'=>'product-code-out', 'readonly'=>'readonly', 'required'=>'required')) }}
                           </div>
                         </div>
