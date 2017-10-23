@@ -109,11 +109,12 @@
                           <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; Register</strong></a></li>
                         @else
                           <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Prodcut</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Product</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                             <ul class="dropdown-menu">
                               <li><a href="{{route('outlet.listProductStock')}}">Product List</a></li>
                               <li><a href="{{route('outlet.importProduct')}}">Import Product</a></li>
                               <li><a href="{{route('outlet.importProductStock')}}">Import Stock</a></li>
+                              <li><a href="{{route('outlet.trxList')}}">Transaction List</a></li>
                             </ul>
                           </li>
                           @if(Auth::user()->hasRole('Distributor') or Auth::user()->hasRole('Distributor Cabang') or Auth::user()->hasRole('Outlet') or Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Principal'))

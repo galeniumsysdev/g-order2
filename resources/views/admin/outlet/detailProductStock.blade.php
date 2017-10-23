@@ -17,26 +17,32 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Product List</strong></div>
+          <div class="panel-heading"><strong>Stock Trx Detail</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
-            <table id="product-list" class="table table-striped table-hover table-center-header">
+            <h4>
+              Product Name : {{ $title }}<br/>
+              Stock : {{ $last_stock }}
+            </h4>
+            <br/>
+            <table id="detail-list" class="table table-hover table-center-header">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Title</th>
-                  <th>Stok</th>
+                  <th>Type</th>
+                  <th>Qty</th>
+                  <th>Trx. Date</th>
                 </tr>
               </thead>
               <tbody>
                 @foreach ($stock as $cell)
-                  <tr>
-                    <td>{{ $cell['op_id'] }}</td>
-                    <td>{{ $cell['title'] }}</td>
-                    <td>{!! $cell['stock'] !!}</td>
+                  <tr class="{{ $cell['class'] }}">
+                    <td>{!! $cell['event'] !!}</td>
+                    <td align="center">{!! $cell['qty'] !!}</td>
+                    <td align="center">{{ $cell['trx_date'] }}</td>
                   </tr>
                 @endforeach
               </tbody>
             </table>
+            <a href="/outlet/product/list" class="btn btn-default">Back</a>
           </div>
         </div>
       </div>
