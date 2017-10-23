@@ -22,7 +22,7 @@ Route::get('/getPrice',[
 
 Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
-Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');  
+Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
 
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
 
@@ -54,7 +54,8 @@ Route::group(['middleware'=>'auth'],function(){
   });
   Route::delete('remove-address/{id}', 'ProfileController@removeaddress')->name('profile.removeaddress');
   Route::delete('remove-contact/{id}', 'ProfileController@removecontact')->name('profile.removecontact');
-
+  Route::get('/home', 'HomeController@index')->name('home');
+  Route::post('/home', 'HomeController@search')->name('notif.search');
 });
 
 Route::group(['middleware'=>['permission:Create PO']],function(){
@@ -94,8 +95,7 @@ Auth::routes();
 
 
 
-Route::get('/home', 'HomeController@index')->name('home');
-Route::post('/home', 'HomeController@search')->name('notif.search');
+
 
 Route::group(['middleware' => ['web']], function () {
   Route::post('language-chooser','LanguageController@changeLanguage');
@@ -145,6 +145,7 @@ Route::group(['middleware' => ['role:IT Galenium']], function () {
   ]);
 
   Route::resource('CategoryOutlet',  'Cat_OutletController');
+  Route::resource('CategoryProduct',  'CategoryProductController');
   Route::resource('users','UserController');
 });
 
@@ -164,11 +165,6 @@ Route::group(['middleware' => ['permission:Outlet_Distributor']], function () {
 
 /*distributor or principal*/
 Route::group(['middleware' => ['permission:ApproveOutlet']], function () {
-  /*Route::post('/approveOutlet',[
-  'uses' => 'CustomerController@approve'
-  ,'as' => 'customer.approve'
-  ,'middleware' => ['permission:ApproveOutlet']
-]);*/
   Route::post('/approveOutlet','CustomerController@approve')->name('customer.approve');
   Route::post('/rejectOutlet','CustomerController@reject')->name('customer.reject');
 });
@@ -200,31 +196,44 @@ Route::get('/test', function () {
     return view('testtable');
 });*/
 /*check PO from Outlet/Distributor*/
-Route::get('/checkPO/{id}','OrderController@checkOrder')->name('order.checkPO');
-Route::match(['get', 'post'],'/listpo','OrderController@listOrder')->name('order.listPO');
-Route::match(['get', 'post'],'/listso','OrderController@listSO')->name('order.listSO');
-Route::post('/SO/approval','OrderController@approvalSO')->name('order.approvalSO');
-Route::get('/notif/newpo/{notifid}/{id}','OrderController@readnotifnewpo')->name('order.notifnewpo');
-Route::post('/PO/batal','OrderController@batalPO')->name('order.cancelPO');
-//Route::post('/PO/Receive','OrderController@receivePO')->name('order.receivePO');
-Route::get('/download/PO/{file}', function ($file='') {
-    return response()->download(storage_path('app/PO/'.$file));
+Route::group(['middleware' => ['auth']], function () {
+  Route::get('/checkPO/{id}','OrderController@checkOrder')->name('order.checkPO');
+  Route::match(['get', 'post'],'/listpo','OrderController@listOrder')->name('order.listPO');
+  Route::match(['get', 'post'],'/listso','OrderController@listSO')->name('order.listSO');
+  Route::post('/SO/approval','OrderController@approvalSO')->name('order.approvalSO');
+  Route::get('/notif/newpo/{notifid}/{id}','OrderController@readnotifnewpo')->name('order.notifnewpo');
+  Route::post('/PO/batal','OrderController@batalPO')->name('order.cancelPO');
+  //Route::post('/PO/Receive','OrderController@receivePO')->name('order.receivePO');
+  Route::get('/download/PO/{file}', function ($file='') {
+      return response()->download(storage_path('app/PO/'.$file));
+  });
 });
-
 Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->name('order.getStatusOracle');
-
+Route::get('/oracle/exportexcel/{id}', 'BackgroundController@createExcel')->name('order.createExcel');
+Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));
 });*/
 
+
 Route::group(['middleware' => ['permission:UploadCMO']], function () {
-Route::get('uploadCMO', 'FilesController@upload')->name('files.uploadcmo');
+    Route::get('uploadCMO', 'FilesController@upload')->name('files.uploadcmo');
     Route::post('/handleUpload', 'FilesController@handleUpload');
-    Route::get('viewAlldownloadfile', 'FilesController@downfunc')->name('files.viewfile');
     Route::get('/downloadCMO/{file}', function ($file='') {
         return response()->download(storage_path('app/uploads/'.$file));
+    });
+});
+Route::group(['middleware' => ['permission:DownloadCMO']], function () {
+  Route::get('viewAlldownloadfile', 'FilesController@downfunc')->name('files.viewfile');
+  Route::get('/downloadCMO/{file}', function ($file='') {
+      return response()->download(storage_path('app/uploads/'.$file));
   });
+  Route::post('/viewAlldownloadfile', 'FilesController@search')->name('files.postviewfile');
+  route::get('notifrejectcmo/{notifid}/{id}','FilesController@readNotif')->name('files.readnotif');
+});
+Route::group(['middleware' => ['role:Principal']], function () {
+  Route::put('/approvecmo/{id}', 'FilesController@approvecmo')->name('files.approvecmo');
 });
 
 /**

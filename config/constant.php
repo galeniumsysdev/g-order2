@@ -21,5 +21,9 @@ return [
     'allowedFileTypes' => 'pdf','xls',
     'maxFileSize' => 1000*2,
      'fileDestinationPath' => 'uploads',
+     'def_order_type_id' => 'YMP Distributor',
+     'def_salesperson' => 'No Sales Credit',
+     'def_warehouse_YMP' => 'YFJ',
+     'def_warehouse_GPL' => 'GFG',
 
 ];

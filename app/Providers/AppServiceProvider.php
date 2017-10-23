@@ -57,6 +57,11 @@ class AppServiceProvider extends ServiceProvider
 
           }
 
+          if(Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))
+          {
+            $product_flexfields = $product_flexfields->where('description','<>','BPJS');
+          }
+
         }
         $product_flexfields =$product_flexfields->orderBy('flex_value')->get() ;
         //View::share('product_flexfields', $product_flexfields);

@@ -6,24 +6,27 @@ use Illuminate\Http\Request;
 use \Storage;
 use App\FileCMO;
 use App\Http\Requests;
+use App\User;
 use DB;
 use Auth;
 use File;
+use Carbon\Carbon;
+use App\Notifications\RejectCmo;
 
 class FilesController extends Controller
 {
   public function handleUpload(Request $request)
   {
       //if($request->hasFile('file')) {
-          $file1 = $request->file('file1');
-          $file2 = $request->file('file2');
+          $file1 = $request->file('filepdf');
+          $file2 = $request->file('fileexcel');
           $distributorid=Auth::user()->customer_id;
           $allowedFileTypes = config('constant.allowedFileTypes');
           $maxFileSize = config('constant.maxFileSize');
           $version=0;
           $rules = [
-              'file1' => 'required|mimes:pdf|max:10240',
-              'file2' => 'required|mimes:xls,xlsx|max:10240',
+              'filepdf' => 'required|mimes:pdf',
+              'fileexcel' => 'required|mimes:xls,xlsx',
           ];
           $version =DB::table('files_cmo')->where([
             ['distributor_id','=',Auth::user()->customer_id],
@@ -63,23 +66,111 @@ class FilesController extends Controller
           }
       //}
 
-      return redirect()->to('/uploadCMO')->withMessage('Data berhasil disimpan');
+      return redirect()->to('/uploadCMO')->withMessage(trans('pesan.successupload'));
   }
 
   public function upload() {
-      $directory = config('app.filesDestinationPath');
+      /*$directory = config('constant.fileDestinationPath');
       $files = Storage::files('$directory');
+      var_dump($files);*/
       $period = date('M-Y', strtotime('+1 month'));
 
       $periodint = date('Ym', strtotime('+1 month'));
-
-      //$files = UploadedFile::all();
-      return view('files.upload')->with(array('files' => $files,'period'=>$period,'period_int'=>$periodint));
+      //var_dump($periodint);
+      $files = DB::table('files_cmo')
+              ->where([
+                        ['distributor_id','=',Auth::user()->customer_id],
+                        ['period','=',$periodint]
+                      ])
+              ->where(function ($query) {
+                $query->whereNull('approve')
+                      ->orwhere('approve', '=', 1);
+              })->latest()->first();
+      return view('files.upload')->with(array('files' => $files,'period'=>$period,'periodint'=>$periodint));
   }
 
   public function downfunc() {
-        $downloads=DB::table('files_cmo')->where('distributor_id','=',Auth::user()->customer_id)->get();
-        return view ('files.viewfile',compact('downloads'));
+       $bulan=date('m')+1;
+       $tahun=date('Y');
+       $distributor="";
+       $status="";
+        $downloads=DB::table('files_cmo')->join('customers','files_cmo.distributor_id','=','customers.id')
+                  ->where('distributor_id','=',Auth::user()->customer_id)
+                  ->where('tahun','=',$tahun)
+                  ->where('bulan','=',$bulan)
+                  ->select('file_excel','file_pdf','distributor_id','files_cmo.id','files_cmo.created_at','version','customer_name','period','approve')
+                  ->orderBy('Period','desc')
+                  ->get();
+        return view ('files.viewfile',compact('downloads','bulan','tahun','distributor','status'));
     }
+  public function search(Request $request){
+      $bulan = $request->bulan;
+      $tahun = $request->tahun;
+      $distributor = $request->distributor;
+      $status =$request->status;
+      $downloads=DB::table('files_cmo')->join('customers','files_cmo.distributor_id','=','customers.id');
+      if(Auth::user()->hasRole('Principal'))
+      {
+        if($request->distributor!="")
+        {
+            $downloads=$downloads->where('customer_name','like',$request->distributor.'%');
+        }
+        if($request->status!="%")
+        {
+          if($request->status=="")
+          {
+            $downloads=$downloads->whereNull('files_cmo.approve');
+          }else{
+            $downloads=$downloads->where('files_cmo.approve','=',$request->status);
+          }
+        }
+      }else{
+        $downloads=$downloads->where('distributor_id','=',Auth::user()->customer_id);
+      }
+      if($request->tahun!="")
+      {
+          $downloads=$downloads->where('tahun','=',$request->tahun);
+      }
+      if($request->bulan!="")
+      {
+          $downloads=$downloads->where('bulan','=',$request->bulan);
+      }
+      $downloads=$downloads->select('file_excel','file_pdf','distributor_id','files_cmo.id','files_cmo.created_at','version','customer_name','period','approve');
+      //var_dump($downloads->toSql());
+      $downloads=$downloads->orderBy('Period','desc')->orderBy('version', 'desc');
+      $downloads=$downloads->get();
+      return view ('files.viewfile',compact('downloads','bulan','tahun','distributor','status'));
+  }
+
+  public function approvecmo(Request $request, $id){
+    var_dump($request->approve);
+    if($request->approve=="approve")
+    {
+      DB::table('files_cmo')->where('id','=',$id)->wherenull('approve')
+      ->update(['approve' => 1, 'first_download'=>Carbon::now(),'updated_at'=>Carbon::now()]);
+    }elseif($request->approve=="reject"){
+       DB::table('files_cmo')->where('id','=',$id)->wherenull('approve')
+        ->update(['approve' => 0, 'first_download'=>Carbon::now(),'updated_at'=>Carbon::now()]);
+        $cmo_distributor =FileCMO::find($id);
+      $userdistributor =User::where('customer_id','=',$cmo_distributor->getDistributor->id)->first();
+      if($userdistributor)
+      {
+          $userdistributor->notify(new RejectCmo($cmo_distributor));
+      }
+    }
+
+    return $this->search($request);
+    //return redirect()->route('files.postviewfile', ['request'=>$request]);
+  }
+
+  public function readNotif($notifid,$id)
+  {
+    Auth::User()->notifications()
+               ->where('id','=',$notifid)
+                 ->update(['read_at' => Carbon::now()]);
+    return redirect()->route('files.uploadcmo');
+  }
+
+
 
 }

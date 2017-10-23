@@ -42,5 +42,7 @@ return [
     'Receive' => 'Terima',
     'Send' => 'Kirim',
     'download' => 'Unduh',
-
+    'receivedate' => 'Tgl Terima',
+    'senddate' => 'Tgl Kirim',
+    'print' => 'Cetak',
 ];

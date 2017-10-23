@@ -32,7 +32,21 @@
 								{!!html_entity_decode($product->description)!!}
 							@endif
 						</p>
-						<h4 class="price">Price: <span id="lblhrg-{{$product->id}}">Rp. {{ number_format($product->harga,2) }}/{{$product->satuan_secondary}}</span></h4>
+						<h4 class="price">Price: <span id="lblhrg-{{$product->id}}">
+							@if($product->item=="43")
+								$
+							@else
+								Rp.
+							@endif
+							@if(is_float($product->harga))
+									{{number_format($product->harga,2)}}/{{$product->satuan_secondary}}
+							@else
+								 {{number_format($product->harga,0)}}/{{$product->satuan_secondary}}
+							@endif
+							@if(($product->rate!=1 or $product->rate!=-99999) and !Auth::guest())
+								({{(float)$product->rate." ".$product->satuan_primary}})
+							@endif
+							</span></h4>
 						@if (!Auth::guest())
 						<input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
 						<div class="input-group" style="width:100%">

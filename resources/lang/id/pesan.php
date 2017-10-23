@@ -30,4 +30,6 @@ return [
     'sendSO_msg' => 'SO :notrx telah dikirim ke customer',
     'notfixedprice'=> 'Harga yang berlaku adalah sesuai faktur',
     'cantapprove'=>"Data tidak tersimpan. Anda tidak memiliki akses untuk mengapprove/mereject outlet ini.",
+    'successupload' => 'File berhasil terupload',
+    'alreadyupload' => 'File telah terupload!'
 ];

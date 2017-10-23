@@ -10,12 +10,15 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Customer;
 use App\User;
 use App\SoHeader;
+use DB;
 class NewPurchaseOrder extends Notification implements ShouldQueue
 {
     use Queueable;
     public $user;
     public $customer;
     public $so_header_id;
+    public $lines;
+    public $total;
 
     /**
      * Create a new notification instance.
@@ -27,6 +30,10 @@ class NewPurchaseOrder extends Notification implements ShouldQueue
         $this->customer = Customer::find($data['customer']);
         $this->user = User::find($data['user']);
         $this->so_header_id =SoHeader::where('id','=',$data['so_header_id'])->select('id','distributor_id','customer_id','customer_po','tgl_order','notrx')->first();
+        $this->lines = DB::table('so_Lines_v')->where('header_id','=',$data['so_header_id'])->get();
+        $this->total = DB::table('so_lines')
+                ->where('header_id','=',$data['so_header_id'])
+                ->sum(DB::raw('(IFNULL(amount,0)+IFNULL(tax_amount,0))'));
 
     }
 
@@ -49,12 +56,15 @@ class NewPurchaseOrder extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-      $message = new MailMessage;
+      /*$message = new MailMessage;
       $message->subject('New PO From '.$this->customer->customer_name)
               ->greeting('Hai '.$this->user->name.',')
               ->line('Anda mendapatkan pesanan baru dari '.$this->customer->customer_name.' melalui aplikasi g-Order dengan nomor transaksi: <strong>'.$this->so_header_id->notrx.'</strong>. Silahkan buka aplikasi g-Order atau login ke web g-Order untuk melihat pesanan tersebut.');
 
-      return $message;
+      return $message;*/
+      return (new MailMessage)
+                ->subject('New PO From '.$this->customer->customer_name)
+                ->markdown('emails.orders.create', ['so_headers' => $this->so_header_id,'lines'=>$this->lines,'total'=>$this->total,'customer'=>$this->customer->customer_name]);
     }
 
     /**

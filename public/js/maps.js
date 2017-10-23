@@ -1,4 +1,4 @@
-var map;
+var map,infoWindow ;
 var myLatLng;
 
 $(document).ready(function() {
@@ -9,8 +9,17 @@ $(document).ready(function() {
       navigator.geolocation.getCurrentPosition(success,fail);
     }else{
       alert("Browser not supported");
+      //handleLocationError(false, infoWindow, map.getCenter());
     }
   }
+  function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+    infoWindow.setPosition(pos);
+    infoWindow.setContent(browserHasGeolocation ?
+                          'Error: The Geolocation service failed.' :
+                          'Error: Your browser doesn\'t support geolocation.');
+    infoWindow.open(map);
+  }
+
 
   function success(position) {
        console.log(position);
@@ -38,8 +47,15 @@ $(document).ready(function() {
           });
     var marker = new google.maps.Marker({
             position: myLatLng,
-            map: map
+            map: map,
+            draggable:true,
+            label:"Posisi outlet"
         });
+    //infoWindow = new google.maps.InfoWindow;
+    google.maps.event.addListener(marker, 'dragend', function (event) {
+  	  document.getElementById("langitude_txt").value=this.getPosition().lat();
+         document.getElementById("longitude_txt").value=this.getPosition().lng();
+    });
   }
 
 //this is marker 

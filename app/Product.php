@@ -13,6 +13,17 @@ class Product extends Model
 
     public function categories()
     {
-        return $this->belongsToMany('App\Category','category_products','product_id','flex_value')->withTimestamps();
+       return $this->belongsToMany('App\Category','category_products','product_id','flex_value')->withTimestamps();
+      /*return $this->hasManyThrough(
+            'App\Category',
+            'App\CategoryProduct',
+            'product_id', // Foreign key on users table...
+            'flex_value', // Foreign key on posts table...
+            'id', // Local key on countries table...
+            'flex_Value' // Local key on users table...
+        );*/
     }
+
+
+
 }

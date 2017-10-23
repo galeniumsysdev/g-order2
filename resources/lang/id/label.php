@@ -47,6 +47,7 @@ return [
     'save'=>'Simpan',
     'personal'=>'info',
     'action'=>'Aksi',
+    //data customer
     'addcontact'=>'Tambah Kontak',
     'addaddress'=>'Tambah Alamat',
     'search'=>'Cari',
@@ -79,5 +80,10 @@ return [
     'download' => 'Unduh',
     'mandatoryfield' => 'Field wajib diisi',
     'searchproduct' => 'Cari Produk',
-	'newconminlength' => 'Minimum perulangan kata sandi baru berisi 6 karakter',
+	  'newconminlength' => 'Minimum perulangan kata sandi baru berisi 6 karakter',
+    'showall' => 'Lihat Semua',
+    'year' => 'Tahun',
+    'month' => 'Bulan',
+    'none' => 'Belum diproses'
+
 ];

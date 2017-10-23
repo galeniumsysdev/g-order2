@@ -46,9 +46,10 @@ class Cart
       if ($this->items){//jika ada array
         if(array_key_exists($id, $this->items)){
           $storedItem = $this->items[$id];
-          $this->totalPrice -= $this->items[$id]['amount'];
+
           if($storedItem['qty']!=$qty or $storedItem['uom']!=$uom or $storedItem['price']!=$harga )
           {
+            $this->totalPrice -= $this->items[$id]['amount'];
             $storedItem['qty']=$qty; //total product
             $storedItem['uom']= $uom;
             $storedItem['price']=$harga;

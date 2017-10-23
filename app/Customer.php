@@ -44,6 +44,11 @@ class Customer extends Model
     return $this->belongsTo('App\CategoryOutlet','outlet_type_id');
   }
 
+  public function cmo()
+  {
+      return $this->hasMany('App\FileCMO');
+  }
+
 
 
 }

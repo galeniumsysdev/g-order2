@@ -41,6 +41,7 @@ class CreateSoHeaderTable extends Migration
           $table->integer('warehouse')->nullable();
           $table->string('interface_flag',1)->default('N');
           $table->string('status_oracle',50)->nullable();
+          $table->text('alasan_tolak')->nullable();
 
 
           //$table->string('enabled_flag',1)->default('Y');

@@ -17,9 +17,18 @@
        <label for="display_name">Nama</label>
        <label class="form-control" name="nama">{{$product->title}}</label>
      </div>
-     <div class="form-group">
+     <!--<div class="form-group">
        <label for="description">Price</label>
-       <label class="form-control" name="harga" size="5">{{$product->price}}</label>
+       <input type="text" class="form-control" name="harga" size="5" id="" value="{{$product->price}}">
+     </div>-->
+     <div class="form-group">
+       <label for="description">Category</label>
+       <select name="category" class="form-control">
+         <option value="">--Pilih Salah Satu --</option>
+         @foreach($categories as $cat)
+         <option value="{{$cat->flex_value}}" {{$cat->flex_value==$product->flex_value?'selected':''}}>{{$cat->description}}</option>
+         @endforeach
+       </select>
      </div>
      <div class="form-group">
        <label for="description">Satuan</label>

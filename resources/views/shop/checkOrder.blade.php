@@ -12,10 +12,8 @@
     <div class="col-md-12">
       <div class="panel panel-default">
         <div class="panel-heading"><strong>Order Product</strong></div>
-
-
         <div class="panel-body" style="overflow-x:auto;">
-          <div class="panel panel-default">
+
             <div class="form-horizontal col-sm-6">
 
                   <br>
@@ -24,8 +22,13 @@
                 <div class="col-md-10 ">
                     <label class="form-class">{{$header->notrx}}&nbsp;
                       @if(isset($header->file_po))
-                      <a href="{{url('/download/'.$header->file_po)}}" title="@lang('shop.download') file PO"><i class="glyphicon glyphicon-download-alt"></i></a></label>
+                      <a href="{{url('/download/'.$header->file_po)}}" title="@lang('shop.download') file PO"><i class="glyphicon glyphicon-download-alt"></i></a>
                       @endif
+                      @if($header->status==0)
+                      &nbsp;
+                      <a href="{{route('order.checkPO',$header->id)}}?print=yes" class="btn btn-primary">@lang('shop.print') PO</a>
+                      @endif
+                    </label>
                 </div>
               </div>
               <div class="form-group">
@@ -69,7 +72,7 @@
                   </div>
               </div>
             </div>
-          </div>
+          <br>
         @if(Auth::user()->customer_id==$header->distributor_id)
           <form class="form-horizontal" action="{{route('order.approvalSO')}}" method="post">
         @elseif(Auth::user()->customer_id==$header->customer_id)

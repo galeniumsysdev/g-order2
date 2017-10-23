@@ -3,7 +3,7 @@
         <a href="index.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
     </li>
     <li {{$menu=='user'?'class=active':''}}>
-        <a href="{{route('users.index')}}"><i class="fa fa-fw fa-bar-chart-o"></i> User</a>
+        <a href="{{route('users.index')}}"><i class="fa fa-fw fa-user"></i> User</a>
     </li>
 	  <li {{$menu=='product'?'class=active':''}}>
         <a href="{{route('product.show')}}"><i class="fa fa-fw fa-table"></i> Product</a>
@@ -15,9 +15,9 @@
     <li {{$menu=='permission'?'class=active':''}}>
         <a href="{{route('permission.index')}}"><i class="fa fa-fw fa-wrench"></i>Permission</a>
     </li>
-    <li {{$menu=='CategoryOutlet'?'class=active':''}}>
+    <!--<li {{$menu=='CategoryOutlet'?'class=active':''}}>
         <a href="{{route('CategoryOutlet.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Outlet</a>
-    </li>
+    </li>-->
     <li>
         <a href="bootstrap-grid.html"><i class="fa fa-fw fa-wrench"></i> Outlet/Distributor</a>
     </li>
@@ -43,6 +43,15 @@
         <a href="blank-page.html"><i class="fa fa-fw fa-file"></i> Blank Page</a>
     </li>
     <li>
-        <a href="index-rtl.html"><i class="fa fa-fw fa-dashboard"></i> RTL Dashboard</a>
+        <a href="javascript:;" data-toggle="collapse" data-target="#category"><i class="fa fa-fw fa-arrows-v"></i> Category <i class="fa fa-fw fa-caret-down"></i></a>
+        <ul id="category" class="collapse">
+            <li {{$menu=='CategoryOutlet'?'class=active':''}}>
+                <a href="{{route('CategoryOutlet.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Outlet</a>
+            </li>
+            <li {{$menu=='CategoryOutlet'?'class=active':''}}>
+                <a href="{{route('CategoryProduct.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Product</a>
+            </li>
+
+        </ul>
     </li>
 </ul>

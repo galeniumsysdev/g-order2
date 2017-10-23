@@ -65,15 +65,16 @@
                         @if(Auth::user()->can('Create PO'))
                           <ul class="nav navbar-right-xs pull-right visible-xs">
                             <li>
-                              <i class="fa fa-shopping-cart fa-lg" aria-hidden="true"></i>
-                              <span class="badge" id="shopcart">{{ Session::has('cart')?Session::get('cart')->totalQty:"" }}</span>
+                              <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart fa-lg" aria-hidden="true"></i>
+                              <span class="badge" id="shopcart2">{{ Session::has('cart')?Session::get('cart')->totalQty:"" }}</span></a>
                             </li>
                           </ul>
                         @endif
                         <ul class="nav navbar-right-xs pull-right visible-xs">
                           <li>
-                            <i class="fa fa-bell fa-lg"></i>
+                            <a href="{{url('/home')}}" title="@lang('label.showall') Notification"><i class="fa fa-bell fa-lg"></i>
                             <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
+                          </a>
                           </li>
                         </ul>
                       @endif
@@ -143,10 +144,10 @@
                             @if(Auth::user()->can('Create PO'))
                                 <li><a href="{{route('order.listPO')}}">Check PO</a></li>
                             @endif
-                            <!-- 
+                            <!--
                             /**
                             * added by WK Productions
-                            */ 
+                            */
                             -->
                               <li><a href="{{route('dpl.generateForm')}}">@lang('label.generatesuggestno')</a></li>
                               <li><a href="{{route('dpl.list')}}">@lang('label.listsuggestno')</a></li>
@@ -246,7 +247,7 @@
                                   </li>
                                   <li class="divider"></li>
                                   <li style="text-align:center">
-                                      <a href="{{url('/home')}}">Show all</a>
+                                      <a href="{{url('/home')}}">@lang('label.showall')</a>
                                   </li>
                                 </ul>
                             </li>

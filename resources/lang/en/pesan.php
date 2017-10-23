@@ -31,4 +31,6 @@ return [
     'sendSO_msg' => 'SO :notrx has been sent to customer',
     'notfixedprice'=> 'This using standard price, the real price will be according to invoice.',
     'cantapprove'=>"You not Authorize to approve/Reject outlet",
+    'successupload' => 'File successfully uploaded',
+    'alreadyupload' => 'File has been uploaded!'
 ];

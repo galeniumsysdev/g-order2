@@ -17,7 +17,7 @@
         <div class="col-xs-6 col-ms-4 col-sm-4 col-md-2" >
           <div class="thumbnail">
             @if($product->imagePath)
-              <img data-src="holder.js/100%x180" alt="100%x180"  class="img product" src="{{ asset('img//'.$product->imagePath) }}" data-holder-rendered="true">
+              <img data-src="holder.js/100%x180" alt="100%x180"  class="img product" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
             @else
               <img data-src="holder.js/100%x180" alt="100%x180" class="img product" src="" data-holder-rendered="true">
             @endif
@@ -38,14 +38,22 @@
 
               <div class="clearfix price" id="lblhrg-{{$product->id}}">
                 @if($product->item=="43")
-                  $  {{number_format($product->harga,2)}}/{{$product->satuan_secondary}}
+                  $
                 @else
-                  Rp. {{number_format($product->harga,2)}}/{{$product->satuan_secondary}}
+                  Rp.
+                @endif
+                @if(is_float($product->harga))
+                    {{number_format($product->harga,2)}}/{{$product->satuan_secondary}}
+                @else
+                   {{number_format($product->harga,0)}}/{{$product->satuan_secondary}}
+                @endif
+                @if(($product->rate!=1 or $product->rate!=-99999) and !Auth::guest())
+                  ({{(float)$product->rate." ".$product->satuan_primary}})
                 @endif
               </div>
               @if (!Auth::guest())
               <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
-              <div class ="clearfix">
+              <div class ="clearfix" id="addCart-{{$product->id}}">
                 <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success pull-right" role="button">Add to cart</a>
               </div>
               @endif
