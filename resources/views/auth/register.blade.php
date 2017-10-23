@@ -1,6 +1,12 @@
 @extends('layouts.home')
 
 @section('content')
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
+
 <div class="container">
     <div class="row">
         <div class="col-sm-12">
@@ -88,7 +94,7 @@
                           </div>
                          </div>
 
-            						<div class="form-group{{ $errors->has('city') ? ' has-error' : '' }}">
+            			<div class="form-group{{ $errors->has('city') ? ' has-error' : '' }}">
                             <label for="city" class="col-sm-4 control-label">*@lang('label.city')</label>
 
                             <div class="col-sm-8">
@@ -294,7 +300,7 @@
                                     @else
                                       <input type="checkbox" id="blankCheckbox" value="1" name="psc">
                                     @endif
-                                    <strong> Personal Skin Care (PSC)
+                                    <strong><a href="#" class="external-psc">Personal Skin Care (PSC)</a>
                                   </strong><div style="font-size:8pt">(Caladine, Oilum, v-mina, Bellsoap, JFSulfur)</div></label>
                                 </div>
 
@@ -306,7 +312,7 @@
                                     @else
                                       <input type="checkbox" id="blankCheckbox" value="1" name="pharma">
                                     @endif
-                                    <strong> Pharma(Non PSC)
+                                    <strong><a href="#" class="external-pharma">Pharma (NON PSC)</a>
                                   </strong></label>
                                 </div>
 

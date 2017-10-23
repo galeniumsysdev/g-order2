@@ -76,5 +76,6 @@ return [
     'upload' =>'Unggah',
     'download' => 'Unduh',
     'mandatoryfield' => 'Field wajib diisi',
-    'searchproduct' => 'Cari Produk'
+    'searchproduct' => 'Cari Produk',
+	'newconminlength' => 'Minimum perulangan kata sandi baru berisi 6 karakter',
 ];

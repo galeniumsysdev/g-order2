@@ -42,8 +42,8 @@ $(document).ready(function() {
         });
   }
 
-//this is marker
-  function createMarker(latlng,icn,name){
+//this is marker 
+  function createMarker(latlng,icn,name){ 
     var markers = new google.maps.Marker({
               position: latlng,
               map: map,

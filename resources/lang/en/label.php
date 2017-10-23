@@ -77,6 +77,6 @@ return [
     'upload' =>'Upload',
     'download' => 'Download',
     'mandatoryfield' => 'Mandatory Field',
-    'searchproduct' => 'Search Product'
-
+    'searchproduct' => 'Search Product',
+	'newconminlength' => 'Minimum new password length is 6 characters',
 ];

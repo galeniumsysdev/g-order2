@@ -16,6 +16,7 @@ html {
 
 body {
   margin: 0;
+  padding: 0;
 }
 
 article,
@@ -8453,4 +8454,8 @@ img {
 	padding-left: 15px;
 	padding-right: 15px;
 	float: right;
+}
+
+.justify-content-md-center {
+	padding-left: 30px;
 }
