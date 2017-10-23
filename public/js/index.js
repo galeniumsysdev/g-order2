@@ -1,6 +1,6 @@
 jQuery(document).ready(function($){
 
-$('.external-link').on('click',function(){
+$('.external').on('click',function(){
 
 	var getLink = $(this).attr('href');
 

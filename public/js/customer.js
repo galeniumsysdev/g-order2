@@ -20,7 +20,7 @@ function checkrole(){
   var roletxt=$("#role option:selected").text();
   //alert(roletxt);
   //var role = $('#role').val();
-  if (roletxt=="Outlet"){
+  if (roletxt=="Outlet" || roletxt=="Apotik/Klinik"){
     $('#divkategori').show();
     $('#divkategoridc').show();
   }else{

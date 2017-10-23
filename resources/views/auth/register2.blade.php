@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.home')
 
 @section('content')
 <div class="container">
@@ -36,7 +36,7 @@
                                     </span>
                                 @endif
                             </div>
-                        </div>                        
+                        </div>
 
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">

@@ -16,6 +16,7 @@ html {
 
 body {
   margin: 0;
+  padding: 0;
 }
 
 article,
@@ -4094,7 +4095,7 @@ fieldset[disabled] .btn-default.focus {
   color: #fff;
   background-color: #3097D1;
   border-color: #2a88bd;
-  float: right;
+  /*float: right;*/
 }
 
 .btn-primary:focus,
@@ -4368,7 +4369,7 @@ fieldset[disabled] .btn-warning.focus {
   color: #fff;
   background-color: red;
   border-color: red;
-  float: right;
+  /*float: right;*/
 }
 
 .btn-danger:active,
@@ -8453,4 +8454,8 @@ img {
 	padding-left: 15px;
 	padding-right: 15px;
 	float: right;
+}
+
+.justify-content-md-center {
+	padding-left: 30px;
 }

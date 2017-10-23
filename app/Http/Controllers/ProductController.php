@@ -88,7 +88,7 @@ class ProductController extends Controller
     if ($pilihandistributor!='')
     {
       $dist = Customer::where('id','=',$pilihandistributor)->select('id','customer_name','pharma_flag','psc_flag','export_flag')->first();
-      $request->session()->put('distributor_to',['id'=>$dist->id,'customer_name'=>$dist->customer_name,'pharma_flag'=>$dist->pharma_flag,'psc_flag'=>$dist->psc_flag]);
+      $request->session()->put('distributor_to',['id'=>$dist->id,'customer_name'=>$dist->customer_name,'pharma_flag'=>$dist->pharma_flag,'psc_flag'=>$dist->psc_flag,'export_flag'=>$dist->export_flag]);
       $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
     }
     $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item from products as p where enabled_flag='Y' ";
