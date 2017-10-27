@@ -20,6 +20,10 @@ Route::get('/getPrice',[
     ,'as' => 'product.getPrice'
   ]);
 
+Route::get('/ajax/getCity', 'UserController@getListCity');
+Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
+Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
+
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
 
 Route::get('detail/{id}', [
@@ -50,7 +54,8 @@ Route::group(['middleware'=>'auth'],function(){
   });
   Route::delete('remove-address/{id}', 'ProfileController@removeaddress')->name('profile.removeaddress');
   Route::delete('remove-contact/{id}', 'ProfileController@removecontact')->name('profile.removecontact');
-
+  Route::get('/home', 'HomeController@index')->name('home');
+  Route::post('/home', 'HomeController@search')->name('notif.search');
 });
 
 Route::group(['middleware'=>['permission:Create PO']],function(){
@@ -90,8 +95,7 @@ Auth::routes();
 
 
 
-Route::get('/home', 'HomeController@index')->name('home');
-Route::post('/home', 'HomeController@search')->name('notif.search');
+
 
 Route::group(['middleware' => ['web']], function () {
   Route::post('language-chooser','LanguageController@changeLanguage');
@@ -141,6 +145,7 @@ Route::group(['middleware' => ['role:IT Galenium']], function () {
   ]);
 
   Route::resource('CategoryOutlet',  'Cat_OutletController');
+  Route::resource('CategoryProduct',  'CategoryProductController');
   Route::resource('users','UserController');
 });
 
@@ -160,11 +165,6 @@ Route::group(['middleware' => ['permission:Outlet_Distributor']], function () {
 
 /*distributor or principal*/
 Route::group(['middleware' => ['permission:ApproveOutlet']], function () {
-  /*Route::post('/approveOutlet',[
-  'uses' => 'CustomerController@approve'
-  ,'as' => 'customer.approve'
-  ,'middleware' => ['permission:ApproveOutlet']
-]);*/
   Route::post('/approveOutlet','CustomerController@approve')->name('customer.approve');
   Route::post('/rejectOutlet','CustomerController@reject')->name('customer.reject');
 });
@@ -196,23 +196,45 @@ Route::get('/test', function () {
     return view('testtable');
 });*/
 /*check PO from Outlet/Distributor*/
-Route::get('/checkPO/{id}','OrderController@checkOrder')->name('order.checkPO');
-Route::match(['get', 'post'],'/listpo','OrderController@listOrder')->name('order.listPO');
-Route::match(['get', 'post'],'/listso','OrderController@listSO')->name('order.listSO');
-Route::post('/SO/approval','OrderController@approvalSO')->name('order.approvalSO');
-Route::get('/notif/newpo/{notifid}/{id}','OrderController@readnotifnewpo')->name('order.notifnewpo');
-Route::post('/PO/batal','OrderController@batalPO')->name('order.cancelPO');
-//Route::post('/PO/Receive','OrderController@receivePO')->name('order.receivePO');
-Route::get('/download/PO/{file}', function ($file='') {
-    return response()->download(storage_path('app/PO/'.$file));
+Route::group(['middleware' => ['auth']], function () {
+  Route::get('/checkPO/{id}','OrderController@checkOrder')->name('order.checkPO');
+  Route::match(['get', 'post'],'/listpo','OrderController@listOrder')->name('order.listPO');
+  Route::match(['get', 'post'],'/listso','OrderController@listSO')->name('order.listSO');
+  Route::post('/SO/approval','OrderController@approvalSO')->name('order.approvalSO');
+  Route::get('/notif/newpo/{notifid}/{id}','OrderController@readnotifnewpo')->name('order.notifnewpo');
+  Route::post('/PO/batal','OrderController@batalPO')->name('order.cancelPO');
+  //Route::post('/PO/Receive','OrderController@receivePO')->name('order.receivePO');
+  Route::get('/download/PO/{file}', function ($file='') {
+      return response()->download(storage_path('app/PO/'.$file));
+  });
 });
-
 Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->name('order.getStatusOracle');
-
+Route::get('/oracle/exportexcel/{id}', 'BackgroundController@createExcel')->name('order.createExcel');
+Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));
 });*/
+
+
+Route::group(['middleware' => ['permission:UploadCMO']], function () {
+    Route::get('uploadCMO', 'FilesController@upload')->name('files.uploadcmo');
+    Route::post('/handleUpload', 'FilesController@handleUpload');
+    Route::get('/downloadCMO/{file}', function ($file='') {
+        return response()->download(storage_path('app/uploads/'.$file));
+    });
+});
+Route::group(['middleware' => ['permission:DownloadCMO']], function () {
+  Route::get('viewAlldownloadfile', 'FilesController@downfunc')->name('files.viewfile');
+  Route::get('/downloadCMO/{file}', function ($file='') {
+      return response()->download(storage_path('app/uploads/'.$file));
+  });
+  Route::post('/viewAlldownloadfile', 'FilesController@search')->name('files.postviewfile');
+  route::get('notifrejectcmo/{notifid}/{id}','FilesController@readNotif')->name('files.readnotif');
+});
+Route::group(['middleware' => ['role:Principal']], function () {
+  Route::put('/approvecmo/{id}', 'FilesController@approvecmo')->name('files.approvecmo');
+});
 
 /**
 * created by WK Productions
@@ -241,18 +263,21 @@ Route::get('/Organization/{user_id}/setting','OrgStructureController@setting')->
 Route::post('/Organization/{user_id}/setting/save','OrgStructureController@saveSetting')->name('org.saveSetting');
 
 //Outlet Product and Stock
+Route::get('/outlet/product/download/template/product','OutletProductController@downloadTemplateProduct')->name('outlet.downloadTemplateProduct');
 Route::get('/outlet/product/import','OutletProductController@importProduct')->name('outlet.importProduct');
 Route::post('/outlet/product/import/view','OutletProductController@importProductView')->name('outlet.importProductView');
 Route::post('/outlet/product/import/process','OutletProductController@importProductProcess')->name('outlet.importProductProcess');
 
-Route::get('/outlet/product/download/stock','OutletProductController@downloadTemplate')->name('outlet.downloadStock');
+Route::get('/outlet/product/download/template/stock','OutletProductController@downloadTemplateStock')->name('outlet.downloadTemplateStock');
 Route::get('/outlet/product/import/stock','OutletProductController@importProductStock')->name('outlet.importProductStock');
 Route::post('/outlet/product/import/stock/view','OutletProductController@importProductStockView')->name('outlet.importProductStockView');
 Route::post('/outlet/product/import/stock/process','OutletProductController@importProductStockProcess')->name('outlet.importProductStockProcess');
 
 Route::get('/outlet/product/list','OutletProductController@listProductStock')->name('outlet.listProductStock');
+Route::get('/outlet/product/detail/{product_id}','OutletProductController@detailProductStock')->name('outlet.detailProductStock');
 Route::get('/outlet/product/getList','OutletProductController@getListProductStock')->name('outlet.getListProductStock');
 
 Route::get('/outlet/transaction','OutletProductController@outletTrx')->name('outlet.trx');
+Route::get('/outlet/transaction/list','OutletProductController@outletTrxList')->name('outlet.trxList');
 Route::post('/outlet/transaction/in/process','OutletProductController@outletTrxInProcess')->name('outlet.trxInProcess');
 Route::post('/outlet/transaction/out/process','OutletProductController@outletTrxOutProcess')->name('outlet.trxOutProcess');

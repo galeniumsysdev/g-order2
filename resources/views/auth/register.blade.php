@@ -1,6 +1,12 @@
 @extends('layouts.home')
 
 @section('content')
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
+
 <div class="container">
     <div class="row">
         <div class="col-sm-12">
@@ -52,7 +58,7 @@
                             </div>
                         </div>-->
 
-                                    <div class="form-group{{ $errors->has('address') ? ' has-error' : '' }}">
+						            <div class="form-group{{ $errors->has('address') ? ' has-error' : '' }}">
                             <label for="outlet" class="col-sm-4 control-label">*@lang('label.address')</label>
 
                             <div class="col-sm-8">
@@ -88,7 +94,7 @@
                           </div>
                          </div>
 
-                                    <div class="form-group{{ $errors->has('city') ? ' has-error' : '' }}">
+            			<div class="form-group{{ $errors->has('city') ? ' has-error' : '' }}">
                             <label for="city" class="col-sm-4 control-label">*@lang('label.city')</label>
 
                             <div class="col-sm-8">
@@ -122,7 +128,7 @@
                             </div>
                         </div>
 
-                                    <div class="form-group{{ $errors->has('districts') ? ' has-error' : '' }}">
+						            <div class="form-group{{ $errors->has('districts') ? ' has-error' : '' }}">
                             <label for="subdistricts" class="col-sm-4 control-label">*@lang('label.state')</label>
 
                             <div class="col-sm-8">
@@ -139,7 +145,7 @@
                             </div>
                         </div>
 
-                                    <div class="form-group{{ $errors->has('postal_code') ? ' has-error' : '' }}">
+						            <div class="form-group{{ $errors->has('postal_code') ? ' has-error' : '' }}">
                             <label for="postal_code" class="col-sm-4 control-label">*@lang('label.postalcode')</label>
 
                             <div class="col-sm-8">
@@ -163,7 +169,7 @@
                                <span style="font-size:8pt">File type: jpeg,jpg,png</span>
                            </div>
                         </div>
-                                     <div class="form-group{{ $errors->has('contact_person') ? ' has-error' : '' }}">
+						             <div class="form-group{{ $errors->has('contact_person') ? ' has-error' : '' }}">
                             <label for="contact_person" class="col-sm-4 control-label">*@lang('label.cp')</label>
 
                             <div class="col-sm-8">
@@ -183,7 +189,7 @@
                             </div>
                          </div>
 
-                                     <div class="form-group{{ $errors->has('HP_1') ? ' has-error' : '' }}">
+						             <div class="form-group{{ $errors->has('HP_1') ? ' has-error' : '' }}">
                             <label for="HP_1" class="col-sm-4 control-label">*@lang('label.hp1')</label>
 
                             <div class="col-sm-8">
@@ -204,7 +210,7 @@
                             </div>
                           </div>
 
-                                     <div class="form-group{{ $errors->has('HP_2') ? ' has-error' : '' }}">
+						             <div class="form-group{{ $errors->has('HP_2') ? ' has-error' : '' }}">
                             <label for="HP_2" class="col-sm-4 control-label">@lang('label.hp2')</label>
 
                             <div class="col-sm-8">
@@ -225,7 +231,7 @@
                             </div>
                           </div>
 
-                                     <div class="form-group{{ $errors->has('no_tlpn') ? ' has-error' : '' }}">
+						             <div class="form-group{{ $errors->has('no_tlpn') ? ' has-error' : '' }}">
                             <label for="no_tlpn" class="col-sm-4 control-label">@lang('label.phone')</label>
 
                             <div class="col-sm-8">
@@ -246,7 +252,7 @@
                             </div>
                           </div>
 
-                                     <div class="form-group{{ $errors->has('NPWP') ? ' has-error' : '' }}">
+						             <div class="form-group{{ $errors->has('NPWP') ? ' has-error' : '' }}">
                             <label for="NPWP" class="col-sm-4 control-label">@lang('label.npwp')</label>
 
                             <div class="col-sm-8">
@@ -260,11 +266,11 @@
                             </div>
                          </div>
 
-                                     <div class="form-group{{ $errors->has('kategori') ? ' has-error' : '' }}">
+						             <div class="form-group{{ $errors->has('kategori') ? ' has-error' : '' }}">
                             <label for="kategori" class="col-sm-4 control-label">*@lang('label.category')</label>
 
                             <div class="col-sm-8">
-                                            <select class="form-control" name="category" required>
+                							<select class="form-control" name="category" required>
                                 @forelse($categories as $category)
                                   @if(old('category')==$category->name)
                                     <option selected='selected' value="{{$category->id}}">{{$category->name}}</option>
@@ -294,7 +300,7 @@
                                     @else
                                       <input type="checkbox" id="blankCheckbox" value="1" name="psc">
                                     @endif
-                                    <strong> Personal Skin Care (PSC)
+                                    <strong><a href="#" class="external-psc">Personal Skin Care (PSC)</a>
                                   </strong><div style="font-size:8pt">(Caladine, Oilum, v-mina, Bellsoap, JFSulfur)</div></label>
                                 </div>
 
@@ -306,7 +312,7 @@
                                     @else
                                       <input type="checkbox" id="blankCheckbox" value="1" name="pharma">
                                     @endif
-                                    <strong> Pharma(Non PSC)
+                                    <strong><a href="#" class="external-pharma">Pharma (NON PSC)</a>
                                   </strong></label>
                                 </div>
 

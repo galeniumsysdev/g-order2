@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Role</title>
-    <link href="{{ asset('public/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
 </head>
 <body>
     <div class="panel panel-default">

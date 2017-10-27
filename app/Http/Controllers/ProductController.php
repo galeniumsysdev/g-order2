@@ -23,9 +23,13 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Notifications\NewPurchaseOrder;
+use Mail;
+use App\Mail\CreateNewPo;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductController extends Controller
 {
+
   protected function validatorImage(array $data)
   {
       return Validator::make($data, [
@@ -44,10 +48,15 @@ class ProductController extends Controller
     }
     $price = DB::select("select getItemPrice ( :cust, :prod, :uom ) AS harga from dual", ['cust'=>$vid,'prod'=>$request->product,'uom'=>$request->uom]);
     $price = $price[0];
+    $rate = DB::select("select p.satuan_primary, getItemRate ( p.satuan_primary, :uom, p.id ) AS rate, p.itemcode from products as p where id = :id", ['id'=>$request->product,'uom'=>$request->uom]);
+    $konversi = $rate[0];
   //  dd($price->harga);
     return response()->json([
                     'result' => 'success',
-                    'price' => $price->harga,
+                    'price' => (float)$price->harga,
+                    'konversi' => (float)$konversi->rate,
+                    'uomprimary' =>$konversi->satuan_primary,
+                    'itemcode' =>$konversi->itemcode
                   ],200);
   }
 
@@ -66,18 +75,68 @@ class ProductController extends Controller
                         ->where('o.outlet_id','=',Auth::user()->customer_id)
                         ->select('c.id','c.customer_name','u.avatar')
                         ->get();
-          return view('shop.sites',['distributors' => $distributor]);
+          return $distributor;
+          //return view('shop.sites',['distributors' => $distributor]);
 
         }else{//if(count($distributor)>1) {
 
             foreach ($customer->hasDistributor as $dist) {
               //dd('distributor:'.$dist->pivot->customer_name);
-              $request->session()->put('distributor_to',['id'=>$dist->id,'customer_name'=>$dist->customer_name,'pharma_flag'=>$dist->pharma_flag,'psc_flag'=>$dist->psc_flag,'export_flag'=>$dist->export_flag]);
+              Session::put('distributor_to',['id'=>$dist->id,'customer_name'=>$dist->customer_name,'pharma_flag'=>$dist->pharma_flag,'psc_flag'=>$dist->psc_flag,'export_flag'=>$dist->export_flag]);
               $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
             }
+            return $oldDisttributor;
         }
       }
     }
+  }
+
+  public function getSqlProduct()
+  {
+    $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate from products as p where enabled_flag='Y' ";
+    if(isset(Auth::user()->customer_id)){
+      $customer = Customer::find(Auth::user()->customer_id);
+      $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
+      if(!is_null($oldDisttributor)){
+        if($customer->psc_flag!="1" or $oldDisttributor['psc_flag']!="1")
+        {
+          $sqlproduct .= " and exists (select 1
+              from category_products  as cp
+                ,categories cat
+              where cp.product_id = p.id
+                and cp.flex_value = cat.flex_value
+                and cat.parent not like 'PSC')";
+        }
+        if($customer->pharma_flag!="1" or $oldDisttributor['pharma_flag']!="1")
+        {
+          $sqlproduct .= " and exists (select 1
+              from category_products as cp
+                ,categories cat
+              where cp.product_id = p.id
+                and cp.flex_value = cat.flex_value
+                and cat.parent not like 'PHARMA')";
+        }
+        if($customer->export_flag!="1" or $oldDisttributor['export_flag']!="1")
+        {
+          $sqlproduct .= " and exists (select 1
+              from category_products as cp
+                ,categories cat
+              where cp.product_id = p.id
+                and cp.flex_value = cat.flex_value
+                and cat.parent not like 'INTERNATIONAL')";
+        }
+        if(Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))
+        {
+          $sqlproduct .= " and exists (select 1
+              from category_products as cp
+                ,categories cat
+              where cp.product_id = p.id
+                and cp.flex_value = cat.flex_value
+                and cat.description <> 'BPJS')";
+        }
+      }
+    }
+    return $sqlproduct;
   }
 
   public function getIndex(Request $request)
@@ -88,65 +147,22 @@ class ProductController extends Controller
     if ($pilihandistributor!='')
     {
       $dist = Customer::where('id','=',$pilihandistributor)->select('id','customer_name','pharma_flag','psc_flag','export_flag')->first();
-      $request->session()->put('distributor_to',['id'=>$dist->id,'customer_name'=>$dist->customer_name,'pharma_flag'=>$dist->pharma_flag,'psc_flag'=>$dist->psc_flag]);
+      $request->session()->put('distributor_to',['id'=>$dist->id,'customer_name'=>$dist->customer_name,'pharma_flag'=>$dist->pharma_flag,'psc_flag'=>$dist->psc_flag,'export_flag'=>$dist->export_flag]);
       $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
     }
-    $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item from products as p where enabled_flag='Y' ";
-    if(isset(Auth::user()->customer_id)){
-      $customer = Customer::find(Auth::user()->customer_id);
-      $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
-      if (is_null($oldDisttributor) or $oldDisttributor ==null)
+      $oldDisttributor = $this->getDistributor();
+
+      if(!is_null($oldDisttributor))
       {
-        if($customer->hasDistributor()->count()>1)
+        if(!is_array($oldDisttributor))
         {
-          $distributor = DB::table('outlet_distributor as o')
-                        ->join('customers as c','o.distributor_id','=','c.id')
-                        ->join('users as u','u.customer_id','=','c.id')
-                        ->where('o.outlet_id','=',Auth::user()->customer_id)
-                        ->select('c.id','c.customer_name','u.avatar')
-                        ->get();
-          return view('shop.sites',['distributors' => $distributor]);
-
-        }else{//if(count($distributor)>1) {
-
-            foreach ($customer->hasDistributor as $dist) {
-              //dd('distributor:'.$dist->pivot->customer_name);
-              $request->session()->put('distributor_to',['id'=>$dist->id,'customer_name'=>$dist->customer_name,'pharma_flag'=>$dist->pharma_flag,'psc_flag'=>$dist->psc_flag,'export_flag'=>$dist->export_flag]);
-              $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
-            }
+          return view('shop.sites',['distributors' => $oldDisttributor]);
         }
       }
 
-      if($customer->psc_flag!="1" or $oldDisttributor['psc_flag']!="1")
-      {
-        $sqlproduct .= " and exists (select 1
-						from category_products  as cp
-              ,categories cat
-						where cp.product_id = p.id
-              and cp.flex_value = cat.flex_value
-							and cat.parent not like 'PSC')";
-      }
-      if($customer->pharma_flag!="1" or $oldDisttributor['pharma_flag']!="1")
-      {
-        $sqlproduct .= " and exists (select 1
-            from category_products as cp
-              ,categories cat
-            where cp.product_id = p.id
-              and cp.flex_value = cat.flex_value
-              and cat.parent not like 'PHARMA')";
-      }
-      if($customer->export_flag!="1" or $oldDisttributor['export_flag']!="1")
-      {
-        $sqlproduct .= " and exists (select 1
-            from category_products as cp
-              ,categories cat
-            where cp.product_id = p.id
-              and cp.flex_value = cat.flex_value
-              and cat.parent not like 'INTERNATIONAL')";
-      }
 
+    $sqlproduct = $this->getSqlProduct();
 
-    }
     //var_dump($sqlproduct);
 
       if (isset(Auth::user()->customer_id))
@@ -173,25 +189,7 @@ class ProductController extends Controller
 
   //  dd($products);
     $products ->setPath(url()->current());
-    //", ['cust'=>$vid,'prod'=>$request->product,'uom'=>$request->uom]);
-  /*  $products = Product::where('Enabled_Flag','=','Y')->select('id','title','imagePath','satuan_primary','satuan_secondary','price','inventory_item_id');//all();
 
-    if(isset(Auth::user()->customer_id)){
-      $customer = Customer::find(Auth::user()->customer_id);
-      if($customer->psc_flag!="1")
-      {
-        $products =$products->whereHas('categories',function($q){
-          $q->where('categories.flex_value','not like','1%');
-        });
-      }
-      if($customer->pharma_flag!="1")
-      {
-        $products =$products->whereHas('categories',function($q){
-          $q->where('categories.flex_value','not like','2%');
-        });
-      }
-    }
-    $products =$products->paginate(12);*/
     return view('shop.index',['products' => $products]);
   }
 
@@ -199,68 +197,17 @@ class ProductController extends Controller
   {
     $perPage = 12; // Item per page
     $currentPage = Input::get('page') - 1;
-    $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item from products as p where enabled_flag='Y' ";
-    if(isset(Auth::user()->customer_id)){
-      $customer = Customer::find(Auth::user()->customer_id);
-      $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
-      if(!is_null($oldDisttributor))
+    $oldDisttributor = $this->getDistributor();
+
+    if(!is_null($oldDisttributor))
+    {
+      if(!is_array($oldDisttributor))
       {
-        if($oldDisttributor['psc_flag']!="1")
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'PSC')";
-        }
-        if($oldDisttributor['pharma_flag']!="1")
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'PHARMA')";
-        }
-        if($oldDisttributor['export_flag']!="1")
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'INTERNATIONAL')";
-        }
-      }
-      if($customer->psc_flag!="1")
-      {
-        $sqlproduct .= " and exists (select 1
-            from category_products as cp
-              ,categories cat
-            where cp.product_id = p.id
-              and cp.flex_value = cat.flex_value
-              and cat.parent not like 'PSC')";
-      }
-      if($customer->pharma_flag!="1")
-      {
-        $sqlproduct .= " and exists (select 1
-            from category_products as cp
-              ,categories cat
-            where cp.product_id = p.id
-              and cp.flex_value = cat.flex_value
-              and cat.parent not like 'PHARMA')";
-      }
-      if($customer->export_flag!="1")
-      {
-        $sqlproduct .= " and exists (select 1
-            from category_products as cp
-              ,categories cat
-            where cp.product_id = p.id
-              and cp.flex_value = cat.flex_value
-              and cat.parent not like 'INTERNATIONAL')";
+        return view('shop.sites',['distributors' => $oldDisttributor]);
       }
     }
+    $sqlproduct = $this->getSqlProduct();
+
     if(isset($request->search_product))
     {
       //$products = Product::where('title','like','%'.$request->search_product.'%')->paginate(12);//all();
@@ -294,38 +241,17 @@ class ProductController extends Controller
       $kategory = Category::find($id);
       //$products = $kategory->products()->paginate(12);
       $perPage = 12; // Item per page
-      $currentPage = Input::get('page') - 1;
-      $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item from products as p where enabled_flag='Y' ";
-      if(isset(Auth::user()->customer_id)){
-        $customer = Customer::find(Auth::user()->customer_id);
-        if($customer->psc_flag!="1")
+      $oldDisttributor = $this->getDistributor();
+
+      if(!is_null($oldDisttributor))
+      {
+        if(!is_array($oldDisttributor))
         {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'PSC')";
-        }
-        if($customer->pharma_flag!="1")
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'PHARMA')";
-        }
-        if($customer->export_flag!="1")
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'INTERNATIONAL')";
+          return view('shop.sites',['distributors' => $oldDisttributor]);
         }
       }
+      $sqlproduct = $this->getSqlProduct();
+      $currentPage = Input::get('page') - 1;
       $sqlproduct .= " and exists (select 1
           from category_products as cat
           where cat.product_id = p.id
@@ -355,7 +281,8 @@ class ProductController extends Controller
   public function show($id)
   {
     //$product=Product::find($id);
-    $sqlproduct = "select id, title, imagePath,description, description_en,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item from products as p where p.id = '".$id."'";
+    $sqlproduct = "select id, title, imagePath,description, description_en,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate  from products as p where p.id = '".$id."'";
+    //$sqlproduct = $this->getSqlProduct();
     if (isset(Auth::user()->customer_id))
     {
       $vid=Auth::user()->id;
@@ -373,6 +300,7 @@ class ProductController extends Controller
   public function index()
   {
     $products=Product::all();//paginate(10);
+
      return view('admin.product.index',['products' => $products,'menu'=>'product']);
   }
 
@@ -380,8 +308,15 @@ class ProductController extends Controller
 
   public function master($id)
   {
-    $product=Product::find($id);
-    return view('admin.product',['product' => $product,'menu'=>'product']);
+    //$product=Product::find($id);
+    $categories = Category::where('enabled_flag','=','Y')->get();
+    $product = DB::table('products as p')->leftjoin('category_products as cp','p.id','=','cp.product_id')
+              ->leftjoin('categories as c', 'cp.flex_value','=','c.flex_value')
+              ->where('p.id','=',$id)
+              ->select('p.id as id','p.title','p.itemcode','p.description','p.description_en','p.imagePath','p.satuan_primary','p.price','c.description as category_name','c.flex_value','c.parent','p.inventory_item_id','p.enabled_flag')
+              ->first();
+    //dd($product) ;
+    return view('admin.product',['product' => $product,'categories'=>$categories,'menu'=>'product']);
   }
 
   public function update(Request $request,$id)
@@ -425,6 +360,9 @@ class ProductController extends Controller
     $product->description =$request->id_descr;
     $product->description_en =$request->en_descr;
     $product->save();
+    //$product->categories()->detach();
+    //$product->categories()->attach($request->category);
+    $product->categories()->sync([$request->category]);
 
     return redirect()->route('product.master',$id)->withMessage('Product Updated');
   }
@@ -650,7 +588,7 @@ class ProductController extends Controller
       if($request->hasFile('filepo'))
       {
         $validator = Validator::make($request->all(), [
-            'filepo' => 'required|mimes:pdf|max:10240',
+            'filepo' => 'required|mimes:jpeg,jpg,png,pdf|max:10240',
         ])->validate();
         $path = $request->file('filepo')->storeAs(
             'PO', $notrx.".".$request->file('filepo')->getClientOriginalExtension()
@@ -658,7 +596,7 @@ class ProductController extends Controller
       }
 
        Validator::make($request->all(), [
-           'no_order' => 'required|max:50',
+           'no_order' => 'required|unique:so_headers,customer_po|max:50',
            'alamat' => 'required',
         ])->validate();
       $header= SoHeader::create([
@@ -699,6 +637,22 @@ class ProductController extends Controller
 
         foreach($cart->items as $product)
         {
+          if($product['uom']!=$product['item']['satuan_primary'])
+          {
+            $rate = DB::select("select p.satuan_primary, getItemRate ( p.satuan_primary, :uom, p.id ) AS rate, p.itemcode from products as p where id = :id", ['id'=>$product['item']['id'],'uom'=>$product['uom']]);
+            if($rate)
+            {
+              $konversi = $rate[0]->rate;
+              $qtyprimary = $product['qty']*$konversi;
+            }else{
+              $qtyprimary = null;
+              $konversi=null;
+            }
+          }else{
+            $konversi=1;
+            $qtyprimary = $product['qty'];
+          }
+
           SoLine::Create([
             'header_id'=> $header->id,
             'product_id'=> $product['item']['id'],
@@ -707,13 +661,17 @@ class ProductController extends Controller
             'list_price' => $product['price'],
             'unit_price' =>$product['price'],
             'amount' => $product['amount'],
-            'inventory_item_id'=> $product['item']['inventory_item_id']
+            'inventory_item_id'=> $product['item']['inventory_item_id'],
+            'uom_primary' => $product['item']['satuan_primary'],
+            'qty_request_primary' => $qtyprimary,
+            'conversion_qty' => $konversi
           ]);
         }
         //notification to distributor
         $data= ['distributor'=>$oldDisttributor['id'],'user'=>$userdistributor->id,'so_header_id'=>$header->id,'customer'=>auth()->user()->customer_id];
         //$data= ['distributor'=>$oldDisttributor['id'],'user'=>$u->id,'so_header_id'=>1,'customer'=>auth()->user()->customer_id];
         $userdistributor->notify(new NewPurchaseOrder($data));
+        Mail::to(Auth::user())->send(new CreateNewPo($header));
       }
 
 
@@ -757,4 +715,7 @@ class ProductController extends Controller
 
      return $res;
     }
+
+
+
 }

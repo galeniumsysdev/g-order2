@@ -19,7 +19,7 @@
             </div>
           </div>
             <div class="form-group{{ $errors->has('no_order') ? ' has-error' : '' }}">
-              <label class="control-label col-sm-3" for="no_order">@lang('shop.Po_num') :</label>
+              <label class="control-label col-sm-3" for="no_order">*@lang('shop.Po_num') :</label>
               <div class="col-sm-8">
                 <input type="text" id="no_order" name="no_order" class="form-control" placeholder="@lang('shop.Po_num')" value="{{old('no_order')}}" required>
                 @if ($errors->has('no_order'))
@@ -30,7 +30,7 @@
               </div>
             </div>
             <div class="form-group{{ $errors->has('alamat') ? ' has-error' : '' }}">
-              <label class="control-label col-sm-3" for="Alamat">@lang('shop.ShipTo') :</label>
+              <label class="control-label col-sm-3" for="Alamat">*@lang('shop.ShipTo') :</label>
               <div class="col-sm-8">
                     <select name="alamat" id="alamat" class="form-control">
                       @foreach($addresses as $address)
@@ -47,7 +47,7 @@
             </div>
             @if(!is_null($billto))
             <div class="form-group {{ $errors->has('billto') ? ' has-error' : '' }}">
-              <label class="control-label col-sm-3" for="Alamat">@lang('shop.BillTo') :</label>
+              <label class="control-label col-sm-3" for="Alamat">*@lang('shop.BillTo') :</label>
               <div class="col-sm-8">
                     <select name="billto" id="billto" class="form-control">
                       @foreach($billto as $bt)
@@ -65,7 +65,8 @@
             <div class="form-group {{ $errors->has('filepo') ? ' has-error' : '' }}">
               <label class="control-label col-sm-3" for="filepo">@lang('shop.documentPO') :</label>
               <div class="col-sm-8">
-                  <input type="file" accept="application/pdf" name="filepo" id="filepo" >
+                  <input type="file" accept="application/pdf, image/*" name="filepo" id="filepo" >
+                  <span style="font-size:10px">File: PDF,jpeg,png, or jpg</span>
                   @if ($errors->has('filepo'))
     									<span class="help-block with-errors">
     											<strong>{{ $errors->first('filepo') }}</strong>
@@ -102,7 +103,7 @@
 					</td>
 					<td data-th="@lang('shop.Price')" id="hrg-{{$id}}" class="text-center xs-only-text-left">{{ number_format($product['price'],2) }}</td>
 					<td data-th="@lang('shop.Quantity')" class="text-center xs-only-text-left">
-              {{ $product['qty']." ".$product['item']['satuan_secondary'] }}
+              {{ $product['qty']." ".$product['uom'] }}
 					</td>
 					<td data-th="@lang('shop.SubTotal')" class="text-center xs-only-text-left" id="subtot-{{$id}}">{{  number_format($product['amount'],2) }}</td>
 				</tr>
@@ -118,8 +119,8 @@
 					<td class="hidden-xs text-center"><strong id="totprice2">Total {{ number_format($totalPrice,2) }}</strong></td>
 					<td><button type="submit" class="btn btn-success btn-block">@lang('shop.CreateOrder') <i class="fa fa-angle-right"></i></button></td>
 				</tr>
-        <tr>
-          <td class="xs text-center"colspan"*"><small>*@lang('pesan.notfixedprice')</small></td>
+        <tr style="border-top-style:hidden;">
+          <td class="xs-only-text-left" colspan="*"><small>*@lang('pesan.notfixedprice')</small></td>
         </tr>
 			</tfoot>
 		</table>

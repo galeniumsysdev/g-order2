@@ -5303,6 +5303,7 @@ tbody.collapse.in {
   }
 }
 
+
 .navbar-collapse {
   overflow-x: visible;
   padding-right: 15px;
@@ -5426,7 +5427,7 @@ tbody.collapse.in {
   padding: 14px 15px;
   font-size: 18px;
   line-height: 22px;
-  height: 50px;
+  height: 50px;  
 }
 
 .navbar-brand:hover,
@@ -6311,7 +6312,7 @@ a.badge:focus {
 
 .thumbnail {
   display: block;
-  padding: 4px;
+  padding: 2px;
   margin-bottom: 22px;
   line-height: 1.6;
   background-color: #f5f8fa;
@@ -6333,6 +6334,7 @@ a.badge:focus {
 .thumbnail .caption {
   padding: 9px;
   color: #636b6f;
+  font-size: 14px;
 }
 
 a.thumbnail:hover,
@@ -8349,4 +8351,3 @@ button.close {
     display: none !important;
   }
 }
-

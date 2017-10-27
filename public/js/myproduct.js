@@ -3,6 +3,7 @@ function addCart(id)
 {
   if(window.Laravel.auth.user)
   {
+    $('#addCart-'+id).hide();
     $.ajax({
              type: 'post',
              url: baseurl+'/add-to-cart/'+id,
@@ -15,8 +16,10 @@ function addCart(id)
              },
              success: function(data) {
                $('#shopcart').html(data.totline) ;
+               $('#shopcart2').html(data.totline) ;
              }
          });
+    $('#addCart-'+id).show();
   }else{
       window.location.href =  baseurl+'/login';
   }
@@ -76,10 +79,32 @@ function changeProduct(id){
 
 function getPrice(id){
   var v_uom = $('#satuan-'+id).val();
+  var v_itemcode;
+  $('#lblhrg-'+id).html("<i class='fa fa-spinner fa-pulse fa-2x fa-fw'></i>");
+  $('#addCart-'+id).hide();
   $.get(baseurl+'/getPrice?product='+id+'&uom='+v_uom,function(data){
+    v_itemcode = data.itemcode;
+    if(v_uom!=data.uomprimary || data.konversi!=1)
+    {
+      if(v_itemcode.substr(0,2)=='43')
+      {
+        $('#lblhrg-'+id).html('$ '+rupiah(data.price)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
+      }else{
+        $('#lblhrg-'+id).html('Rp. '+rupiah(data.price)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
+      }
+
+      $('#hrg-'+id).val(data.price);
+    }else{
+      if(v_itemcode.substr(0,2)=='43')
+      {
+        $('#lblhrg-'+id).html('$ '+rupiah(data.price)+'/'+v_uom);
+      }else {
         $('#lblhrg-'+id).html('Rp. '+rupiah(data.price)+'/'+v_uom);
-        $('#hrg-'+id).val(data.price);
+      }
+      $('#hrg-'+id).val(data.price);
+    }
       });
+      $('#addCart-'+id).show();
 }
 
 function rupiah(nStr) {
@@ -124,3 +149,63 @@ function isNumberCheck(field) {
       field.value = "";
     }
 }
+
+function inputreason()
+{
+  var label =  $('#reject_PO').text()
+  if (label=="Reject")
+  {
+      var reason = prompt("Please input your reason for reject the PO?", "");
+  }else{
+    var reason = prompt("Masukkan alasan tolak PO?", "");
+  }
+  if (reason != null ) {//click ok
+    if (reason != ""){
+      $('#alasanreject').val(reason);
+      return true;
+    }else{
+        alert("Reason must be filled");
+        return false;
+    }
+
+  }
+  return false;
+}
+/*
+$('#reject_PO').on('click',function(){
+  var label =  $('#reject_PO').text()
+  if (label=="Reject")
+  {
+      var reason = prompt("Please input your reason for reject the PO?", "");
+  }else{
+    var reason = prompt("Masukkan alasan tolak PO?", "");
+  }
+
+  if (reason != null ) {//click ok
+    if (reason != ""){
+      $.ajax({
+               type: 'post',
+               url: baseurl+'/rejectbyGPL',
+               data: {
+                   '_token': $('input[name=_token]').val(),
+                   'id': $("#user_id").val(),
+                   'alasan': reason,
+                   'notif_id':notif
+               },
+               success: function(data) {
+                   $('#pesan').html("<div class='alert alert-info'>"+data.message+"</div>");
+                   $('#status').html("");
+                   $('#status').append("<label for='statue' class='control-label col-sm-2'>Status: </label>");
+                   $('#status').append("<div class='col-sm-10'><p class='form-control'>Tolak: "+reason+"</p></div>");
+                   $('#divdistributor').hide();
+                   $('#listdistributor').hide();
+
+               }
+           });
+    }else{
+        alert("Reason must be filled");
+    }
+
+  }
+  return false;
+});*/

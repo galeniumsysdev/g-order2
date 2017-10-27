@@ -11,22 +11,22 @@
      @if(isset($nama_kategori))
      <div><h2>Category Product: {{$nama_kategori}}</h2></div>
      @endif
-  @forelse($products->chunk(4) as $productChunk)
-    <div class="row">
+  @forelse($products->chunk(6) as $productChunk)
+    <div class="row display-flex">
       @foreach($productChunk as $product)
-        <div class="col-ms-6 col-sm-6 col-md-3">
+        <div class="col-xs-6 col-ms-4 col-sm-4 col-md-2" >
           <div class="thumbnail">
             @if($product->imagePath)
-              <img data-src="holder.js/100%x180" alt="100%x180" style="height: 180px; width: 100%; display: block;" src="{{ asset('img//'.$product->imagePath) }}" data-holder-rendered="true">
+              <img data-src="holder.js/100%x180" alt="100%x180"  class="img product" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
             @else
-              <img data-src="holder.js/100%x180" alt="100%x180" style="height: 180px; width: 100%; display: block;" src="" data-holder-rendered="true">
+              <img data-src="holder.js/100%x180" alt="100%x180" class="img product" src="" data-holder-rendered="true">
             @endif
             <div class="caption">
               <h4><a href="{{ route('product.detail',['id'=>$product->id])}}">{{ $product->title }}</a></h4>
               @if (!Auth::guest())
               <div class="input-group" style="width:100%">
-                  <input type="text" class="form-control " name="qty" id="qty-{{$product->id}}" value=1 size="2" style="text-align:right;width:50%"  onkeypress="return isNumberKey(event)" >
-                  <select name="satuan" class="form-control" style="width:40%;" id="satuan-{{$product->id}}" onChange="getPrice('{{$product->id}}')">
+                  <input type="text" class="form-control input-sm" name="qty" id="qty-{{$product->id}}" value=1 style="text-align:right;width:40%"  onkeypress="return isNumberKey(event)" >
+                  <select name="satuan" class="form-control input-sm" style="width:50%;" id="satuan-{{$product->id}}" onChange="getPrice('{{$product->id}}')">
                     @foreach($product->uom as $satuan)
                       <option value="{{$satuan->uom_code}}" {{$product->satuan_secondary==$satuan->uom_code?'selected':''}}>{{$satuan->uom_code}}</option>
                     @endforeach
@@ -38,14 +38,22 @@
 
               <div class="clearfix price" id="lblhrg-{{$product->id}}">
                 @if($product->item=="43")
-                  $  {{number_format($product->harga,2)}}/{{$product->satuan_secondary}}
+                  $
                 @else
-                  Rp. {{number_format($product->harga,2)}}/{{$product->satuan_secondary}}
+                  Rp.
+                @endif
+                @if(is_float($product->harga))
+                    {{number_format($product->harga,2)}}/{{$product->satuan_secondary}}
+                @else
+                   {{number_format($product->harga,0)}}/{{$product->satuan_secondary}}
+                @endif
+                @if(($product->rate!=1 or $product->rate!=-99999) and !Auth::guest())
+                  ({{(float)$product->rate." ".$product->satuan_primary}})
                 @endif
               </div>
               @if (!Auth::guest())
               <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
-              <div class ="clearfix">
+              <div class ="clearfix" id="addCart-{{$product->id}}">
                 <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success pull-right" role="button">Add to cart</a>
               </div>
               @endif

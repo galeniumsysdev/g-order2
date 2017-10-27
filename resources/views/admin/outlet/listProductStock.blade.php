@@ -32,7 +32,7 @@
                   <tr>
                     <td>{{ $cell['op_id'] }}</td>
                     <td>{{ $cell['title'] }}</td>
-                    <td>{{ number_format($cell['product_qty'],0,',','.') }}</td>
+                    <td>{!! $cell['stock'] !!}</td>
                   </tr>
                 @endforeach
               </tbody>

@@ -38,7 +38,7 @@
       	<h3>Dipercaya Lintas Generasi</h3>
       </div>
     </div>
-	<div class="item">
+	<!--<div class="item">
       <div class="box"></div>
       <div class="carousel-caption">
       	<h3>Solusi Kemudahan Perawatan Kesehatan Anda</h3>
@@ -61,7 +61,7 @@
       <div class="carousel-caption">
       	<h3>Solusi Kemudahan Perawatan Kesehatan Anda</h3>
       </div>
-  </div>
+  </div>-->
 
   <!-- Controls -->
 	  <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">

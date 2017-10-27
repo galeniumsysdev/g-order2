@@ -11,8 +11,6 @@ class User extends Authenticatable {
 	use EntrustUserTrait;
 	//use Uuids;
 
-	public $incrementing = false;
-
 	public function routeNotificationForPusherPushNotifications() {
 		// return $this->email;
 		return 'test';
@@ -26,7 +24,6 @@ class User extends Authenticatable {
 	protected $fillable = [
 		'name', 'email', 'password', 'validate_flag', 'register_flag', 'customer_id', 'api_token', 'code_verifikasi', 'first_login',
 	];
-
 	/**
 	 * The attributes that should be hidden for arrays.
 	 *

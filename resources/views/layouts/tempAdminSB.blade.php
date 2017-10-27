@@ -9,7 +9,7 @@
 	<!-- BOOTSTRAP STYLES-->
     <link href="{{asset('css/bootstrap.min.css')}}" rel="stylesheet" />
      <!-- FONTAWESOME STYLES-->
-    <link href="{{asset('css/font-awesome.css')}}" rel="stylesheet" />
+    <link href="{{asset('font-awesome/css/font-awesome.css')}}" rel="stylesheet" />
         <!-- CUSTOM STYLES-->
     <link href="{{asset('css/sb-admin.css')}}" rel="stylesheet">
      <!-- Custom FONTS-->

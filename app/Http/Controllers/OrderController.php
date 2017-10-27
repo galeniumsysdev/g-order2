@@ -11,10 +11,13 @@ use File;
 use Storage;
 use Carbon\Carbon;
 use PDO;
+use PDF;
 use App\Customer;
 use App\Notifications\RejectPoByDistributor;
 use App\Notifications\ReceiveItemsPo;
 use App\Notifications\ShippingOrderOracle;
+use Illuminate\Support\Facades\Input;
+use Excel;
 
 
 class OrderController extends Controller
@@ -43,6 +46,14 @@ class OrderController extends Controller
       if ($user_dist->hasRole('Principal') )    {
         return view('shop.checkOrder1',compact('header','lines'));
       }else {
+        $print=Input::get('print','');
+        if ($print=="yes"){
+          $pdf = PDF::loadView('shop.pdf_po',compact('header','lines'));
+          $pdf->setPaper('a4','portrait');
+          //return $pdf->stream();
+          return $pdf->download($header->notrx.'.pdf');
+              //return view('shop.pdf_po',compact('header','lines'));
+        }
         return view('shop.checkOrder',compact('header','lines'));
       }
     }
@@ -53,7 +64,7 @@ class OrderController extends Controller
       //if(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik'))
       if(Auth::user()->can('CheckStatusPO'))
       {
-          $trx = DB::table('so_header_v as sh')->where('customer_id','=',Auth::user()->customer_id);
+          $trx = DB::table('so_header_v as sh')->where('customer_id','=',Auth::user()->customer_id)->orderBy('tgl_order','desc');
       }else{
         abort(403, 'Unauthorized action.');
       }
@@ -103,6 +114,12 @@ class OrderController extends Controller
 
     public function listSO(Request $request)
     {
+      if ($request->method()=='GET')
+      {
+        $request->tglak = date_format(Carbon::now(),'Y-m-d');
+        $request->tglaw = date_format(Carbon::now()->addDay(-7),'Y-m-d');
+      }
+      //var_dump($request->tglak."--".$request->tglaw);
       $liststatus = DB::table('flexvalue')->where([['master','=','status_po'],['enabled_flag','=','Y']])->orderBy('id','asc')->get();
       if(Auth::user()->can('CheckStatusSO'))
       {
@@ -113,14 +130,23 @@ class OrderController extends Controller
       $request->jns=2;//listso
 
 
-      if($request->status=="" and $request->tgl_aw=="" and $request->tgl_ak=="" and $request->criteria=="")
+      if($request->status=="" and $request->tglaw=="" and $request->tglak=="" and $request->criteria=="")
       {
         $request->status=0;
         $trx =$trx->where('status','=',0);
       }else{
         if(isset($request->status))
         {
-          $trx =$trx->where('status','=',$request->status);
+          if($request->status=="x")
+          {
+              $trx =$trx->where([['status','=',0],['approve','=',1]]);
+              $this->createExcel($request);
+          }elseif($request->status=="0"){
+              $trx =$trx->where([['status','=',0],['approve','=',0]]);
+          }else{
+              $trx =$trx->where('status','=',$request->status);
+          }
+
         }
         if(isset($request->criteria))
         {
@@ -152,6 +178,7 @@ class OrderController extends Controller
         ['id','=',$request->header_id],
         ['distributor_id','=',Auth::user()->customer_id]
       ])->first();
+      //dd($request->alasan."-".$request->approve);
       //echo($header.','.Auth::user()->customer_id);
       if(!$header)
       {
@@ -264,12 +291,13 @@ class OrderController extends Controller
           ->where('header_id','=',$request->header_id)
           ->update(['qty_confirm' => 0]);
         $header->status=-2;
+        $header->alasan_tolak=$request->alasan;
         $header->tgl_approve=Carbon::now();
         $header->save();
         $customer = Customer::where('id','=',$header->customer_id)->first();
         foreach($customer->users as $u)
         {
-          $u->notify(new RejectPoByDistributor($header,1));
+          $u->notify(new RejectPoByDistributor($header,1, $request->alasan));
         }
 
         return redirect()->route('order.listSO')->withMessage(trans('pesan.rejectSO_msg',['notrx'=>$header->notrx]));
@@ -329,7 +357,7 @@ class OrderController extends Controller
           $customer = Customer::where('id','=',$header->distributor_id)->first();
           foreach($customer->users as $u)
           {
-            $u->notify(new RejectPoByDistributor($header,0));
+            $u->notify(new RejectPoByDistributor($header,0,""));
           }
           $header->save();
           return redirect()->route('order.listPO')->withMessage(trans('pesan.cancelPO_msg',['notrx'=>$header->notrx]));
@@ -373,6 +401,103 @@ class OrderController extends Controller
         }
       }
 
+    }
+
+    public function createExcel(Request $request)
+    {
+      $header = DB::table('so_headers as sh')
+                ->join('customers as c','sh.customer_id','=','c.id')
+                ->leftjoin('oe_transaction_types as ot','sh.order_type_id','=','ot.transaction_type_id')
+                ->leftjoin('qp_list_headers as ql','ql.list_header_id','=','sh.price_list_id')
+                ->where([
+                        ['sh.status','=','0'],
+                        ['sh.approve','=','1'],
+                        ['sh.distributor_id','=',Auth::user()->customer_id],
+                        //['sh.id','=',$id]
+                      ]);
+        if(isset($request->criteria))
+        {
+          $search = $request->criteria;
+          $header =$header->Where(function ($query) use($search) {
+            $query->orwhere('customer_name','LIKE',"%$search%")
+                  ->orWhere('notrx','LIKE',"%$search%")
+                  ->orWhere('customer_po','LIKE',"%$search%")   ;
+              });
+        }
+        if(isset($request->tglaw) )
+        {
+          $header =$header->where('tgl_order','>=',$request->tglaw);
+        }
+        if(isset($request->tglak) )
+        {
+          $header =$header->where('tgl_order','<=',$request->tglak);
+        }
+        $header =$header->select('c.customer_name','sh.customer_po', DB::raw('date_format(tgl_order,"%d-%b-%Y %H:%i:%s") as tgl_order')
+                           , 'sh.oracle_ship_to','sh.currency', 'sh.oracle_bill_to',DB::raw('"ENT" as ent')
+                           ,DB::raw('"*NB" as nb'),'sh.id', 'ot.name as transaction_name','ql.name as price_name', 'c.customer_number','sh.warehouse','sh.notrx'
+                          )
+                  ->get();
+      //dd($header);
+        //$header=$header->toArray();
+        //$data= json_decode( json_encode($header), true);
+        //$i=0;            //  dd($header->toArray());
+      return Excel::create('template_SO_Oracle', function($excel) use ($header ) {
+        $excel->setTitle('Interface sales order');
+        $excel->setCreator('Shanty')
+          ->setCompany('Solinda');
+        $excel->sheet('order', function($sheet) use ($header)
+        {
+
+          foreach($header as $h)
+          {
+            //$i++;
+            if (Auth::user()->name=='YASA MITRA PERDANA, PT')
+            {
+              //if($h->)
+              $warehouse = config('constant.def_warehouse_YMP');
+            }elseif (Auth::user()->name=='GALENIUM PHARMASHIA LABORATOEIS, PT'){
+              $warehouse = config('constant.def_warehouse_GPL');
+            }
+            $connoracle = DB::connection('oracle');
+            if($connoracle){
+              $oraheader = $connoracle->table('oe_order_headers_all as oha')
+                          ->where('nvl(ola.attribute1,oha.orig_sys_document_ref','=',$h->notrx)
+                          ->where('oha.cancelled_flag','!=','Y')
+                          ->get();
+              if($oraheader->isEmpty())
+              {
+                $oraheader=null;
+              }
+            }else{
+              $oraheader=null;
+            }
+            if(is_null($oraheader)){
+              //$data = json_decode( json_encode($h), true);
+                //$sheet->fromArray($h, null, 'A1', false, false);
+                //$sheet->row($i,json_decode( json_encode($h), true));
+                //$sheet->appendRow(json_decode( json_encode($h), true));
+                $sheet->appendRow(array($h->customer_name,$h->customer_number,$h->transaction_name,$h->customer_po,$h->tgl_order
+                                  ,$h->price_name,$h->oracle_ship_to,config('constant.def_salesperson'),'','',$h->currency,$h->oracle_bill_to
+                                  ,'','','ENT','','',$warehouse,'*NB'));
+                $line = DB::table('so_lines as sl')
+                      ->join('products as p','sl.product_id','=','p.id')
+                      ->where([
+                        ['sl.header_id','=',$h->id]
+                      ])->select('p.itemcode','sl.qty_confirm','sl.uom','sl.line_id')
+                      ->get();
+                foreach($line as $l)
+                {
+                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom,'','',$h->tgl_order,'','','','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
+
+                }
+                $sheet->appendRow(array('*SAVE','*PB'));
+            }
+
+
+          }
+          $sheet->protect('GPLJanganDiub4h');
+        });
+      })->download("xlsx");
     }
 
 }

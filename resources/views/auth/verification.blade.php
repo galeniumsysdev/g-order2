@@ -20,7 +20,7 @@
                   @elseif ($errors->has('langitude'))
                     <span class="help-block">
                         <strong>{{ $errors->first('langitude') }}</strong>
-                    </span>
+                    </span> 
                   @endif
                     <form class="form-horizontal" method="POST" action="{{ route('register2') }}">
                         {{ csrf_field() }}
@@ -40,11 +40,11 @@
                         </div>
 
                         <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label for="password" class="col-md-4 control-label">@lang("label.password")</label>
+                            <label for="password" class="col-md-4 control-label">*@lang("label.newpassword")</label>
 
                             <div class="col-md-6">
                                 <input id="password" type="password" class="form-control" name="password" required>
-
+                                <div style="font-size:8pt; color:red;">* @lang('label.pwdminlength')</div>
                                 @if ($errors->has('password'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('password') }}</strong>
@@ -54,21 +54,21 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="password-confirm" class="col-md-4 control-label">@lang("label.confpass")</label>
+                            <label for="password-confirm" class="col-md-4 control-label">@lang("label.newconfpass")</label>
 
                             <div class="col-md-6">
                                 <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
+								<div style="font-size:8pt; color:red;">* @lang('label.newconminlength')</div>
                             </div>
                         </div>
                         <div class="form-group">
-                          <div class="row justify-content-md-center">
-                          <div class="col-md-6 col-md-offset-4" id ="map">
-
-                          </div>
-                            <input type="hidden" name="langitude" value="" id="langitude_txt">
-                            <input type="hidden" name="longitude" value="" id="longitude_txt">
-                          </div>
+							<div class="row justify-content-md-center">
+								<div class="col-md-6 col-md-offset-4" id ="map"></div>
+								<input type="hidden" name="langitude" value="" id="langitude_txt">
+								<input type="hidden" name="longitude" value="" id="longitude_txt">
+							</div>
                         <div>
+						<br>
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">
                                 <button type="submit" id="btnlogin" class="btn btn-primary">
@@ -76,8 +76,6 @@
                                 </button>
                             </div>
                         </div>
-
-
                     </form>
                 </div>
             </div>

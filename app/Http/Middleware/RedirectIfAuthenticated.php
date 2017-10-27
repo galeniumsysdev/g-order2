@@ -24,7 +24,7 @@ class RedirectIfAuthenticated
           }else{
               return redirect('/home');
           }*/
-        }
+        }        
 
         return $next($request);
     }

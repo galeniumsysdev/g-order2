@@ -23,6 +23,9 @@
               <option value="" {{$request->status==-3?"selected=selected":""}}>--@lang('shop.statustransaction')--</option>
               @foreach($liststatus as $state)
               <option value="{{$state->id}}" {{$request->status==$state->id?"selected=selected":""}}>{{$state->name}}</option>
+              @if($state->id == 0 and Auth::user()->hasRole('Principal'))
+                <option value="x" {{$request->status=='x'?"selected=selected":""}}>Menunggu Booked Oracle</option>
+              @endif
               @endforeach
             </select>
           </div>
@@ -57,7 +60,15 @@
                   Customer: <strong>{{$t->customer_name}}</strong>
                 @endif
             </h6>
-            <p class="card-text"> @lang('shop.orderdate'): <strong>{{date('d-M-Y',strtotime($t->tgl_order))}}</strong> | Amount: <strong>{{number_format($t->total_amount,2)}}</strong> | Status: <strong class="text-success">{{$t->status_name}}</strong></p>
+            <p class="card-text"> @lang('shop.orderdate'):
+              <strong>{{date('d-M-Y',strtotime($t->tgl_order))}}</strong> | Amount: <strong>{{number_format($t->total_amount,2)}}</strong> | Status: <strong class="text-success">
+              @if($t->status==0 and $t->approve==1 and Auth::user()->hasRole('Principal'))
+                Menunggu Booked dari Oracle
+              @else
+              {{$t->status_name}}
+              @endif
+              </strong>
+            </p>
           </div>
         </div>
         @empty

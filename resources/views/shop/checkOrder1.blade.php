@@ -10,6 +10,7 @@
 <!--<link rel="stylesheet"href="//codeorigin.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />-->
 <div class="container">
   <div class="row">
+
     <div class="col-md-12">
       <div class="panel panel-default">
         <div class="panel-heading"><strong>Order Product</strong></div>
@@ -45,10 +46,23 @@
                   @if($header->status==0 and $header->approve==1 and Auth::user()->customer_id==$header->distributor_id)
                     <input type="text" class="form-control" value="Menunggu Booked Oracle" readonly>
                   @else
+
+                    @if($header->status==-2 and !is_null($header->alasan_tolak))
+                    <input type="text" class="form-control" value="{{$header->status_name. ' (alasan: '.$header->alasan_tolak.')'}}" readonly>
+                    @else
                     <input type="text" class="form-control" value="{{$header->status_name}}" readonly>
+                    @endif
                   @endif
                 </div>
               </div>
+              @if($header->status>=2)
+              <div class="form-group">
+                <label for="subject" class="col-md-2 control-label">@lang('shop.senddate')</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" value="{{date('d-M-Y',strtotime($header->tgl_kirim))}}" readonly>
+                </div>
+              </div>
+              @endif
 
             </div>
             <div class="form-horizontal col-sm-6">
@@ -70,6 +84,14 @@
                     <textarea class="form-control">{{$header->ship_to_addr}}</textarea>
                   </div>
               </div>
+              @if($header->status>=3)
+              <div class="form-group">
+                <label for="subject" class="col-md-2 control-label">@lang('shop.receivedate')</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" value="{{date('d-M-Y',strtotime($header->tgl_terima))}}" readonly>
+                </div>
+              </div>
+              @endif
             </div>
           </div>
         @if($header->status==0 and Auth::user()->customer_id==$header->distributor_id)
@@ -118,20 +140,20 @@
     					<td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->unit_price,2) }}</td>
               <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
     					<td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
-                  {{ $line->qty_request }}
+                  {{ (float)$line->qty_request }}
     					</td>
               @if($header->status>0 or (Auth::user()->customer_id==$header->distributor_id and $header->status==0))
                 <td data-th="@lang('shop.qtyavailable')" class="text-center xs-only-text-left">
                   @if(Auth::user()->customer_id==$header->distributor_id and $header->status==0)
                     <input type="number" name="qtyshipping[{{$id}}]" id="qty-{{$id}}" class="form-control text-center" value="{{ $line->qty_request }}" style="min-width:80px;">
                   @elseif($header->status>0)
-                    {{$line->qty_confirm}}
+                    {{(float)$line->qty_confirm}}
                   @endif
                 </td>
               @endif
               @if($header->status>1)
                 <td data-th="@lang('shop.qtyship')" class="text-center xs-only-text-left">
-                  {{$line->qty_shipping}}
+                  {{(float)$line->qty_shipping}}
                 </td>
               @endif
               @if(Auth::user()->customer_id==$header->customer_id and $header->status==2)
@@ -141,7 +163,7 @@
               @endif
               @if($header->status>2)
                   <td data-th="@lang('shop.qtyreceive')" class="text-center xs-only-text-left">
-                    {{$line->qty_accept}}
+                    {{(float)$line->qty_accept}}
                   </td>
               @endif
     					<td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
@@ -231,7 +253,13 @@
     				</tr>
             @if($header->status==0 and $header->approve==0 and Auth::user()->customer_id==$header->distributor_id)
               <tr>
-      					<td><button type="submit" name="approve" value="reject" class="btn btn-warning text-left" style="min-width:200px;"><i class="fa fa-angle-left" style="color:#fff"></i>@lang('label.reject')</td>
+      					<td><!--<a onclick="return false;" id="reject_PO" class="btn btn-warning" style="min-width:200px;">-->
+                  <input type="hidden" id="alasanreject" value="" name="alasan">
+                  <button type="submit" onclick="return inputreason();" name="approve" value="reject" class="btn btn-warning" style="min-width:200px;" >
+                  <i class="fa fa-angle-left" style="color:#fff"></i>@lang('label.reject')
+                  </button>
+                  <!--</a>-->
+                </td>
       					<td colspan="4" class="hidden-xs"></td>
       					<td><button type="submit" name="approve" value="approve" class="btn btn-success btn-block text-right">@lang('label.approve')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button></td>
       				</tr>
@@ -260,7 +288,6 @@
 </div>
 @endsection
 @section('js')
-
 <script src="{{ asset('js/myproduct.js') }}"></script>
 
 @endsection

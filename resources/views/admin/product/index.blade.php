@@ -25,7 +25,7 @@
 <tbody>
   @forelse($products as $product)
   <tr>
-      <td>{{$product->inventory_item_id}}</td>
+      <td>{{$product->itemcode}}</td>
       <td>{{$product->title}}</td>
       <td>{{$product->satuan_primary}}</td>
       <td>{{$product->price}}</td>

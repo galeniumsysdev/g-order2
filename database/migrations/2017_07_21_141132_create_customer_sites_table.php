@@ -28,6 +28,7 @@ class CreateCustomerSitesTable extends Migration
           $table->String('tax_code')->nullable();
           $table->text('address1');
           $table->string('state')->nullable();
+          $table->string('district')->nullable();
           $table->string('city');
           $table->string('province')->nullable();
           $table->string('postalcode')->nullable();

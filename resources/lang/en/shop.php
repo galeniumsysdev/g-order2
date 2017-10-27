@@ -42,4 +42,7 @@ return [
     'Receive' => 'Receive',
     'Send' => 'Send',
     'download' => 'Download',
+    'receivedate' => 'Receive Date',
+    'senddate' => 'Send Date',
+    'print' => 'Print',
 ];

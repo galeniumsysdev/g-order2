@@ -11,15 +11,24 @@
 
      <div class="form-group">
        <label for="name">Kode</label>
-       <input type="text" class="form-control" name="kode" id="" value="{{ $product->inventory_item_id }}">
+       <input type="text" class="form-control" name="kode" id="" value="{{ $product->itemcode }}">
      </div>
      <div class="form-group">
        <label for="display_name">Nama</label>
        <input type="text" class="form-control" name="nama" id="" value="{{$product->title}}">
      </div>
-     <div class="form-group">
+     <!--<div class="form-group">
        <label for="description">Price</label>
        <input type="text" class="form-control" name="harga" size="5" id="" value="{{$product->price}}">
+     </div>-->
+     <div class="form-group">
+       <label for="description">Category</label>
+       <select name="category" class="form-control">
+         <option value="">--Pilih Salah Satu --</option>
+         @foreach($categories as $cat)
+         <option value="{{$cat->flex_value}}" {{$cat->flex_value==$product->flex_value?'selected':''}}>{{$cat->description}}</option>
+         @endforeach
+       </select>
      </div>
      <div class="form-group">
        <label for="description">Satuan</label>
@@ -34,7 +43,7 @@
        <textarea class="form-control" id="id_descr" name="id_descr">{{$product->description}}</textarea>
      </div>
      <div class="form-group">
-         <label for="imageInput">File input</label>
+         <label for="imageInput">File Image</label>
          <input data-preview="#preview" accept="image/*" name="input_img" type="file" id="imageInput">
          @if ($errors->has('input_img'))
              <span class="help-block">
