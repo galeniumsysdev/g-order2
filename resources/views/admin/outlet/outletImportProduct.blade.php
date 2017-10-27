@@ -17,10 +17,23 @@
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Upload Product</strong></div>
+          <div class="panel-heading"><strong>Import New Product</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="default-value">
+                          <label for="outlet">
+                            [ <a href="/outlet/product/download/template/product">Download Template</a> ]
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 {!! Form::open(['url' => '/outlet/product/import/view', 'files'=>'true']) !!}
                   <div class="form-group">
                     <div class="container-fluid">

@@ -18,6 +18,7 @@ class CreateOutletStock extends Migration
             $table->String('product_id',36);
             $table->String('event',16);
             $table->integer('qty');
+            $table->varchar('batch',255);
             $table->timestamps();
         });
     }

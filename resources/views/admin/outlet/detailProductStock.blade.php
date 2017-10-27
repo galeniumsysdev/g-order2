@@ -29,6 +29,7 @@
                 <tr>
                   <th>Type</th>
                   <th>Qty</th>
+                  <th>Batch No.</th>
                   <th>Trx. Date</th>
                 </tr>
               </thead>
@@ -37,6 +38,7 @@
                   <tr class="{{ $cell['class'] }}">
                     <td>{!! $cell['event'] !!}</td>
                     <td align="center">{!! $cell['qty'] !!}</td>
+                    <td align="center">{{ $cell['batch'] }}</td>
                     <td align="center">{{ $cell['trx_date'] }}</td>
                   </tr>
                 @endforeach

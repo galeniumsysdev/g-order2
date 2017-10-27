@@ -29,6 +29,7 @@
                   <th>Product Name</th>
                   <th>Type</th>
                   <th>Qty</th>
+                  <th>Batch No.</th>
                   <th>Tgl. Trx</th>
                 </tr>
               </thead>
@@ -39,6 +40,7 @@
                       <td>{{ $trx['title'] }}</td>
                       <td align="center">{!! $trx['event'] !!}</td>
                       <td align="center">{!! $trx['qty'] !!}</td>
+                      <td align="center">{{ $trx['batch'] }}</td>
                       <td align="center">{{ $trx['trx_date'] }}</td>
                     </tr>
                 @endforeach
