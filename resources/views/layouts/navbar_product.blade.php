@@ -164,8 +164,8 @@
 
                         @endif
 
-                        <!--{{--notification--}}
-                        <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>-->
+                        {{--notification--}}
+                        <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> Notifications
                               <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
