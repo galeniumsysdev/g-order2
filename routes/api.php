@@ -22,15 +22,14 @@ Route::post('/verifikasiregister', 'Api\Auth\LoginController@register_verificati
 Route::post('/operations', 'Api\Auth\LoginController2@operations');
 
 Route::get('/pusher', function () {
-	// dd($pusher->provides());
-	event(new App\Events\HelloPusherEvent('Hi there Pusher!'));
+	$data = (object) [
+		'data' => 'data',
+	];
+	event(new App\Events\HelloPusherEvent($data));
 	$customer = App\Customer::first();
-	// dd($customer->users());
 	$users = $customer->users;
 	foreach ($users as $u) {
-		$u->notify(new App\Notifications\DummyNotif());
+		$u->notify(new App\Notifications\DummyNotif($data));
 	}
-	// event(new App\Events\DummyNotif());
 	return 'test';
-	// return $customer->notify(new App\Events\DummyNotif());
 });

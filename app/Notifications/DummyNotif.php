@@ -7,6 +7,10 @@ use NotificationChannels\PusherPushNotifications\PusherChannel;
 use NotificationChannels\PusherPushNotifications\PusherMessage;
 
 class DummyNotif extends Notification {
+	public function __construct($data) {
+		$this->data = $data;
+	}
+
 	public function via($notifiable) {
 		return [PusherChannel::class];
 	}
@@ -15,6 +19,7 @@ class DummyNotif extends Notification {
 		return PusherMessage::create()
 			->android()
 			->title('test')
+			->setOption('custom', $this->data)
 			->body('dummy');
 	}
 }
