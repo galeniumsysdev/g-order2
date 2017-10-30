@@ -13,7 +13,7 @@ class User extends Authenticatable {
 
 	public function routeNotificationForPusherPushNotifications() {
 		// return $this->email;
-		return 'test';
+		return 'shanty29.dewi@solinda.co.id';
 	}
 
 	/**

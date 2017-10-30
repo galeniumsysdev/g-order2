@@ -22,10 +22,10 @@ class PusherBroadcaster implements ShouldBroadcast {
 	 *
 	 * @return void
 	 */
-	public function __construct($title, $message, $href, $email) {
-		$this->message = $message;
-		$this->title = $title;
-		$this->href = $href;
+	public function __construct($data, $email) {
+		$this->message = $data['message'];
+		$this->title = $data['title'];
+		$this->href = $data['href'];
 		$this->email = $email;
 	}
 

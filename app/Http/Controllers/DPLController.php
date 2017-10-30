@@ -17,6 +17,7 @@ use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Events\PusherBroadcaster;
+use App\Notifications\PushNotif;
 
 class DPLController extends Controller {
 	public function __construct() {
@@ -173,9 +174,13 @@ class DPLController extends Controller {
 			->update(array('approved_by' => $set_by, 'next_approver' => ($next_approver) ? $next_approver->directsup_user_id : ''));
 
 		//notif
-
-		event(new PusherBroadcaster('title', 'Discount telah diset', 'https://google.com', $next_approver));
-
+		$data = [
+			'title' => 'title',
+			'body' => 'Discount telah diset',
+			'href' => 'http://google.com',
+		];
+		event(new PusherBroadcaster($data, $next_approver));
+		$next_approver->notify(new PushNotif($data));
 		return redirect('/dpl/list');
 	}
 

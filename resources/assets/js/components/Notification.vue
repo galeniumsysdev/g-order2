@@ -6,8 +6,8 @@
         <ul class="dropdown-menu alert-dropdown">
           <li>
           </li>
-
         </ul>
+        <div style="display: none" id="user-email">{{email}}</div>
     </li>
 </template>
 
@@ -31,7 +31,6 @@
           }
         },
         mounted() {
-          console.log(this.email)
             Echo.channel(this.email)
                 .listen('.wk-prod', (notification) => {
                     let newUnreadNotifications={data:{tipe:notification.tipe,subject:notification.subject}};

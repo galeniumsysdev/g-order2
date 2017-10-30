@@ -22,14 +22,16 @@ Route::post('/verifikasiregister', 'Api\Auth\LoginController@register_verificati
 Route::post('/operations', 'Api\Auth\LoginController2@operations');
 
 Route::get('/pusher', function () {
-	$data = (object) [
-		'data' => 'data',
+	$data = [
+		'title' => 'akhirnya',
+		'body' => 'Disini ada pesta',
+		'href' => 'http://google.com',
 	];
 	event(new App\Events\PusherBroadcaster('hahaha', 'heleh', 'https://google.com', 'shanty25.dewi@solinda.co.id'));
 	$customer = App\Customer::first();
 	$users = $customer->users;
 	foreach ($users as $u) {
-		// $u->notify(new App\Notifications\DummyNotif($data));
+		$u->notify(new App\Notifications\DummyNotif($data));
 	}
 	return 'test';
 });

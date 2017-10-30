@@ -47829,7 +47829,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   mounted: function mounted() {
     var _this = this;
 
-    console.log(this.email);
     Echo.channel(this.email).listen('.wk-prod', function (notification) {
       var newUnreadNotifications = { data: { tipe: notification.tipe, subject: notification.subject } };
       _this.unreadNotifications.push(newUnreadNotifications);
@@ -47871,7 +47870,13 @@ var render = function() {
       ]
     ),
     _vm._v(" "),
-    _vm._m(0)
+    _vm._m(0),
+    _vm._v(" "),
+    _c(
+      "div",
+      { staticStyle: { display: "none" }, attrs: { id: "user-email" } },
+      [_vm._v(_vm._s(_vm.email))]
+    )
   ])
 }
 var staticRenderFns = [

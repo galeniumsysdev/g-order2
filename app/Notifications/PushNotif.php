@@ -6,7 +6,7 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\PusherPushNotifications\PusherChannel;
 use NotificationChannels\PusherPushNotifications\PusherMessage;
 
-class DummyNotif extends Notification {
+class PushNotif extends Notification {
 	public function __construct($data) {
 		$this->data = $data;
 	}
@@ -18,8 +18,8 @@ class DummyNotif extends Notification {
 	public function toPushNotification($notifiable) {
 		return PusherMessage::create()
 			->android()
-			->title('test')
+			->title($this->data['title'])
 			->setOption('custom', $this->data)
-			->body('dummy');
+			->body($this->data['body']);
 	}
 }
