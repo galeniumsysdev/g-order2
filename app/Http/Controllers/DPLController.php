@@ -161,8 +161,18 @@ class DPLController extends Controller {
 			->update(array('fill_in' => 0));
 
 		$this->dplLog($suggest_no, 'Input Discount');
+
+		$set_by = Auth::user()->id;
+		$next_approver = OrgStructure::select('user_id','email')
+									->join('users','users.id','org_structure.user_id')
+									->where('user_id', Auth::user()->id)
+									->first();
+
+		$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+			->update(array('approved_by' => $set_by, 'next_approver' => ($next_approver) ? $next_approver->directsup_user_id : ''));
+
 		//notif
-		event(new App\Events\HelloPusherEvent('Discount telah diset'));
+		event(new \App\Events\HelloPusherEvent('Discount telah diset'));
 
 		return redirect('/dpl/list');
 	}
