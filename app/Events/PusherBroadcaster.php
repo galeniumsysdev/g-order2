@@ -6,25 +6,31 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Queue\SerializesModels;
 
-class HelloPusherEvent implements ShouldBroadcast {
+class PusherBroadcaster implements ShouldBroadcast {
 	use SerializesModels;
 
 	/**
 	 * Only (!) Public members will be serialized to JSON and sent to Pusher
 	 **/
 	public $message;
+	public $title;
+	public $href;
+	private $email;
 
 	/**
 	 * Create a new event instance.
 	 *
 	 * @return void
 	 */
-	public function __construct($message) {
+	public function __construct($title, $message, $href, $email) {
 		$this->message = $message;
+		$this->title = $title;
+		$this->href = $href;
+		$this->email = $email;
 	}
 
 	public function broadcastAs() {
-		return 'my-event';
+		return 'wk-prod';
 	}
 
 	/**
@@ -33,6 +39,6 @@ class HelloPusherEvent implements ShouldBroadcast {
 	 * @return Channel|array
 	 */
 	public function broadcastOn() {
-		return ['demo'];
+		return $this->email;
 	}
 }

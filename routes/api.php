@@ -25,11 +25,11 @@ Route::get('/pusher', function () {
 	$data = (object) [
 		'data' => 'data',
 	];
-	event(new App\Events\HelloPusherEvent($data));
+	event(new App\Events\PusherBroadcaster('hahaha', 'heleh', 'https://google.com', 'shanty25.dewi@solinda.co.id'));
 	$customer = App\Customer::first();
 	$users = $customer->users;
 	foreach ($users as $u) {
-		$u->notify(new App\Notifications\DummyNotif($data));
+		// $u->notify(new App\Notifications\DummyNotif($data));
 	}
 	return 'test';
 });

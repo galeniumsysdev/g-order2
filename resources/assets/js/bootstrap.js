@@ -54,25 +54,25 @@ window.Echo = new Echo({
     encrypted:true
 });
 
-window.Echo.channel('demo')
-          .listen('.my-event', post => {
-            if (! ('Notification' in window)) {
-              alert('Web Notification is not supported');
-              return;
-            }
+// window.Echo.channel('demo')
+//           .listen('.my-event', post => {
+//             if (! ('Notification' in window)) {
+//               alert('Web Notification is not supported');
+//               return;
+//             }
 
-            Notification.requestPermission( permission => {
-              let notification = new Notification('New post alert!', {
-                body: post.message, // content for the alert
-                icon: "https://pusher.com/static_logos/320x320.png" // optional image url
-              });
+//             Notification.requestPermission( permission => {
+//               let notification = new Notification('New post alert!', {
+//                 body: post.message, // content for the alert
+//                 icon: "https://pusher.com/static_logos/320x320.png" // optional image url
+//               });
 
-              // link to page on clicking the notification
-              notification.onclick = () => {
-                window.open(window.location.href);
-              };
-            });
-          })
+//               // link to page on clicking the notification
+//               notification.onclick = () => {
+//                 window.open(window.location.href);
+//               };
+//             });
+//           })
 
 // window.Echo.channel('demo')
 //     .listen('.my-event', (e) => {

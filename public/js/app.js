@@ -1167,24 +1167,25 @@ window.Echo = new __WEBPACK_IMPORTED_MODULE_0_laravel_echo___default.a({
   encrypted: true
 });
 
-window.Echo.channel('demo').listen('.my-event', function (post) {
-  if (!('Notification' in window)) {
-    alert('Web Notification is not supported');
-    return;
-  }
+// window.Echo.channel('demo')
+//           .listen('.my-event', post => {
+//             if (! ('Notification' in window)) {
+//               alert('Web Notification is not supported');
+//               return;
+//             }
 
-  Notification.requestPermission(function (permission) {
-    var notification = new Notification('New post alert!', {
-      body: post.message, // content for the alert
-      icon: "https://pusher.com/static_logos/320x320.png" // optional image url
-    });
+//             Notification.requestPermission( permission => {
+//               let notification = new Notification('New post alert!', {
+//                 body: post.message, // content for the alert
+//                 icon: "https://pusher.com/static_logos/320x320.png" // optional image url
+//               });
 
-    // link to page on clicking the notification
-    notification.onclick = function () {
-      window.open(window.location.href);
-    };
-  });
-});
+//               // link to page on clicking the notification
+//               notification.onclick = () => {
+//                 window.open(window.location.href);
+//               };
+//             });
+//           })
 
 // window.Echo.channel('demo')
 //     .listen('.my-event', (e) => {
@@ -47806,33 +47807,43 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
 
 // import NotificationItem from './NotificationItem.vue'
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: {
-        unreads: {
-            type: Array
-        },
-        userid: {
-            type: String
-        }
+  props: {
+    unreads: {
+      type: Array
     },
-    data: function data() {
-        return {
-            unreadNotifications: []
-        };
+    userid: {
+      type: String
     },
-    mounted: function mounted() {
-        var _this = this;
-
-        console.log('Component mounted.');
-        Echo.channel('demo').listen('.my-event', function (notification) {
-            console.log(notification);
-            var newUnreadNotifications = { data: { tipe: notification.tipe, subject: notification.subject } };
-            _this.unreadNotifications.push(newUnreadNotifications);
-        });
+    email: {
+      type: String
     }
+  },
+  data: function data() {
+    return {
+      unreadNotifications: []
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    Echo.channel(this.email).listen('.wk-prod', function (notification) {
+      var newUnreadNotifications = { data: { tipe: notification.tipe, subject: notification.subject } };
+      _this.unreadNotifications.push(newUnreadNotifications);
+      Notification.requestPermission(function (permission) {
+        var notif = new Notification(notification.title || 'Judul', {
+          body: notification.message, // content for the alert
+          icon: "https://pusher.com/static_logos/320x320.png" // optional image url
+        });
+        // link to page on clicking the notification
+        notif.onclick = function () {
+          window.open(notification.href);
+        };
+      });
+    });
+  }
 });
 
 /***/ }),
@@ -47859,17 +47870,17 @@ var render = function() {
       ]
     ),
     _vm._v(" "),
-    _c("ul", { staticClass: "dropdown-menu alert-dropdown" }, [
-      _c(
-        "li",
-        _vm._l(_vm.unreadNotifications, function(unread) {
-          return _c("notification-item")
-        })
-      )
-    ])
+    _vm._m(0)
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ul", { staticClass: "dropdown-menu alert-dropdown" }, [_c("li")])
+  }
+]
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {

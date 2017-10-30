@@ -16,6 +16,7 @@ use App\User;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Events\PusherBroadcaster;
 
 class DPLController extends Controller {
 	public function __construct() {
@@ -172,7 +173,8 @@ class DPLController extends Controller {
 			->update(array('approved_by' => $set_by, 'next_approver' => ($next_approver) ? $next_approver->directsup_user_id : ''));
 
 		//notif
-		event(new \App\Events\HelloPusherEvent('Discount telah diset'));
+
+		event(new PusherBroadcaster('title', 'Discount telah diset', 'https://google.com', $next_approver));
 
 		return redirect('/dpl/list');
 	}

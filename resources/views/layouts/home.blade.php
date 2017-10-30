@@ -130,8 +130,8 @@
                                 </li>
                               </ul>
                             </li>
-                        <!--     {{--notification--}}
-                            <notification></notification> -->
+                        <!--     {{--notification--}} -->
+                            <!-- <notification :email="{!! json_encode(Auth::user()->email) !!}"></notification> -->
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> Notifications
                                   <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
