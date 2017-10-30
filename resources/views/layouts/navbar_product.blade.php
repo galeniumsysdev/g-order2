@@ -125,6 +125,7 @@
                           <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; Login</strong></a></li>
                           <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; Register</strong></a></li>
                         @else
+                          <notification :email="{{json_encode(Auth::user()->email)}}"></notification>
                           @if(Auth::user()->can('product'))
                           <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Product</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
@@ -244,7 +245,6 @@
                               @endif
                               <!--{{--notification--}}
                               <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification> -->
-                              <notification :email="{{json_encode(Auth::user()->email)}}"></notification>
                               <li class="dropdown hidden-xs">
                                   <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> Notifications
                                     <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>

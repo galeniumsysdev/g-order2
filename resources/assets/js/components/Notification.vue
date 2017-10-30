@@ -31,6 +31,7 @@
           }
         },
         mounted() {
+          console.log(this.email)
             Echo.channel(this.email)
                 .listen('.wk-prod', (notification) => {
                     let newUnreadNotifications={data:{tipe:notification.tipe,subject:notification.subject}};

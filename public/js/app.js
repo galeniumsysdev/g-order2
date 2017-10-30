@@ -47829,6 +47829,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   mounted: function mounted() {
     var _this = this;
 
+    console.log(this.email);
     Echo.channel(this.email).listen('.wk-prod', function (notification) {
       var newUnreadNotifications = { data: { tipe: notification.tipe, subject: notification.subject } };
       _this.unreadNotifications.push(newUnreadNotifications);
