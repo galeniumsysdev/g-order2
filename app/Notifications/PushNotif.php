@@ -20,6 +20,6 @@ class PushNotif extends Notification {
 			->android()
 			->title($this->data['title'])
 			->setOption('custom', $this->data)
-			->body($this->data['body']);
+			->body($this->data['message']);
 	}
 }
