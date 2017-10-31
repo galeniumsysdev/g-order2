@@ -4,9 +4,11 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-6 copyrt xs-center">
-				© 2017 All Rights Reserved. Galenium Pharmasia Laboratories | Yasa MItra Perdana | Solinda
+				<!--© 2017 All Rights Reserved. Galenium Pharmasia Laboratories | Yasa MItra Perdana | Solinda-->
+				<img src="{{asset('/img/logo/galeniumPutih.png')}}" class="footer-gpl-img">
+				<img src="{{asset('/img/logo/yasaPutih.png')}}" class="footer-gpl-img">
 			</div>
-			<div class="col-sm-6 text-right xs-center">
+			<div class="col-sm-6 text-right xs-only-text-center">
 				<ul class="list-inline footer-social">
 
 					<!-- android button -->

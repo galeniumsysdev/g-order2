@@ -29,9 +29,12 @@
 
        <div class="form-group text-left">
            <h3>Permissions</h3>
+           <select name="permission[]" class="form-control" multiple size="7">
            @foreach($permissions as $permission)
-       <input type="checkbox"   name="permission[]" value="{{$permission->id}}" > {{isset($permission->display_name)?$permission->display_name:$permission->name}} <br>
+   		<!--//<input type="checkbox"   name="permission[]" value="{{$permission->id}}" > {{isset($permission->display_name)?$permission->display_name:$permission->name}} <br>-->
+             <option value="{{$permission->id}}">{{isset($permission->display_name)?$permission->display_name:$permission->name}}</option>
            @endforeach
+         </select>
      </div>
      <button type="submit" class="btn btn-primary">Submit</button>
    </form>

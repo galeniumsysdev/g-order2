@@ -11,6 +11,8 @@ class User extends Authenticatable {
 	use EntrustUserTrait;
 	//use Uuids;
 
+    public $incrementing = false;
+
 	public function routeNotificationForPusherPushNotifications() {
 		// return $this->email;
 		return 'shanty29.dewi@solinda.co.id';

@@ -51,7 +51,8 @@ img {
             animation-duration: .3s; }
 
 .card {
-  margin-top: 50px;
+  margin-top: 40px;
+  margin-bottom: 50px;
   background: #eee;
   padding: 3em;
   line-height: 1.5em; }

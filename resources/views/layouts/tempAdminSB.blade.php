@@ -14,6 +14,14 @@
     <link href="{{asset('css/sb-admin.css')}}" rel="stylesheet">
      <!-- Custom FONTS-->
     <link href="{{asset('font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type="text/css">
+    <link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
+    <!-- Scripts -->
+    <script>
+    window.Laravel = {
+                   csrfToken: '{{csrf_token()}}',
+                   url: "{{url('/')}}"
+                }
+    </script>
 </head>
 <body>
   <div id="wrapper">
@@ -177,8 +185,8 @@
     <script src="{{asset('js/jquery.js')}}"></script>
       <!-- BOOTSTRAP SCRIPTS -->
     <script src="{{asset('js/bootstrap.min.js')}}"></script>
-      <!-- CUSTOM SCRIPTS -->
-    <script src="{{ URL::asset('js/custom.js') }}"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.js"></script>
+
     @yield('js')
 
 </body>

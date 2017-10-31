@@ -128,11 +128,24 @@ Route::group(['middleware' => ['role:IT Galenium']], function () {
     'middleware' => ['role:IT Galenium'],
     'as' => 'admin.index'
   ]);
+  Route::get('/admin/banner','BannerController@listBanner')->name('admin.banner');
+  Route::get('/banner/publish/{publish}/{id}','BannerController@publish')->name('banner.publish');
+  Route::delete('/banner/destroy/{id}','BannerController@destroy')->name('banner.destroy');
+  Route::get('/banner/create','BannerController@create')->name('banner.create');
+  Route::post('/banner/create','BannerController@store')->name('banner.store');
+  Route::get('/banner/{id}/edit','BannerController@edit')->name('banner.edit');
+  Route::patch('/banner/{id}','BannerController@update')->name('banner.update');
 
   Route::get('/showProduct', [
   'uses' => 'ProductController@index'
   ,'as' => 'product.show'
   ]);
+
+
+  Route::get('/product/listparetoProduct','ProductController@listParetoProduct')->name('product.pareto');
+  Route::get('/product/getParetoProduct','ProductController@getAjaxProduct')->name('product.getAjaxProduct');
+  Route::post('/product/updatePareto','ProductController@updatePareto')->name('product.updatePareto');
+  Route::delete('/product/updatePareto/{id}','ProductController@destroyPareto')->name('product.destroyPareto');
 
   Route::get('masterProduct/{id}', [
   'uses' => 'ProductController@master'
@@ -209,7 +222,7 @@ Route::group(['middleware' => ['auth']], function () {
   });
 });
 Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->name('order.getStatusOracle');
-Route::get('/oracle/exportexcel/{id}', 'BackgroundController@createExcel')->name('order.createExcel');
+Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 /*
 Route::get('/test',function () {
@@ -281,3 +294,6 @@ Route::get('/outlet/transaction','OutletProductController@outletTrx')->name('out
 Route::get('/outlet/transaction/list','OutletProductController@outletTrxList')->name('outlet.trxList');
 Route::post('/outlet/transaction/in/process','OutletProductController@outletTrxInProcess')->name('outlet.trxInProcess');
 Route::post('/outlet/transaction/out/process','OutletProductController@outletTrxOutProcess')->name('outlet.trxOutProcess');
+/*
+*
+*/

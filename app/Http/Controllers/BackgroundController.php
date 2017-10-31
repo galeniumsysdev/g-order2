@@ -17,24 +17,34 @@ use App\QpListHeaders;
 use App\OeTransactionType;
 use App\User;
 use App\SoShipping;
+use App\CustomerSite;
 
 class BackgroundController extends Controller
 {
     public function getStatusOrderOracle()
     {
-
-      $request= DB::table('tbl_request')->insertGetId([
+      $request= DB::table('tbl_request')->where('event','=','SalesOrder')
+                ->max('created_at');
+      if($request)
+      {
+        $lasttime = date_create($request);
+        //echo"type:".gettype($lasttime);
+      }else{
+        $lasttime = date_create("2017-07-01");
+      }
+      /*$newrequest= DB::table('tbl_request')->insertGetId([
         'created_at'=>Carbon::now(),
         'updated_at'=>Carbon::now(),
         'event'=>'SalesOrder'
-      ]);
+      ]);*/
       $connoracle = DB::connection('oracle');
       if($connoracle){
+        echo "masuk<br>";
         $headers = SoHeader::whereNotNull('oracle_customer_id')->where([
                   ['approve','=',1],
                   ['status','>=',0],
                   ['status','<',2],
-                // ['notrx','=','PO-20171002-X-00008']
+                  ['notrx','=','PO-20170927-IX-00009']
         ])->get();
         if($headers){
           foreach($headers as $h)
@@ -102,7 +112,7 @@ class BackgroundController extends Controller
                   }
                 }//endforeach soline
                 //
-                $oraheader = $connoracle->selectone('select min(booked_date)')
+                //$oraheader = $connoracle->selectone('select min(booked_date)');
                 $h->status=1;
                 $h->interface_flag="Y";
                 $h->status_oracle ="BOOKED";
@@ -118,7 +128,23 @@ class BackgroundController extends Controller
               }//endif status==0 (belum di booked)
               elseif($h->status==1)
               {
-
+                echo "status sudah booked belum kirim untuk notrx:".$h->notrx."<br>";
+                $mysoline = SoLine::where([
+                                    ['header_id','=',$h->id],
+                                    ['qty_confirm','!=',0]
+                                    ])
+                          ->get();
+                //getSo di Oracle
+                foreach($mysoline as $sl)
+                {
+                  echo "line:".$sl->line_id."<br>";
+                  $ship = $this->getShippingSO($h->notrx,$sl->line_id,$lasttime,$sl->product_id);
+                  if($ship==1)
+                  {
+                    $jmlkirim = $mysoline->shippings->sum('qty_shipping');
+                    dd($jmlkirim);
+                  }
+                }
               }
             }//foreach
 
@@ -126,6 +152,9 @@ class BackgroundController extends Controller
 
 
       }// end if(connoracle){
+        else{
+          echo "can't connect to oracle";
+        }
 
     }
 
@@ -273,14 +302,76 @@ class BackgroundController extends Controller
           if($c->status=='I'){
             $updateuser = User::where('customer_id','=',$c->customer_id)
             ->update(['validate_flag'=>0]);
+          }elseif($c->status=='A'){
+            $updateuser = User::where('customer_id','=',$c->customer_id)
+                          ->whereNotNull('password')->first();
+            if ($updateuser)
+            {
+              if($updateuser->validate_flag==0)
+              {
+                $updateuser->validate_flag=1;
+                $updateuser->save();
+              }
+            }
           }
         }
+        $customersite = $this->getCustomerSites($lasttime);
         //$customrsite =
         //DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
       }
     }
 
-    public function getShippingSO($headerid,$lineid,$lasttime)
+    public function getCustomerSites($lasttime)
+    {
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $sites = $connoracle->table('HZ_CUST_ACCT_SITES_ALL hcas')
+                    ->join('hz_party_sites hps','hcas.PARTY_SITE_ID', '=', 'hps.party_site_id')
+                    ->join('hz_locations hl','hps.location_id','=','hl.location_id')
+                    ->join('HZ_CUST_SITE_USES_ALL hcsua', 'hcas.CUST_ACCT_SITE_ID','=','hcsua.CUST_ACCT_SITE_ID')
+                    ->whereIn('site_use_code', ['SHIP_TO','BILL_TO'])
+                    //->where('ac.last_update_date','>=',$lasttime)
+                    ->select('cust_account_id', 'hcas.cust_acct_site_id as cust_acct_site_id', 'hcas.party_site_id', 'bill_to_flag', 'ship_to_flag', 'hcas.orig_system_reference', 'hcas.status as status', 'hcas.org_id as org_id'
+                        , 'hcsua.SITE_USE_id as site_use_id'
+                        , 'hcsua.site_use_code as site_use_code', 'hcsua.BILL_TO_SITE_USE_ID as bill_to_site_use_id'
+                        , 'hcsua.payment_term_id as payment_term_id'
+                        , 'hcsua.price_list_id as price_list_id'
+                        , 'hcsua.order_type_id as order_type_id'
+                        , 'hcsua.tax_code as tax_code'
+                        ,  'hl.ADDRESS1', 'hl.address2 as kecamatan','hl.address3 as kabupaten', 'hl.address4 as wilayah'
+                        ,  'hl.city', 'hl.province', 'hl.country'
+                        , 'hcsua.WAREHOUSE_ID','hl.POSTAL_CODE')
+                    ->get();
+        if($sites)
+        {
+          foreach ($sites as $site)
+          {
+              echo "Sites:".$site->cust_account_id."<br>";
+              $customer = Customer::where('oracle_customer_id','=',$site->cust_account_id)->first();
+              if($customer)
+              {
+                $mycustomersite = CustomerSite::updateOrCreate(
+                  ['oracle_customer_id'=>$site->cust_account_id,'cust_acct_site_id'=>$site->cust_acct_site_id,'site_use_id'=>$site->site_use_id],
+                  ['site_use_code'=>$site->site_use_code,'status'=>$site->status,'bill_to_site_use_id'=>$site->bill_to_site_use_id
+                  ,'payment_term_id'=>$site->payment_term_id,'price_list_id'=>$site->price_list_id
+                  ,'order_type_id'=>$site->order_type_id,'tax_code'=>$site->tax_code
+                  ,'address1'=>$site->address1,'state'=>$site->kecamatan,'district'=>$site->kabupaten
+                  ,'city'=>$site->city,'province'=>$site->province,'postal_code'=>$site->postal_code,'Country'=>$site->country
+                  ,'org_id'=>$site->org_id,'warehouse'=>$site->warehouse_id,'customer_id'=>$customer->id
+                  ]
+                );
+                echo "Sites berhasil ditambah/update<br>";
+              }
+
+          }
+          return true;
+        }
+      }else{
+        return false;
+      }
+    }
+
+    public function getShippingSO($headerid,$lineid,$lasttime, $productid)
     {
       $connoracle = DB::connection('oracle');
       if($connoracle){
@@ -288,15 +379,18 @@ class BackgroundController extends Controller
         $oraship = $connoracle->table('wsh_delivery_Details as wdd')
                   ->join( 'wsh_Delivery_assignments as wda','wdd.delivery_detail_id','=','wda.delivery_detail_id')
                   ->join('wsh_new_deliveries as wnd','wda.delivery_id','=','wnd.delivery_id')
-                  ->join('oe_order_lines_all ola',function($join){
+                  ->join('oe_order_lines_all as ola',function($join){
                       $join->on('wdd.source_header_id','=','ola.header_id');
                       $join->on('wdd.source_line_id','=','ola.line_id');
                   })
-                  ->where([['wdd.source_header_id','=',$headerid]
-                          ,['wdd.source_line_id','=',$lineid]]
-                          ,['wdd.source_code','=','OE']
+                  ->where([//['wdd.source_header_id','=',$headerid]
+                          //,['wdd.source_line_id','=',$lineid]]
+                          //,
+                          ['wdd.source_code','=','OE']
+                          ,[DB::raw('nvl(ola.attribute1,ola.orig_sys_document_ref)'),'=',$headerid]
+                          ,[DB::raw('nvl(ola.attribute2,ola.orig_sys_line_ref)'),'=',strval($lineid)]
                           ,['wdd.last_update_date','>',$lasttime]
-                          )
+                        ])
                   ->where(function ($query) {
                               $query->whereNotNull('ola.attribute1')
                                     ->orWhere('ola.order_source_id','=',config('constant.order_source_id'));
@@ -306,6 +400,7 @@ class BackgroundController extends Controller
                       , 'wdd.requested_quantity_uom as primary_uom', 'wdd.requested_quantity'
                       , 'wdd.picked_quantity'
                       , 'wdd.shipped_quantity'
+                      , DB::raw('inv_convert.inv_um_convert(wdd.inventory_item_id,wdd.requested_quantity_uom,wdd.src_requested_quantity_uom) as convert_qty')
                       , 'wdd.lot_number'
                       , 'wdd.transaction_id'
                       , 'wdd.split_from_delivery_detail_id'
@@ -313,24 +408,31 @@ class BackgroundController extends Controller
                             from mtl_material_transactions mmt
                             where wdd.transaction_id =mmt.transaction_id
                             and wdd.inventory_item_id = mmt.inventory_item_id
-                            and mmt.TRANSACTION_TYPE_ID=52) as transaction_date'))
+                            and mmt.TRANSACTION_TYPE_ID=52) as transaction_date')
+                      ,'wdd.inventory_item_id'
+                    )
                   ->get();
-        /*foreach($oraship as $ship)
+            var_dump($oraship);
+        foreach($oraship as $ship)
         {
+          //$productid = Product::where('inventory_item_id','=',$ship->inventory_item_id)->select('id')->first();
           $my_so_ship =SoShipping::updateOrCreate(
             ['delivery_detail_id'=>$ship->delivery_detail_id],
             ['deliveryno'=>$ship->delivery_no,'source_header_id'=>$ship->source_header_id
-            ,'source_line_id'=>$ship->source_line_id,'product_id'=>
+            ,'source_line_id'=>$ship->source_line_id,'product_id'=>$productid
             ,'uom'=>$ship->src_requested_quantity_uom,'qty_request'=>$ship->src_requested_quantity
             ,'uom_primary'=>$ship->primary_uom,'qty_request_primary'=>$ship->requested_quantity
-            ,'qty_shipping'->$ship->qty_picked
+            ,'qty_shipping'=>$ship->picked_quantity
             ,'batch_no'=>$ship->lot_number
-            ,'split_source_id'->$ship->split_from_delivery_detail_id
-            ,'tgl_kirim'->$ship->transaction_date
+            ,'split_source_id'=>$ship->split_from_delivery_detail_id
+            ,'tgl_kirim'=>$ship->transaction_date
+            ,'conversion_qty'=>$ship->convert_qty
             ]
           );
-        }*/
-
+        }
+        return 1;
+      }else{
+        return 0;
       }
     }
 
@@ -354,6 +456,7 @@ class BackgroundController extends Controller
                     and oha.flow_status_code ='BOOKED'");
         if($oraSO)
         {
+
           return $oraSO;
         }else{
           return null;

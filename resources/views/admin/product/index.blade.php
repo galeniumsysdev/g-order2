@@ -15,20 +15,24 @@
 <table class="table" id="table">
   <thead>
   <tr>
-    <th>Code</th>
-    <th>Name</th>
-    <th>Satuan</th>
-    <th>Price</th>
+    <th></th>
+    <th>Kode</th>
+    <th>Nama</th>
+    <th>Satuan Primary</th>
+    <th>Kategori</th>
     <th>Action</th>
   </tr>
 </thead>
 <tbody>
   @forelse($products as $product)
   <tr>
+      <td><img src="{{asset('img/'.$product->imagePath)}}" style="width:30px;height:30px;"></td>
       <td>{{$product->itemcode}}</td>
       <td>{{$product->title}}</td>
       <td>{{$product->satuan_primary}}</td>
-      <td>{{$product->price}}</td>
+      <td>
+        {{$product->categories->first()->description}}
+      </td>
       <td><a class="btn btn-info btn-sm" href="{{route('product.master',$product->id)}}">Edit</a></td>
   </tr>
   @empty
@@ -53,9 +57,14 @@
           'columnDefs' : [     // see https://datatables.net/reference/option/columns.searchable
                             {
                                'searchable'    : true,
-                               'targets'       : [0,1,2,3]
+                               'targets'       : [1,2,3,4]
                             },
-                        ]
+                            {
+                              'orderable'     : false,
+                              'targets'       : [0,5],
+                            }
+                        ],
+          'order'         : [[ 1, "asc" ]]
         });
     } );
      </script>
