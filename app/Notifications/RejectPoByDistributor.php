@@ -83,8 +83,8 @@ class RejectPoByDistributor extends Notification
      {
        if($this->is_distributor==1){
          return [
-           'tipe'=>'Pembatalan PO dari Distributor',
-           'subject'=>'Pembatalan PO '.$this->header->customer_po,
+           'tipe'=>'Penolakan PO dari Distributor',
+           'subject'=>'Penolakan PO '.$this->header->customer_po,
            'order'=>$this->header
          ];
        }else{

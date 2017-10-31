@@ -84,6 +84,7 @@ return [
     'showall' => 'Lihat Semua',
     'year' => 'Tahun',
     'month' => 'Bulan',
-    'none' => 'Belum diproses'
+    'none' => 'Belum diproses',
+    'donthaveaccount' => "Belum punya akun?"
 
 ];

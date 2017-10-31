@@ -12,7 +12,7 @@ $(document).ready(function() {
             'ordering': false,
             //'order': [[ 1, 'desc' ]]
         });
- 
+
     $('.change-product').hide();
 
     if($('#trx-in-date, #trx-out-date').length){

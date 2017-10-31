@@ -16,7 +16,7 @@
         </div>
         @endif
         <div class="card card-container">
-          <img id="profile-img" class="profile-img-card" src="{{ URL::to('img/g-Order.jpeg') }}" />
+          <!--<img id="profile-img" class="profile-img-card" src="{{ URL::to('img/g-Order.jpeg') }}" />-->
           <p id="profile-name" class="profile-name-card">@lang('label.login')</p>
                   <form class="form-horizontal" role="form" method="POST" action="{{ route('login') }}">
                       {{ csrf_field() }}
@@ -68,6 +68,10 @@
                               <a class="btn btn-link" href="{{ route('password.request') }}">
                                   @lang('label.forgotpassword')
                               </a>
+                                <div class="btn" style="margin-top:-20px">@lang('label.donthaveaccount')
+                              <a class="btn-link" href="{{ route('password.request') }}">
+                                  @lang('label.register')
+                              </a></div>
                           <!--</div>-->
                       </div>
                     </form>

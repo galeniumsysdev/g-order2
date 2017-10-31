@@ -8,12 +8,18 @@
 	  <li {{$menu=='product'?'class=active':''}}>
         <a href="{{route('product.show')}}"><i class="fa fa-fw fa-table"></i> Product</a>
     </li>
+    <li {{$menu=='pareto'?'class=active':''}}>
+        <a href="{{route('product.pareto')}}"><i class="fa fa-fw fa-star"></i> Pareto Product</a>
+    </li>
+    <li {{$menu=='banner'?'class=active':''}}>
+        <a href="{{route('admin.banner')}}"><i class="fa fa-fw fa-film"></i> Banner/Carousel</a>
+    </li>
 
     <li {{$menu=='role'?'class=active':''}}>
-        <a href="{{route('role.index')}}"><i class="fa fa-fw fa-edit"></i>Role</a>
+        <a href="{{route('role.index')}}"><i class="fa fa-fw fa-edit"></i> Role</a>
     </li>
     <li {{$menu=='permission'?'class=active':''}}>
-        <a href="{{route('permission.index')}}"><i class="fa fa-fw fa-wrench"></i>Permission</a>
+        <a href="{{route('permission.index')}}"><i class="fa fa-fw fa-wrench"></i> Permission</a>
     </li>
     <!--<li {{$menu=='CategoryOutlet'?'class=active':''}}>
         <a href="{{route('CategoryOutlet.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Outlet</a>

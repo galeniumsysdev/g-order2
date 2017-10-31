@@ -45,4 +45,5 @@ return [
     'receivedate' => 'Receive Date',
     'senddate' => 'Send Date',
     'print' => 'Print',
+    'createexcel' =>'Create Excel',
 ];

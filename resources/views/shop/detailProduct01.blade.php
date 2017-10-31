@@ -6,14 +6,14 @@
 		<div class="card">
 			<div class="container-fliud">
 				<div class="wrapper row">
-					<div class="preview col-md-6">
+					<div class="preview col-sm-6">
 						<div class="preview-pic tab-content">
 						  @if(isset($product->imagePath))
 								<img src="{{ asset('img//'.$product->imagePath) }}" />
 							@endif
 						</div>
 					</div>
-					<div class="details col-md-6">
+					<div class="details col-sm-6">
 						<h3 class="product-title">{{$product->title}}</h3>
 						<!--<div class="rating">
 							<div class="stars">
@@ -32,6 +32,8 @@
 								{!!html_entity_decode($product->description)!!}
 							@endif
 						</p>
+
+						@if (Auth::check())
 						<h4 class="price">Price: <span id="lblhrg-{{$product->id}}">
 							@if($product->item=="43")
 								$
@@ -46,8 +48,7 @@
 							@if(($product->rate!=1 or $product->rate!=-99999) and !Auth::guest())
 								({{(float)$product->rate." ".$product->satuan_primary}})
 							@endif
-							</span></h4>
-						@if (!Auth::guest())
+						</span></h4>
 						<input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
 						<div class="input-group" style="width:100%">
 							<span class="input-group-addon" id="basic-addon1">Qty</span>

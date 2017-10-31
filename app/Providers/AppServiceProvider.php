@@ -7,6 +7,7 @@ use App\Category;
 use App\Customer;
 use Auth;
 use Session;
+use App\Banner;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,11 +20,11 @@ class AppServiceProvider extends ServiceProvider
     {
       view()->composer('layouts.navbar_product', function($view)
      {
-      $product_flexfields = Category::where([//ProductFlexfield::where([
-        ['enabled_flag','=','Y']
-        ,['summary_flag','=','N']
-        //,['flex_value_set_id','=',config('constant.flex_value_set_id')]
-        ]);
+        $product_flexfields = Category::where([//ProductFlexfield::where([
+                                        ['enabled_flag','=','Y']
+                                        ,['summary_flag','=','N']
+                                        //,['flex_value_set_id','=',config('constant.flex_value_set_id')]
+                              ]);
         if(isset(Auth::user()->customer_id)){
           $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
           $customer = Customer::find(Auth::user()->customer_id);
@@ -67,6 +68,12 @@ class AppServiceProvider extends ServiceProvider
         //View::share('product_flexfields', $product_flexfields);
         $view->with('product_flexfields', $product_flexfields);
       });
+     view()->composer('shop.carausel', function($view)
+     {
+       $banners = Banner::where('publish_flag','=','Y')->orderBy('id')->get();
+       $view->with('banners', $banners);
+     });
+
     }
 
     /**

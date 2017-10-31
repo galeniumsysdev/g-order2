@@ -60,6 +60,8 @@ class UserController extends Controller
         $input = $request->all();
         $input['id']= Uuid::generate()->string;
         $input['password'] = Hash::make($input['password']);
+        $input['validate_flag']=1;
+        $input['register_flag']=1;
         $user = User::create($input);
         foreach ($request->input('roles') as $key => $value) {
             $user->attachRole($value);
@@ -93,8 +95,7 @@ class UserController extends Controller
         $roles = Role::pluck('display_name','id');
 
         //$userRole = $user->roles->lists('id','id')->toArray();
-        $userRole = $user->roles->pluck('id','id')->toArray();
-
+        $userRole = $user->roles->pluck('id','id')->toArray();      
         return view('admin.user.edit',['user'=>$user,'roles'=>$roles,'userRole'=>$userRole,'menu'=>$this->menu]);
     }
 

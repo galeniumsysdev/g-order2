@@ -90,6 +90,32 @@ class ProductController extends Controller
       }
     }
   }
+  public function getAjaxProduct(Request $request)
+  {
+    $products =Product::where([['enabled_flag','=','Y'],['title','like',$request->input('query')."%"]]);
+    $products =$products->select('title','id')->get();
+    return response()->json($products);
+  }
+
+  public function updatePareto(Request $request)
+  {
+
+  /*  if($request->isMethod('post'))
+    {*/
+      $product=Product::where('id','=',$request->idpareto)->update(['pareto'=>1]);
+      return redirect()->route('product.pareto')->withMessage('Product Updated');
+    /*}elseif($request->isMethod('DELETE')){
+      $product=Product::where('id','=',$id)->update(['pareto'=>0]);
+      return redirect()->route('product.pareto')->withMessage('Product Removed');
+    }*/
+
+
+  }
+  public function destroyPareto($id)
+  {
+    $product=Product::where('id','=',$id)->update(['pareto'=>0]);
+    return redirect()->route('product.pareto')->withMessage('Product removed from pareto products');
+  }
 
   public function getSqlProduct()
   {
@@ -139,7 +165,13 @@ class ProductController extends Controller
     return $sqlproduct;
   }
 
-  public function getIndex(Request $request)
+  public function getIndex()
+  {
+    $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
+    return view('shop.index',['products' => $products]);
+  }
+
+  public function displayProduct(Request $request)
   {
     $perPage = 12; // Item per page
     $currentPage = Input::get('page') - 1;
@@ -310,20 +342,24 @@ class ProductController extends Controller
   {
     //$product=Product::find($id);
     $categories = Category::where('enabled_flag','=','Y')->get();
-    $product = DB::table('products as p')->leftjoin('category_products as cp','p.id','=','cp.product_id')
+    $product = DB::table('products as p')
+              ->leftjoin('category_products as cp','p.id','=','cp.product_id')
               ->leftjoin('categories as c', 'cp.flex_value','=','c.flex_value')
               ->where('p.id','=',$id)
-              ->select('p.id as id','p.title','p.itemcode','p.description','p.description_en','p.imagePath','p.satuan_primary','p.price','c.description as category_name','c.flex_value','c.parent','p.inventory_item_id','p.enabled_flag')
+              ->select('p.id as id','p.title','p.itemcode','p.description','p.description_en','p.imagePath','p.satuan_primary','c.description as category_name','c.flex_value','c.parent','p.inventory_item_id','p.enabled_flag','p.pareto','p.long_description')
               ->first();
     //dd($product) ;
-    return view('admin.product',['product' => $product,'categories'=>$categories,'menu'=>'product']);
+    return view('admin.product.edit',['product' => $product,'categories'=>$categories,'menu'=>'product']);
   }
 
   public function update(Request $request,$id)
   {
     $product=Product::find($id);
     $image = $request->file('input_img');
-
+    $this->validate($request, [
+        'nama' => 'required|unique:products,title,'.$id.',id|max:191',
+        'enabledflag'=>'required',
+    ]);
     //echo($request->file('input_img')->getClientOriginalName());
     /*product image yg lama di hapus jika file input tidak kosong*/
     if($image){
@@ -357,12 +393,15 @@ class ProductController extends Controller
     }
     //dd('stop');
     //$product=Product::find($id);
+    $product->title =  $request->nama;
+    $product->pareto = $request->pareto;
+    $product->enabled_flag = $request->enabledflag;
     $product->description =$request->id_descr;
     $product->description_en =$request->en_descr;
     $product->save();
     //$product->categories()->detach();
     //$product->categories()->attach($request->category);
-    $product->categories()->sync([$request->category]);
+  //  $product->categories()->sync([$request->category]);
 
     return redirect()->route('product.master',$id)->withMessage('Product Updated');
   }
@@ -405,6 +444,7 @@ class ProductController extends Controller
 												IF(c.postalcode IS NULL, '', concat(',',c.postalcode))) as address1"))
           ->where('customer_id','=',auth()->user()->customer_id)
           ->where('site_use_code','=','SHIP_TO')
+          ->where('status','=','A')
           ->get();
       $billto=null;
       if ($dist!='')
@@ -421,6 +461,7 @@ class ProductController extends Controller
     												IF(c.postalcode IS NULL, '', concat(',',c.postalcode))) as address1"))
               ->where('customer_id','=',auth()->user()->customer_id)
               ->where('site_use_code','=','BILL_TO')
+              ->where('status','=','A')
               ->get();
         }
         //dd($billto);
@@ -596,7 +637,7 @@ class ProductController extends Controller
       }
 
        Validator::make($request->all(), [
-           'no_order' => 'required|unique:so_headers,customer_po|max:50',
+           'no_order' => 'required|unique:so_headers,customer_po,null,null,customer_id,'.Auth::user()->customer_id.'|max:50',
            'alamat' => 'required',
         ])->validate();
       $header= SoHeader::create([
@@ -716,6 +757,10 @@ class ProductController extends Controller
      return $res;
     }
 
-
+    public function listParetoProduct()
+    {
+      $products = Product::where('pareto','=',1)->get();
+      return view('admin.product.pareto',['products' => $products,'menu'=>'pareto']);
+    }
 
 }

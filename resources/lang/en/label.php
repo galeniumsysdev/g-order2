@@ -80,9 +80,10 @@ return [
     'download' => 'Download',
     'mandatoryfield' => 'Mandatory Field',
     'searchproduct' => 'Search Product',
-	'newconminlength' => 'Minimum new password length is 6 characters',
+	  'newconminlength' => 'Minimum new password length is 6 characters',
     'showall' => 'Show All',
     'year' => 'Year',
     'month' => 'Month',
-    'none' => 'None'
+    'none' => 'None',
+    'donthaveaccount' => "Don't have an account?"
 ];

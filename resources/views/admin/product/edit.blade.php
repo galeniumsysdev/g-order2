@@ -6,21 +6,23 @@
   </div>
 @endif
 <h3>Product</h3>
-  <form action="{{route('product.update',$product->id)}}" enctype="multipart/form-data" method="post" role="form">
+  <form class="form-horizontal" action="{{route('product.update',$product->id)}}" enctype="multipart/form-data" method="post" role="form" >
        {{csrf_field()}}
 
      <div class="form-group">
        <label for="name">Kode</label>
-       <input type="text" class="form-control" name="kode" id="" value="{{ $product->itemcode }}">
+      <label class="form-control" name="kode">{{ $product->itemcode }}</label>
      </div>
      <div class="form-group">
        <label for="display_name">Nama</label>
-       <input type="text" class="form-control" name="nama" id="" value="{{$product->title}}">
+       <input type="text" class="form-control" name="nama" value="{{$product->title}}">
+       @if ($errors->has('nama'))
+           <span class="help-block">
+               <strong>{{ $errors->first('nama') }}</strong>
+           </span>
+       @endif
      </div>
-     <!--<div class="form-group">
-       <label for="description">Price</label>
-       <input type="text" class="form-control" name="harga" size="5" id="" value="{{$product->price}}">
-     </div>-->
+
      <div class="form-group">
        <label for="description">Category</label>
        <select name="category" class="form-control">
@@ -32,19 +34,19 @@
      </div>
      <div class="form-group">
        <label for="description">Satuan</label>
-       <input type="text" class="form-control" name="satuan" size="5" id="" value="{{$product->satuan_primary}}" readonly="readonly">
+       <label class="form-control" name="satuan" size="5" >{{$product->satuan_primary}}</label>
      </div>
      <div class="form-group">
        <label for="description">Description (English)</label>
-       <textarea class="form-control" id="en_descr" name="en_descr">{{$product->description_en}}</textarea>
+       <textarea class="form-control" id="en_descr" name="en_descr">{{old('en_descr')?old('en_descr'):$product->description_en}}</textarea>
      </div>
      <div class="form-group">
        <label for="messageArea">Description (Indonesia)</label>
-       <textarea class="form-control" id="id_descr" name="id_descr">{{$product->description}}</textarea>
+       <textarea class="form-control" id="id_descr" name="id_descr">{{old('id_descr')?old('id_descr'):$product->description}}</textarea>
      </div>
      <div class="form-group">
          <label for="imageInput">File Image</label>
-         <input data-preview="#preview" accept="image/*" name="input_img" type="file" id="imageInput">
+         <input data-preview="#preview" name="input_img" type="file" id="imageInput">
          @if ($errors->has('input_img'))
              <span class="help-block">
                  <strong>{{ $errors->first('input_img') }}</strong>
@@ -52,11 +54,38 @@
          @endif
     </div>
            <div class="thumbnail">
-           <img id="profile-img-tag" data-src="holder.js/100%x180" alt="100%x180" style="height: 180px; width: 180px; display: block;" src="{{ asset($product->imagePath) }}" data-holder-rendered="true">
+           <img id="profile-img-tag" data-src="holder.js/100%x180" alt="100%x180" style="height: 180px; width: 180px; display: block;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
            </div>
+     <div class="form-group">
+       <label for="pareto" class="control-label col-sm-2" style="text-align:left!important;padding-left:0px;">Pareto Product</label>
+       <div class="col-sm-10">
+         <input type="radio" name="pareto" value="1" {{$product->pareto=="1"?'checked=checked':''}}>Yes&nbsp;&nbsp;
+         <input type="radio" name="pareto" value="0" {{$product->pareto=="0"?'checked=checked':''}}>No
+         @if ($errors->has('pareto'))
+             <span class="help-block">
+                 <strong>{{ $errors->first('pareto') }}</strong>
+             </span>
+         @endif
+       </div>
 
+     </div>
+     <div class="form-group">
+       <label for="Publisher" class="control-label col-sm-2" style="text-align:left!important;padding-left:0px;">Publish Product</label>
+       <div class="col-sm-10">
+         <input type="radio" name="enabledflag" value="Y" {{$product->enabled_flag=="Y"?'checked=checked':''}}>Yes&nbsp;&nbsp;
+         <input type="radio" name="enabledflag" value="N" {{$product->enabled_flag=="N"?'checked=checked':''}}>No
+         @if ($errors->has('pareto'))
+             <span class="help-block">
+                 <strong>{{ $errors->first('pareto') }}</strong>
+             </span>
+         @endif
+       </div>
+     </div>
+      <div class="form-group">
      <input type="hidden" name="itemid" value="">
      <button type="submit" class="btn btn-primary">Save Product</button>
+     <a href="{{route('product.show')}}"><button type="button" class="btn btn-warning">Master Product</button></a>
+   </div>
    </form>
 @endsection
 @section('js')
