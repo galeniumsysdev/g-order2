@@ -5083,6 +5083,7 @@ tbody.collapse.in {
 .nav > li {
   position: relative;
   display: block;
+  padding-left: 11px;
 }
 
 .nav > li > a {
@@ -8426,7 +8427,7 @@ hr {
 
 img {
 	vertical-align: middle;
-	margin-bottom: 10px;
+	margin-bottom: 3px;
 }
 
 .icon-right {

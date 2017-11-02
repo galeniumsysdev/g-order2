@@ -12,7 +12,7 @@ return [
     |
     */
 
-    'login' => 'Masuk',
+    'login' => 'Silahkan Masuk',
     'logout' => 'Keluar',
     'home' => 'Beranda',
     'register' => 'Daftar',
