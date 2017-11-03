@@ -32,7 +32,7 @@
 					<p id="profile-name" class="profile-name-card"><strong>@lang('label.login')</strong></p>
 					<hr>
 						<div class="imgcontainer">
-							<img src="{{ URL::to('img/eaae33ce7e.jpg') }}" alt="Avatar" class="avatar">
+							<img src="{{ URL::to('img/login1.jpg') }}" alt="Avatar" class="avatar">
 						</div>
 						
 					<form class="form-horizontal" role="form" method="POST" action="{{ route('login') }}">

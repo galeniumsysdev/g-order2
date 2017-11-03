@@ -399,11 +399,9 @@ ul.dropdown-notif li .item-right button{
 }
 
 .footer-play-img {
-	float: center;
-	width: 95px;
-	height: 26px;
-	margin-top: -15px;
-	margin-left: -18px;
+	margin-bottom: 25px;
+	height: 40px;
+	padding-right: 5px;
 }
 
 .navbar-right-xs{
