@@ -17,29 +17,13 @@ function ubah(old){
   	});
 }
 function checkrole(){
-  var roletxt=$("#role option:selected").text();
-  //alert(roletxt);
-  //var role = $('#role').val();
-  if (roletxt=="Outlet" || roletxt=="Apotik/Klinik"){
-    $('#divkategori').show();
+  //var pscflag=$("#psc_flag").length;
+
+  if ($("#psc_flag").is(':checked')){
     $('#divkategoridc').show();
   }else{
-    $('#divkategori').hide();
     $('#divkategoridc').hide();
   }
-  /*if (roletxt=="Distributor Cabang"){
-    $('#divdistributor').hide();
-    $('#listdistributor').hide();
-    $('#divkategori').hide();
-    $('#divkategoridc').hide();
-  }else{
-    $('#divdistributor').show();
-    $('#listdistributor').show();
-    if(roletxt=="Distributor"){
-      $('#divkategori').hide();
-      $('#divkategoridc').hide();
-    }
-  }*/
 }
 
 function add_dist_table(id,name){
@@ -138,7 +122,7 @@ function load_data(query,id)
 
   });
 
-$('#role').on('change',function(){
+$('#psc_flag').on('change',function(){
   checkrole();
 });
 

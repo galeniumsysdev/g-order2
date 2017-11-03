@@ -59,7 +59,7 @@
 						<td>{{$site->city}}</td>
 						<td>{{$site->state}}</td>
 						<td>{{$site->postalcode}}</td>
-						<td><a class="btn btn-info btn-sm" href="#"><span class="glyphicon glyphicon-pencil"></span></a>
+						<td><a class="btn btn-info btn-sm" href="{{route('profile.edit_address',$site->id)}}"><span class="glyphicon glyphicon-pencil"></span></a>
 						{!! Form::open(['method' => 'DELETE','route' => ['profile.removeaddress', $site->id],'style'=>'display:inline']) !!}
 						<!--  {!! Form::submit('Delete', ['class' => 'btn btn-sm btn-danger']) !!}-->
 						{!! Form::button( '<i class="fa fa-trash-o"></i>', ['type' => 'submit','class' => 'btn btn-sm btn-danger'] ) !!}
@@ -77,7 +77,7 @@
 					Add Address
 				</a>
 			</div>
-			
+
 			<!--UNTUK CONTACT-->
 			<h3><strong><u>Contact</u></strong></h3>
 			@if($customer_contacts->count()>1)

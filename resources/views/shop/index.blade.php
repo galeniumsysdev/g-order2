@@ -16,13 +16,15 @@
       @foreach($productChunk as $product)
         <div class="col-xs-6 col-ms-4 col-sm-4 col-md-2" >
           <div class="thumbnail">
+            <a href="{{ route('product.detail',['id'=>$product->id])}}" title="{{ $product->title }}">
             @if($product->imagePath)
               <img data-src="holder.js/100%x180" alt="100%x180"  class="img product" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
             @else
               <img data-src="holder.js/100%x180" alt="100%x180" class="img product" src="" data-holder-rendered="true">
             @endif
+            </a>
             <div class="caption">
-              <h4><a href="{{ route('product.detail',['id'=>$product->id])}}">{{ $product->title }}</a></h4>            
+              <h4><a href="{{ route('product.detail',['id'=>$product->id])}}">{{ $product->title }}</a></h4>
             </div>
           </div>
         </div>

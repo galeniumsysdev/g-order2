@@ -52,7 +52,7 @@ class CustomerController extends Controller
       //$customer_contacts= $customer->whereHas(colors, function ($query) {                                         $query->where('color', 'blue'); //'color' is the column on the Color table where 'blue' is stored.}])->get();
       $customer_sites = $customer->sites;
 
-      if (Auth::user()->ability(array('Marketing PSC', 'Marketing Pharma'),'') )
+      if (Auth::user()->ability(array('MarketingGPL','Marketing PSC', 'Marketing Pharma'),'') )
       {
         if ($customer->Status=="R")
         {
@@ -60,7 +60,12 @@ class CustomerController extends Controller
                       ->where('id','=',$notif_id)
                         ->update(['read_at' => Carbon::now()]);
         }
-        $customer_email = $customer->contact()->where('contact_type', 'EMAIL')->first();
+
+        if($customer->contact()->where('contact_type', 'EMAIL')->first())
+        {
+          $customer_email = $customer->contact()->where('contact_type', 'EMAIL')->first();
+          $customer_email =$customer_email->contact;
+        }
         if (!empty($customer->subgroup_dc_id))
         {
           $subgroupdc =SubGroupDatacenter::find($customer->subgroup_dc_id);
@@ -68,8 +73,8 @@ class CustomerController extends Controller
         }else{
           $groupdcid="";
         }
-        $groupdcs = GroupDatacenter::all();//where('enabled_flag','1');
-        $categories = CategoryOutlet::where('enable_flag','Y')->get();
+        $groupdcs = GroupDatacenter::where('enabled_flag','1')->get();
+        $categories = CategoryOutlet::where('enable_flag','Y')->orderBy('name','asc')->get();
         $roles = Role::whereIn('name',['Outlet','Apotik/Klinik'])->get();
         $distributors = DB::table('customers as a')
                         ->join('outlet_distributor as b','a.id','=','b.outlet_id')
@@ -224,7 +229,9 @@ class CustomerController extends Controller
 
   public function update(Request $request, $id)
   {//approve outlet by gpl
+    //dd($request->all());
     $pesan = "";
+
     if($request->save=="save" or $request->save=="approve")
     {
       $user = User::find($id);
@@ -243,22 +250,22 @@ class CustomerController extends Controller
         $user->avatar = $filename;
       }
       $user->name=$request->name;
-      $user->save();
-      $user->detachRoles($user->roles);
-      $user->roles()->attach($request->role);
+      //$user->save();
+      //$user->detachRoles($user->roles);
+      //$user->roles()->attach($request->role);
       $customer = Customer::find($user->customer_id);
+      //dd($customer->hasDistributor->count());
       $customer->tax_reference = $request->npwp;
       $customer->customer_name = $request->name;
-
-      if(Auth::User()->hasRole('Marketing PSC')){
-        $customer->outlet_type_id =$request->category;
+      $customer->outlet_type_id =$request->category;
+      if($request->psc_flag=="1"){
+      //if(Auth::User()->hasRole('Marketing PSC')){
         $customer->subgroup_dc_id =$request->subgroupdc;
       }else{
-        $customer->outlet_type_id =null;
         $customer->subgroup_dc_id =null;
       }
     }
-    if($request->save=="approve")
+  /*  if($request->save=="approve")
     {
       if((Auth::User()->hasRole('Marketing PSC') and $request->psc_flag=="1") or (Auth::User()->hasRole('Marketing Pharma') and $request->pharma_flag=="1"))
       {
@@ -298,21 +305,22 @@ class CustomerController extends Controller
       }else{
         return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.cantapprove"));
       }
-    }
+    }*/
 
     $customer->psc_flag =$request->psc_flag;
     $customer->pharma_flag =$request->pharma_flag;
     $customer->save();
-    if($request->save=="approve")
+    if($customer->hasDistributor->count()==0)
+    {
+      $pesan = " ".trans("pesan.adddistributor");
+    }
+
+  /*  if($request->save=="approve")
     {
       $userlogin = Auth::user();
       $notifications = $userlogin->notifications()
                       ->where([
                         ['id','=',$request->notif_id]
-                        /*['type','like','%MarketingGaleniumNotif'],
-                        ['notifiable_id','=',$userlogin->id],
-                        ['notifiable_type','like', 'App%User'],
-                        ['data','like', '%"user":{"id":"'.$id.'"%'],*/
                         ])
                         ->whereNull('read_at')
                         ->get();
@@ -330,7 +338,7 @@ class CustomerController extends Controller
         //mark as read notification for user login and outlet
         $pesan = "";
       }
-    }
+    }*/
       //dd($request->notif_id."aaaa");
       //return response()->json(['message'=>'success']);
       return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.update").$pesan);
@@ -503,4 +511,84 @@ class CustomerController extends Controller
 
     }
 
+
+    public function listNoo(Request $request)
+    {
+      $categories = CategoryOutlet::where('enable_flag','Y')->orderBy('name','asc')->get();
+      $roles = Role::whereIn('name',['Outlet','Apotik/Klinik'])->get();
+      $subgroupdc=DB::table('subgroup_datacenters as s')
+                  ->join('group_datacenters as g','g.id','=','s.group_id')
+                  ->where([['s.enabled_flag','=',1],['g.enabled_flag','=',1]])
+                  ->select('s.id as id','g.name as group','s.name as subgroup')
+                  ->get();
+      if($request->isMethod('post'))
+      {
+        $outlets = Customer::wherenull('oracle_customer_id');
+        $outlets =$outlets->leftjoin('category_outlets as co','co.id','=','customers.outlet_type_id');
+        $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=','customers.subgroup_dc_id');
+        if($request->name)
+        {
+            $outlets = $outlets->where('customer_name','like',$request->name."%");
+        }
+        if ($request->category!="")
+        {
+            $outlets = $outlets->where('outlet_type_id','=',$request->category);
+        }
+        if ($request->role!="")
+        {
+            $r=$request->role;
+            $outlets = $outlets->whereExists(function ($query) use($r) {
+                  $query->select(DB::raw(1))
+                        ->from('users as u')
+                        ->join('role_user as ru','ru.user_id','=','u.id')
+                        ->join('roles as r','r.id','=','ru.role_id')
+                        ->whereRaw("u.customer_id = customers.id and r.id = '".$r."'");
+              });
+        }else{
+          $outlets = $outlets->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                      ->from('users as u')
+                      ->join('role_user as ru','ru.user_id','=','u.id')
+                      ->join('roles as r','r.id','=','ru.role_id')
+                      ->whereRaw("u.customer_id = customers.id and r.name in ('Apotik/Klinik','Outlet')");
+            });
+        }
+        if($request->psc_flag=="1" and $request->pharma_flag!="1")
+        {
+            $outlets = $outlets->where('psc_flag','=','1');
+        }
+        if($request->pharma_flag=="1" and $request->psc_flag!="1")
+        {
+            $outlets = $outlets->where('pharma_flag','=','1');
+        }
+        if($request->pharma_flag=="1" and $request->psc_flag=="1")
+        {
+            $outlets = $outlets->where(function ($query) {
+              $query->where('pharma_flag','=','1')
+                    ->orWhere('psc_flag','=','1');
+            });
+        }
+        //dd($request->subgroupdc);
+        if($request->subgroupdc)
+        {
+          $outlets = $outlets->whereIn('subgroup_dc_id',$request->subgroupdc);
+        }
+        //var_dump($outlets->toSql());
+        $outlets = $outlets->select('customers.customer_name as customer_name','customers.id as id','co.name as category_name','tax_reference','pharma_flag','psc_flag','sdc.name as subdc','customers.status');
+        $outlets = $outlets->get();
+      }else{
+        $outlets = null;
+      }
+
+      return view('admin.customer.listNoo',compact('categories','roles','outlets','request','subgroupdc'));
+    }
+    public function searchOutlet(Request $request)
+    {
+      $data = Customer::where("customer_name","LIKE",$request->input('query')."%")
+            ->whereNull("oracle_customer_id")
+            ->where('status','=','A');
+      $data = $data->select('id','customer_name');
+      $data = $data->get();
+      return response()->json($data);
+    }
 }

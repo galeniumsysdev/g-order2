@@ -14,8 +14,6 @@ class User extends Authenticatable
 
     public $incrementing = false;
 
-
-
     /**
      * The attributes that are mass assignable.
      *
@@ -60,7 +58,6 @@ class User extends Authenticatable
         return false;
       }
     }
-
 
 
     public function roles()

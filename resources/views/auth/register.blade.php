@@ -106,7 +106,7 @@
                                        <input id="no_tlpn" type="no_tlpn" class="form-control" name="extnotelp" fieldset disabled placeholder="+62" required>
                                    </div>
                                    <div class="col-xs-10">
-                                       <input id="no_tlpn" type="no_tlpn" class="form-control" name="no_tlpn" value="{{ old('no_tlpn') }}">
+                                       <input id="no_tlpn" type="no_tlpn" class="form-control" name="no_tlpn" value="{{ old('no_tlpn') }}" required>
                                    </div>
                                </div>
 
@@ -118,7 +118,7 @@
                            </div>
                          </div>
 
-                        <div class="form-group{{ $errors->has('NPWP') ? ' has-error' : '' }}">
+                      <!--  <div class="form-group{{ $errors->has('NPWP') ? ' has-error' : '' }}">
                            <label for="NPWP" class="col-sm-4 control-label">@lang('label.npwp')</label>
 
                            <div class="col-sm-8">
@@ -130,13 +130,14 @@
                                    </span>
                                @endif
                            </div>
-                        </div>
+                        </div>-->
 
-                        <div class="form-group{{ $errors->has('kategori') ? ' has-error' : '' }}">
+                        <div class="form-group{{ $errors->has('category') ? ' has-error' : '' }}">
                            <label for="kategori" class="col-sm-4 control-label">*@lang('label.category')</label>
 
                            <div class="col-sm-8">
                              <select class="form-control" name="category" required>
+                               <option value="">--</option>
                                @forelse($categories as $category)
                                  @if(old('category')==$category->name)
                                    <option selected='selected' value="{{$category->id}}">{{$category->name}}</option>
@@ -147,9 +148,9 @@
                                <tr><td colspan="4">No Category</td></tr>
                                @endforelse
                              </select>
-                               @if ($errors->has('kategori'))
+                               @if ($errors->has('category'))
                                    <span class="help-block">
-                                       <strong>{{ $errors->first('kategori') }}</strong>
+                                       <strong>{{ $errors->first('category') }}</strong>
                                    </span>
                                @endif
                            </div>

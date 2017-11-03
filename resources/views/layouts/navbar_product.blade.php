@@ -125,6 +125,9 @@
                           <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; Login</strong></a></li>
                           <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; Register</strong></a></li>
                         @else
+                          @if(Auth::user()->can('Outlet_Distributor'))
+                            <li><a href="{{ route('customer.listNoo') }}"><strong>List Noo</strong></a></li>
+                          @endif
                           @if(Auth::user()->can('PengajuanDPL'))
                             <!--
                             /**
@@ -167,7 +170,17 @@
                               </ul>
                             </li>
                           @endif
-
+                          @if (Auth::user()->hasRole('Apotik/Klinik'))
+                            <li class="dropdown">
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Product</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                              <ul class="dropdown-menu">
+                                <li><a href="{{route('outlet.listProductStock')}}">Product List</a></li>
+                                <li><a href="{{route('outlet.importProduct')}}">Import Product</a></li>
+                                <li><a href="{{route('outlet.importProductStock')}}">Import Stock</a></li>
+                                <li><a href="{{route('outlet.trxList')}}">Transaction List</a></li>
+                              </ul>
+                            </li>
+                          @endif
                           @if(Auth::user()->can('Create PO'))
                               <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>@lang('label.categoryproduct')</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
@@ -184,17 +197,19 @@
                               </li>
                           @endif
 
-                          @if (Auth::user()->hasRole('Apotik/Klinik'))
-                            <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Product</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
-                              <ul class="dropdown-menu">
-                                <li><a href="{{route('outlet.listProductStock')}}">Product List</a></li>
-                                <li><a href="{{route('outlet.importProduct')}}">Import Product</a></li>
-                                <li><a href="{{route('outlet.importProductStock')}}">Import Stock</a></li>
-                                <li><a href="{{route('outlet.trxList')}}">Transaction List</a></li>
-                              </ul>
-                            </li>
-                          @endif
+
+                          <!--bahasa dropdown-->
+                          <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp; <strong>{{ app()->getLocale() }}</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                            <ul class="dropdown-menu">
+                              <li id="LI_201">
+                                  <a href="#" id="idLang" onclick="changeLanguage('id');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/indonesia.png" alt="" width="20" height="20" id="IMG_203" /><span id="SPAN_204"><span id="SPAN_205">&nbsp; Indonesia (id)</span></span></a>
+                              </li>
+                              <li id="LI_489">
+                                <a href="#" id="enLang" onclick="changeLanguage('en');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/united_kingdom.png" alt="" width="20" height="20" id="IMG_491" /><span id="SPAN_492"><span id="SPAN_493">&nbsp; English (en)</span></span></a>
+                              </li>
+                            </ul>
+                          </li>
                         <!--{{--notification--}}
                           --  <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>-->
                             <li class="dropdown hidden-xs">
@@ -215,18 +230,7 @@
                                   </li>
                                 </ul>
                             </li>
-                            <!--bahasa dropdown-->
-                            <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp; <strong>{{ app()->getLocale() }}</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
-                              <ul class="dropdown-menu">
-                                <li id="LI_201">
-                                    <a href="#" id="idLang" onclick="changeLanguage('id');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/indonesia.png" alt="" width="20" height="20" id="IMG_203" /><span id="SPAN_204"><span id="SPAN_205">&nbsp; Indonesia (id)</span></span></a>
-                                </li>
-                                <li id="LI_489">
-                                  <a href="#" id="enLang" onclick="changeLanguage('en');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/united_kingdom.png" alt="" width="20" height="20" id="IMG_491" /><span id="SPAN_492"><span id="SPAN_493">&nbsp; English (en)</span></span></a>
-                                </li>
-                              </ul>
-                            </li>
+
                             <!--user dropdown-->
                             <li class="dropdown">
                                 <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">

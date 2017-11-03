@@ -71,6 +71,7 @@ class RegisterController extends Controller
             'HP_1' => 'required|regex:/(8)[0-9]{8,}/',
             'HP_2' => 'nullable|regex:/(8)[0-9]{8,}/',
             'no_tlpn' => 'nullable|regex:/[0-9]{9}/',
+            'category' => 'required',
         ]);
     }
 
@@ -122,7 +123,13 @@ class RegisterController extends Controller
          $user_check->register_flag=1;
          $user_check->first_login = date('Y-m-d H:i:s');
          $user_check->api_token='';
-         $user_check->save();
+
+         if($user_check->roles->count()==0)
+         {
+           $roleoutlet = Role::where('name','=','Outlet')->first();
+           $user_check->roles()->attach($roleoutlet->id);
+         }
+         //$user_check->save();
          return $user_check;
        }else{
          //return back()->with('status', trans('auth.alreadyregistered'));
@@ -145,10 +152,11 @@ class RegisterController extends Controller
         $validator = Validator::make($request->all(), [
             'imgphoto' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ])->validate();
+
       }
       $customer = Customer::create([
           'customer_name' => strtoupper($request->name),
-          'status' => 'X',
+          'status' => 'A',
           'tax_reference' => $request->NPWP,
           'pharma_flag' => $request->pharma,
           'psc_flag' => $request->psc,
@@ -171,6 +179,7 @@ class RegisterController extends Controller
        $custsites->postalcode = $request->postal_code;
        $custsites->Country = 'ID';
        $custsites->customer_id = $customer->id;
+       $custsites->primary_flag='Y';
        $custsites->save();
 
        $custcontact= new CustomerContact();
@@ -204,15 +213,18 @@ class RegisterController extends Controller
              $custcontact3->save();
         }
 
-        $avatar = $request->file('imgphoto');
-        $filename = time() . '.' . $avatar->getClientOriginalExtension();
-        Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
       //$user=$this->create($input);
       $user= new User();
       $user->id = Uuid::generate()->string;
       $user->name = strtoupper($request->name);
       $user->email = $request->email;
-      $user->avatar = $filename;
+      if($request->hasFile('imgphoto')) {
+        $avatar = $request->file('imgphoto');
+        $filename = time() . '.' . $avatar->getClientOriginalExtension();
+        Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
+        $user->avatar = $filename;
+      }
+
       $user->api_token =str_random(60);
       $customer->users()->save($user);
 
@@ -232,7 +244,7 @@ class RegisterController extends Controller
       //dd($user->customer->psc_flag);
       if (!is_null($user)){
         if(!$user->validate_flag){
-          $marketings = User::whereHas('roles'), function($q){
+          $marketings = User::whereHas('roles', function($q){
               $q->where('name','MarketingGPL');
           })->get();
 
@@ -278,7 +290,11 @@ class RegisterController extends Controller
     public function verification_email($token)
     {
       $user = User::where('api_token',$token)->first();
-      return view('auth.verification',['data' => $user]);
+      if ($user){
+          return view('auth.verification',['data' => $user]);
+      }else{
+        redirect(route('login'))->with('status',trans("auth.registerfailed"));
+      }
     }
 
 }

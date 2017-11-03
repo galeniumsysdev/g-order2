@@ -23,6 +23,9 @@ Route::get('/getPrice',[
 Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
 Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
+Route::get('/ajax/typeaheadProvince', 'ProfileController@getListProvince');
+Route::get('/ajax/typeaheadCity', 'ProfileController@getListCity');
+
 
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
 
@@ -49,6 +52,8 @@ Route::group(['middleware'=>'auth'],function(){
   Route::get('/add_address', function () {
     return view('auth.profile.add_address');
   });
+  Route::match(['patch','get'],'/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
+  //Route::get('/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   Route::get('/add_contact', function () {
       return view('auth.profile.add_contact');
   });
@@ -59,6 +64,7 @@ Route::group(['middleware'=>'auth'],function(){
 });
 
 Route::group(['middleware'=>['permission:Create PO']],function(){
+Route::get('/product/buy', 'ProductController@displayProduct')->name('product.buy');
 Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
     ,'as' => 'product.shoppingCart'
@@ -92,10 +98,6 @@ Route::get('/shopping-cart',[
 
 
 Auth::routes();
-
-
-
-
 
 Route::group(['middleware' => ['web']], function () {
   Route::post('language-chooser','LanguageController@changeLanguage');
@@ -163,8 +165,12 @@ Route::group(['middleware' => ['role:IT Galenium']], function () {
 });
 
 Route::get('/manageOutlet/{id}/{notif_id}', 'CustomerController@show')->name('customer.show');
+//Route::get('/searchNoo', 'CustomerController@searchNoo')->name('customer.searchNoo');
+Route::get('customer/searchOutlet', 'CustomerController@searchOutlet')->name('customer.searchoutlet');
+
 
 Route::group(['middleware' => ['permission:Outlet_Distributor']], function () {
+  Route::match(['get','post'],'/searchNoo', 'CustomerController@listNoo')->name('customer.listNoo');
   Route::get('/searchCustomer/{search}/{id}','CustomerController@search');
   Route::get('/tambahDistributor/{id}/{outletid}','CustomerController@addlist');
   Route::patch('/saveOutlet/{customer}', 'CustomerController@update')->name('customer.update');

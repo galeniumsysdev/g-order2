@@ -66,9 +66,10 @@
       <div class="row"><h2 align="center">No Product</h2></div>
   @endforelse
 </div>
+{{$products->links('vendor.pagination.bootstrap-4')}}
 <div>
 
-  
+
 </div>
 @endsection
 @section('js')
