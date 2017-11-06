@@ -76,5 +76,6 @@ return [
     'upload' =>'Unggah',
     'download' => 'Unduh',
     'mandatoryfield' => 'Field wajib diisi',
-    'searchproduct' => 'Cari Produk'
+    'searchproduct' => 'Cari Produk',
+	'donthaveaccount' => 'Register?'
 ];

@@ -58,7 +58,7 @@
 						<div class="form-group">
 							<div id="remember" class="checkbox">
 								<label>
-									<input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}> @lang('label.remember')
+									<input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>@lang('label.remember')
 								</label>
 							</div>
 						</div>
@@ -68,7 +68,10 @@
 								@lang('label.login')
 							</button>
 							<a class="btn btn-link" href="{{ route('password.request') }}">
-								@lang('label.forgotpassword')
+									@lang('label.forgotpassword')
+								</a>
+							<a class="btn btn-regis" href="#">
+								@lang('label.donthaveaccount')
 							</a>
 						</div>
 					</form>

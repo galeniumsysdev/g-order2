@@ -3,6 +3,7 @@
 .card-container.card {
     max-width: 350px;
     padding: 5px 20px;
+    margin-bottom: 150px;
 }
 .card {
     background-color: #fff;
@@ -53,5 +54,15 @@
 	color: rgb(0,118,192);
 	font-weight: normal;
 	border-radius: 0;
-	padding-top: 20px;
+	padding-top: 10px;
+	float: left;
+}
+
+.btn-regis {
+	color: rgb(0,118,192);
+	font-weight: normal;
+	border-radius: 0;
+	padding-top: 0px;
+    text-align: center;
+    width: 100%;
 }

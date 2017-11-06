@@ -77,6 +77,7 @@ return [
     'upload' =>'Upload',
     'download' => 'Download',
     'mandatoryfield' => 'Mandatory Field',
-    'searchproduct' => 'Search Product'
+    'searchproduct' => 'Search Product',
+	'donthaveaccount' => 'Dont Have an Account?'
 
 ];
