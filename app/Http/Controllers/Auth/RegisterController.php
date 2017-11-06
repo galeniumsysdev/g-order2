@@ -154,11 +154,11 @@ class RegisterController extends Controller
           'psc_flag' => $request->psc,
           'outlet_type_id' => $request->category,
         ]);
-        $customer->save();
-      $province=DB::table('provinces')->where('id','=',$request->province)->first();
-      $city=DB::table('regencies')->where('id','=',$request->city)->first();
-      $district=DB::table('districts')->where('id','=',$request->district)->first();
-      $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
+       $customer->save();
+       $province=DB::table('provinces')->where('id','=',$request->province)->first();
+       $city=DB::table('regencies')->where('id','=',$request->city)->first();
+       $district=DB::table('districts')->where('id','=',$request->district)->first();
+       $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
 
        $custsites = new CustomerSite();
        $custsites->site_use_code = "SHIP_TO";
@@ -196,8 +196,8 @@ class RegisterController extends Controller
             $custcontact2->save();
         }
         if(isset($request->no_tlpn)){
-            $custcontact3= new CustomerContact();
-            $custcontact3->contact_name = $request->contact_person;
+             $custcontact3= new CustomerContact();
+             $custcontact3->contact_name = $request->contact_person;
              $custcontact3->contact_type = 'PHONE';
              $custcontact3->contact ='+62'.$request->no_tlpn;
              $custcontact3->customer_id=$customer->id;
@@ -232,6 +232,15 @@ class RegisterController extends Controller
       //dd($user->customer->psc_flag);
       if (!is_null($user)){
         if(!$user->validate_flag){
+          $marketings = User::whereHas('roles'), function($q){
+              $q->where('name','MarketingGPL');
+          })->get();
+
+          foreach ($marketings as $sales)
+          {
+              $sales->notify(new MarketingGaleniumNotif($user));
+          }
+          /*
           if ($user->customer->psc_flag ==="1"){
             $marketings_psc = User::whereHas('roles', function($q){
                 $q->where('name','Marketing PSC');
@@ -252,13 +261,13 @@ class RegisterController extends Controller
             {
                 $mpharma->notify(new MarketingGaleniumNotif($user));
             }
-          }
+          }*/
           $user->validate_flag=1;
           //$user->api_token='';
           $user->save();
           //return redirect(route('verification','token'=>$token))->with('status','Your activation is completed. Please Input Your Password')
-          //return view('auth.verification',['data' => $user]);
-          return redirect(route('login'))->with('status',trans("auth.registerverified"));
+          return view('auth.verification',['data' => $user]);
+          //return redirect(route('login'))->with('status',trans("auth.registerverified"));
         }else{
             return redirect(route('login'))->with('status',trans("auth.alreadyverified"));
         }

@@ -45,4 +45,5 @@ return [
     'receivedate' => 'Tgl Terima',
     'senddate' => 'Tgl Kirim',
     'print' => 'Cetak',
+    'createexcel' =>'Buat Excel',
 ];

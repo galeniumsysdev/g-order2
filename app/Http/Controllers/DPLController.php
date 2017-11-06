@@ -159,44 +159,43 @@ class DPLController extends Controller {
 				));
 		}
 
-		$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-			->update(array('fill_in' => 0));
-
-		$this->dplLog($suggest_no, 'Input Discount');
-
-		$set_by = Auth::user()->id;
 		$next_approver = OrgStructure::select('org_structure.*','email')
 									->join('users','users.id','org_structure.directsup_user_id')
 									->where('user_id', Auth::user()->id)
 									->first();
 
-		$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-			->update(array('approved_by' => $set_by, 'next_approver' => ($next_approver) ? $next_approver->directsup_user_id : ''));
+		$this->dplLog($suggest_no, 'Input Discount');
 
 		//notif
+		$dpl_outlet = DPLSuggestNo::select('dpl_suggest_no.*','customer_name')
+							->join('customers','customers.id','dpl_suggest_no.outlet_id')
+							->where('suggest_no', $suggest_no)
+							->first();
 
-		if(!empty($next_approver->user_id)){
-			$user_notif = DB::select('call getUserNotificationDPL("'.$suggest_no.'")');
-			
-			foreach ($user_notif as $key => $user) {
-				$data = [
-					'title' => 'Approval',
-					'message' => 'Discount untuk '.$suggest_no,
-					//'href' => route('dpl.discountApproval',$suggest_no),
-					'href' => 'http://google.com'
-				];
-				event(new PusherBroadcaster($data, $user->USER_EMAIL));
+		$user_role = Auth::user()->roles;
+		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
+		if(!empty($notified_users)){
+			$data = [
+				'title' => 'Pengajuan DPL #'.$suggest_no,
+				'message' => 'untuk '.$dpl_outlet['customer_name'],
+				//'href' => route('dpl.discountApproval',$suggest_no),
+				'href' => 'http://google.com'
+			];
+			foreach ($notified_users as $key => $email) {
+				$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+					->update(array('fill_in' => 0,
+									'approved_by' => Auth::user()->id,
+									'next_approver' => $key
+									));
+				foreach ($email as $key => $mail) {
+					event(new PusherBroadcaster($data, $mail));
+					$apps_user = User::where('email',$mail)->first();
+					$apps_user->notify(new PushNotif($data));
+				}
+				break;
 			}
 		}
-		$data = [
-			'title' => 'Approval',
-			'message' => 'Discount untuk '.$suggest_no,
-			//'href' => route('dpl.discountApproval',$suggest_no),
-			'href' => 'http://google.com'
-		];
-		$next_approver->notify(new PushNotif($data));
 
-		
 		return redirect('/dpl/list');
 	}
 
@@ -238,58 +237,88 @@ class DPLController extends Controller {
 		$suggest_no = $request->suggest_no;
 		$action = $request->action;
 		if ($action == 'Approve') {
-			$approved_by = Auth::user()->id;
-			$next_approver = OrgStructure::select('org_structure.*','email')
-									->join('users','users.id','org_structure.directsup_user_id')
-									->where('user_id', Auth::user()->id)
-									->first();
-
-			$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-				->update(array('approved_by' => $approved_by, 'next_approver' => ($next_approver) ? $next_approver->directsup_user_id : ''));
-
-			if(!empty($next_approver->user_id)){
+			$user_role = Auth::user()->roles;
+			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
+			if(!empty($notified_users)){
 				$data = [
-					'title' => 'Approval',
-					'message' => 'Discount untuk '.$suggest_no,
+					'title' => 'Permohonan Approval',
+					'message' => 'Permohonan Approval #'.$suggest_no,
 					//'href' => route('dpl.discountApproval',$suggest_no),
 					'href' => 'http://google.com'
 				];
-				event(new PusherBroadcaster($data, $next_approver->email));
-				$next_approver->notify(new PushNotif($data));
+				foreach ($notified_users as $key => $email) {
+					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+						->update(array('approved_by' => Auth::user()->id, 'next_approver' => $key));
+					foreach ($email as $key => $mail) {
+						event(new PusherBroadcaster($data, $mail));
+						$apps_user = User::where('email',$mail)->first();
+						$apps_user->notify(new PushNotif($data));
+					}
+					break;
+				}
 			}
 		} else {
-			$approved_by = '';
-			$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-				->update(array('approved_by' => $approved_by, 'fill_in' => 1));
-
-			$user_notif = DB::select('call getUserNotificationDPL("'.$suggest_no.'")');
-			
-			foreach ($user_notif as $key => $user) {
+			$user_role = Auth::user()->roles;
+			$notified_users = $this->getArrayNotifiedEmail($suggest_no);
+			if(!empty($notified_users)){
 				$data = [
-					'title' => 'Rejected',
-					'message' => 'Silakan isi diskon untuk '.$suggest_no,
+					'title' => 'Usulan Discount #'.$suggest_no.' ditolak',
+					'message' => 'oleh '.Auth::user()->name,
 					//'href' => route('dpl.discountForm',$suggest_no),
 					'href' => 'http://google.com'
 				];
-				event(new PusherBroadcaster($data, $user->USER_EMAIL));
+				foreach ($notified_users as $key => $email) {
+					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+						->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
+					foreach ($email as $key => $mail) {
+						event(new PusherBroadcaster($data, $mail));
+						$apps_user = User::where('email',$mail)->first();
+						$apps_user->notify(new PushNotif($data));
+					}
+				}
 			}
-			$next_approver = OrgStructure::select('org_structure.*','email')
-									->join('users','users.id','org_structure.directsup_user_id')
-									->where('user_id', Auth::user()->id)
-									->first();
-			$data = [
-				'title' => 'Rejected',
-				'message' => 'Silakan isi diskon untuk '.$suggest_no,
-				//'href' => route('dpl.discountForm',$suggest_no),
-				'href' => 'http://google.com'
-			];
-			$next_approver->notify(new PushNotif($data));
-
 		}
 
 		$this->dplLog($suggest_no, $action);
 
 		return redirect('/dpl/list');
+	}
+
+	public function getArrayNotifiedEmail($suggest_no, $curr_pos = ''){
+		$positions = [];
+		$dpl = DPLSuggestNo::select('dpl_suggest_no.*','email')
+							->join('users','users.id','dpl_suggest_no.mr_id')
+							->where('suggest_no', $suggest_no)
+							->first();
+		if($curr_pos == '')
+			$positions['SPV'][] = $dpl['email'];
+
+		$next_approver = OrgStructure::select('org_structure.*','email')
+									->join('users','users.id','org_structure.directsup_user_id')
+									->where('user_id', $dpl['mr_id'])
+									->first();
+		if($curr_pos == '' || ($curr_pos != 'ASM' && $curr_pos != 'Admin DPL' && $curr_pos != 'FSM' && $curr_pos != 'HSM'))
+			$positions['ASM'][] = $next_approver['email'];
+
+		$next_approver = User::whereHas('roles', function($q){
+								    $q->where('name', 'Admin DPL');
+								})->first();
+		if($curr_pos == '' || ($curr_pos != 'Admin DPL' && $curr_pos != 'FSM' && $curr_pos != 'HSM'))
+			$positions['Admin DPL'][] = $next_approver['email'];
+
+		$next_approver = User::whereHas('roles', function($q){
+								    $q->where('name', 'FSM');
+								})->first();
+		if($curr_pos == '' || ($curr_pos != 'FSM' && $curr_pos != 'HSM'))
+			$positions['FSM_HSM'][] = $next_approver['email'];
+
+		$next_approver = User::whereHas('roles', function($q){
+								    $q->where('name', 'HSM');
+								})->first();
+		if($curr_pos == '' || ($curr_pos != 'FSM' && $curr_pos != 'HSM'))
+			$positions['FSM_HSM'][] = $next_approver['email'];
+
+		return $positions;
 	}
 
 	public function dplLog($suggest_no, $type) {
@@ -319,7 +348,7 @@ class DPLController extends Controller {
 			'approver.id as dpl_appr_id',
 			'approver.name as dpl_appr_name',
 			'dpl_suggest_no.suggest_no',
-			'dpl_no',
+			'dpl_no.dpl_no',
 			'fill_in',
 			'next_approver')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')

@@ -140,7 +140,7 @@ class OrderController extends Controller
           if($request->status=="x")
           {
               $trx =$trx->where([['status','=',0],['approve','=',1]]);
-              $this->createExcel($request);
+              //$this->createExcel($request,null);
           }elseif($request->status=="0"){
               $trx =$trx->where([['status','=',0],['approve','=',0]]);
           }else{
@@ -167,6 +167,8 @@ class OrderController extends Controller
         }
       }
       //var_dump($trx->toSql());
+      $trx = $trx->orderBy('tgl_order','desc');
+      $trx = $trx->orderBy('notrx','desc');
       $trx = $trx->get();
       return view('shop.listpo',compact('liststatus','trx','request'));
     }
@@ -191,12 +193,12 @@ class OrderController extends Controller
         {
           $connoracle = DB::connection('oracle');
           if($connoracle){
-            $oraheader = $connoracle->table('oe_headers_iface_all')->insert([
+            /*$oraheader = $connoracle->table('oe_headers_iface_all')->insert([
               'order_source_id'=>config('constant.order_source_id')
               ,'orig_sys_document_ref'=>$header->notrx
               ,'org_id'=>$header->org_id
               ,'sold_from_org_id'=>$header->org_id
-              /*,'ship_from_org_id'=>$header->warehouse*/
+              ,'ship_from_org_id'=>$header->warehouse
               ,'ordered_date'=>$header->tgl_order
               ,'order_type_id'=>$header->order_type_id
               ,'sold_to_org_id'=>$header->oracle_customer_id
@@ -211,7 +213,7 @@ class OrderController extends Controller
               ,'ship_to_org_id'=>$header->oracle_ship_to
               ,'invoice_to_org_id'=>$header->oracle_bill_to
             ]);
-            $header->interface_flag="Y";
+            $header->interface_flag="Y";*/
             $header->status=0;
           }
         }else{
@@ -232,7 +234,7 @@ class OrderController extends Controller
             ->update(['qty_confirm' => $request->qtyshipping[$soline->line_id]]);
           if(!is_null($header->oracle_customer_id))
           {
-            if($oraheader){
+            /*if($oraheader){
               $oraline = $connoracle->table('oe_lines_iface_all')->insert([
                 'order_source_id'=>config('constant.order_source_id')
                 ,'orig_sys_document_ref' => $header->notrx
@@ -241,7 +243,7 @@ class OrderController extends Controller
                 ,'inventory_item_id'=>$soline->inventory_item_id
                 ,'ordered_quantity'=>$request->qtyshipping[$soline->line_id]
                 ,'order_quantity_uom'=>$soline->uom
-                /*,'ship_from_org_id'=>$soline->qty_shipping*/
+                //,'ship_from_org_id'=>$soline->qty_shipping
                 ,'org_id'=>$header->org_id
                 //,'pricing_quantity'
                 //,'unit_selling_price'
@@ -256,7 +258,7 @@ class OrderController extends Controller
                 ,'last_update_date'=>Carbon::now()
                 //,'line_type_id'
                 ,'calculate_price_flag'=>'Y'
-              ]);
+              ]);*/
               $ordertype=config('constant.order_source_id');
               $orgid = $header->org_id;
               $notrx =$header->notrx;
@@ -277,7 +279,7 @@ class OrderController extends Controller
                   $header->oracle_header_id = $hsl;
               }*/
 
-            }
+            //}
           }
         }
         $header->approve=1;
@@ -285,6 +287,7 @@ class OrderController extends Controller
         $header->tgl_approve=Carbon::now();
         $header->save();
 
+        //$this->createExcel(null,$h->id);
         return redirect()->route('order.listSO')->withMessage(trans('pesan.approveSO_msg',['notrx'=>$header->notrx]));
       }elseif($request->approve=="reject"){
         $update = DB::table('so_lines')
@@ -327,6 +330,9 @@ class OrderController extends Controller
           return view('errors.403');
         }
 
+      }elseif($request->createExcel=="Create Excel"){
+          $this->createExcel($request, $request->header_id);
+        //  return redirect()->route('order.listPO');
       }
     }
 
@@ -403,7 +409,7 @@ class OrderController extends Controller
 
     }
 
-    public function createExcel(Request $request)
+    public function createExcel(Request $request,$id)
     {
       $header = DB::table('so_headers as sh')
                 ->join('customers as c','sh.customer_id','=','c.id')
@@ -432,6 +438,10 @@ class OrderController extends Controller
         {
           $header =$header->where('tgl_order','<=',$request->tglak);
         }
+        if(isset($id))
+        {
+          $header =$header->where('sh.id','=',$id);
+        }
         $header =$header->select('c.customer_name','sh.customer_po', DB::raw('date_format(tgl_order,"%d-%b-%Y %H:%i:%s") as tgl_order')
                            , 'sh.oracle_ship_to','sh.currency', 'sh.oracle_bill_to',DB::raw('"ENT" as ent')
                            ,DB::raw('"*NB" as nb'),'sh.id', 'ot.name as transaction_name','ql.name as price_name', 'c.customer_number','sh.warehouse','sh.notrx'
@@ -441,7 +451,7 @@ class OrderController extends Controller
         //$header=$header->toArray();
         //$data= json_decode( json_encode($header), true);
         //$i=0;            //  dd($header->toArray());
-      return Excel::create('template_SO_Oracle', function($excel) use ($header ) {
+      $create= Excel::create('template_SO_Oracle', function($excel) use ($header ) {
         $excel->setTitle('Interface sales order');
         $excel->setCreator('Shanty')
           ->setCompany('Solinda');
@@ -460,10 +470,16 @@ class OrderController extends Controller
             }
             $connoracle = DB::connection('oracle');
             if($connoracle){
-              $oraheader = $connoracle->table('oe_order_headers_all as oha')
-                          ->where('nvl(ola.attribute1,oha.orig_sys_document_ref','=',$h->notrx)
+              $oraheader = $connoracle->table('oe_order_headers_all oha')
+                          //->where(DB::raw('nvl(oha.attribute1,oha.orig_sys_document_ref)'),'=',$h->notrx)
+                          ->whereExists(function ($query) use($h) {
+                                $query->select(DB::raw(1))
+                                      ->from('oe_order_lines_all ola')
+                                      ->whereRaw("ola.header_id = oha.header_id and nvl(ola.attribute1,ola.orig_sys_document_ref) = '".$h->notrx."'");
+                            })
                           ->where('oha.cancelled_flag','!=','Y')
                           ->get();
+              //dd($oraheader);            
               if($oraheader->isEmpty())
               {
                 $oraheader=null;
@@ -490,14 +506,16 @@ class OrderController extends Controller
                   $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom,'','',$h->tgl_order,'','','','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
 
                 }
-                $sheet->appendRow(array('*SAVE','*PB'));
+                $sheet->appendRow(array('*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*PB'));
             }
 
 
           }
           $sheet->protect('GPLJanganDiub4h');
         });
-      })->download("xlsx");
+      })->export("xlsx");
+      return redirect()->route('order.listPO');
+      //return 1;
     }
 
 }

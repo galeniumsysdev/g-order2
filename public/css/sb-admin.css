@@ -229,3 +229,67 @@ ul.alert-dropdown {
 .help-block{
   color:#800000;
 }
+
+
+/*carousel*/
+.carousel-control .fa-angle-right {
+	position: absolute;
+	top: 50%;
+	margin-top: -10px;
+	z-index: 5;
+	display: inline-block;
+}
+
+.carousel-control .fa-angle-left {
+	position: absolute;
+	top: 50%;
+	margin-top: -10px;
+	z-index: 5;
+	display: inline-block;
+}
+.carousel-inner {
+	overflow: hidden;
+	width: 100%;
+	margin-bottom: 22px;
+}
+
+.carousel{
+  width:100%;
+}
+.item img{
+  object-fit:cover;
+  max-height:300px !important;
+  height:auto;
+  width:100%;
+}
+
+
+.box{
+    width: 100%;
+    height: 300px;
+    background-color: rgb(41, 128, 185);
+}
+
+@media (max-width: 550px), only screen and (max-device-width: 736px) and (orientation: portrait) {
+  .item img{
+    object-fit:cover;
+    max-height:auto !important;
+    height:auto;
+    width:100%;
+    font-size: 3vw;
+  }
+
+
+  .box{
+      width: 100%;
+      height: auto;
+      background-color: rgb(41, 128, 185);
+  }
+  .carousel-caption {
+    bottom: -10px;
+  }
+  .carousel-caption h3{
+    font-size: 3vw;
+  }
+
+}
