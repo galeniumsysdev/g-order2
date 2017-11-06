@@ -191,7 +191,6 @@
                            </div>
                         </div>
 
-
                       </div>
                       <div class="form-horizontal col-sm-6">
                         <!--<div class="form-group">
@@ -237,9 +236,9 @@
                                   </span>
                               @endif
                           </div>
-                      </div>
+                        </div>
 
-            			     <div class="form-group{{ $errors->has('city') ? ' has-error' : '' }}">
+                        <div class="form-group{{ $errors->has('city') ? ' has-error' : '' }}">
                             <label for="city" class="col-sm-4 control-label">*@lang('label.city')</label>
 
                             <div class="col-sm-8">
@@ -303,19 +302,18 @@
                                 @endif
                             </div>
                         </div>
+                      </div>
 
-
-
-                       </div/>
-                        <div class="form-group">
-                            <div class="col-sm-12">
-                                <button type="submit" class="btn btn-primary">
-                                    @lang('label.register')
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-sm-12 has-error"><span class="help-block">* @lang('label.mandatoryfield')</span></div>
+                      <div class="form-group">
+                          <div class="col-sm-12">
+                              <button type="submit" class="btn btn-primary">
+                                  @lang('label.register')
+                              </button>
+                          </div>
+                      </div>
+                      <div class="col-sm-12 has-error"><span class="help-block">* @lang('label.mandatoryfield')</span></div>
                     </form>
+                   </div>
                 </div>
             </div>
         </div>

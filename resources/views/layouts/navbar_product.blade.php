@@ -20,8 +20,6 @@
   <link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">
   <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
   <link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
-
-
   <link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">
   <link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
   <link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
@@ -59,7 +57,7 @@
                       @else
                           <a class="navbar-brand" href="{{ url('/home') }}" style="color:#fff">
                       @endif
-                          <strong>{{ config('app.name', 'g-Order') }}</strong>
+                          <strong><img class="img-header" src="{{ URL::to('img/logoe1.png') }}"/></strong>
                         </a>
                       @if(Auth::user())
                         @if(Auth::user()->can('Create PO'))
@@ -125,6 +123,19 @@
                           <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; Login</strong></a></li>
                           <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; Register</strong></a></li>
                         @else
+                          <notification :email="{{json_encode(Auth::user()->email)}}"></notification>
+                          @if(Auth::user()->can('product'))
+                          <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Product</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                            <ul class="dropdown-menu">
+                              <li><a href="{{route('outlet.listProductStock')}}">Product List</a></li>
+                              <li><a href="{{route('outlet.importProduct')}}">Import Product</a></li>
+                              <li><a href="{{route('outlet.importProductStock')}}">Import Stock</a></li>
+                              <li><a href="{{route('outlet.trx')}}">Transaction In/Out</a></li>
+                              <li><a href="{{route('outlet.trxList')}}">Transaction List</a></li>
+                            </ul>
+                          </li>
+                          @endif
                           @if(Auth::user()->can('Outlet_Distributor'))
                             <li><a href="{{ route('customer.listNoo') }}"><strong>List Noo</strong></a></li>
                           @endif
@@ -289,7 +300,7 @@
           @yield('content')
       </div>
       <!--@yield('footer')-->
-      @include('layouts.footer')
+      <!--@include('layouts.footer')-->
     </div>
     <!-- Scripts -->
 

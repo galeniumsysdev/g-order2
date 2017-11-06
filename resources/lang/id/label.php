@@ -12,7 +12,7 @@ return [
     |
     */
 
-    'login' => 'Masuk',
+    'login' => 'Silahkan Masuk',
     'logout' => 'Keluar',
     'home' => 'Beranda',
     'register' => 'Daftar',
@@ -80,11 +80,10 @@ return [
     'download' => 'Unduh',
     'mandatoryfield' => 'Field wajib diisi',
     'searchproduct' => 'Cari Produk',
-	  'newconminlength' => 'Minimum perulangan kata sandi baru berisi 6 karakter',
+	'newconminlength' => 'Minimum perulangan kata sandi baru berisi 6 karakter',
     'showall' => 'Lihat Semua',
     'year' => 'Tahun',
     'month' => 'Bulan',
     'none' => 'Belum diproses',
     'donthaveaccount' => "Belum punya akun?"
-
 ];

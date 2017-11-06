@@ -17,7 +17,7 @@
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Upload Stock</strong></div>
+          <div class="panel-heading"><strong>Import Stock</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
@@ -27,7 +27,7 @@
                       <div class="col-md-12">
                         <div class="default-value">
                           <label for="outlet">
-                            [ <a href="/outlet/product/download/stock">Download Template</a> ]
+                            [ <a href="/outlet/product/download/template/stock">Download Template</a> ]
                           </label>
                         </div>
                       </div>
@@ -80,6 +80,7 @@
                                 <th>Title</th>
                                 <th>Stok Terakhir</th>
                                 <th>Stok Baru</th>
+                                <th>Batch</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -89,6 +90,7 @@
                                 <td>{{ $cell['title'] }}</td>
                                 <td>{{ $cell['last_stock'] }}</td>
                                 <td>{{ $cell['stock'] }}</td>
+                                <td>{{ (string)$cell['batch'] }}</td>
                               </tr>
                             @endforeach
                             </tbody>

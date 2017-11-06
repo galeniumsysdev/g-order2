@@ -57,7 +57,9 @@
                         <a class="navbar-brand" href="{{ url('/') }}" style="color:#fff">
                       @endif
                     @endif
-                        <strong>{{ config('app.name', 'g-Order') }}</strong>
+                        <strong>
+						<img class="img-header" src="{{ URL::to('img/logoe1.png') }}"/>
+						</strong></a>
                     </a>
                 </div>
                 @if (!Auth::guest())
@@ -130,8 +132,8 @@
                                 </li>
                               </ul>
                             </li>
-                            <!--{{--notification--}}
-                            <notification userid="{{auth()->id()}}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>-->
+                        <!--     {{--notification--}} -->
+                            <!-- <notification :email="{!! json_encode(Auth::user()->email) !!}"></notification> -->
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> Notifications
                                   <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
@@ -194,7 +196,6 @@
                                 </ul>
                             </li>
                         @endif
-
                     </ul>
                 </div>
             </div>

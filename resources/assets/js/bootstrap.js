@@ -42,16 +42,39 @@ if (token) {
  * for events that are broadcast by Laravel. Echo and event broadcasting
  * allows your team to easily build robust real-time web applications.
  */
-/*
+
 import Echo from 'laravel-echo'
 
 window.Pusher = require('pusher-js');
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
-    key: '8158c69642b65ebeb8ad',
+    key: 'f467c670b37f772d422e',
     cluster: "ap1",
-    encrypted:true,
-    authEndpoint : '/broadcasting/auth',
+    encrypted:true
 });
-*/
+
+// window.Echo.channel('demo')
+//           .listen('.my-event', post => {
+//             if (! ('Notification' in window)) {
+//               alert('Web Notification is not supported');
+//               return;
+//             }
+
+//             Notification.requestPermission( permission => {
+//               let notification = new Notification('New post alert!', {
+//                 body: post.message, // content for the alert
+//                 icon: "https://pusher.com/static_logos/320x320.png" // optional image url
+//               });
+
+//               // link to page on clicking the notification
+//               notification.onclick = () => {
+//                 window.open(window.location.href);
+//               };
+//             });
+//           })
+
+// window.Echo.channel('demo')
+//     .listen('.my-event', (e) => {
+//         console.log(e);
+//     });

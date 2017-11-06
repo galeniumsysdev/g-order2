@@ -140,7 +140,7 @@ class OrderController extends Controller
           if($request->status=="x")
           {
               $trx =$trx->where([['status','=',0],['approve','=',1]]);
-            //  $this->createExcel($request,null);
+              $this->createExcel($request,null);
           }elseif($request->status=="0"){
               $trx =$trx->where([['status','=',0],['approve','=',0]]);
           }else{
@@ -506,7 +506,7 @@ class OrderController extends Controller
                   $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom,'','',$h->tgl_order,'','','','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
 
                 }
-                $sheet->appendRow(array('*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*PB'));
+                $sheet->appendRow(array('*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*PB','*IR'));
             }
 
 
