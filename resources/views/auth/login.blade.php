@@ -69,9 +69,6 @@
 							<button type="submit" class="btn btn-lg btn-primary btn-block btn-signin">
 								@lang('label.login')
 							</button>
-							<a class="btn btn-link" href="{{ route('password.request') }}">
-									@lang('label.forgotpassword')
-								</a>
 							<a class="btn btn-regis" href="{{ url('/register') }}">
 								@lang('label.donthaveaccount')
 							</a>
