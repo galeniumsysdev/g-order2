@@ -307,7 +307,7 @@
     }
     </script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<!--<script src="http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.js"></script>-->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.js"></script>
 <script src="{{ asset('js/app.js') }}"></script>
 <script src="{{ asset('js/customlang.js') }}"></script>
 <script src="{{ asset('js/index.js') }}"></script>

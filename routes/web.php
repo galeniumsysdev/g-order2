@@ -162,6 +162,9 @@ Route::group(['middleware' => ['role:IT Galenium']], function () {
   Route::resource('CategoryOutlet',  'Cat_OutletController');
   Route::resource('CategoryProduct',  'CategoryProductController');
   Route::resource('users','UserController');
+  Route::resource('GroupDataCenter','DataCenterController');
+  Route::resource('SubgroupDatacenter','SubgroupDCController');
+  
 });
 
 Route::get('/manageOutlet/{id}/{notif_id}', 'CustomerController@show')->name('customer.show');
@@ -230,6 +233,7 @@ Route::group(['middleware' => ['auth']], function () {
 Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->name('order.getStatusOracle');
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
+Route::get('/oracle/synchronizemodofier', 'BackgroundController@getModifierSummary');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));

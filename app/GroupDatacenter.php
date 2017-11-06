@@ -9,6 +9,6 @@ class GroupDatacenter extends Model
      protected $fillable=['name','display_name','enabled_flag'];
      public function subgroupdatacenter()
      {
-         return $this->hasMany('App\SubgroupDatacenter');
+         return $this->hasMany('App\SubgroupDatacenter','group_id');
      }
 }

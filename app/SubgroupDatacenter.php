@@ -14,6 +14,6 @@ class SubgroupDatacenter extends Model
     }
 
     public function customer(){
-      return $this->hasMany('App\Customer');
+      return $this->hasMany('App\Customer','subgroup_dc_id');
     }
 }

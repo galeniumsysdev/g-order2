@@ -21,7 +21,7 @@ class QpCreateTables extends Migration
             $table->string('automatic_flag',1);
             $table->string('modifier_level_code',30);
             $table->integer('list_price');
-            $table->string('list_price_uom_code,3');
+            $table->string('list_price_uom_code');
             $table->string('primary_uom_flag',1);
             $table->integer('inventory_item_id');
             $table->integer('organization_id');
@@ -36,7 +36,7 @@ class QpCreateTables extends Migration
             $table->integer('product_precedence');
             $table->integer('pricing_phase_id');
             $table->integer('pricing_attribute_id');
-            $table->string('pricing_attribute_context',30);
+            $table->string('product_attribute_context',30);
             $table->string('product_attr',30);
             $table->string('product_attr_val',240);
             $table->string('product_uom_code',3);
@@ -57,7 +57,6 @@ class QpCreateTables extends Migration
             $table->string('comparison_operator_code',30);
             $table->string('qualifier_context',30);
             $table->string('qualifier_attribute',30);
-            $table->integer('qualifier_id');
             $table->integer('qualifier_grouping_no');
             $table->string('qualifier_attr_value',240);
             $table->integer('list_header_id');
@@ -139,6 +138,6 @@ class QpCreateTables extends Migration
         Schema::dropIfExists('QP_PRICING_ATTR_V');
         Schema::dropIfExists('QP_PRICING_ATTR_GET_V');
         Schema::dropIfExists('qp_qualifiers_v');
-        Schema::dropIfExists('qp_modifier_summary_v');        
+        Schema::dropIfExists('qp_modifier_summary_v');
     }
 }

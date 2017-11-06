@@ -140,7 +140,7 @@ class OrderController extends Controller
           if($request->status=="x")
           {
               $trx =$trx->where([['status','=',0],['approve','=',1]]);
-              //$this->createExcel($request,null);
+            //  $this->createExcel($request,null);
           }elseif($request->status=="0"){
               $trx =$trx->where([['status','=',0],['approve','=',0]]);
           }else{
@@ -163,7 +163,7 @@ class OrderController extends Controller
         }
         if(isset($request->tglak) )
         {
-          $trx =$trx->where('tgl_order','<=',$request->tglak);
+          $trx =$trx->where('tgl_order','<=',date('Y-m-d H:i:s', strtotime($request->tglak." 23:59:59")));
         }
       }
       //var_dump($trx->toSql());
@@ -479,7 +479,7 @@ class OrderController extends Controller
                             })
                           ->where('oha.cancelled_flag','!=','Y')
                           ->get();
-              //dd($oraheader);            
+              //dd($oraheader);
               if($oraheader->isEmpty())
               {
                 $oraheader=null;

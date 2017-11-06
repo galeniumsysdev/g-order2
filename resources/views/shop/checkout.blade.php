@@ -166,5 +166,10 @@ $(function()
 </script>-->
 
 <script src="{{ asset('js/myproduct.js') }}"></script>
+<script>
 
+window.Laravel = {
+               customerid : '{{auth()->user()->customer_id}}',
+            }
+</script>
 @endsection
