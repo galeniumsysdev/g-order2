@@ -33,11 +33,12 @@
       <td>{{$role->display_name}}</td>
       <td>{{$role->description}}</td>
       <td><a class="btn btn-info btn-sm" href="{{route('role.edit',$role->id)}}"><span class="glyphicon glyphicon-pencil"></span></a>
+        <!--
         {!! Form::open(['method' => 'DELETE','route' => ['role.destroy', $role->id],'style'=>'display:inline']) !!}
-            <!--  {!! Form::submit('Delete', ['class' => 'btn btn-sm btn-danger']) !!}-->
+
             {!! Form::button( '<i class="fa fa-trash-o"></i>', ['type' => 'submit','class' => 'btn btn-sm btn-danger'] ) !!}
 
-          	{!! Form::close() !!}
+          	{!! Form::close() !!}-->
       </td>
   </tr>
   @empty

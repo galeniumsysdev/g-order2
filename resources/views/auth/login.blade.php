@@ -69,7 +69,7 @@
                                   @lang('label.forgotpassword')
                               </a>
                                 <div class="btn" style="margin-top:-20px">@lang('label.donthaveaccount')
-                              <a class="btn-link" href="{{ route('password.request') }}">
+                              <a class="btn-link" href="{{ url('/register') }}">
                                   @lang('label.register')
                               </a></div>
                           <!--</div>-->

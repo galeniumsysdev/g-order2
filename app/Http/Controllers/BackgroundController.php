@@ -18,6 +18,8 @@ use App\OeTransactionType;
 use App\User;
 use App\SoShipping;
 use App\CustomerSite;
+use App\qp_modifier_summary;
+use App\qp_qualfiers;
 
 class BackgroundController extends Controller
 {
@@ -520,31 +522,41 @@ class BackgroundController extends Controller
     {
       $connoracle = DB::connection('oracle');
       if($connoracle){
-        $modifiers = $connoracle->table('qp_modifier_summary_v')->get();
-        if($modifiers)
-        {
-          foreach ($modifiers as $m){
-            $modifier = qp_modifier_summary::updateOrCreate(['list_line_id'=>$m->list_line_id, 'list_header_id'=>$m->list_header_id],
-              ['list_line_type_code'=>$m->list_line_type_code,'automatic_flag'=>$m->automatic_flag,'modifier_level_code'=>$m->modifier_level_code
-              ,'list_price'=>$m->list_price,'list_price_uom_code'=>$m->list_price_uom_code,'primary_uom_flag'=>$m->primary_uom_flag
-              ,'inventory_item_id'=>$m->inventory_item_id,'organization_id'=>$m->organization_id,'operand'=>$m->operand
-              ,'arithmetic_operator'=>$m->arithmetic_operator,'override_flag'=>$m->override_flag
-              ,'print_on_invoice_flag'=>$m->print_on_invoice_flag,'start_date_active'=>$m->start_date_active
-              ,'end_date_active'=>$m->end_date_active,'incompatibility_grp_code'=>$m->incompatibility_grp_code
-              ,'list_line_no'=>$m->list_line_no,'product_precedence'=>$m->product_precedence
-              ,'pricing_phase_id'=>$m->pricing_phase_id,'pricing_attribute_id'=>$m->pricing_attribute_id
-              ,'product_attribute_context'=>$m->product_attribute_context,'product_attr'=>$m->product_attr
-              ,'product_attr_val'=>$m->product_attr_val,'product_uom_code'=>$m->product_uom_code
-              ,'comparison_operator_code'=>$m->comparison_operator_code,'pricing_attribute_context'=>$m->pricing_attribute_context
-              ,'pricing_attr'=>$m->pricing_attr,'pricing_attr_value_from'=>$m->pricing_attr_value_from
-              ,'pricing_attr_value_to'=>$m->pricing_attr_value_to,'pricing_attribute_datatype'=>$m->pricing_attribute_datatype
-              ,'product_attribute_datatype'=>$m->product_attribute_datatype
-              ]
-            );
-            echo "Modifier: ".$m->list_line_id." berhasil ditambah/update<br>";
-          }
+          echo "Connect to oracle<br>";
+          $modifiers = $connoracle->table('qp_modifier_summary_v')
+                      ->select(  'list_line_id','list_header_id','list_line_type_code','automatic_flag','modifier_level_code'
+                        ,'list_price','list_price_uom_code','primary_uom_flag','inventory_item_id','organization_id'
+                        ,'operand','arithmetic_operator','override_flag','print_on_invoice_flag','start_date_active'
+                        ,'end_date_active','incompatibility_grp_code','list_line_no','product_precedence','pricing_phase_id'
+                        ,'pricing_attribute_id','product_attribute_context','product_attr','product_attr_val'
+                        ,'product_uom_code','comparison_operator_code','pricing_attribute_context','pricing_attr'
+                        ,'pricing_attr_value_from','pricing_attr_value_to','pricing_attribute_datatype'
+                        ,'product_attribute_datatype')
+                      ->get();
+          if($modifiers)
+          {
+            foreach ($modifiers as $m){
+              $modifier = qp_modifier_summary::updateOrCreate(['list_line_id'=>$m->list_line_id, 'list_header_id'=>$m->list_header_id],
+                ['list_line_type_code'=>$m->list_line_type_code,'automatic_flag'=>$m->automatic_flag,'modifier_level_code'=>$m->modifier_level_code
+                ,'list_price'=>$m->list_price,'list_price_uom_code'=>$m->list_price_uom_code,'primary_uom_flag'=>$m->primary_uom_flag
+                ,'inventory_item_id'=>$m->inventory_item_id,'organization_id'=>$m->organization_id,'operand'=>$m->operand
+                ,'arithmetic_operator'=>$m->arithmetic_operator,'override_flag'=>$m->override_flag
+                ,'print_on_invoice_flag'=>$m->print_on_invoice_flag,'start_date_active'=>$m->start_date_active
+                ,'end_date_active'=>$m->end_date_active,'incompatibility_grp_code'=>$m->incompatibility_grp_code
+                ,'list_line_no'=>$m->list_line_no,'product_precedence'=>$m->product_precedence
+                ,'pricing_phase_id'=>$m->pricing_phase_id,'pricing_attribute_id'=>$m->pricing_attribute_id
+                ,'product_attribute_context'=>$m->product_attribute_context,'product_attr'=>$m->product_attr
+                ,'product_attr_val'=>$m->product_attr_val,'product_uom_code'=>$m->product_uom_code
+                ,'comparison_operator_code'=>$m->comparison_operator_code,'pricing_attribute_context'=>$m->pricing_attribute_context
+                ,'pricing_attr'=>$m->pricing_attr,'pricing_attr_value_from'=>$m->pricing_attr_value_from
+                ,'pricing_attr_value_to'=>$m->pricing_attr_value_to,'pricing_attribute_datatype'=>$m->pricing_attribute_datatype
+                ,'product_attribute_datatype'=>$m->product_attribute_datatype
+                ]
+              );
+              echo "Modifier: ".$m->list_line_id." berhasil ditambah/update<br>";
+            }
 
-        }
+          }
       }
     }
 
@@ -552,7 +564,11 @@ class BackgroundController extends Controller
     {
       $connoracle = DB::connection('oracle');
       if($connoracle){
-        $qualifiers = $connoracle->table('qp_qualifiers')->get();
+        $qualifiers = $connoracle->table('qp_qualifiers')
+                      ->select('qualifier_id','excluder_flag','comparison_operator_code','qualifier_context','qualifier_attribute'
+                      ,'qualifier_grouping_no','qualifier_attr_value','list_header_id','list_line_id','start_date_active'
+                      ,'end_date_active','qualifier_datatype','qualifier_precendence')
+                      ->get();
         if($qualifiers)
         {
           foreach ($qualifiers as $q){
@@ -571,5 +587,5 @@ class BackgroundController extends Controller
         }
       }
     }
-    
+
 }
