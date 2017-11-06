@@ -20,8 +20,6 @@
   <link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">
   <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
   <link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
-
-
   <link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">
   <link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
   <link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
@@ -59,7 +57,7 @@
                       @else
                           <a class="navbar-brand" href="{{ url('/home') }}" style="color:#fff">
                       @endif
-                          <strong>{{ config('app.name', 'g-Order') }}</strong>
+                          <strong><img class="img-header" src="{{ URL::to('img/logoe1.png') }}"/></strong>
                         </a>
                       @if(Auth::user())
                         @if(Auth::user()->can('Create PO'))
@@ -302,7 +300,7 @@
           @yield('content')
       </div>
       <!--@yield('footer')-->
-      @include('layouts.footer')
+      <!--@include('layouts.footer')-->
     </div>
     <!-- Scripts -->
 
