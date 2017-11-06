@@ -12,8 +12,8 @@ class User extends Authenticatable {
 	//use Uuids;
 
 	public function routeNotificationForPusherPushNotifications() {
-		// return $this->email;
-		return 'shanty29.dewi@solinda.co.id';
+		return $this->email;
+		// return 'shanty25.dewi@solinda.co.id';
 	}
 
 	/**

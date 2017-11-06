@@ -25,13 +25,14 @@ Route::get('/pusher', function () {
 	$data = [
 		'title' => 'akhirnya',
 		'body' => 'Disini ada pesta',
+		'message' => 'Disini ada pesta',
 		'href' => 'http://google.com',
 	];
-	event(new App\Events\PusherBroadcaster('hahaha', 'heleh', 'https://google.com', 'shanty25.dewi@solinda.co.id'));
+	event(new App\Events\PusherBroadcaster($data, 'shanty25.dewi@solinda.co.id'));
 	$customer = App\Customer::first();
 	$users = $customer->users;
 	foreach ($users as $u) {
-		$u->notify(new App\Notifications\DummyNotif($data));
+		$u->notify(new App\Notifications\PushNotif($data));
 	}
 	return 'test';
 });
