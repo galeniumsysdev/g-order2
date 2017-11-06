@@ -46,4 +46,5 @@ return [
     'senddate' => 'Tgl Kirim',
     'print' => 'Cetak',
     'createexcel' =>'Buat Excel',
+    'suggestiondpl' => 'No. Kupon DPL'
 ];

@@ -95,7 +95,7 @@ class UserController extends Controller
         $roles = Role::pluck('display_name','id');
 
         //$userRole = $user->roles->lists('id','id')->toArray();
-        $userRole = $user->roles->pluck('id','id')->toArray();      
+        $userRole = $user->roles->pluck('id','id')->toArray();
         return view('admin.user.edit',['user'=>$user,'roles'=>$roles,'userRole'=>$userRole,'menu'=>$this->menu]);
     }
 

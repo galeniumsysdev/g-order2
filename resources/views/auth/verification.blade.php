@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.home')
 
 @section('content')
 
@@ -20,7 +20,7 @@
                   @elseif ($errors->has('langitude'))
                     <span class="help-block">
                         <strong>{{ $errors->first('langitude') }}</strong>
-                    </span> 
+                    </span>
                   @endif
                     <form class="form-horizontal" method="POST" action="{{ route('register2') }}">
                         {{ csrf_field() }}
@@ -58,16 +58,16 @@
 
                             <div class="col-md-6">
                                 <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
-								<div style="font-size:8pt; color:red;">* @lang('label.newconminlength')</div>
+								                <div style="font-size:8pt; color:red;">* @lang('label.newconminlength')</div>
                             </div>
                         </div>
                         <div class="form-group">
-							<div class="row justify-content-md-center">
-								<div class="col-md-6 col-md-offset-4" id ="map"></div>
-								<input type="hidden" name="langitude" value="" id="langitude_txt">
-								<input type="hidden" name="longitude" value="" id="longitude_txt">
-							</div>
-                        <div>
+            							<div class="row justify-content-md-center">
+            								<div class="col-md-6 col-md-offset-4" id ="map"></div>
+            								<input type="hidden" name="langitude" value="" id="langitude_txt">
+            								<input type="hidden" name="longitude" value="" id="longitude_txt">
+            							</div>
+                        </div>
 						<br>
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">

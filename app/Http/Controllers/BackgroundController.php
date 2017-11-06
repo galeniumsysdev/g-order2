@@ -515,4 +515,61 @@ class BackgroundController extends Controller
         return null;
       }
     }
+
+    public function getModifierSummary()
+    {
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $modifiers = $connoracle->table('qp_modifier_summary_v')->get();
+        if($modifiers)
+        {
+          foreach ($modifiers as $m){
+            $modifier = qp_modifier_summary::updateOrCreate(['list_line_id'=>$m->list_line_id, 'list_header_id'=>$m->list_header_id],
+              ['list_line_type_code'=>$m->list_line_type_code,'automatic_flag'=>$m->automatic_flag,'modifier_level_code'=>$m->modifier_level_code
+              ,'list_price'=>$m->list_price,'list_price_uom_code'=>$m->list_price_uom_code,'primary_uom_flag'=>$m->primary_uom_flag
+              ,'inventory_item_id'=>$m->inventory_item_id,'organization_id'=>$m->organization_id,'operand'=>$m->operand
+              ,'arithmetic_operator'=>$m->arithmetic_operator,'override_flag'=>$m->override_flag
+              ,'print_on_invoice_flag'=>$m->print_on_invoice_flag,'start_date_active'=>$m->start_date_active
+              ,'end_date_active'=>$m->end_date_active,'incompatibility_grp_code'=>$m->incompatibility_grp_code
+              ,'list_line_no'=>$m->list_line_no,'product_precedence'=>$m->product_precedence
+              ,'pricing_phase_id'=>$m->pricing_phase_id,'pricing_attribute_id'=>$m->pricing_attribute_id
+              ,'product_attribute_context'=>$m->product_attribute_context,'product_attr'=>$m->product_attr
+              ,'product_attr_val'=>$m->product_attr_val,'product_uom_code'=>$m->product_uom_code
+              ,'comparison_operator_code'=>$m->comparison_operator_code,'pricing_attribute_context'=>$m->pricing_attribute_context
+              ,'pricing_attr'=>$m->pricing_attr,'pricing_attr_value_from'=>$m->pricing_attr_value_from
+              ,'pricing_attr_value_to'=>$m->pricing_attr_value_to,'pricing_attribute_datatype'=>$m->pricing_attribute_datatype
+              ,'product_attribute_datatype'=>$m->product_attribute_datatype
+              ]
+            );
+            echo "Modifier: ".$m->list_line_id." berhasil ditambah/update<br>";
+          }
+
+        }
+      }
+    }
+
+    public function getQualiers()
+    {
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $qualifiers = $connoracle->table('qp_qualifiers')->get();
+        if($qualifiers)
+        {
+          foreach ($qualifiers as $q){
+            $qualifier = qp_qualifiers::updateOrCreate(['qualifier_id'=>$q->qualifier_id],
+              ['excluder_flag'=>$q->excluder_flag,'comparison_operator_code'=>$q->comparison_operator_code
+              ,'qualifier_context'=>$q->qualifier_context,'qualifier_attribute'=>$q->qualifier_attribute
+              ,'qualifier_grouping_no'=>$q->qualifier_no,'qualifier_attr_value'=>$q->qualifier_attr_value
+              ,'list_header_id'=>$q->list_header_id,'list_line_id'=>$q->list_line_id
+              ,'start_date_active'=>$q->start_Date_Active,'end_date_active'=>$q->end_date_active
+              ,'qualifier_datatype'=>$q->qualifier_datatype,'qualifier_precendence'=>$q->qualifier_precendence
+              ]
+            );
+            echo "qualifier: ".$q->qualifier_id." berhasil ditambah/update<br>";
+          }
+
+        }
+      }
+    }
+    
 }

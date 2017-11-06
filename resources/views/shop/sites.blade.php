@@ -17,7 +17,7 @@
               <img data-src="holder.js/100%x100" alt="100%x100" style="height: 100px; width: 100%; display: block;" src="{{ asset('img/e-order1.png') }}" data-holder-rendered="true">
             @endif
             <div class="caption">
-              <a href="{{route('product.index')}}?dist={{$distributor->id}}">{{ $distributor->customer_name }}</a>
+              <a href="{{route('product.buy')}}?dist={{$distributor->id}}">{{ $distributor->customer_name }}</a>
             </div>
           </div>
         </div>

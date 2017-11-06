@@ -46,4 +46,5 @@ return [
     'senddate' => 'Send Date',
     'print' => 'Print',
     'createexcel' =>'Create Excel',
+    'suggestiondpl' => 'Coupon No',
 ];

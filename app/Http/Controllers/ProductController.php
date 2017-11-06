@@ -222,7 +222,7 @@ class ProductController extends Controller
   //  dd($products);
     $products ->setPath(url()->current());
 
-    return view('shop.index',['products' => $products]);
+    return view('shop.product',['products' => $products]);
   }
 
   public function search(Request $request)

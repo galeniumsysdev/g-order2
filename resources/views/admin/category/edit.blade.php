@@ -33,6 +33,6 @@
      @endif
   </div>
   <button type="submit" class="btn btn-primary">Submit</button>
-   <a href='{{URL::previous()}}'><button type="button" class="btn btn-warning">Cancel</button></a>
+   <a href='{{route("CategoryOutlet.index")}}'><button type="button" class="btn btn-warning">Back to list</button></a>
 </form>
 @endsection

@@ -142,6 +142,29 @@ class ProfileController extends Controller
 
   }
 
+  public function editAddress(Request $request,$id)
+  {
+    $site = CustomerSite::find($id);
+    $provinces = $provinces = DB::table('provinces')->get();
+    if($request->isMethod('patch'))
+    {
+      $site->site_use_code = $request->fungsi;
+      $site->address1 = strtoupper($request->address);
+      $site->state = strtoupper($request->state);
+      $site->city = strtoupper($request->city);
+      $site->postalcode = $request->postalcode;
+      $site->Country = 'ID';
+      $site->save();
+      $prevpage = $request->prevpage;
+      //dd($prevpage);
+      return view('auth.profile.edit_address',compact('site','prevpage','provinces'))->withMessage(trans('pesan.update'));
+    }else{
+        $prevpage = null;
+        return view('auth.profile.edit_address',compact('site','prevpage','provinces'));
+    }
+
+  }
+
   public function removeaddress($id)
   {
     $delete = DB::table("customer_sites")->where([
@@ -158,5 +181,18 @@ class ProfileController extends Controller
       ['customer_id','=',auth()->user()->customer_id],
       ])->delete();
     return back()->withMessage(trans('pesan.delete'));
+  }
+
+  public function getListProvince(Request $request)
+  {
+      $provinces = DB::table('provinces')->where('name','like',$request->input('query')."%")->get();
+      return response()->json($provinces);
+  }
+
+  public function getListCity(Request $request)
+  {
+      //$id = Input::get('id');
+      $city = DB::table('regencies')->where('name','like',$request->input('query')."%")->get();
+      return Response::json($city);
   }
 }

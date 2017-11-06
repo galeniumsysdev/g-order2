@@ -23,14 +23,14 @@
     </li>
     <!--<li {{$menu=='CategoryOutlet'?'class=active':''}}>
         <a href="{{route('CategoryOutlet.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Outlet</a>
-    </li>-->
-    <li>
-        <a href="bootstrap-grid.html"><i class="fa fa-fw fa-wrench"></i> Outlet/Distributor</a>
     </li>
+    <li>
+        <a href="{{route('customer.listNoo')}}"><i class="fa fa-fw fa-wrench"></i> Outlet/Distributor</a>
+    </li>-->
     <li {{$menu=='OrgStructure'?'class=active':''}}>
         <a href="{{route('org.list')}}"><i class="fa fa-fw fa-desktop"></i> Organization Structure</a>
     </li>
-    <li>
+  <!--  <li>
         <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-arrows-v"></i> Dropdown <i class="fa fa-fw fa-caret-down"></i></a>
         <ul id="demo" class="collapse">
             <li>
@@ -47,7 +47,7 @@
 	<li>
 @endif
         <a href="blank-page.html"><i class="fa fa-fw fa-file"></i> Blank Page</a>
-    </li>
+    </li>-->
     <li>
         <a href="javascript:;" data-toggle="collapse" data-target="#category"><i class="fa fa-fw fa-arrows-v"></i> Category <i class="fa fa-fw fa-caret-down"></i></a>
         <ul id="category" class="collapse">
@@ -56,6 +56,12 @@
             </li>
             <li {{$menu=='CategoryOutlet'?'class=active':''}}>
                 <a href="{{route('CategoryProduct.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Product</a>
+            </li>
+            <li {{$menu=='GroupDataCenter'?'class=active':''}}>
+                <a href="{{route('GroupDataCenter.index')}}"><i class="fa fa-fw fa-desktop"></i> Group Datacenter</a>
+            </li>
+            <li {{$menu=='SubgroupDatacenter'?'class=active':''}}>
+                <a href="{{route('SubgroupDatacenter.index')}}"><i class="fa fa-fw fa-desktop"></i> Subgroup Datacenter</a>
             </li>
 
         </ul>

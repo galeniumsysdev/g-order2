@@ -29,6 +29,19 @@
                 @endif
               </div>
             </div>
+            @if(Auth::user()->customer->pharma_flag=="1" and (Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet')))
+            <div class="form-group {{ $errors->has('coupon_no') ? ' has-error' : '' }}">
+              <label class="control-label col-sm-3" for="dplno">@lang('shop.suggestiondpl') :</label>
+              <div class="col-sm-8">
+                    <input type="text" name="coupon_no" id="coupon_no" value="" class="form-control" placeholder="@lang('shop.suggestiondpl')">
+                    @if ($errors->has('coupon_no'))
+      									<span class="help-block with-errors">
+      											<strong>{{ $errors->first('coupon_no') }}</strong>
+      									</span>
+      							@endif
+              </div>
+            </div>
+            @endif
             <div class="form-group{{ $errors->has('alamat') ? ' has-error' : '' }}">
               <label class="control-label col-sm-3" for="Alamat">*@lang('shop.ShipTo') :</label>
               <div class="col-sm-8">
@@ -62,6 +75,7 @@
               </div>
             </div>
             @endif
+
             <div class="form-group {{ $errors->has('filepo') ? ' has-error' : '' }}">
               <label class="control-label col-sm-3" for="filepo">@lang('shop.documentPO') :</label>
               <div class="col-sm-8">
@@ -152,5 +166,10 @@ $(function()
 </script>-->
 
 <script src="{{ asset('js/myproduct.js') }}"></script>
+<script>
 
+window.Laravel = {
+               customerid : '{{auth()->user()->customer_id}}',
+            }
+</script>
 @endsection

@@ -81,7 +81,7 @@
             function (data) {
                 $('#cari-pareto').typeahead({
                     source: data,
-                    items: 'all',
+                    items: 10,
                     showHintOnFocus: 'all',
                     displayText: function (item) {
                         return item.title;

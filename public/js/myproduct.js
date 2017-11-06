@@ -209,3 +209,26 @@ $('#reject_PO').on('click',function(){
   }
   return false;
 });*/
+
+$('#coupon_no').blur(function(){
+  /*var path = {{route('DPLController@suggestNoValidation')}};
+    $.get(path+"/"+this.val,function(data){
+
+    });*/
+
+    $.ajax({
+             type: 'get',
+             url: baseurl+'/dpl/suggestno/validation/'+window.Laravel.customerid+'/'+$(this).val(),
+             success: function(data) {
+               if(data.valid){
+                 alert("nomor dpl valid");
+               }else{
+                 //alert("nomor dpl tidak valid");
+
+                 swal ( "No Kupon DPL tidak valid!" ,  "" ,  "error" )
+
+                 $('#coupon_no').val('');
+               }
+             }
+         });
+});
