@@ -54,7 +54,7 @@ class QpCreateTables extends Migration
             $table->integer('qualifier_id');
             $table->timestamps();
             $table->string('excluder_flag',1)->nullable();
-            $table->string('comparison_operator_code',30)->nullable();
+            $table->string('comparision_operator_code',30)->nullable();
             $table->string('qualifier_context',30)->nullable();
             $table->string('qualifier_attribute',30)->nullable();
             $table->integer('qualifier_grouping_no')->nullable();
@@ -64,7 +64,7 @@ class QpCreateTables extends Migration
             $table->date('start_date_active')->nullable();
             $table->date('end_date_Active')->nullable();
             $table->string('qualifier_datatype',10)->nullable();
-            $table->integer('qualifier_precendence')->nullable();
+            $table->integer('qualifier_precedence')->nullable();
           });
 
           Schema::create('QP_PRICING_ATTR_GET_V', function (Blueprint $table) {

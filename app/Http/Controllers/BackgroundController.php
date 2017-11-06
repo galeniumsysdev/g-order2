@@ -19,7 +19,7 @@ use App\User;
 use App\SoShipping;
 use App\CustomerSite;
 use App\qp_modifier_summary;
-use App\qp_qualfiers;
+use App\qp_qualifiers;
 
 class BackgroundController extends Controller
 {
@@ -560,25 +560,26 @@ class BackgroundController extends Controller
       }
     }
 
-    public function getQualiers()
+    public function getQualifiers()
     {
       $connoracle = DB::connection('oracle');
       if($connoracle){
-        $qualifiers = $connoracle->table('qp_qualifiers')
-                      ->select('qualifier_id','excluder_flag','comparison_operator_code','qualifier_context','qualifier_attribute'
+        $qualifiers = $connoracle->table('qp_qualifiers_v')
+                      ->select('qualifier_id','excluder_flag','comparision_operator_code','qualifier_context','qualifier_attribute'
                       ,'qualifier_grouping_no','qualifier_attr_value','list_header_id','list_line_id','start_date_active'
-                      ,'end_date_active','qualifier_datatype','qualifier_precendence')
+                      ,'end_date_active','qualifier_datatype','qualifier_precedence')
                       ->get();
         if($qualifiers)
         {
+          echo "Connect to oracle<br>";
           foreach ($qualifiers as $q){
             $qualifier = qp_qualifiers::updateOrCreate(['qualifier_id'=>$q->qualifier_id],
-              ['excluder_flag'=>$q->excluder_flag,'comparison_operator_code'=>$q->comparison_operator_code
+              ['excluder_flag'=>$q->excluder_flag,'comparision_operator_code'=>$q->comparision_operator_code
               ,'qualifier_context'=>$q->qualifier_context,'qualifier_attribute'=>$q->qualifier_attribute
-              ,'qualifier_grouping_no'=>$q->qualifier_no,'qualifier_attr_value'=>$q->qualifier_attr_value
+              ,'qualifier_grouping_no'=>$q->qualifier_grouping_no,'qualifier_attr_value'=>$q->qualifier_attr_value
               ,'list_header_id'=>$q->list_header_id,'list_line_id'=>$q->list_line_id
-              ,'start_date_active'=>$q->start_Date_Active,'end_date_active'=>$q->end_date_active
-              ,'qualifier_datatype'=>$q->qualifier_datatype,'qualifier_precendence'=>$q->qualifier_precendence
+              ,'start_date_active'=>$q->start_date_active,'end_date_active'=>$q->end_date_active
+              ,'qualifier_datatype'=>$q->qualifier_datatype,'qualifier_precedence'=>$q->qualifier_precedence
               ]
             );
             echo "qualifier: ".$q->qualifier_id." berhasil ditambah/update<br>";
