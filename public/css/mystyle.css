@@ -427,12 +427,10 @@ ul.dropdown-notif li .item-right button{
 	padding-left: 5px;
 	margin-top: 20px;
   padding-right: 10px;
-  float: right;
 }
 
 .footer-apps-img img {
   height: 40px;
-  margin-left: -10px;
 }
 
 .footer-play-img {
@@ -525,14 +523,14 @@ ul.dropdown-notif li .item-right button{
 .img-footer-gale {
 	vertical-align: middle;
 	width: 100px;
-	margin-top: 15px;
+	margin-top: 20px;
 }
 
 .img-footer-yasa {
 	vertical-align: middle;
 	width: 80px;
 	height: 30px;
-	margin-top: 15px;
+	margin-top: 20px;
 	margin-left: 10px;
 }
 

@@ -300,7 +300,7 @@
           @yield('content')
       </div>
       <!--@yield('footer')-->
-      <!--@include('layouts.footer')-->
+      @include('layouts.footer')
     </div>
     <!-- Scripts -->
 

@@ -59,6 +59,9 @@
 								<label>
 									<input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>@lang('label.remember')
 								</label>
+								<a class="btn btn-link" href="{{ route('password.request') }}">
+									@lang('label.forgotpassword')
+								</a>
 							</div>
 						</div>
 						
