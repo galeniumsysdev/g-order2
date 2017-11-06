@@ -40,20 +40,6 @@
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
-                        <div class="form-label">
-                          <label for="distributor">Distributor</label>
-                        </div>
-                      </div>
-                      <div class="col-md-10">
-                        {{ Form::select('distributor',$distributor_list,0,array('class'=>'form-control','id'=>'distributor')) }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="container-fluid">
-                    <div class="row">
-                      <div class="col-md-2">
                         &nbsp;
                       </div>
                       <div class="col-md-10">

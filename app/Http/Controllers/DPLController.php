@@ -30,7 +30,6 @@ class DPLController extends Controller {
 			->get();
 
 		$outlet_list = array('---Pilih---');
-		$distributor_list = array('---Silakan Pilih Outlet---');
 
 		foreach ($outlets as $key => $outlet) {
 			$outlet_list[$outlet->id] = $outlet->customer_name;
@@ -38,7 +37,6 @@ class DPLController extends Controller {
 
 		return view('admin.dpl.genSuggestNo', array(
 			'outlet_list' => $outlet_list,
-			'distributor_list' => $distributor_list,
 		));
 	}
 
@@ -60,7 +58,6 @@ class DPLController extends Controller {
 		$dplSuggestNo = new DPLSuggestNo;
 		$dplSuggestNo->mr_id = Auth::User()->id;
 		$dplSuggestNo->outlet_id = $request->outlet;
-		$dplSuggestNo->distributor_id = $request->distributor;
 		$dplSuggestNo->suggest_no = $token;
 		$dplSuggestNo->save();
 
