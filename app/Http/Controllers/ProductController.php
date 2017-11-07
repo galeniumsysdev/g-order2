@@ -567,7 +567,7 @@ class ProductController extends Controller
                        ->withInput();
         }
       }
-      dd($check_dpl);
+      //dd($check_dpl);
       if(!Session::has('distributor_to'))
       {
         return view('shop.shopping-cart',['products'=>null])->withMessage('Pilih distributor terlebih dahulu');
@@ -660,8 +660,10 @@ class ProductController extends Controller
         ])->validate();
         if(isset($request->coupon_no))
         {
-          $check_dpl->notrx = $notrx;
-          $check_dpl->save();
+          DPLSuggestNo::where('outlet_id',Auth::user()->customer_id)
+                        ->where('suggest_no',$request->coupon_no)
+                        ->whereNull('notrx')
+                        ->update(['notrx'=>$notrx,'distributor_id'=> $oldDisttributor['id']]);
         }
       $header= SoHeader::create([
           'distributor_id' => $oldDisttributor['id'],

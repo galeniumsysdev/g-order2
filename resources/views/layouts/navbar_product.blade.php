@@ -13,14 +13,14 @@
     <!-- Styles -->
 		<!--<link rel="stylesheet" href="product.css">-->
 	<link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,700&subset=latin-ext,vietnamese" rel="stylesheet">
-	 <!--<link href="css/bootstrap.min.css" rel="stylesheet">-->
+
   <link href="https://fonts.googleapis.com/css?family=Pacifico&subset=latin-ext,vietnamese" rel="stylesheet">
 	<link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
-  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">-->
+
   <link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">
-  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
+
   <link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
-  <link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">
+  <!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
   <link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
   <link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
 
@@ -188,6 +188,7 @@
                                 <li><a href="{{route('outlet.listProductStock')}}">Product List</a></li>
                                 <li><a href="{{route('outlet.importProduct')}}">Import Product</a></li>
                                 <li><a href="{{route('outlet.importProductStock')}}">Import Stock</a></li>
+                                <li><a href="{{route('outlet.trx')}}">Transaction In/Out</a></li>
                                 <li><a href="{{route('outlet.trxList')}}">Transaction List</a></li>
                               </ul>
                             </li>
@@ -222,7 +223,7 @@
                             </ul>
                           </li>
                         <!--{{--notification--}}
-                          --  <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>-->
+                           <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>-->
                             <li class="dropdown hidden-xs">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> Notifications
                                   <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
@@ -300,7 +301,7 @@
           @yield('content')
       </div>
       <!--@yield('footer')-->
-      <!--@include('layouts.footer')-->
+      @include('layouts.footer')
     </div>
     <!-- Scripts -->
 
@@ -323,6 +324,5 @@
 <script src="{{ asset('js/customlang.js') }}"></script>
 <script src="{{ asset('js/index.js') }}"></script>
 @yield('js')
-
 </body>
 </html>

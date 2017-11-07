@@ -24,6 +24,13 @@ class Product extends Model
         );*/
     }
 
+    public function uom()
+    {
+      return $this->hasMany('App\UomConversion','product_id');
+    }
+
+
+
 
 
 }
