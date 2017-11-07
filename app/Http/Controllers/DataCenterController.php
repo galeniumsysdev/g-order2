@@ -18,13 +18,13 @@ class DataCenterController extends Controller
   public function index()
   {
     $group=GroupDatacenter::all();//paginate(10);
-    return view('admin.groupdc.index',array('groups'=>$group,'menu'=>$this->menu));
+    return view('admin.groupDC.index',array('groups'=>$group,'menu'=>$this->menu));
   }
 
 
   public function create()
   {
-    return view('admin.groupdc.create',array('menu'=>$this->menu));
+    return view('admin.groupDC.create',array('menu'=>$this->menu));
   }
 
 
@@ -55,7 +55,7 @@ class DataCenterController extends Controller
   public function edit($id)
   {
     $group=GroupDatacenter::find($id);//paginate(10);
-    return view('admin.groupdc.edit',array('group'=>$group,'menu'=>$this->menu));
+    return view('admin.groupDC.edit',array('group'=>$group,'menu'=>$this->menu));
   }
 
 

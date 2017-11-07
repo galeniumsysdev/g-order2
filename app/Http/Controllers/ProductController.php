@@ -26,6 +26,7 @@ use App\Notifications\NewPurchaseOrder;
 use Mail;
 use App\Mail\CreateNewPo;
 use Illuminate\Database\Eloquent\Collection;
+use App\DPLSuggestNo;
 
 class ProductController extends Controller
 {
@@ -552,6 +553,21 @@ class ProductController extends Controller
       $shipid=null;
       $orgid=null;
       $warehouseid=null;
+      $check_dpl =false;
+      if(isset($request->coupon_no))
+      {
+        $check_dpl = DPLSuggestNo::where('outlet_id',Auth::user()->customer_id)
+                      ->where('suggest_no',$request->coupon_no)
+                      ->whereNull('notrx')
+                      ->get();
+        if($check_dpl->isEmpty())
+        {
+          return redirect('/checkout')
+                       ->withErrors(['coupon_no'=>trans('pesan.notmatchdpl')])
+                       ->withInput();
+        }
+      }
+      //dd($check_dpl);
       if(!Session::has('distributor_to'))
       {
         return view('shop.shopping-cart',['products'=>null])->withMessage('Pilih distributor terlebih dahulu');
@@ -636,10 +652,19 @@ class ProductController extends Controller
         );
       }
 
+
+
        Validator::make($request->all(), [
            'no_order' => 'required|unique:so_headers,customer_po,null,null,customer_id,'.Auth::user()->customer_id.'|max:50',
            'alamat' => 'required',
         ])->validate();
+        if(isset($request->coupon_no))
+        {
+          DPLSuggestNo::where('outlet_id',Auth::user()->customer_id)
+                        ->where('suggest_no',$request->coupon_no)
+                        ->whereNull('notrx')
+                        ->update(['notrx'=>$notrx,'distributor_id'=> $oldDisttributor['id']]);
+        }
       $header= SoHeader::create([
           'distributor_id' => $oldDisttributor['id'],
           'customer_id' => auth()->user()->customer_id,
@@ -659,7 +684,9 @@ class ProductController extends Controller
           'notrx' => $notrx,
           'status' => 0,
           'org_id' => $orgid,
-          'warehouse' =>$warehouseid
+          'warehouse' =>$warehouseid,
+          'suggest_no'=>$request->coupon_no
+
         ]);
       if($header){
         if($tmpnotrx==0){

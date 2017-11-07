@@ -31,5 +31,6 @@ return [
     'notfixedprice'=> 'Harga yang berlaku adalah sesuai faktur',
     'cantapprove'=>"Data tidak tersimpan. Anda tidak memiliki akses untuk mengapprove/mereject outlet ini.",
     'successupload' => 'File berhasil terupload',
-    'alreadyupload' => 'File telah terupload!'
+    'alreadyupload' => 'File telah terupload!',
+    'notmatchdpl' => 'No Pengajuan DPL tidak cocok'
 ];

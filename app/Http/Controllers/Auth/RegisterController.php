@@ -18,6 +18,8 @@ use Webpatser\Uuid\Uuid;
 use DB;
 use Image;
 use File;
+use App\CategoryOutlet;
+
 
 class RegisterController extends Controller
 {
@@ -295,6 +297,39 @@ class RegisterController extends Controller
       }else{
         redirect(route('login'))->with('status',trans("auth.registerfailed"));
       }
+    }
+
+    public function showRegistrationForm()
+    {
+      $categories = CategoryOutlet::where('enable_flag','Y')->get();
+      $provinces = DB::table('provinces')->get();
+      return view('auth.register',compact('categories','provinces'));
+    }
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function register2(Request $request)
+    {
+        //$this->validator($request->all())->validate();
+        $this->verification($request->all())->validate();
+
+
+        //event(new Registered($user = $this->create($request->all())));
+        event( new Registered( $user = $this->update($request->all()) ) );
+
+        if($user->register_flag){
+          $this->guard()->login($user);
+
+          return $this->registered($request, $user)
+                          ?: redirect($this->redirectPath());
+        }else{
+          return back()->with('status', trans('auth.alreadyregistered'));
+        }
+
     }
 
 }
