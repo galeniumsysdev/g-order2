@@ -220,7 +220,7 @@ body { /*padding-top: 30px;*/
 
 .navbar-login
 {
-    width: 305px;
+    width: 350px;
     padding: 10px;
     padding-bottom: 0px;
 }
@@ -234,8 +234,8 @@ body { /*padding-top: 30px;*/
 
 .btn-black, a.btn-black:hover {
 	color: #fff;
-	background-color: #000;
-	border-color: #000;
+	background-color: skyblue;
+	border-color: skyblue;
 }
 
 /*register*/
@@ -449,7 +449,7 @@ ul.dropdown-notif li .item-right button{
 }
 
 .navbar-right-xs a, .navbar-right-xs a:hover{
-  color: #000;
+  color: #fff;
 }
 
 /*table responsive*/
@@ -545,4 +545,11 @@ ul.dropdown-notif li .item-right button{
 
 .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
 	color: #fff;
+}
+
+.fa-lg {
+  font-size: 1.33333333em;
+  line-height: .75em;
+  vertical-align: -15%;
+  color: #fff;
 }

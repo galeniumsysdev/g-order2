@@ -13,7 +13,7 @@ return [
     */
 
     'login' => 'Login',
-    'logout' => 'Logout',
+    'logout' => 'L O G O U T',
     'home' => 'Home',
     'register' => 'Register',
     'outlet' => 'Outlet Name',

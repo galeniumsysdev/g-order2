@@ -5077,6 +5077,7 @@ tbody.collapse.in {
 .nav > li {
   position: relative;
   display: block;
+  padding-left: 10px;
 }
 
 .nav > li > a {
@@ -6213,7 +6214,7 @@ a.label:focus {
   vertical-align: middle;
   white-space: nowrap;
   text-align: center;
-  background-color: #777777;
+  background-color: #14568c;
   border-radius: 10px;
 }
 
@@ -8350,4 +8351,9 @@ button.close {
   .hidden-print {
     display: none !important;
   }
+}
+
+.navbar-header-logout {
+  font-size: 16px;
+  padding-left: 130px;
 }

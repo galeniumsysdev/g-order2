@@ -71,7 +71,7 @@
                         <ul class="nav navbar-right-xs pull-right visible-xs">
                           <li>
                             <a href="{{url('/home')}}" title="@lang('label.showall') Notification"><i class="fa fa-bell fa-lg"></i>
-                            <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
+                            &nbsp;<span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
                           </a>
                           </li>
                         </ul>
@@ -137,7 +137,7 @@
                           </li>
                           @endif
                           @if(Auth::user()->can('Outlet_Distributor'))
-                            <li><a href="{{ route('customer.listNoo') }}"><strong>List Noo</strong></a></li>
+                            <li><a href="{{ route('customer.listNoo') }}">List Noo</a></li>
                           @endif
                           @if(Auth::user()->can('PengajuanDPL'))
                             <!--
@@ -211,7 +211,7 @@
 
                           <!--bahasa dropdown-->
                           <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp; <strong>{{ app()->getLocale() }}</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp;{{ app()->getLocale() }}&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                             <ul class="dropdown-menu">
                               <li id="LI_201">
                                   <a href="#" id="idLang" onclick="changeLanguage('id');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/indonesia.png" alt="" width="20" height="20" id="IMG_203" /><span id="SPAN_204"><span id="SPAN_205">&nbsp; Indonesia (id)</span></span></a>
@@ -248,16 +248,16 @@
                                     <strong><i class="fa fa-user" aria-hidden="true"></i> {{ Auth::user()->name }} </strong>
                                 </a>-->
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" style="position:relative; padding-left:50px">
-                                  <img id="img_profile2" src="{{asset('/uploads/avatars/'.Auth::user()->avatar) }}" style="width:32px; height:32px; position:absolute; top:10px; left:10px; border-radius:50%">
+                                  <img id="img_profile2" src="{{ asset('/uploads/avatars/'.Auth::user()->avatar) }}" style="width:32px; height:32px; position:absolute; top:10px; left:10px; border-radius:50%"><i class="fa fa-chevron-down" aria-hidden="true"></i>
                                 </a>
 
                                 <ul class="dropdown-menu">
                                     <li>
                                         <div class="navbar-login">
-                                            <div class="row">
+                                        <div class="row">
                                                 <div class="col-lg-4">
                                                     <p class="text-center xs-hidden">
-                                                        <img id="img_profile" src="{{asset('/uploads/avatars/'.Auth::user()->avatar) }}" style="width:58px; height:58px;  border-radius:50%">
+                                                        <img id="img_profile" src="{{ asset('/uploads/avatars/'.Auth::user()->avatar) }}" style="width:100px; height:100px;  border-radius:50%; margin-left:5px;">
                                                     </p>
                                                 </div>
                                                 <div class="col-lg-8">
@@ -274,11 +274,11 @@
                                     <li>
                                         <div class="navbar-login navbar-login-session">
                                                 <div class="links">
-                                                    <p>
+                                                    <p class="navbar-header-logout">
                                                       <a href="{{ route('logout') }}"
                                                           onclick="event.preventDefault();
                                                                    document.getElementById('logout-form').submit();">
-                                                          @lang('label.logout')
+                                                          <strong>@lang('label.logout')</strong>
                                                       </a>
 
                                                       <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

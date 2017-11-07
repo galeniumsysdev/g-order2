@@ -13,7 +13,7 @@ return [
     */
 
     'login' => 'Silahkan Masuk',
-    'logout' => 'Keluar',
+    'logout' => 'K E L U A R',
     'home' => 'Beranda',
     'register' => 'Daftar',
     'email'=>'Alamat Email',
