@@ -21,6 +21,7 @@
     <!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
+    <link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
 
     <!-- Scripts -->
     <script>
@@ -34,7 +35,7 @@
     </script>
 </head>
 <body>
-    <div >
+    <div>
         <nav class="navbar navbar-default navbar-static-top header">
             <div class="container">
                 <div class="navbar-header">
