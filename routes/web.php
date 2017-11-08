@@ -307,3 +307,7 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 /*
 *
 */
+
+Route::get('/test', function () {
+  return view('fixedfooter');
+});

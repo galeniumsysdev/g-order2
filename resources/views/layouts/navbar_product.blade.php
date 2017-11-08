@@ -297,8 +297,8 @@
               </div>
 
           </nav>
-
           @yield('content')
+          
       </div>
       <!--@yield('footer')-->
       @include('layouts.footer')

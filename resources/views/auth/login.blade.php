@@ -70,8 +70,7 @@
 							<button type="submit" class="btn btn-lg btn-primary btn-block btn-signin">
 								@lang('label.login')
 							</button>
-							<a class="btn btn-regis" href="{{ url('/register') }}">
-								@lang('label.donthaveaccount')
+							<p class="btn-regis">@lang('label.donthaveaccount') <a href="{{ url('/register') }}">@lang('label.register')</p>
 							</a>
 						</div>
 					</form>

@@ -191,6 +191,9 @@ body { /*padding-top: 30px;*/
           color: #FFD700;
           background-color: #000;
     }
+    .navbar-header-logout a{
+      color: #FFF;    
+    }
 }
 
 

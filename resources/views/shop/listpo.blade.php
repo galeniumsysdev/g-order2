@@ -45,6 +45,9 @@
           </div>
           <div  class="form-group">
             <input type="submit" name="search" value="Search" class="btn btn-primary form-control">
+            @if($request->jns==2)
+              <input type="submit" name="excel" value="Create Excel" class="btn btn-success form-control">
+            @endif
           </div>
         </form>
         <div>&nbsp;</div>

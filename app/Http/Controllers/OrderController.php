@@ -129,6 +129,10 @@ class OrderController extends Controller
       }
       $request->jns=2;//listso
 
+      if($request->excel == "Create Excel" and $request->status=="x")
+      {
+        $this->createExcel($request,null);
+      }
 
       if($request->status=="" and $request->tglaw=="" and $request->tglak=="" and $request->criteria=="")
       {
@@ -140,7 +144,7 @@ class OrderController extends Controller
           if($request->status=="x")
           {
               $trx =$trx->where([['status','=',0],['approve','=',1]]);
-              $this->createExcel($request,null);
+              //$this->createExcel($request,null);
           }elseif($request->status=="0"){
               $trx =$trx->where([['status','=',0],['approve','=',0]]);
           }else{
