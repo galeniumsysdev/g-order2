@@ -28,7 +28,7 @@ class OutletProductController extends Controller
   {
   	if($request->file_import){
 	    $file = $request->file_import;
-	
+
 	    $data = Excel::load($file, function($reader){})->get();
 	  }
 
@@ -94,7 +94,7 @@ class OutletProductController extends Controller
   {
   	if($request->file_import){
 	    $file = $request->file_import;
-	
+
 	    $data = Excel::load($file, function($reader){})->get();
 
 	    foreach ($data as $key => $value) {
@@ -142,7 +142,7 @@ class OutletProductController extends Controller
   													->get();
 
   	return response()->json($stock);
-  }  
+  }
 
   public function listProductStock()
   {
@@ -198,7 +198,7 @@ class OutletProductController extends Controller
 				$count++;
 			}
 		}
-  	
+
   	return view('admin.outlet.detailProductStock', array('title'=>$title, 'last_stock'=>$last_stock, 'stock'=>$trx));
   }
 

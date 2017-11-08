@@ -1,6 +1,7 @@
 @extends('layouts.home')
 
 @section('content')
+
 	<link rel="stylesheet" href="{{ URL::to('css/login.css') }}">
 	<div class="container">
 		<div class="row">
@@ -15,7 +16,7 @@
 						{{ $errors->first('credentials') }}
 					</div>
 				@endif
-				
+
 				<style>
 					.imgcontainer {
 					text-align: center;
@@ -26,14 +27,14 @@
 					border-radius: 0%;
 					}
 				</style>
-				
+
 				<div class="card card-container">
 					<p id="profile-name" class="profile-name-card"><strong>@lang('label.login')</strong></p>
 					<hr>
 						<div class="imgcontainer">
 							<img src="{{ URL::to('img/1.png') }}" alt="Avatar" class="avatar">
 						</div>
-						
+
 					<form class="form-horizontal" role="form" method="POST" action="{{ route('login') }}">
 						{{ csrf_field() }}
 						<div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
@@ -44,7 +45,7 @@
 								</span>
 							@endif
 						</div>
-						
+
 						<div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
 							<input id="password" type="password" class="form-control" name="password" placeholder="@lang('label.password')" required>
 							@if ($errors->has('password'))
@@ -53,7 +54,7 @@
 								</span>
 							@endif
 						</div>
-						
+
 						<div class="form-group">
 							<div id="remember" class="checkbox">
 								<label>
@@ -64,7 +65,7 @@
 								</a>
 							</div>
 						</div>
-						
+
 						<div class="form-group">
 							<button type="submit" class="btn btn-lg btn-primary btn-block btn-signin">
 								@lang('label.login')
