@@ -13,6 +13,7 @@ html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
+  height: 100%;
 }
 
 body {
@@ -3922,6 +3923,8 @@ select[multiple].input-lg,
 .form-horizontal .form-group {
   margin-left: -15px;
   margin-right: -15px;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
 .form-horizontal .form-group:before,
@@ -5078,6 +5081,7 @@ tbody.collapse.in {
 .nav > li {
   position: relative;
   display: block;
+  padding-left: 11px;
 }
 
 .nav > li > a {
@@ -8351,3 +8355,101 @@ button.close {
   }
 }
 
+/*table responsive*/
+@media only screen and (max-width: 800px) {
+        /* Force table to not be like tables anymore */
+        #no-more-tables table,
+        #no-more-tables thead,
+        #no-more-tables tbody,
+        #no-more-tables th,
+        #no-more-tables td,
+        #no-more-tables tr {
+        display: block;
+        }
+
+        /* Hide table headers (but not display: none;, for accessibility) */
+        #no-more-tables thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        }
+
+        #no-more-tables tr { border: 1px solid #ccc; }
+
+        #no-more-tables td {
+        /* Behave like a "row" */
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        white-space: normal;
+        text-align:left;
+        }
+
+        #no-more-tables td:before {
+        /* Now like a table header */
+        position: absolute;
+        /* Top/left values mimic padding */
+        top: 6px;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align:left;
+        font-weight: bold;
+        }
+
+        /*
+        Label the data
+        */
+        #no-more-tables td:before { content: attr(data-title); }
+        }
+
+.fa {
+	display: inline-block;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	/*padding-right: 15px;
+	color: #3097D1;
+	margin-top: 9px;*/
+}
+
+hr {
+	margin-top: 0;
+	margin-bottom: 22px;
+	border: 0;
+	border-top: 1px solid blue;
+}
+
+img {
+	vertical-align: middle;
+	margin-bottom: 3px;
+}
+
+.icon-right {
+	float: right;
+	margin-left: 10px;
+}
+
+.panel-default > .panel-heading {
+	color: white;
+	background-color: #3097D1;
+	border-color: #3097D1;
+}
+
+.col-position {
+  position: relative;
+  min-height: 1px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.button-container {
+	margin-right: auto;
+	margin-left: auto;
+	padding-left: 15px;
+	padding-right: 15px;
+	float: right;
+}
