@@ -47807,6 +47807,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // import NotificationItem from './NotificationItem.vue'
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -47830,8 +47840,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     var _this = this;
 
     Echo.channel(this.email).listen('.wk-prod', function (notification) {
-      var newUnreadNotifications = { data: { tipe: notification.tipe, subject: notification.subject } };
-      _this.unreadNotifications.push(newUnreadNotifications);
+      _this.unreadNotifications.push(notification);
       Notification.requestPermission(function (permission) {
         var notif = new Notification(notification.title || 'Judul', {
           body: notification.message, // content for the alert
@@ -47870,7 +47879,31 @@ var render = function() {
       ]
     ),
     _vm._v(" "),
-    _vm._m(0),
+    _c(
+      "ul",
+      {
+        staticClass: "dropdown-menu alert-dropdown dropdown-notif",
+        attrs: { role: "menu" }
+      },
+      _vm._l(_vm.unreadNotifications, function(item) {
+        return _c("li", { key: item.index }, [
+          _c("a", { attrs: { href: item.href } }, [
+            _c("span", { staticClass: "item" }, [
+              _c("span", { staticClass: "item-left" }, [
+                _c("span", { staticClass: "item-info" }, [
+                  _c("strong", [_vm._v(_vm._s(item.title))]),
+                  _vm._v(
+                    "\n                " +
+                      _vm._s(item.message) +
+                      "\n              "
+                  )
+                ])
+              ])
+            ])
+          ])
+        ])
+      })
+    ),
     _vm._v(" "),
     _c(
       "div",
@@ -47879,14 +47912,7 @@ var render = function() {
     )
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("ul", { staticClass: "dropdown-menu alert-dropdown" }, [_c("li")])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {

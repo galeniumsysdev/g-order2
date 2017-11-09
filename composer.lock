@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "096b3d4c3b75e9dca7c360f111b79001",
+    "content-hash": "4eff9d5444969c21215587952f825890",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -1436,7 +1436,7 @@
         },
         {
             "name": "mtdowling/cron-expression",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mtdowling/cron-expression.git",
@@ -1533,16 +1533,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v3.1.1",
+            "version": "v3.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "a1e8e1a30e1352f118feff1a8481066ddc2f234a"
+                "reference": "08131e7ff29de6bb9f12275c7d35df71f25f4d89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/a1e8e1a30e1352f118feff1a8481066ddc2f234a",
-                "reference": "a1e8e1a30e1352f118feff1a8481066ddc2f234a",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/08131e7ff29de6bb9f12275c7d35df71f25f4d89",
+                "reference": "08131e7ff29de6bb9f12275c7d35df71f25f4d89",
                 "shasum": ""
             },
             "require": {
@@ -1580,7 +1580,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2017-09-02T17:10:46+00:00"
+            "time": "2017-11-04T11:48:34+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -1636,12 +1636,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pesakitan22/pusher-push-notifications.git",
-                "reference": "acba116ecc18292ff2ac794ffdbb12c9ed7797c8"
+                "reference": "c5311c7a1bd9d811b74dc7323339ec1fc8e209d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pesakitan22/pusher-push-notifications/zipball/acba116ecc18292ff2ac794ffdbb12c9ed7797c8",
-                "reference": "acba116ecc18292ff2ac794ffdbb12c9ed7797c8",
+                "url": "https://api.github.com/repos/pesakitan22/pusher-push-notifications/zipball/c5311c7a1bd9d811b74dc7323339ec1fc8e209d3",
+                "reference": "c5311c7a1bd9d811b74dc7323339ec1fc8e209d3",
                 "shasum": ""
             },
             "require": {
@@ -1701,7 +1701,7 @@
                 "pusher",
                 "pusher-push-notifications"
             ],
-            "time": "2017-10-18 14:51:16"
+            "time": "2017-10-27 08:36:15"
         },
         {
             "name": "phenx/php-font-lib",
@@ -1936,16 +1936,16 @@
         },
         {
             "name": "psy/psysh",
-            "version": "v0.8.13",
+            "version": "v0.8.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/psysh.git",
-                "reference": "cdb5593c3684bab74e10fcfffe4a0c8d1c39695d"
+                "reference": "91e53c16560bdb8b9592544bb38429ae00d6baee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/cdb5593c3684bab74e10fcfffe4a0c8d1c39695d",
-                "reference": "cdb5593c3684bab74e10fcfffe4a0c8d1c39695d",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/91e53c16560bdb8b9592544bb38429ae00d6baee",
+                "reference": "91e53c16560bdb8b9592544bb38429ae00d6baee",
                 "shasum": ""
             },
             "require": {
@@ -2005,7 +2005,7 @@
                 "interactive",
                 "shell"
             ],
-            "time": "2017-10-19T06:13:20+00:00"
+            "time": "2017-11-04T16:06:49+00:00"
         },
         {
             "name": "pusher/pusher-php-server",
