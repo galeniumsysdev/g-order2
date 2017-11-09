@@ -239,7 +239,7 @@
                         </div>
 
                         <div class="form-group{{ $errors->has('city') ? ' has-error' : '' }}">
-                            <label for="city" class="col-sm-4 control-label">*@lang('label.city')</label>
+                            <label for="city" class="col-sm-4 control-label">*@lang('label.city_regency')</label>
 
                             <div class="col-sm-8">
                               <select name="city" class="form-control" id="city" onchange="getListDistrict(this.value,{{old('district')}})" required>
@@ -256,7 +256,7 @@
                         </div>
 
                         <div class="form-group{{ $errors->has('district') ? ' has-error' : '' }}">
-                            <label for="district" class="col-sm-4 control-label">*@lang('label.regency')</label>
+                            <label for="district" class="col-sm-4 control-label">*@lang('label.subdistrict')</label>
 
                             <div class="col-sm-8">
                                 <!--<input id="regency" type="regency" class="form-control" name="regency" value="{{ old('regency') }}" required>-->
@@ -273,7 +273,7 @@
                         </div>
 
 						            <div class="form-group{{ $errors->has('districts') ? ' has-error' : '' }}">
-                            <label for="subdistricts" class="col-sm-4 control-label">*@lang('label.state')</label>
+                            <label for="subdistricts" class="col-sm-4 control-label">*@lang('label.urban_village')</label>
 
                             <div class="col-sm-8">
                               <select name="subdistricts" class="form-control" id="subdistricts" required>

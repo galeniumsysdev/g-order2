@@ -128,13 +128,10 @@
 }
 
 
-body { /*padding-top: 30px;*/
-      min-height: 100%;
-      background-repeat: no-repeat;
+body { 
+    min-height: 100%;
+    background-repeat: no-repeat;
 	  background-color: #E8EAF6;
-    /*  background-color: #214b6c;*/
-      /*padding-bottom: -100px;*/
-    /*background-image: linear-gradient(top, #d4d4d4, #bdbdbd);*/
   }
 
 
