@@ -123,7 +123,7 @@
                           <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; Login</strong></a></li>
                           <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; Register</strong></a></li>
                         @else
-                          <notification :email="{{json_encode(Auth::user()->email)}}"></notification>
+                          <notification :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
                           @if(Auth::user()->can('product'))
                           <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Product</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
@@ -223,7 +223,7 @@
                           </li>
                         <!--{{--notification--}}
                           --  <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>-->
-                            <li class="dropdown hidden-xs">
+                            <!-- <li class="dropdown hidden-xs">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> Notifications
                                   <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
                                 </a>
@@ -240,7 +240,7 @@
                                       <a href="{{url('/home')}}">@lang('label.showall')</a>
                                   </li>
                                 </ul>
-                            </li>
+                            </li> -->
 
                             <!--user dropdown-->
                             <li class="dropdown">

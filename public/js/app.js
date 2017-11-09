@@ -47817,11 +47817,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // import NotificationItem from './NotificationItem.vue'
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
-    unreads: {
+    notif: {
       type: Array
     },
     userid: {
@@ -47829,18 +47840,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     email: {
       type: String
+    },
+    count: {
+      type: Number
     }
   },
   data: function data() {
     return {
-      unreadNotifications: []
+      unreadNotifications: [],
+      notifCount: 0
     };
   },
   mounted: function mounted() {
     var _this = this;
 
+    this.notifCount = this.count;
+    this.unreadNotifications = this.notif;
     Echo.channel(this.email).listen('.wk-prod', function (notification) {
-      _this.unreadNotifications.push(notification);
+      _this.unreadNotifications.push({
+        data: {
+          subject: notification.message,
+          href: notification.href
+        }
+      });
+      _this.notifCount = _this.notifCount + 1;
       Notification.requestPermission(function (permission) {
         var notif = new Notification(notification.title || 'Judul', {
           body: notification.message, // content for the alert
@@ -47872,38 +47895,44 @@ var render = function() {
       },
       [
         _c("i", { staticClass: "fa fa-bell" }),
-        _vm._v(" "),
-        _c("span", { staticClass: "badge" }, [
-          _vm._v(_vm._s(_vm.unreadNotifications.length))
-        ])
+        _vm._v("\n      Notifications\n      "),
+        _c("span", { staticClass: "badge" }, [_vm._v(_vm._s(_vm.notifCount))])
       ]
     ),
     _vm._v(" "),
-    _c(
-      "ul",
-      {
-        staticClass: "dropdown-menu alert-dropdown dropdown-notif",
-        attrs: { role: "menu" }
-      },
-      _vm._l(_vm.unreadNotifications, function(item) {
-        return _c("li", { key: item.index }, [
-          _c("a", { attrs: { href: item.href } }, [
-            _c("span", { staticClass: "item" }, [
-              _c("span", { staticClass: "item-left" }, [
-                _c("span", { staticClass: "item-info" }, [
-                  _c("strong", [_vm._v(_vm._s(item.title))]),
-                  _vm._v(
-                    "\n                " +
-                      _vm._s(item.message) +
-                      "\n              "
-                  )
+    _vm.unreadNotifications.length
+      ? _c(
+          "ul",
+          {
+            staticClass: "dropdown-menu alert-dropdown dropdown-notif",
+            attrs: { role: "menu" }
+          },
+          _vm._l(_vm.unreadNotifications, function(item) {
+            return _c("li", { key: item.index }, [
+              _c("a", { attrs: { href: item.data.href } }, [
+                _c("span", { staticClass: "item" }, [
+                  _c("span", { staticClass: "item-left" }, [
+                    _c("span", { staticClass: "item-info" }, [
+                      _vm._v(
+                        "\n                " +
+                          _vm._s(item.data.subject) +
+                          "\n              "
+                      )
+                    ])
+                  ])
                 ])
               ])
             ])
-          ])
-        ])
-      })
-    ),
+          })
+        )
+      : _c(
+          "ul",
+          {
+            staticClass: "dropdown-menu alert-dropdown dropdown-notif",
+            attrs: { role: "menu" }
+          },
+          [_vm._m(0)]
+        ),
     _vm._v(" "),
     _c(
       "div",
@@ -47912,7 +47941,22 @@ var render = function() {
     )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", [
+      _c("span", { staticClass: "item" }, [
+        _c("span", { staticClass: "item-left" }, [
+          _c("span", { staticClass: "item-info" }, [
+            _vm._v("\n              No unread notifications\n            ")
+          ])
+        ])
+      ])
+    ])
+  }
+]
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
