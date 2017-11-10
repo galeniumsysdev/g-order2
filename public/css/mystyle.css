@@ -131,7 +131,7 @@
 body { 
     min-height: 100%;
     background-repeat: no-repeat;
-	  background-color: #E8EAF6;
+    background-color: #E8EAF6;
   }
 
 
@@ -166,8 +166,8 @@ body {
 }
 .navbar-default .navbar-toggle {
     border-color: rgb(0,118,192);
-	float: left;
-	margin-left: 16px;
+  float: left;
+  margin-left: 16px;
 }
 .navbar-default .navbar-toggle:hover,
 .navbar-default .navbar-toggle:focus {
@@ -176,7 +176,7 @@ body {
 .navbar-default .navbar-toggle .icon-bar {
     background-color: #fff;
     text-align:  left;
-	height: 3px;
+  height: 3px;
 }
 @media (max-width: 767px) {
     .navbar-default .navbar-nav .open .dropdown-menu > li > a {
@@ -233,25 +233,25 @@ body {
 }
 
 .btn-black, a.btn-black:hover {
-	color: #fff;
-	background-color: skyblue;
-	border-color: skyblue;
+  color: #fff;
+  background-color: skyblue;
+  border-color: skyblue;
 }
 
 /*register*/
 .country-code {
-	width: 20%;
-	padding-right: 5px;
+  width: 20%;
+  padding-right: 5px;
 }
 
 .country-code>input {
-	text-align: center;
+  text-align: center;
   font-size: 12px;
 }
 
 .country-code + .col-xs-10 {
-	width: 80%;
-	padding-left: 0
+  width: 80%;
+  padding-left: 0
 }
 
 /*footer*/
@@ -272,7 +272,7 @@ body {
   color: #1e90ff;
 }
 .nb-copyright .footer-social{
-	margin-top: 22px;
+  margin-top: 22px;
 }
 .nb-copyright .footer-social i{
   padding: 5px 10px;
@@ -292,24 +292,24 @@ body {
 }
 /*carousel*/
 .carousel-control .fa-angle-right {
-	position: absolute;
-	top: 50%;
-	margin-top: -10px;
-	z-index: 5;
-	display: inline-block;
+  position: absolute;
+  top: 50%;
+  margin-top: -10px;
+  z-index: 5;
+  display: inline-block;
 }
 
 .carousel-control .fa-angle-left {
-	position: absolute;
-	top: 50%;
-	margin-top: -10px;
-	z-index: 5;
-	display: inline-block;
+  position: absolute;
+  top: 50%;
+  margin-top: -10px;
+  z-index: 5;
+  display: inline-block;
 }
 .carousel-inner {
-	overflow: hidden;
-	width: 100%;
-	margin-bottom: 22px;
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 22px;
 }
 
 .carousel{
@@ -418,14 +418,14 @@ ul.dropdown-notif li .item-right button{
 
 /*-----APLIKASI MOBILE-----*/
 .footer-gpl-img {
-	margin-bottom: 25px;
-	height: 40px;
-	padding-left: 5px;
+  margin-bottom: 25px;
+  height: 40px;
+  padding-left: 5px;
 }
 .footer-apps-img {
-	margin-bottom: 25px;
-	padding-left: 5px;
-	margin-top: 20px;
+  margin-bottom: 25px;
+  padding-left: 5px;
+  margin-top: 20px;
   padding-right: 10px;
 }
 
@@ -434,11 +434,11 @@ ul.dropdown-notif li .item-right button{
 }
 
 .footer-play-img {
-	margin-bottom: 25px;
-	padding-right:0px;
+  margin-bottom: 25px;
+  padding-right:0px;
   height: 40px;
-	float: right;
-	margin-top: 20px;
+  float: right;
+  margin-top: 20px;
 }
 
 .navbar-right-xs{
@@ -503,48 +503,48 @@ ul.dropdown-notif li .item-right button{
 }
 
 .img-header {
-	vertical-align: middle;
-	width: 120px;
-	margin-left: -10px;
-	margin-top: -5px;
+  vertical-align: middle;
+  width: 120px;
+  margin-left: -10px;
+  margin-top: -5px;
 }
 
 .footer {
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	width: 100%;
-	background-color: rgb(0,118,192);
-	color: white;
-	text-align: center;
-	padding: 0px 15px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: rgb(0,118,192);
+  color: white;
+  text-align: center;
+  padding: 0px 15px;
 }
 
 .img-footer-gale {
-	vertical-align: middle;
-	width: 100px;
-	margin-top: 20px;
+  vertical-align: middle;
+  width: 100px;
+  margin-top: 20px;
 }
 
 .img-footer-yasa {
-	vertical-align: middle;
-	width: 80px;
-	height: 30px;
-	margin-top: 20px;
-	margin-left: 10px;
+  vertical-align: middle;
+  width: 80px;
+  height: 30px;
+  margin-top: 20px;
+  margin-left: 10px;
 }
 
 .navbar-default .navbar-collapse, .navbar-default .navbar-form {
-	border-color: skyblue;
+  border-color: skyblue;
 }
 
 .navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
-	color: #fff;
-	background-color: transparent;
+  color: #fff;
+  background-color: transparent;
 }
 
 .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
-	color: #fff;
+  color: #fff;
 }
 
 .fa-lg {
