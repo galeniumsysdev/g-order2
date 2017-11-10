@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-      view()->composer('layouts.navbar_product', function($view)
+      view()->composer(['layouts.navbar_product','shop.product'], function($view)
      {
         $product_flexfields = Category::where([//ProductFlexfield::where([
                                         ['enabled_flag','=','Y']

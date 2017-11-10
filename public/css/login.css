@@ -54,15 +54,16 @@
 	color: rgb(0,118,192);
 	font-weight: normal;
 	border-radius: 0;
-	padding-top: 10px;
-	float: left;
+	/*padding-top: 10px;*/
+    float: right;
+    margin-top: -7px;
 }
 
 .btn-regis {
 	color: rgb(0,118,192);
 	font-weight: normal;
 	border-radius: 0;
-	padding-top: 0px;
+	padding-top: 15px;
     text-align: center;
     width: 100%;
 }

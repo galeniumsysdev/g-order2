@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -44,5 +45,16 @@ class LoginController extends Controller
         $credentials['register_flag']=1;
         return $credentials;
     }
-
+    protected function authenticated(Request $request, $user)
+    {
+      if(Auth::check()) {
+        if(Auth::user()->hasRole('IT Galenium')) {
+            return redirect('/admin');
+        }elseif(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik') ) {
+              return redirect('/product/buy');
+        }else{/*if(Auth::user()->hasRole('Marketing PSC') || Auth::user()->hasRole('Marketing Pharma')) {*/
+            return redirect('/home');
+        }
+      }
+    }
 }

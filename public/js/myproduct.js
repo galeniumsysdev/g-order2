@@ -221,7 +221,7 @@ $('#coupon_no').blur(function(){
              url: baseurl+'/dpl/suggestno/validation/'+window.Laravel.customerid+'/'+$(this).val(),
              success: function(data) {
                if(data.valid){
-                 alert("nomor dpl valid");
+                 swal ( "No Kupon DPL Valid!" ,  "" ,  "success" )
                }else{
                  //alert("nomor dpl tidak valid");
 
