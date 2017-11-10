@@ -9,8 +9,8 @@ class UomConversion extends Model
   protected $table = 'mtl_uom_conversions_v';
 
   protected $fillable = [
-    'product_id','uom_code'
+    'product_id','uom_code','rate'
   ];
 
-  
+
 }

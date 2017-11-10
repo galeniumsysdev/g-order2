@@ -30,7 +30,11 @@
                   <input type="text" class="form-control input-sm" name="qty" id="qty-{{$product->id}}" value=1 style="text-align:right;width:40%"  onkeypress="return isNumberKey(event)" >
                   <select name="satuan" class="form-control input-sm" style="width:50%;" id="satuan-{{$product->id}}" onChange="getPrice('{{$product->id}}')">
                     @foreach($product->uom as $satuan)
+                       @php ($vrate =1)
                       <option value="{{$satuan->uom_code}}" {{$product->satuan_secondary==$satuan->uom_code?'selected':''}}>{{$satuan->uom_code}}</option>
+                      @if($product->satuan_secondary==$satuan->uom_code)
+                        @php ($vrate = $satuan->rate)
+                      @endif
                     @endforeach
 
                   </select>
@@ -38,7 +42,14 @@
               @endif
           <div class="productprice">
             <div class="pull-right"></div>
-            <div class="pricetext">Rp. 21.420,00</div>
+            <div class="pricetext">Rp. 21.420,00
+            </div>
+          </div>
+          <div class ="clearfix">
+            <a href="{{ route('product.addToCart',['id'=>$product->id])}}" class="btn btn-sm btn-success center-block" role="button">Add to cart</a>
+          </div>
+          <div class="info-product">
+            1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}
           </div>
         <!--</div>-->
       </div>

@@ -6,11 +6,15 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
 use App\Role;
+use App\Customer;
+use App\CustomerSite;
+use App\CustomerContact;
 use DB;
 use Hash;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Response;
 use Webpatser\Uuid\Uuid;
+use App\Notifications\VerificationUser;
 
 
 class UserController extends Controller
@@ -27,9 +31,8 @@ class UserController extends Controller
     }
     public function index(Request $request)
     {
-        $data = User::whereNull('customer_id')->orderBy('id','name')->paginate(10);
-        return view('admin.user.index',['data'=>$data,'menu'=>$this->menu])
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+        $data = User::whereNull('customer_id')->orderBy('id','name')->get();
+        return view('admin.user.index',['data'=>$data,'menu'=>$this->menu]);
     }
 
     /**
@@ -165,6 +168,84 @@ class UserController extends Controller
       $id = Input::get('id');
         $subdistricts = DB::table('villages')->where('district_id','=',$id)->get();
         return Response::json($subdistricts);
+    }
+
+    public function oracleIndex()
+    {
+        $customers = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+                    ->orderBy('customer_name','asc')->get();
+          /*$customers = DB::table('customers as c')->leftjoin('users as u','c.id','=','u.customer_id')->leftjoin('role_user as ru','u.id','=','ru.user_id')
+                      ->leftjoin('roles as r','ru.role_id','=','r.id')
+                      ->whereNotNull('oracle_customer_id')
+                      ->where('c.status','=','A')
+                      ->select('c.id','c.customer_name','c.customer_number','c.tax_reference','customer_category_code'
+                              ,'c.customer_class_code','c.pharma_flag','c.psc_flag','c.export_flag','c.tollin_flag','c.subgroup_dc_id','u.email','ru.role_id','r.name as role_name')
+                      ->orderBy('customer_name','asc')->get();*/
+        return view('admin.oracle.customerindex',['customers'=>$customers,'menu'=>'customer-oracle']);
+    }
+
+    public function oracleShow($id)
+    {
+        $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+                    ->where('id','=',$id)
+                    ->orderBy('customer_name','asc')->first();
+
+        $customer_sites = CustomerSite::where('customer_id','=',$id)->get();
+        $customer_contacts = CustomerContact::where('customer_id','=',$id)->get();
+        $roles = Role::whereIn('name',['Distributor','Distributor Cabang','Principal','Outlet','Apotik/Klinik'])->get();
+        $principals = DB::table('users as u')->join('role_user as ru','ru.user_id','=','u.id')
+                      ->join('roles as r','r.id','=','ru.role_id')
+                      ->where('r.name','=','Principal')
+                      ->select('u.name','u.id','u.customer_id')
+                      ->get();
+        return view('admin.oracle.customershow',['customer'=>$customer,'customer_sites'=>$customer_sites
+                                                ,'customer_contacts'=>$customer_contacts,'roles'=>$roles
+                                                ,'principals'=>$principals,'menu'=>'customer-oracle']);
+    }
+
+    public function oracleUpdate(Request $request,$id)
+    {
+        $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+                    ->where('id','=',$id)
+                    ->orderBy('customer_name','asc')->first();
+        //dd($customer);
+        $customer->psc_flag = $request->psc_flag;
+        $customer->pharma_flag = $request->pharma_flag;
+        $customer->export_flag = $request->export_flag;
+        $customer->tollin_flag = $request->tollin_flag;
+        $customer->save();
+        if($request->distributor!="")
+        {
+          $customer->hasDistributor()->sync($request->distributor);
+        }
+
+        $usercustomer = User::where('customer_id','=',$customer->id)->first();
+        if($usercustomer)
+        {
+            $usercustomer->email = $request->email;
+            $usercustomer->save();
+        }else{
+          $usercustomer = User::firstorCreate(
+                            ['customer_id'=>$customer->id],
+                            ['email'=>$request->email,'name'=>$request->customer_name
+                            ,'api_token'=>str_random(60)]
+                      );
+        }
+        if($request->role!="")
+        {
+          $usercustomer->roles()->sync($request->role);
+        }
+        if(isset($request->send_customer))
+        {
+          $usercustomer->notify(new VerificationUser($usercustomer));
+          return redirect()->route('useroracle.show',$id)
+                          ->with('success','Successfully Send Email');
+        }else{
+          return redirect()->route('useroracle.show',$id)
+                          ->with('success','Customer Oracle updated successfully');
+        }
+
+
     }
 
 }
