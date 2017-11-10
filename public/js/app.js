@@ -47191,34 +47191,6 @@ var staticRenderFns = [
 ]
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
-
-module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('li', {
-    staticClass: "dropdown"
-  }, [_c('a', {
-    staticClass: "dropdown-toggle",
-    attrs: {
-      "href": "#",
-      "data-toggle": "dropdown"
-    }
-  }, [_c('i', {
-    staticClass: "fa fa-bell"
-  }), _vm._v(" "), _c('span', {
-    staticClass: "badge"
-  }, [_vm._v(_vm._s(_vm.unreadNotifications.length))])]), _vm._v(" "), _vm._m(0), _vm._v(" "), _c('div', {
-    staticStyle: {
-      "display": "none"
-    },
-    attrs: {
-      "id": "user-email"
-    }
-  }, [_vm._v(_vm._s(_vm.email))])])
-},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('ul', {
-    staticClass: "dropdown-menu alert-dropdown"
-  }, [_c('li')])
-}]}
-module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
