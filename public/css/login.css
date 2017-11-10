@@ -2,8 +2,8 @@
 
 .card-container.card {
     padding: 5px 20px;
-    /*max-width: 350px;
-    margin-bottom: 150px;*/
+    max-width: 350px;
+    margin-bottom: 60px;
 }
 .card {
     background-color: #fff;
