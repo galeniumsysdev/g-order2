@@ -52,8 +52,10 @@
                       </button>
 
                       <!-- Branding Image -->
-                      @if(Auth::guest()||Auth::user()->can('Create PO'))
+                      @if(Auth::guest())
                         <a class="navbar-brand" href="{{ url('/') }}" style="color:#fff">
+                      @elseif(Auth::user()->can('Create PO'))
+                        <a class="navbar-brand" href="{{ url('/product/buy') }}" style="color:#fff">
                       @else
                           <a class="navbar-brand" href="{{ url('/home') }}" style="color:#fff">
                       @endif
@@ -77,7 +79,7 @@
                         </ul>
                       @endif
                   </div>
-                  @if (Auth::check()&&Auth::user()->can('Create PO'))
+                  @if (Auth::check() && Auth::user()->can('Create PO'))
                     <form method="post" action="{{route('product.search')}}" class="navbar-form navbar-left" role="search">
                        {{csrf_field()}}
                       <!--<div class="form-group">
@@ -298,7 +300,7 @@
 
           </nav>
           @yield('content')
-          
+
       </div>
       <!--@yield('footer')-->
       @include('layouts.footer')

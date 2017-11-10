@@ -1,4 +1,4 @@
-@extends('layouts.home')
+@extends('layouts.navbar_product')
 
 @section('content')
 
@@ -17,16 +17,6 @@
 					</div>
 				@endif
 
-				<style>
-					.imgcontainer {
-					text-align: center;
-					margin: 24px 0 12px 0;
-					}
-					img.avatar {
-					width: 50%;
-					border-radius: 0%;
-					}
-				</style>
 
 				<div class="card card-container">
 					<p id="profile-name" class="profile-name-card"><strong>@lang('label.login')</strong></p>
