@@ -47039,11 +47039,32 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // import NotificationItem from './NotificationItem.vue'
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
-    unreads: {
+    notif: {
       type: Array
     },
     userid: {
@@ -47051,19 +47072,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     email: {
       type: String
+    },
+    count: {
+      type: Number
     }
   },
   data: function data() {
     return {
-      unreadNotifications: []
+      unreadNotifications: [],
+      notifCount: 0
     };
   },
   mounted: function mounted() {
     var _this = this;
 
+    this.notifCount = this.count;
+    this.unreadNotifications = this.notif;
     Echo.channel(this.email).listen('.wk-prod', function (notification) {
-      var newUnreadNotifications = { data: { tipe: notification.tipe, subject: notification.subject } };
-      _this.unreadNotifications.push(newUnreadNotifications);
+      _this.unreadNotifications.push({
+        data: {
+          subject: notification.message,
+          href: notification.href
+        }
+      });
+      _this.notifCount = _this.notifCount + 1;
       Notification.requestPermission(function (permission) {
         var notif = new Notification(notification.title || 'Judul', {
           body: notification.message, // content for the alert
@@ -47082,33 +47114,83 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('li', {
-    staticClass: "dropdown"
-  }, [_c('a', {
-    staticClass: "dropdown-toggle",
-    attrs: {
-      "href": "#",
-      "data-toggle": "dropdown"
-    }
-  }, [_c('i', {
-    staticClass: "fa fa-bell"
-  }), _vm._v(" "), _c('span', {
-    staticClass: "badge"
-  }, [_vm._v(_vm._s(_vm.unreadNotifications.length))])]), _vm._v(" "), _vm._m(0), _vm._v(" "), _c('div', {
-    staticStyle: {
-      "display": "none"
-    },
-    attrs: {
-      "id": "user-email"
-    }
-  }, [_vm._v(_vm._s(_vm.email))])])
-},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('ul', {
-    staticClass: "dropdown-menu alert-dropdown"
-  }, [_c('li')])
-}]}
-module.exports.render._withStripped = true
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("li", { staticClass: "dropdown" }, [
+    _c(
+      "a",
+      {
+        staticClass: "dropdown-toggle",
+        attrs: { href: "#", "data-toggle": "dropdown" }
+      },
+      [
+        _c("i", { staticClass: "fa fa-bell" }),
+        _vm._v("\n      Notifications\n      "),
+        _c("span", { staticClass: "badge" }, [_vm._v(_vm._s(_vm.notifCount))])
+      ]
+    ),
+    _vm._v(" "),
+    _vm.unreadNotifications.length
+      ? _c(
+          "ul",
+          {
+            staticClass: "dropdown-menu alert-dropdown dropdown-notif",
+            attrs: { role: "menu" }
+          },
+          _vm._l(_vm.unreadNotifications, function(item) {
+            return _c("li", { key: item.index }, [
+              _c("a", { attrs: { href: item.data.href } }, [
+                _c("span", { staticClass: "item" }, [
+                  _c("span", { staticClass: "item-left" }, [
+                    _c("span", { staticClass: "item-info" }, [
+                      _vm._v(
+                        "\n                " +
+                          _vm._s(item.data.subject) +
+                          "\n              "
+                      )
+                    ])
+                  ])
+                ])
+              ])
+            ])
+          })
+        )
+      : _c(
+          "ul",
+          {
+            staticClass: "dropdown-menu alert-dropdown dropdown-notif",
+            attrs: { role: "menu" }
+          },
+          [_vm._m(0)]
+        ),
+    _vm._v(" "),
+    _c(
+      "div",
+      { staticStyle: { display: "none" }, attrs: { id: "user-email" } },
+      [_vm._v(_vm._s(_vm.email))]
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", [
+      _c("span", { staticClass: "item" }, [
+        _c("span", { staticClass: "item-left" }, [
+          _c("span", { staticClass: "item-info" }, [
+            _vm._v("\n              No unread notifications\n            ")
+          ])
+        ])
+      ])
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
   module.hot.accept()
   if (module.hot.data) {

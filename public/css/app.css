@@ -8406,37 +8406,37 @@ button.close {
         }
 
 .fa {
-	display: inline-block;
-	font: normal normal normal 14px/1 FontAwesome;
-	font-size: inherit;
-	text-rendering: auto;
-	-webkit-font-smoothing: antialiased;
-	/*padding-right: 15px;
-	color: #3097D1;
-	margin-top: 9px;*/
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  /*padding-right: 15px;
+  color: #3097D1;
+  margin-top: 9px;*/
 }
 
 hr {
-	margin-top: 0;
-	margin-bottom: 22px;
-	border: 0;
-	border-top: 1px solid blue;
+  margin-top: 0;
+  margin-bottom: 22px;
+  border: 0;
+  border-top: 1px solid blue;
 }
 
 img {
-	vertical-align: middle;
-	margin-bottom: 3px;
+  vertical-align: middle;
+  margin-bottom: 3px;
 }
 
 .icon-right {
-	float: right;
-	margin-left: 10px;
+  float: right;
+  margin-left: 10px;
 }
 
 .panel-default > .panel-heading {
-	color: white;
-	background-color: #3097D1;
-	border-color: #3097D1;
+  color: white;
+  background-color: #3097D1;
+  border-color: #3097D1;
 }
 
 .col-position {
@@ -8447,9 +8447,9 @@ img {
 }
 
 .button-container {
-	margin-right: auto;
-	margin-left: auto;
-	padding-left: 15px;
-	padding-right: 15px;
-	float: right;
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+  float: right;
 }

@@ -87,9 +87,10 @@
                             @foreach ($data as $cell)
                               <tr>
                                 <td>{{ $cell['id'] }}</td>
-                                <td>{{ $cell['title'] }}</td>
+                                <td>{{ $cell['nama_barang'] }}</td>
                                 <td>{{ $cell['last_stock'] }}</td>
                                 <td>{{ $cell['stock'] }}</td>
+                                <td>{{ $cell['satuan'] }}</td>
                                 <td>{{ (string)$cell['batch'] }}</td>
                               </tr>
                             @endforeach

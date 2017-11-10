@@ -12,7 +12,7 @@ class PushNotif extends Notification {
 	}
 
 	public function via($notifiable) {
-		return [PusherChannel::class];
+		return [PusherChannel::class, 'database'];
 	}
 
 	public function toPushNotification($notifiable) {
@@ -21,5 +21,15 @@ class PushNotif extends Notification {
 			->title($this->data['title'])
 			->setOption('custom', $this->data)
 			->body($this->data['message']);
+	}
+	/**
+     * Get the array representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+	public function toDatabase($notifiable)
+	{
+		return $this->data;
 	}
 }

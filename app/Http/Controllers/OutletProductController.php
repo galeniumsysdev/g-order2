@@ -42,9 +42,9 @@ class OutletProductController extends Controller
   	$product = array();
   	foreach ($data as $key => $new) {
   		$product[$key]['id'] = Uuid::generate();
-  		$product[$key]['title'] = $new->title;
-  		$product[$key]['unit'] = $new->unit;
-  		$product[$key]['price'] = $new->price;
+  		$product[$key]['title'] = $new->nama_barang;
+  		$product[$key]['unit'] = $new->satuan;
+  		$product[$key]['price'] = (intval($new->price)) ? intval($new->price) : 0;
   		$product[$key]['enabled_flag'] = 'Y';
   		$product[$key]['created_at'] = date('Y-m-d H:i:s', time());
   		$product[$key]['updated_at'] = date('Y-m-d H:i:s', time());
@@ -66,18 +66,19 @@ class OutletProductController extends Controller
   					->setCreator(Auth::user()->name)
   					->setCompany('PT. Galenium Pharmasia Laboratories')
   					->sheet('Product Stock '.date('Ymd His'), function($sheet){
-  						$sheet->row(1, array('ID','Title','Stock','Batch'));
+  						$sheet->row(1, array('ID','Nama Barang','Stock','Satuan','Batch'));
   						$sheet->setColumnFormat(array('D'=>'@'));
 
-  						$products = OutletProducts::select('outlet_products.id as op_id','title',DB::raw('sum(qty) as product_qty'))
+  						$products = OutletProducts::select('outlet_products.id as op_id','unit','title',DB::raw('sum(qty) as product_qty'))
   													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
-  													->groupBy('op_id','title')
+  													->groupBy('op_id','unit','title')
   													->get();
 
   						foreach ($products as $key => $prod) {
   							$sheet->row($key+2, array($prod->op_id,
   																				$prod->title,
   																				($prod->product_qty ? $prod->product_qty : 0),
+                                          $prod->unit,
   																				''
   																				));
   						}

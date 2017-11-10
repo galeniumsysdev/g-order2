@@ -84,9 +84,9 @@
                               <tbody>
                               @foreach ($data as $cell)
                                 <tr>
-                                  <td>{{ $cell['title'] }}</td>
-                                  <td>{{ $cell['unit'] }}</td>
-                                  <td>{{ number_format($cell['price'],0,',','.') }}</td>
+                                  <td>{{ $cell['nama_barang'] }}</td>
+                                  <td>{{ $cell['satuan'] }}</td>
+                                  <td>{{ number_format(floatval($cell['price']),0,',','.') }}</td>
                                 </tr>
                               @endforeach
                               </tbody>
