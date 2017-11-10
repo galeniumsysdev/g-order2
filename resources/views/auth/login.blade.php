@@ -1,4 +1,4 @@
-@extends('layouts.home')
+@extends('layouts.navbar_product')
 
 @section('content')
 
@@ -17,17 +17,6 @@
 					</div>
 				@endif
 
-				<style>
-					.imgcontainer {
-					text-align: center;
-					margin: 24px 0 12px 0;
-					}
-					img.avatar {
-					width: 50%;
-					border-radius: 0%;
-					}
-				</style>
-
 				<div class="card card-container">
 					<p id="profile-name" class="profile-name-card"><strong>@lang('label.login')</strong></p>
 					<hr>
@@ -37,7 +26,7 @@
 
 					<form class="form-horizontal" role="form" method="POST" action="{{ route('login') }}">
 						{{ csrf_field() }}
-						<div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
+						<div class="form-group {{ $errors->has('email') ? ' has-error' : '' }}" style="margin-left:0px; margin-right:0px;">
 							<input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" placeholder="@lang('label.email')" required autofocus>
 							@if ($errors->has('email'))
 								<span class="help-block">
@@ -46,7 +35,7 @@
 							@endif
 						</div>
 
-						<div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
+						<div class="form-group {{ $errors->has('password') ? ' has-error' : '' }}" style="margin-left:0px; margin-right:0px;">
 							<input id="password" type="password" class="form-control" name="password" placeholder="@lang('label.password')" required>
 							@if ($errors->has('password'))
 								<span class="help-block">
@@ -55,7 +44,7 @@
 							@endif
 						</div>
 
-						<div class="form-group">
+						<div class="form-group" style="margin-left:0px; margin-right:0px;">
 							<div id="remember" class="checkbox">
 								<label>
 									<input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>@lang('label.remember')
@@ -66,7 +55,7 @@
 							</div>
 						</div>
 
-						<div class="form-group">
+						<div class="form-group" style="margin-left:0px; margin-right:0px;">
 							<button type="submit" class="btn btn-lg btn-primary btn-block btn-signin">
 								@lang('label.login')
 							</button>

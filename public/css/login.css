@@ -1,9 +1,9 @@
 /*css login*/
 
 .card-container.card {
-    max-width: 350px;
     padding: 5px 20px;
-    margin-bottom: 150px;
+    /*max-width: 350px;
+    margin-bottom: 150px;*/
 }
 .card {
     background-color: #fff;
@@ -12,7 +12,7 @@
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
     border-radius: 20px;
-	top: -5px;
+	top: 3px;
 	position: relative;
 }
 
