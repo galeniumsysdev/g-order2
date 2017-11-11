@@ -14,7 +14,8 @@ use Hash;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Response;
 use Webpatser\Uuid\Uuid;
-use App\Notifications\VerificationUser;
+use App\Notifications\InvitationUser;
+
 
 
 class UserController extends Controller
@@ -237,7 +238,7 @@ class UserController extends Controller
         }
         if(isset($request->send_customer))
         {
-          $usercustomer->notify(new VerificationUser($usercustomer));
+          $usercustomer->notify(new InvitationUser($usercustomer));
           return redirect()->route('useroracle.show',$id)
                           ->with('success','Successfully Send Email');
         }else{
@@ -247,5 +248,130 @@ class UserController extends Controller
 
 
     }
+    public function cabangCreate($parent_id)
+    {
+      $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+                  ->where('id','=',$parent_id)
+                  ->orderBy('customer_name','asc')->first();
+      $provinces = DB::table('provinces')->get();
+      return view('admin.oracle.cabangcreate',['parent'=>$customer,'provinces'=>$provinces,'menu'=>'customer-cabang']);
+    }
 
+
+    public function cabangStore(Request $request,$parent_id)
+    {
+      $this->validate($request, [
+          'customer_name' => 'required',
+          'email' => 'required|email|unique:users,email',
+          'address'=>'required',
+          'province'=>'required',
+          'city'=>'required',
+          'district'=>'required',
+          'subdistricts'=>'required',
+      ]);
+      $customer = Customer::where('customer_name','like',$request->customer_name)->first();
+      if($customer)
+      {
+          return redirect()->back()->withErrors(['customer_name', trans('validation.unique')]);
+      }else{
+        $parentcustomer =Customer::where('id','=',$parent_id)->first();
+        if($parentcustomer)
+        {
+          $newcustomer =  Customer::create(['customer_name'=>strtoupper($request->customer_name)
+                                            ,'status'=>'A'
+                                            ,'pharma_flag'=>$parentcustomer->pharma_flag
+                                            ,'psc_flag'=>$parentcustomer->psc_flag
+                                            ,'export_flag'=>$parentcustomer->export_flag
+                                            ,'tollin_flag'=>$parentcustomer->tollin_flag
+                                            ,'parent_dist'=>$parentcustomer->id
+                                          ]);
+          $province=DB::table('provinces')->where('id','=',$request->province)->first();
+          $city=DB::table('regencies')->where('id','=',$request->city)->first();
+          $district=DB::table('districts')->where('id','=',$request->district)->first();
+          $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
+          $newsite = CustomerSite::create(['site_use_code'=>'SHIP_TO'
+                                          ,'primary_flag'=>'P'
+                                          ,'status'=>'A'
+                                          ,'address1'=>$request->address
+                                          ,'state'=>$state->name
+                                          ,'district'=>$district->name
+                                          ,'city'=>$city->name
+                                          ,'province'=>$province->name
+                                          ,'province_id'=>$request->province
+                                          ,'city_id'=>$request->city
+                                          ,'district_id'=>$request->district
+                                          ,'state_id'=>$request->subdistricts
+                                          ,'postal_code'=>$request->postal_code
+                                          ,'country'=>'ID'
+                                          ,'customer_id'=>$newcustomer->id
+
+          ]);
+          $custcontact= new CustomerContact();
+           $custcontact->contact_name = '';
+           $custcontact->contact_type = 'EMAIL';
+           $custcontact->contact =$request->email;
+           $custcontact->customer_id=$newcustomer->id;
+           $custcontact->save();
+          $newuser = User::create(['id'=>Uuid::generate()->string
+                                  ,'email'=> $request->email
+                                  ,'name'=>strtoupper($request->customer_name)
+                                  ,'customer_id'=>$newcustomer->id
+                                  ,'api_token'=>str_random(60)
+                    ]);
+          //$newuser = User::where('id','=','ebf4e3f0-c6f9-11e7-9af5-8b1784dd6434')->first();
+          $roleoutlet = Role::where('name','=','Distributor Cabang')->first();
+          $newuser->roles()->attach($roleoutlet->id);
+          $newuser->notify(new InvitationUser($newuser));
+          return redirect()->route('useroracle.show',$parent_id)
+                          ->with('message','Distributor Cabang berhasil ditambahkan dan email verifikasi telah dikirim.');
+        }
+      }
+    }
+
+    public function cabangEdit($id)
+    {
+      $distcabang = Customer::where('id','=',$id)->first();
+      $alamat = CustomerSite::where([['customer_id','=',$id],['primary_flag','=','P']])->orderBy('created_at','asc')->first();
+      $provinces = DB::table('provinces')->get();
+      $roles = DB::table('roles')->whereIn('name',['Distributor','Distributor Cabang'])->get();
+      return view('admin.oracle.cabangedit',['customer'=>$distcabang,'alamat'=>$alamat,'roles'=>$roles,'provinces'=>$provinces,'menu'=>'customer-cabang']);
+    }
+
+    public function cabangUpdate(Request $request,$id)
+    {
+      $this->validate($request, [
+          'customer_name' => 'required',
+          'email' => 'required|email|unique:users,email',
+          'address'=>'required',
+          'province'=>'required',
+          'city'=>'required',
+          'district'=>'required',
+          'subdistricts'=>'required',
+      ]);
+      $distcabang = Customer::where('id','=',$id)->first();
+      $distcabang->customer_name = $request->customer_name;
+      $province=DB::table('provinces')->where('id','=',$request->province)->first();
+      $city=DB::table('regencies')->where('id','=',$request->city)->first();
+      $district=DB::table('districts')->where('id','=',$request->district)->first();
+      $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
+      $alamat = CustomerSite::where([['customer_id','=',$id],['primary_flag','=','P']])
+              ->update(['province_id'=>$request->province
+                        ,'city_id'=>$request->city
+                        ,'district_id'=>$request->district
+                        ,'state_id'=>$request->state
+                        ,'address1'=>$request->address
+                        ,'state'=>$state->name
+                        ,'district'=>$district->name
+                        ,'city'=>$city->name
+                        ,'province'=>$province->name
+                        ,'postal_code'=>$request->postal_code
+              ]);
+      $user = User::where('customer_id','=',$id)->first();
+      if ($user->email!=$request->email)
+      {
+        $user = User::where('customer_id','=',$id)
+                  ->update(['email'=>$request->email]);
+      }
+      return redirect()->route('usercabang.edit',$id)->with('message','Successfully edit data');;
+    }
 }

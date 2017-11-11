@@ -273,10 +273,10 @@
                       </div>
 
                       <div class="form-group{{ $errors->has('districts') ? ' has-error' : '' }}">
-                          <label for="subdistricts" class="col-sm-4 control-label">*@lang('label.urban_village')</label>
+                          <label for="subdistricts" class="col-sm-4 control-label">@lang('label.urban_village')</label>
 
                           <div class="col-sm-8">
-                            <select name="subdistricts" class="form-control" id="subdistricts" required>
+                            <select name="subdistricts" class="form-control" id="subdistricts">
                               <option value="">--</option>
                             </select>
                               <!--<input id="districts" type="districts" class="form-control" name="districts" value="{{ old('districts') }}">-->
@@ -290,10 +290,10 @@
                       </div>
 
                       <div class="form-group{{ $errors->has('postal_code') ? ' has-error' : '' }}">
-                          <label for="postal_code" class="col-sm-4 control-label">*@lang('label.postalcode')</label>
+                          <label for="postal_code" class="col-sm-4 control-label">@lang('label.postalcode')</label>
 
                           <div class="col-sm-8">
-                              <input id="postal_code" type="postal_code" class="form-control" name="postal_code" value="{{ old('postal_code') }}" required>
+                              <input id="postal_code" type="postal_code" class="form-control" name="postal_code" value="{{ old('postal_code') }}">
 
                               @if ($errors->has('postal_code'))
                                   <span class="help-block">

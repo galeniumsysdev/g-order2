@@ -11,7 +11,7 @@ class Customer extends Model
   public $incrementing = false;
   protected $fillable = [
       'id','customer_number', 'customer_name','oracle_customer_id', 'status', 'customer_category_code','customer_class_code','primary_salesrep_id','tax_reference','tax_code','price_list_id','order_type_id','customer_name_phonetic','pharma_flag','psc_flag'
-      ,'outlet_type_id','subgroup_dc_id','longitude','langitude','id_approval_psc','id_approval_pharma','date_approval_psc','date_approval_pharma','keterangan','export_flag','tollin_flag'
+      ,'outlet_type_id','subgroup_dc_id','longitude','langitude','id_approval_psc','id_approval_pharma','date_approval_psc','date_approval_pharma','keterangan','export_flag','tollin_flag','parent_dist'
   ];
 
   public function users()
@@ -36,7 +36,7 @@ class Customer extends Model
   public function hasDistributor()
   {
     return $this->belongsToMany('App\Customer','outlet_distributor','outlet_id','distributor_id')->withTimestamps();
-  }  
+  }
 
   public function subgroupdc()
   {
@@ -51,6 +51,16 @@ class Customer extends Model
   public function cmo()
   {
       return $this->hasMany('App\FileCMO');
+  }
+
+  public function cabang()
+  {
+      return $this->hasMany('App\Customer','parent_dist');
+  }
+
+  public function pusat()
+  {
+      return $this->belongsTo('App\Customer','parent_dist');
   }
 
 
