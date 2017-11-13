@@ -46,7 +46,7 @@ class BackgroundController extends Controller
                   ['approve','=',1],
                   ['status','>=',0],
                   ['status','<',2],
-                  ['notrx','=','PO-20170927-IX-00009']
+                  ['notrx','=','PO-20171002-X-00010']
         ])->get();
         if($headers){
           foreach($headers as $h)
@@ -140,11 +140,13 @@ class BackgroundController extends Controller
                 foreach($mysoline as $sl)
                 {
                   echo "line:".$sl->line_id."<br>";
-                  $ship = $this->getShippingSO($h->notrx,$sl->line_id,$lasttime,$sl->product_id);
+                  $ship = $this->getShippingSO($h->notrx,$sl->line_id,$lasttime,$sl->product_id,$h->id);
                   if($ship==1)
                   {
-                    $jmlkirim = $mysoline->shippings->sum('qty_shipping');
-                    dd($jmlkirim);
+                    $jmlkirim = $sl->shippings()->sum('qty_shipping');
+                    $sl->qty_shipping = $jmlkirim;
+                    $sl->save();
+                    //dd($jmlkirim);
                   }
                 }
               }
@@ -373,7 +375,7 @@ class BackgroundController extends Controller
       }
     }
 
-    public function getShippingSO($headerid,$lineid,$lasttime, $productid)
+    public function getShippingSO($notrx,$lineid,$lasttime, $productid,$headerid)
     {
       $connoracle = DB::connection('oracle');
       if($connoracle){
@@ -389,7 +391,7 @@ class BackgroundController extends Controller
                           //,['wdd.source_line_id','=',$lineid]]
                           //,
                           ['wdd.source_code','=','OE']
-                          ,[DB::raw('nvl(ola.attribute1,ola.orig_sys_document_ref)'),'=',$headerid]
+                          ,[DB::raw('nvl(ola.attribute1,ola.orig_sys_document_ref)'),'=',$notrx]
                           ,[DB::raw('nvl(ola.attribute2,ola.orig_sys_line_ref)'),'=',strval($lineid)]
                           ,['wdd.last_update_date','>',$lasttime]
                         ])
@@ -429,6 +431,8 @@ class BackgroundController extends Controller
             ,'split_source_id'=>$ship->split_from_delivery_detail_id
             ,'tgl_kirim'=>$ship->transaction_date
             ,'conversion_qty'=>$ship->convert_qty
+            ,'header_id' =>$headerid
+            ,'line_id'=>$lineid
             ]
           );
         }
