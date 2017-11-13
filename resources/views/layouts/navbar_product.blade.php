@@ -126,18 +126,6 @@
                           <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; @lang('label.register')</strong></a></li>
                         @else
                           <notification :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
-                          @if(Auth::user()->can('product'))
-                          <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Product</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
-                            <ul class="dropdown-menu">
-                              <li><a href="{{route('outlet.listProductStock')}}">Product List</a></li>
-                              <li><a href="{{route('outlet.importProduct')}}">Import Product</a></li>
-                              <li><a href="{{route('outlet.importProductStock')}}">Import Stock</a></li>
-                              <li><a href="{{route('outlet.trx')}}">Transaction In/Out</a></li>
-                              <li><a href="{{route('outlet.trxList')}}">Transaction List</a></li>
-                            </ul>
-                          </li>
-                          @endif
                           @if(Auth::user()->can('Outlet_Distributor'))
                             <li><a href="{{ route('customer.listNoo') }}">List Noo</a></li>
                           @endif

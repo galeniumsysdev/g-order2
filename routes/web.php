@@ -306,6 +306,9 @@ Route::post('/outlet/product/import/stock/view','OutletProductController@importP
 Route::post('/outlet/product/import/stock/process','OutletProductController@importProductStockProcess')->name('outlet.importProductStockProcess');
 
 Route::get('/outlet/product/list','OutletProductController@listProductStock')->name('outlet.listProductStock');
+Route::get('/outlet/product/form/{id?}','OutletProductController@formProduct')->name('outlet.formProduct');
+Route::post('/outlet/product/submit','OutletProductController@submitProduct')->name('outlet.submitProduct');
+Route::get('/outlet/product/delete/{id}','OutletProductController@deleteProduct')->name('outlet.deleteProduct');
 Route::get('/outlet/product/detail/{product_id}','OutletProductController@detailProductStock')->name('outlet.detailProductStock');
 Route::get('/outlet/product/getList','OutletProductController@getListProductStock')->name('outlet.getListProductStock');
 
