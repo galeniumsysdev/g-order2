@@ -19,12 +19,17 @@
         <div class="panel panel-default">
           <div class="panel-heading"><strong>Product List</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
+            <a href="{{ route('outlet.formProduct') }}" class="btn btn-default">Add Product</a>
+            <a href="{{ route('outlet.importProduct') }}" class="btn btn-default">Import Product</a>
+            <a href="{{ route('outlet.importProductStock') }}" class="btn btn-info pull-right">Import Stock</a>
+            <br/><br/>
             <table id="product-list" class="table table-striped table-hover table-center-header">
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>Title</th>
                   <th>Stok</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -33,6 +38,10 @@
                     <td>{{ $cell['op_id'] }}</td>
                     <td>{{ $cell['title'] }}</td>
                     <td>{!! $cell['stock'] !!}</td>
+                    <td align="center">
+                      <a href="{{ route('outlet.formProduct',$cell['op_id']) }}" class="btn btn-primary">Edit</a>
+                      <a href="{{ route('outlet.deleteProduct',$cell['op_id']) }}" class="btn btn-danger" onclick="if(!confirm('Are you sure want to delete \'{{ $cell['title'] }}\' and its histories?')){return false;}">Delete</a>
+                    </td>
                   </tr>
                 @endforeach
               </tbody>

@@ -135,21 +135,7 @@
                             </li>
                         <!--     {{--notification--}} -->
                             <!-- <notification :email="{!! json_encode(Auth::user()->email) !!}"></notification> -->
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> Notifications
-                                  <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
-                                </a>
-                                <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu">
-                                  <li>
-                                    @forelse (Auth::user()->unreadNotifications  as $notification)
-                                    @include('notifications.'.snake_case(class_basename($notification->type)))
-                                    @empty
-                                      no unread notification
-                                      @endforelse
-                                  </li>
-
-                                </ul>
-                            </li>
+                            <notification :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" style="position:relative; padding-left:50px">
 									                         <img id="img_profile2" src="{{asset('/uploads/avatars/'.Auth::user()->avatar) }}" style="width:32px; height:32px; position:absolute; top:8px; left:10px; border-radius:50%"><i class="#" aria-hidden="true"></i><strong>&nbsp; User</strong>
