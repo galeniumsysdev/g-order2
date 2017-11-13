@@ -31,5 +31,10 @@ class PushNotif extends Notification {
 	public function toDatabase($notifiable)
 	{
 		return $this->data;
+		return [
+			'tipe'=> $this->data['title'],
+			'subject'=> $this->data['message'],
+			'konten'=> $this->data
+		];
 	}
 }
