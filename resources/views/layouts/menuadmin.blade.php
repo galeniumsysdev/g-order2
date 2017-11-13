@@ -2,8 +2,20 @@
     <li>
         <a href="index.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
     </li>
-    <li {{$menu=='user'?'class=active':''}}>
-        <a href="{{route('users.index')}}"><i class="fa fa-fw fa-user"></i> User</a>
+    <li>
+      <a href="javascript:;" data-toggle="collapse" data-target="#user"><i class="fa fa-fw fa-user"></i> User <i class="fa fa-fw fa-caret-down"></i></a>
+      @if($menu=='customer-oracle' or $menu=='user' )
+      <ul id="user" class="collapse in">
+      @else
+      <ul id="user" class="collapse">
+      @endif
+        <li {{$menu=='customer-oracle'?'class=active':''}}>
+            <a href="{{route('useroracle.index')}}"><i class="fa fa-fw fa-user"></i> Customer Oracle</a>
+        </li>
+        <li {{$menu=='user'?'class=active':''}}>
+            <a href="{{route('users.index')}}"><i class="fa fa-fw fa-user"></i> Other User</a>
+        </li>
+      </ul>
     </li>
 	  <li {{$menu=='product'?'class=active':''}}>
         <a href="{{route('product.show')}}"><i class="fa fa-fw fa-table"></i> Product</a>
@@ -50,11 +62,15 @@
     </li>-->
     <li>
         <a href="javascript:;" data-toggle="collapse" data-target="#category"><i class="fa fa-fw fa-arrows-v"></i> Category <i class="fa fa-fw fa-caret-down"></i></a>
+        @if(in_array($menu,array("CategoryOutlet","CategoryProduct","GroupDataCenter","SubgroupDatacenter")) )
+        <ul id="category" class="collapse in">
+        @else
         <ul id="category" class="collapse">
+        @endif
             <li {{$menu=='CategoryOutlet'?'class=active':''}}>
                 <a href="{{route('CategoryOutlet.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Outlet</a>
             </li>
-            <li {{$menu=='CategoryOutlet'?'class=active':''}}>
+            <li {{$menu=='CategoryProduct'?'class=active':''}}>
                 <a href="{{route('CategoryProduct.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Product</a>
             </li>
             <li {{$menu=='GroupDataCenter'?'class=active':''}}>

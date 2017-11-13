@@ -8,7 +8,7 @@
 
         <div>Hi {{$name}},
             <p>Thanks for creating an account g-Order.
-            Please follow the link below to verify your email address                        
+            Please follow the link below to verify your email address
             {{route('confirmation',$api_token)}}.</p><br/>
 
         </div>

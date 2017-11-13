@@ -158,12 +158,21 @@ Route::group(['middleware' => ['role:IT Galenium']], function () {
     'uses' => 'ProductController@update'
     ,'as' => 'product.update'
   ]);
+  Route::get('/users/oracle','UserController@oracleIndex')->name('useroracle.index');
+  Route::get('/users/oracle/{id}','UserController@oracleShow')->name('useroracle.show');
+  Route::patch('/users/oracle/{id}','UserController@oracleUpdate')->name('useroracle.update');
+  Route::get('/users/cabang/{parent_id}','UserController@cabangCreate')->name('usercabang.create');
+  Route::post('/users/cabang/{parent_id}','UserController@cabangStore')->name('usercabang.store');
+  Route::get('/users/cabang/edit/{id}','UserController@cabangEdit')->name('usercabang.edit');
+  Route::patch('/users/cabang/edit/{id}','UserController@cabangUpdate')->name('usercabang.update');
 
   Route::resource('CategoryOutlet',  'Cat_OutletController');
   Route::resource('CategoryProduct',  'CategoryProductController');
   Route::resource('users','UserController');
   Route::resource('GroupDataCenter','DataCenterController');
   Route::resource('SubgroupDatacenter','SubgroupDCController');
+
+
 
 });
 

@@ -49,6 +49,7 @@
     width: 100%;
     display: block;
   }
+
   .caption h4 a{
     font-size: 12px;
   }
@@ -128,7 +129,7 @@
 }
 
 
-body { 
+body {
     min-height: 100%;
     background-repeat: no-repeat;
     background-color: #E8EAF6;
@@ -189,7 +190,7 @@ body {
           background-color: #000;
     }
     .navbar-header-logout a{
-      color: #FFF;    
+      color: #FFF;
     }
 }
 
@@ -552,4 +553,30 @@ ul.dropdown-notif li .item-right button{
   line-height: .75em;
   vertical-align: -15%;
   color: #fff;
+}
+
+html,body {
+  margin: 0;
+  padding: 0;
+  height: 100%!important;
+}
+
+#app {
+  padding-bottom: 5em;
+}
+
+@media (max-width: 767px) {
+  #app {
+    padding-bottom: 8em;
+  }
+}
+
+.imgcontainer {
+text-align: center;
+margin: 24px 0 12px 0;
+}
+
+img.avatar {
+width: 50%;
+border-radius: 0%;
 }

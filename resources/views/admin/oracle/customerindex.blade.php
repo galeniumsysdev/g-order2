@@ -3,10 +3,7 @@
 	<div class="row">
 	    <div class="col-lg-12 margin-tb">
 	        <div class="pull-left">
-	            <h2>Users Management</h2>
-	        </div>
-	        <div class="pull-right">
-	            <a class="btn btn-success" href="{{ route('users.create') }}"> Create New User</a>
+	            <h2>Customer Oracle</h2>
 	        </div>
 	    </div>
 	</div>
@@ -18,30 +15,31 @@
 	<table  class="table" id="table">
     <thead>
   		<tr>
-  			<th>Name</th>
+        <th>Customer Number</th>
+  			<th>Customer Name</th>
   			<th>Email</th>
   			<th>Roles</th>
-  			<th width="280px">Action</th>
+  			<th>Action</th>
   		</tr>
     </thead>
     <tbody>
-    	@foreach ($data as $key => $user)
+    	@foreach ($customers as $cust)
     	<tr>
-    		<td>{{ $user->name }}</td>
-    		<td>{{ $user->email }}</td>
-    		<td>
-    			@if(!empty($user->roles))
-    				@foreach($user->roles as $v)
+        <td>{{ $cust->customer_number }}</td>
+    		<td>{{ $cust->customer_name }}</td>
+    		@if($cust->users->count()>0)
+          <td>{{$cust->user->email}}</td>
+          <td>@if(!empty($cust->user->roles))
+    				@foreach($cust->user->roles as $v)
     					<label class="label label-success">{{ $v->display_name }}</label>
     				@endforeach
-    			@endif
-    		</td>
+    			@endif</td>
+        @else
+          <td>-</td>
+          <td>-</td>
+        @endif
     		<td>
-    			<a class="btn btn-info" href="{{ route('users.show',$user->id) }}">Show</a>
-    			<a class="btn btn-primary" href="{{ route('users.edit',$user->id) }}">Edit</a>
-    			{!! Form::open(['method' => 'DELETE','route' => ['users.destroy', $user->id],'style'=>'display:inline']) !!}
-                {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
-            	{!! Form::close() !!}
+    			<a class="btn btn-info" href="{{route('useroracle.show',$cust->id)}}">Show</a>
     		</td>
     	</tr>
     	@endforeach
@@ -62,8 +60,11 @@
           'columnDefs' : [
                             {
                                'searchable'    : true,
-                               'targets'       : [0,1,2]
-                            },
+                               'targets'       : [0,1,2,3]
+                            },{
+                               'orderable'    : true,
+                               'targets'       : [0,1,2,3]
+                            }
                         ]
         });
     } );

@@ -17,6 +17,7 @@ function getListCity(id,old){
           $('#city').append('<option value="'+subcatObj.id+'">'+subcatObj.name+'</option>');
         }
       });
+      $( "#city" ).prop( "disabled", false );
 
   });
 }
@@ -37,6 +38,7 @@ function getListDistrict(id,old){
           $('#district').append('<option value="'+subcatObj.id+'">'+subcatObj.name+'</option>');
         }
       });
+      $( "#district" ).prop( "disabled", false );
 
   });
 }
@@ -55,7 +57,7 @@ function getListSubdistrict(id,old){
           $('#subdistricts').append('<option value="'+subcatObj.id+'">'+subcatObj.name+'</option>');
         }
       });
-
+      $( "#subdistricts" ).prop( "disabled", false );
   });
 }
 

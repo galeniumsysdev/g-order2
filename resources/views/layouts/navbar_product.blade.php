@@ -52,8 +52,10 @@
                       </button>
 
                       <!-- Branding Image -->
-                      @if(Auth::guest()||Auth::user()->can('Create PO'))
+                      @if(Auth::guest())
                         <a class="navbar-brand" href="{{ url('/') }}" style="color:#fff">
+                      @elseif(Auth::user()->can('Create PO'))
+                        <a class="navbar-brand" href="{{ url('/product/buy') }}" style="color:#fff">
                       @else
                           <a class="navbar-brand" href="{{ url('/home') }}" style="color:#fff">
                       @endif
@@ -77,7 +79,7 @@
                         </ul>
                       @endif
                   </div>
-                  @if (Auth::check()&&Auth::user()->can('Create PO'))
+                  @if (Auth::check() && Auth::user()->can('Create PO'))
                     <form method="post" action="{{route('product.search')}}" class="navbar-form navbar-left" role="search">
                        {{csrf_field()}}
                       <!--<div class="form-group">
@@ -120,8 +122,8 @@
                               </li>
                             </ul>
                           </li>
-                          <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; Login</strong></a></li>
-                          <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; Register</strong></a></li>
+                          <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; @lang('label.login')</strong></a></li>
+                          <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; @lang('label.register')</strong></a></li>
                         @else
                           <notification :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
                           @if(Auth::user()->can('Outlet_Distributor'))
@@ -286,7 +288,7 @@
 
           </nav>
           @yield('content')
-          
+
       </div>
       <!--@yield('footer')-->
       @include('layouts.footer')
