@@ -18,6 +18,10 @@ class Customer extends Model
   {
       return $this->hasMany('App\User','customer_id');
   }
+  public function user()
+  {
+     return $this->hasOne('App\User','customer_id')->orderBy('created_at','desc');
+  }
 
   public function sites()
   {
@@ -31,8 +35,8 @@ class Customer extends Model
 
   public function hasDistributor()
   {
-    return $this->belongsToMany('App\Customer','outlet_distributor','outlet_id','distributor_id')->withTimestamps();;
-  }
+    return $this->belongsToMany('App\Customer','outlet_distributor','outlet_id','distributor_id')->withTimestamps();
+  }  
 
   public function subgroupdc()
   {

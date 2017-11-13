@@ -28,19 +28,22 @@
 
 /* Add animation to "page content" */
 .animate-bottom {
-  padding-bottom: 130px;
+  /*padding-bottom: 130px;*/
   position: relative;
   -webkit-animation-name: animatebottom;
   -webkit-animation-duration: 0.1s;
   animation-name: animatebottom;
-  animation-duration: 0.1s
+  animation-duration: 0.1s;
+  height: auto !important;
+  height: 100%;
+  min-height: 100%;
 }
 
-@media screen and (min-width: 480px) {
+/*@media screen and (min-width: 480px) {
   .animate-bottom {
     padding-bottom: 80px;
   }
-}
+}*/
 
 @-webkit-keyframes animatebottom {
   from { bottom:-100px; opacity:0 }
