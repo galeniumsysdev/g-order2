@@ -580,3 +580,7 @@ img.avatar {
 width: 50%;
 border-radius: 0%;
 }
+
+#app {
+  padding-bottom: 5em;
+}

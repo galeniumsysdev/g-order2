@@ -29,6 +29,15 @@ class Product extends Model
       return $this->hasMany('App\UomConversion','product_id');
     }
 
+    public function soshippings()
+    {
+        return $this->hasMany('App\SoShipping','product_id');
+    }
+    public function solines()
+    {
+        return $this->hasMany('App\SoLine','product_id');
+    }
+
 
 
 

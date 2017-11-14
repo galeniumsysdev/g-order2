@@ -176,6 +176,7 @@ class DPLController extends Controller {
 				'title' => 'Pengajuan DPL #'.$suggest_no,
 				'message' => 'untuk '.$dpl_outlet['customer_name'],
 				//'href' => route('dpl.discountApproval',$suggest_no),
+				'suggest_no' => $suggest_no,
 				'href' => 'http://google.com'
 			];
 			foreach ($notified_users as $key => $email) {
@@ -241,6 +242,7 @@ class DPLController extends Controller {
 					'title' => 'Permohonan Approval',
 					'message' => 'Permohonan Approval #'.$suggest_no,
 					//'href' => route('dpl.discountApproval',$suggest_no),
+					'suggest_no' => $suggest_no,
 					'href' => 'http://google.com'
 				];
 				foreach ($notified_users as $key => $email) {
@@ -262,6 +264,7 @@ class DPLController extends Controller {
 					'title' => 'Usulan Discount #'.$suggest_no.' ditolak',
 					'message' => 'oleh '.Auth::user()->name,
 					//'href' => route('dpl.discountForm',$suggest_no),
+					'suggest_no' => $suggest_no,
 					'href' => 'http://google.com'
 				];
 				foreach ($notified_users as $key => $email) {
