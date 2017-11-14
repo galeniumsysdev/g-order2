@@ -7,6 +7,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
 
+<!--POP UP PRODUK-->
+<!--<link rel="stylesheet" type="text/css" href="{{ asset('css/css-pop/default.css') }}" />-->
+<link rel="stylesheet" type="text/css" href="{{ asset('css/css-pop/component.css') }}" />
+<script src="{{ asset('js/js-pop/modernizr.custom.js') }}"></script>
+
 <div class="container">
     <div class="row">
         <div class="col-sm-12">
@@ -167,29 +172,104 @@
                                    @else
                                      <input type="checkbox" id="blankCheckbox" value="1" name="psc">
                                    @endif
-                                   <strong><a href="#" class="external-psc">Personal Skin Care (PSC)</a>
-                                 </strong><div style="font-size:8pt">(Caladine, Oilum, v-mina, Bellsoap, JFSulfur)</div></label>
-                               </div>
 
-
-                               <div class="checkbox">
-                                 <label>
-                                   @if( old('pharma')=="1")
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma" checked="checked">
-                                   @else
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma">
-                                   @endif
-                                   <strong><a href="#" class="external-pharma">Pharma (NON PSC)</a>
-                                 </strong></label>
-                               </div>
-
-                               @if ($errors->has('psc'))
+                                   @if ($errors->has('psc'))
                                    <span class="help-block">
                                        <strong>{{ $errors->first('psc') }}</strong>
                                    </span>
-                               @endif
-                           </div>
-                        </div>
+                                   @endif 
+
+                                   <div class="md-modal md-effect-1" id="modal-1">
+                                      <div class="md-content">
+                                          <h3><strong>Produk Personal Skin Care ( PSC )</strong></h3>
+                                          <div>
+                                              <ul>
+                                                  <li style="font-size:18px;">Caladine</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Oilum</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">V-Mina</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Bellsoap</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">JFSulfur</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                              </ul>
+                                              <button class="md-close">Close</button>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                   <div class="container-pop">
+                                      <div class="main clearfix">
+                                          <div class="column">
+                                              <a href="#" class="md-trigger" data-modal="modal-1"><strong>Personal Skin Care ( PSC )</strong></a>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="md-overlay"></div>
+                                  <div style="font-size:8pt; margin-top:5px;">(Caladine, Oilum, v-mina, Bellsoap, JFSulfur)</div></label>
+                               </div>
+
+                               <!---->
+
+                               <div class="checkbox">
+                                 <label>
+                                   @if( old('psc')=="1")
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc" checked="checked">
+                                   @else
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc">
+                                   @endif
+
+                                   @if ($errors->has('psc'))
+                                   <span class="help-block">
+                                       <strong>{{ $errors->first('psc') }}</strong>
+                                   </span>
+                                   @endif 
+
+                                   <div class="md-modal md-effect-2" id="modal-2">
+                                      <div class="md-content">
+                                          <h3><strong>Produk Pharma ( NON PSC )</strong></h3>
+                                          <div>
+                                              <ul>
+                                                  <li style="font-size:18px;">Scabimite CReam</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Laxadine Emulsi</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Haemocaine Ointment</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Mycorine</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Acne Feldine Lotion</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Pyravit Syrup</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Laxarec Rektal Tube</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Solare</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Soft U Derm Cream</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                  <li style="font-size:18px;">Topsy Cream</li>
+                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                              </ul>
+                                              <button class="md-close">Close</button>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                   <div class="container-pop">
+                                      <div class="main clearfix">
+                                          <div class="column">
+                                              <a href="#" class="md-trigger" data-modal="modal-2"><strong>Pharma ( NON PSC )</strong></a>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="md-overlay"></div>
+                                  </label>
+                               </div>
+                               </div>
+                              </div>
 
                       </div>
                       <div class="form-horizontal col-sm-6">
@@ -313,7 +393,6 @@
                       </div>
                       <div class="col-sm-12 has-error"><span class="help-block">* @lang('label.mandatoryfield')</span></div>
                     </form>
-                   </div>
                 </div>
             </div>
         </div>
@@ -350,4 +429,12 @@
     });
 </script>
 
+<!--JAVA SCRIPT POP UP-->
+<script src="{{ asset('js/js-pop/classie.js') }}"></script>
+<script src="{{ asset('js/js-pop/modalEffects.js') }}"></script>
+<script>
+var polyfilter_scriptpath = '/js/';
+</script>
+<script src="{{ asset('js/js-pop/cssParser.js') }}"></script>
+<script src="{{ asset('js/js-pop/css-filters-polyfill.js') }}"></script>
 @endsection
