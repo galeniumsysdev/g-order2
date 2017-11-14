@@ -6,7 +6,7 @@
         </a>
         <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-if="unreadNotifications.length">
           <li v-for="item in unreadNotifications" v-bind:key="item.index">
-            <a v-bind:href="item.data.konten.href">
+            <a v-bind:href="item.data.content.href">
               <span class="item">
                 <span class="item-left">
                   <span class="item-info">
@@ -63,7 +63,7 @@
                     this.unreadNotifications.push({
                       data: {
                         subject: notification.message,
-                        konten: {
+                        content: {
                           href: notification.href
                         }
                       }
