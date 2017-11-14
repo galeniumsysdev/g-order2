@@ -202,6 +202,58 @@ class OutletProductController extends Controller
 
   	return view('admin.outlet.detailProductStock', array('title'=>$title, 'last_stock'=>$last_stock, 'stock'=>$trx));
   }
+  
+  public function formProduct($id = '')
+  {
+    if($id)
+      $product = OutletProducts::where('id',$id)->first();
+    else{
+      $product = new \stdClass;
+      $product->id = '';
+      $product->title = '';
+      $product->unit = '';
+      $product->price = 0;
+    }
+
+    return view('admin.outlet.outletProductForm', array('product'=>$product));
+  }
+
+  public function submitProduct(Request $request)
+  {
+    $id = $request->id;
+    $product_name = $request->product_name;
+    $unit = $request->product_unit;
+    $price = $request->product_price;
+
+    if(!$id){
+      $product = new OutletProducts;
+      $product->id = Uuid::generate();
+      $product->enabled_flag = 'Y';
+    }
+    else{
+      $product = OutletProducts::find($id);
+    }
+    $product->title = $product_name;
+    $product->unit = $unit;
+    $product->price = $price;
+    $save = $product->save();
+
+    if($save){
+      if(!$id)
+        return redirect()->back()->with('msg','Product saved successfully.');
+      else
+        return redirect()->back()->with('msg','Product edited successfully.');
+    }
+  }
+
+  public function deleteProduct($id)
+  {
+    $delete = OutletProducts::destroy($id);
+
+    if($delete){
+      return redirect()->back()->with('msg','Product deleted successfully.');
+    }
+  }
 
   public function outletTrx()
   {

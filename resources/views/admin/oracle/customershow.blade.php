@@ -37,6 +37,9 @@
                         <li role="presentation" class="active"><a href="#personal" aria-controls="Personal" role="tab" data-toggle="tab">@lang('label.personal')</a></li>
                         <li role="presentation"><a href="#address" aria-controls="Address" role="tab" data-toggle="tab">@lang('label.address')</a></li>
                         <li role="presentation"><a href="#contact" aria-controls="Contact" role="tab" data-toggle="tab">@lang('label.contact')</a></li>
+                        @if($customer->user->hasRole('Distributor'))
+                        <li role="presentation"><a href="#distributor_cabang" aria-controls="distributor_cabang" role="tab" data-toggle="tab">Distributor Cabang</a></li>
+                        @endif
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane active" id="personal">
@@ -177,7 +180,41 @@
 
                           </div>
                         </div>
-
+                        <div role="tabpanel" class="tab-pane" id="distributor_cabang">
+                          <div class="table-responsive">
+                            <table id="dist-table" class="table table-striped">
+                              <thead>
+                                <tr>
+                                  <th>Name</th>
+                                  <th>Role</th>
+                                  <th>Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @forelse($customer->cabang as $cab)
+                                <tr>
+                                  <td>{{$cab->customer_name}}</td>
+                                  <td>
+                                    @foreach($cab->user->roles as $v)
+                          					     <label class="label label-success">{{ $v->display_name }}</label>
+                          				  @endforeach
+                                  </td>
+                                  <td>
+                                    <a href="{{route('usercabang.edit',$cab->id)}}" class="btn btn-sm btn-primary">Edit</a>
+                                  </td>
+                                </tr>
+                                @empty
+                                  <tr>
+                                    <td>No Data Found</td>
+                                  </tr>
+                                @endforelse
+                              </tbody>
+                            </table>
+                            <div class="pull">
+                  	            <a class="btn btn-primary" href="{{route('usercabang.create',$customer->id)}}"> Create Distributor Cabang</a>
+                  	        </div>
+                          </div>
+                        </div>
 
 
                     </div>

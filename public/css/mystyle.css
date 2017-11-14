@@ -561,6 +561,10 @@ html,body {
   height: 100%!important;
 }
 
+#app {
+  padding-bottom: 5em;
+}
+
 @media (max-width: 767px) {
   #app {
     padding-bottom: 8em;

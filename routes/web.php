@@ -161,6 +161,11 @@ Route::group(['middleware' => ['role:IT Galenium']], function () {
   Route::get('/users/oracle','UserController@oracleIndex')->name('useroracle.index');
   Route::get('/users/oracle/{id}','UserController@oracleShow')->name('useroracle.show');
   Route::patch('/users/oracle/{id}','UserController@oracleUpdate')->name('useroracle.update');
+  Route::get('/users/cabang/{parent_id}','UserController@cabangCreate')->name('usercabang.create');
+  Route::post('/users/cabang/{parent_id}','UserController@cabangStore')->name('usercabang.store');
+  Route::get('/users/cabang/edit/{id}','UserController@cabangEdit')->name('usercabang.edit');
+  Route::patch('/users/cabang/edit/{id}','UserController@cabangUpdate')->name('usercabang.update');
+
   Route::resource('CategoryOutlet',  'Cat_OutletController');
   Route::resource('CategoryProduct',  'CategoryProductController');
   Route::resource('users','UserController');
@@ -301,6 +306,9 @@ Route::post('/outlet/product/import/stock/view','OutletProductController@importP
 Route::post('/outlet/product/import/stock/process','OutletProductController@importProductStockProcess')->name('outlet.importProductStockProcess');
 
 Route::get('/outlet/product/list','OutletProductController@listProductStock')->name('outlet.listProductStock');
+Route::get('/outlet/product/form/{id?}','OutletProductController@formProduct')->name('outlet.formProduct');
+Route::post('/outlet/product/submit','OutletProductController@submitProduct')->name('outlet.submitProduct');
+Route::get('/outlet/product/delete/{id}','OutletProductController@deleteProduct')->name('outlet.deleteProduct');
 Route::get('/outlet/product/detail/{product_id}','OutletProductController@detailProductStock')->name('outlet.detailProductStock');
 Route::get('/outlet/product/getList','OutletProductController@getListProductStock')->name('outlet.getListProductStock');
 
