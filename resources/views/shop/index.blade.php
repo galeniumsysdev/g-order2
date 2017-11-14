@@ -27,15 +27,15 @@
               <h4><a href="{{ route('product.detail',['id'=>$product->id])}}">{{ $product->title }}</a></h4>
               @if(Auth::check())
                 <div class="input-group" style="width:100%">
-                    <input type="text" class="form-control " name="qty" value=1 size="2" style="text-align:right;width:50%">
-                    <select name="satuan" class="form-control" style="width:40% ">
+                    <input type="text" class="form-control " id="qty-{{$product->id}}" name="qty" value=1 size="2" style="text-align:right;width:50%">
+                    <select name="satuan" class="form-control" style="width:40% " id="satuan-{{$product->id}}" onChange="getPrice('{{$product->id}}')">
                       <option value="Box">Box</option>
                       <option value="Pcs">Pcs</option>
                     </select>
                 </div>
-                <div class="clearfix price">Rp. 0</div>
-                <div class ="clearfix">
-                  <a href="{{ route('product.addToCart',['id'=>$product->id])}}" class="btn btn-success pull-right" role="button">Add to cart</a>
+                <div class="clearfix price" >Rp. 0</div>
+                <div class ="clearfix" id="addCart-{{$product->id}}">
+                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success pull-right" role="button">Add to cart</a>
                 </div>
               @endif
             </div>

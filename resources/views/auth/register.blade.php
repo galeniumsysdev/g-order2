@@ -106,7 +106,7 @@
                                      <input id="no_tlpn" type="no_tlpn" class="form-control" name="extnotelp" fieldset disabled placeholder="+62" required>
                                  </div>
                                  <div class="col-xs-10">
-                                     <input id="no_tlpn" type="no_tlpn" class="form-control" name="no_tlpn" value="{{ old('no_tlpn') }}" required>
+                                     <input id="no_tlpn" type="no_tlpn" class="form-control" name="no_tlpn" value="{{ old('no_tlpn') }}">
                                  </div>
                              </div>
 

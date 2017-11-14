@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\User;
 use App\SoHeader;
+use App\SoShipping;
 use Auth;
 use File;
 use Storage;
@@ -30,21 +31,30 @@ class OrderController extends Controller
                 $query->orWhere('distributor_id','=',Auth::user()->customer_id)
                       ->orWhere('customer_id','=',Auth::user()->customer_id);
                   })->first();
+      /*$header = SoHeader::where('id','=',$id)
+        ->where(function ($query) {
+          $query->orWhere('distributor_id','=',Auth::user()->customer_id)
+                ->orWhere('customer_id','=',Auth::user()->customer_id);
+            })->first();*/
       if(!$header)
       {
             return view('errors.403');
       }
+      //dd($header->shippings()->select('deliveryno','tgl_kirim')->groupBy('deliveryno','tgl_kirim')->get());
       $lines =DB::table('so_lines_v')->where('header_id','=',$id)->get();
+      $deliveryno = SoShipping::where('header_id','=',$id)->get();
+      $deliveryno = $deliveryno->groupBy('deliveryno','tgl_kirim');
+
       //if(Auth::user()->customer_id!=$header->customer_id){
           $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
-          if($user_dist->hasRole('Principal')){
-              return view('shop.checkOrder1',compact('header','lines'));
-          }
+        /*  if($user_dist->hasRole('Principal')){
+              return view('shop.checkOrder1',compact('header','lines','deliveryno'));
+          }*/
       //}
 
 
       if ($user_dist->hasRole('Principal') )    {
-        return view('shop.checkOrder1',compact('header','lines'));
+        return view('shop.checkOrder1',compact('header','lines','deliveryno'));
       }else {
         $print=Input::get('print','');
         if ($print=="yes"){
