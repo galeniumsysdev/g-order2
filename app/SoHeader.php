@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 class SoHeader extends Model
 {
   protected $fillable = [
@@ -13,7 +14,12 @@ class SoHeader extends Model
 
   public function line()
   {
-      return $this->hasMany('App\SoLine','line_id');
+      return $this->hasMany('App\SoLine','header_id');
+  }
+
+  public function shippings()
+  {
+    return $this->hasMany('App\SoShipping','header_id');
   }
 
 }

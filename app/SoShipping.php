@@ -15,6 +15,11 @@ class SoShipping extends Model
 
   public function lines()
   {
-    return $this->belongsTo('App\SoLine','line_id');
+    return $this->belongsTo('App\SoLine','line_id','line_id');
   }
+  public function product()
+  {
+     return $this->belongsTo('App\Product');
+  }
+
 }

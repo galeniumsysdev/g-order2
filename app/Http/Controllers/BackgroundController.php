@@ -149,6 +149,12 @@ class BackgroundController extends Controller
                     //dd($jmlkirim);
                   }
                 }
+                $soline_notsend = SoLine::where([['header_id','=',$h->id],['qty_request_primary','!=','qty_shipping']])->get();
+                if($soline_notsend){
+                  $h->status=2;
+                }else{
+                  $h->status=4;
+                }
               }
             }//foreach
 

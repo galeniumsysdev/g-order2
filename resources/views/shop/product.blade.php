@@ -45,8 +45,9 @@
             <div class="pricetext">Rp. 21.420,00
             </div>
           </div>
-          <div class ="clearfix">
-            <a href="{{ route('product.addToCart',['id'=>$product->id])}}" class="btn btn-sm btn-success center-block" role="button">Add to cart</a>
+          <div class ="clearfix" id="addCart-{{$product->id}}">
+            <!--<a href="{{ route('product.addToCart',['id'=>$product->id])}}" class="btn btn-sm btn-success center-block" role="button">Add to cart</a>-->
+            <a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button">Add to cart</a>
           </div>
           <div class="info-product">
             1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}
