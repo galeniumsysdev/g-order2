@@ -212,26 +212,6 @@
                               </li>
                             </ul>
                           </li>
-                        <!--{{--notification--}}
-                          --  <notification userid="{!!auth()->id()!!}" :unreads="{{auth()->user()->unreadNotifications}}"></notification>-->
-                            <!-- <li class="dropdown hidden-xs">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> Notifications
-                                  <span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
-                                </a>
-                                <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" >
-                                  <li>
-                                    @forelse (Auth::user()->unreadNotifications->take(5)  as $notification)
-                                    @include('notifications.'.snake_case(class_basename($notification->type)))
-                                    @empty
-                                      no unread notification
-                                      @endforelse
-                                  </li>
-                                  <li class="divider"></li>
-                                  <li style="text-align:center">
-                                      <a href="{{url('/home')}}">@lang('label.showall')</a>
-                                  </li>
-                                </ul>
-                            </li> -->
 
                             <!--user dropdown-->
                             <li class="dropdown">
