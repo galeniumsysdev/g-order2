@@ -31,3 +31,18 @@ table#cart tfoot td .btn{display:block;}
 .totprice{display:block;background: #3366FF;color: #fff;}
 
 }
+.tabcard.col-sm-12 {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.tab-content{
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.kirim-panel{
+  color: #337ab7;
+}
+
+#shipping .panel-group{
+  min-width:500px;
+}

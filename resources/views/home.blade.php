@@ -102,6 +102,8 @@
                       <a href="{{route('order.notifnewpo',['notifid'=>$notif->id,'id'=>$notif->data['so_header_id']['id']])}}">{{$notif->data['subject']}}</a>
                     @elseif($notif->type=="App\\Notifications\\RejectDistributorNotif")
                         <a href="{{route('customer.show',[$notif->data['user']['id'],$notif->id] )}}">{{$notif->data['subject']}}</a>
+                    @elseif($notif->type=="App\\Notifications\\PushNotif")
+                        <a href="{{route('dpl.discountApproval',[$notif->data['content']['suggest_no']]) }}">sadfasfaasd</a>
                     @else
                     <!--if($notif->type=="App\\Notifications\\RejectPoByDistributor" or $notif->type=="App\\Notifications\\ShippingOrderOracle" or $notif->type=="App\\Notifications\\BookOrderOracle")-->
                         <a href="{{route('order.notifnewpo',[$notif->id,$notif->data['order']['id']])}}">{{$notif->data['subject']}}</a>
