@@ -9,6 +9,10 @@ class Cart
   public $items = null;
   public $totalQty = 0;
   public $totalPrice = 0;
+  public $totalTax = 0;
+  public $totalDiscount = 0;
+  public $totalAmount = 0;
+
 
   public function __construct($oldCart)
   {

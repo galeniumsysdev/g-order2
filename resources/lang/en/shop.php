@@ -24,6 +24,7 @@ return [
     'ContinueShopping' => 'Continue Shopping',
     'CreateOrder' => 'Create Order',
     'Total' => 'Total',
+    'Amount' => 'Amount',
     'Po_num' => 'PO Number',
     'ShipTo' => 'Ship To',
     'BillTo' => 'Bill To',

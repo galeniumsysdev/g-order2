@@ -24,9 +24,9 @@
             @else
               <img data-src="holder.js/100%x180" alt="100%x180" class="img product" src="" data-holder-rendered="true">
             @endif
-          <div class="producttitle"><a href="#">{{$product->title}}</a></div>
+          <div class="producttitle"><a href="{{ route('product.detail',['id'=>$product->id])}}">{{$product->title}}</a></div>
           @if (!Auth::guest())
-              <div class="input-group" style="width:100%">
+              <div class="input-group   input-group-sm" style="width:100%">
                   <input type="text" class="form-control input-sm" name="qty" id="qty-{{$product->id}}" value=1 style="text-align:right;width:40%"  onkeypress="return isNumberKey(event)" >
                   <select name="satuan" class="form-control input-sm" style="width:50%;" id="satuan-{{$product->id}}" onChange="getPrice('{{$product->id}}')">
                     @foreach($product->uom as $satuan)
@@ -42,15 +42,39 @@
               @endif
           <div class="productprice">
             <div class="pull-right"></div>
-            <div class="pricetext">Rp. 21.420,00
+            <div class="pricetext" id="lblhrg-{{$product->id}}">
+              @if(substr($product->itemcode,1,2)=="43")
+                $
+              @else
+                Rp.
+              @endif
+              @if(Auth::user()->hasRole('Distributor'))
+                {{number_format($product->getPrice(Auth()->user()->id,$product->satuan_secondary),2)}}/{{$product->satuan_secondary}}
+              @else
+                {{number_format($product->getPrice(Auth()->user()->id,$product->satuan_primary),2)}}/{{$product->satuan_primary}}
+              @endif
             </div>
+            <div class="price coret" id="hrgcoret-{{$product->id}}">
+              @if(substr($product->itemcode,1,2)=="43")
+                $
+              @else
+                Rp.
+              @endif
+              @if(Auth::user()->hasRole('Distributor'))
+                {{number_format($product->getRealPrice(Auth()->user()->id,$product->satuan_secondary),2)}}/{{$product->satuan_secondary}}
+              @else
+                {{number_format($product->getRealPrice(Auth()->user()->id,$product->satuan_primary),2)}}/{{$product->satuan_primary}}
+              @endif
+            </div>
+            <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
           </div>
           <div class ="clearfix" id="addCart-{{$product->id}}">
             <!--<a href="{{ route('product.addToCart',['id'=>$product->id])}}" class="btn btn-sm btn-success center-block" role="button">Add to cart</a>-->
             <a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button">Add to cart</a>
           </div>
           <div class="info-product">
-            1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}
+            1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}<br>
+
           </div>
         <!--</div>-->
       </div>

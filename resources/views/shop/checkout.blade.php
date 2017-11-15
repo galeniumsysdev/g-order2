@@ -125,7 +125,17 @@
 			</tbody>
 			<tfoot>
 				<tr class="visible-xs">
-					<td class="text-center" ><strong class="totprice" id="totprice1">Total {{number_format($totalPrice,2)}}</strong></td>
+					<td class="text-center" ><strong class="totprice" id="totprice1">SubTotal {{number_format($totalPrice,2)}}</strong></td>
+				</tr>
+        <tr class="visible-xs">
+					<td class="text-center" ><strong class="totprice" id="taxprice">Tax </strong></td>
+				</tr>
+        <tr class="visible-xs">
+					<td class="text-center" ><strong class="totprice" id="discount">Discount </strong></td>
+				</tr>
+        <tr>
+          <td class="pull-right">Total</td>
+					<td class="hidden-xs text-center"><strong id="totprice2"> {{ number_format($totalPrice,2) }}</strong></td>
 				</tr>
 				<tr>
 					<td><a href="{{route('product.shoppingCart') }}" class="btn btn-warning" style="min-width:200px;"><i class="fa fa-angle-left"></i> @lang('shop.back')</a></td>

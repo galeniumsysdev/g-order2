@@ -17,6 +17,12 @@ table#cart tbody td .form-control{
 .actions .btn-danger{
   float:right;
 }
+.row{
+  margin-right:0px;
+}
+#app{
+  padding-bottom: 10em;
+}
 
 table#cart thead { display: none; }
 table#cart tbody td { display: block; padding: .6rem; min-width:320px;}

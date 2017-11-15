@@ -26,7 +26,7 @@
   					<th style="width:40%" class="text-center">@lang('shop.Product')</th>
   					<th style="width:10%" class="text-center">@lang('shop.Price')</th>
   					<th style="width:20%" class="text-center">@lang('shop.Quantity')</th>
-  					<th style="width:20%" class="text-center">@lang('shop.SubTotal')</th>
+  					<th style="width:20%" class="text-center">@lang('shop.Amount')</th>
   					<th style="width:10%"></th>
   				</tr>
   			</thead>
@@ -60,7 +60,7 @@
               </div>
 
   					</td>
-  					<td data-th="@lang('shop.SubTotal')" class="text-center" id="subtot-{{$id}}">{{  number_format($product['amount'],2) }}</td>
+  					<td data-th="@lang('shop.Amount')" class="text-right xs-only-text-center" id="subtot-{{$id}}">{{  number_format($product['amount'],2) }}</td>
   					<td class="actions" data-th="">
   						<button class="btn btn-info btn-sm" id="rfs-{{$id}}" onclick="return changeProduct(this.id);" ><i class="fa fa-refresh"></i></button>
   						<a href="{{route('product.removeItem',['id'=>$id]) }}" id="rmv-{{$id}}"><button class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button></a>
@@ -69,15 +69,35 @@
             @endforeach
   			</tbody>
   			<tfoot>
-  				<tr class="visible-xs">
-  					<td class="text-center" ><strong class="totprice" id="totprice1">Total {{number_format($totalPrice,2)}}</strong></td>
+          <tr >
+            <td colspan="3" class="text-right hidden-xs"><strong>@lang('shop.SubTotal')</strong></td>
+  					<td class="text-right xs-only-text-center" ><strong class="totprice" id="totprice1"><label class="visible-xs-inline">@lang('shop.SubTotal'): </label>{{number_format($totalPrice,2)}}</strong></td>
+            <td class="hidden-xs"></td>
   				</tr>
-  				<tr>
+          <tr style="border-top-style:hidden;">
+            <td colspan="3" class="text-right hidden-xs"><strong>Discount</strong></td>
+  					<td class="text-right xs-only-text-center" ><strong class="totprice" id="totprice1"><label class="visible-xs-inline">Discount: </label>0</strong></td>
+            <td class="hidden-xs"></td>
+  				</tr>
+          <tr style="border-top-style:hidden;">
+            <td colspan="3" class="text-right hidden-xs"><strong>Tax</strong></td>
+  					<td class="text-right xs-only-text-center" ><strong class="totprice" id="totprice1"><label class="visible-xs-inline">Tax: </label>0</strong></td>
+            <td class="hidden-xs"></td>
+  				</tr>
+          <tr  style="border-top-style:hidden;">
+            <td colspan="3" class="text-right hidden-xs"><strong>@lang('shop.Total')</strong></td>
+  					<td class="text-right xs-only-text-center" ><strong class="totprice" id="totprice1"><label class="visible-xs-inline">@lang('shop.Total'): </label>{{number_format($totalPrice,2)}}</strong></td>
+            <td class="hidden-xs"></td>
+  				</tr>
+  				<tr  style="border-top-style:hidden;">
   					<td><a href="{{route('product.index') }}" class="btn btn-warning"><i class="fa fa-angle-left"></i> @lang('shop.ContinueShopping')</a></td>
   					<td colspan="2" class="hidden-xs"></td>
-  					<td class="hidden-xs text-center"><strong id="totprice2">Total {{ number_format($totalPrice,2) }}</strong></td>
+  					<td class="hidden-xs text-center"></td>
   					<td><a href="{{route('product.checkOut')}}" class="btn btn-success btn-block" >@lang('shop.CheckOut') <i class="fa fa-angle-right"></i></a></td>
   				</tr>
+          <tr style="border-top-style:hidden;">
+            <td class="xs-only-text-left" colspan="5"><small>*@lang('pesan.notfixedprice')</small></td>
+          </tr>
   			</tfoot>
   		</table>
     </div>

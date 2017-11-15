@@ -28,6 +28,7 @@ use App\Mail\CreateNewPo;
 use Illuminate\Database\Eloquent\Collection;
 use App\DPLSuggestNo;
 
+
 class ProductController extends Controller
 {
 
@@ -47,14 +48,17 @@ class ProductController extends Controller
     }else{
       $vid='';
     }
-    $price = DB::select("select getItemPrice ( :cust, :prod, :uom ) AS harga from dual", ['cust'=>$vid,'prod'=>$request->product,'uom'=>$request->uom]);
+    $price = DB::select("select getProductPrice ( :cust, :prod, :uom ) AS harga from dual", ['cust'=>$vid,'prod'=>$request->product,'uom'=>$request->uom]);
     $price = $price[0];
+    $hargadiskon = DB::select("select getDiskonPrice ( :cust, :prod, :uom, 1 ) AS harga from dual", ['cust'=>$vid,'prod'=>$request->product,'uom'=>$request->uom]);
+    $hargadiskon = $hargadiskon[0];
     $rate = DB::select("select p.satuan_primary, getItemRate ( p.satuan_primary, :uom, p.id ) AS rate, p.itemcode from products as p where id = :id", ['id'=>$request->product,'uom'=>$request->uom]);
     $konversi = $rate[0];
   //  dd($price->harga);
     return response()->json([
                     'result' => 'success',
                     'price' => (float)$price->harga,
+                    'diskon' => (float)$hargadiskon->harga,
                     'konversi' => (float)$konversi->rate,
                     'uomprimary' =>$konversi->satuan_primary,
                     'itemcode' =>$konversi->itemcode
@@ -120,7 +124,13 @@ class ProductController extends Controller
 
   public function getSqlProduct()
   {
-    $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate from products as p where enabled_flag='Y' ";
+    if(Auth::user()->hasRole('Distributor'))
+    {
+        $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_secondary,1 ) price_diskon from products as p where enabled_flag='Y' ";
+    }else{
+        $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_primary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_primary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_primary,1 ) price_diskon from products as p where enabled_flag='Y' ";
+    }
+
     if(isset(Auth::user()->customer_id)){
       $customer = Customer::find(Auth::user()->customer_id);
       $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
@@ -160,7 +170,17 @@ class ProductController extends Controller
               where cp.product_id = p.id
                 and cp.flex_value = cat.flex_value
                 and cat.description <> 'BPJS')";
+          if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik']))
+          {
+            $sqlproduct .= " and p.tipe_dot != ('Merah')";
+          }
+          if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik','Toko Obat Berijin']))
+          {
+            $sqlproduct .= " and p.tipe_dot != ('Biru')";
+          }
         }
+
+
       }
     }
     return $sqlproduct;
@@ -206,7 +226,7 @@ class ProductController extends Controller
       }
     // /  dd($sqlproduct);
     //  $sqlproduct .= " limit 12";
-    $dataproduct = DB::select($sqlproduct, ['cust'=>$vid]);
+    $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid ]);
 
     foreach($dataproduct as $dp)
     {
@@ -217,11 +237,11 @@ class ProductController extends Controller
     $products = collect($dataproduct);
 
 
-    $pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
+    /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
     $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
 
   //  dd($products);
-    $products ->setPath(url()->current());
+    $products ->setPath(url()->current());*/
 
     return view('shop.product',['products' => $products]);
   }
@@ -253,7 +273,7 @@ class ProductController extends Controller
     }else{
       $vid='';
     }
-    $dataproduct = DB::select($sqlproduct, ['cust'=>$vid]);
+    $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid]);
 
     foreach($dataproduct as $dp)
     {
@@ -262,10 +282,10 @@ class ProductController extends Controller
     }
     //  $sqlproduct .= " limit 12";
     $products = collect($dataproduct);
-    $pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
+    /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
     $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
     $products->appends($_REQUEST)->render();
-    $products ->setPath(url()->current());
+    $products ->setPath(url()->current());*/
     return view('shop.index',['products' => $products]);
   }
 
@@ -273,7 +293,7 @@ class ProductController extends Controller
   {
       $kategory = Category::find($id);
       //$products = $kategory->products()->paginate(12);
-      $perPage = 12; // Item per page
+      $perPage = 30; // Item per page
       $oldDisttributor = $this->getDistributor();
 
       if(!is_null($oldDisttributor))
@@ -296,7 +316,7 @@ class ProductController extends Controller
         $vid='';
       }
       //  $sqlproduct .= " limit 12";
-      $dataproduct = DB::select($sqlproduct, ['cust'=>$vid]);
+      $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid]);
 
       foreach($dataproduct as $dp)
       {
@@ -305,9 +325,9 @@ class ProductController extends Controller
       }
       //  $sqlproduct .= " limit 12";
       $products = collect($dataproduct);
-      $pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
+      /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
       $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
-      $products ->setPath(url()->current());
+      $products ->setPath(url()->current());*/
     return view('shop.index',['products' => $products,'nama_kategori'=>$kategory->description]);
   }
 

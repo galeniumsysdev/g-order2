@@ -24,6 +24,7 @@ return [
     'ContinueShopping' => 'Pilih Barang Lagi',
     'CreateOrder' => 'Buat Order',
     'Total' => 'Total',
+    'Amount' => 'Amount',
     'Po_num' => 'Nomor PO',
     'ShipTo' => 'Alamat Pengiriman',
     'BillTo' => 'Alamat Invoice',
