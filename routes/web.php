@@ -19,6 +19,7 @@ Route::get('/getPrice',[
     'uses' => 'ProductController@getPrice'
     ,'as' => 'product.getPrice'
   ]);
+Route::post('/ajax/changeOrderUom', 'OrderController@changeOrderUom');
 
 Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
@@ -69,7 +70,7 @@ Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
     ,'as' => 'product.shoppingCart'
   ]);
-  Route::get('/checkout',[
+  Route::post('/checkout',[
       'uses' => 'ProductController@checkOut'
       ,'as' => 'product.checkOut'
     ]);
@@ -89,7 +90,7 @@ Route::get('/shopping-cart',[
       ,'as' => 'product.removeItem'
     ]);
 
-    Route::post('/checkout',[
+    Route::post('/postcheckout',[
       'uses' => 'ProductController@postOrder'
       ,'as' => 'product.postOrder'
     ]);
@@ -322,6 +323,6 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 *
 */
 
-Route::get('/test', function () {
-  return view('fixedfooter');
+Route::get('/displayproduct', function () {
+    return view('shop.welcome');
 });

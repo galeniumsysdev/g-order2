@@ -1,6 +1,7 @@
 <?php
 
 namespace App;
+use Auth;
 
 //use Illuminate\Database\Eloquent\Model;
 
@@ -20,11 +21,14 @@ class Cart
       $this->items = $oldCart->items;
       $this->totalQty = $oldCart->totalQty;
       $this->totalPrice = $oldCart->totalPrice;
+      $this->totalTax = $oldCart->totalTax;
+      $this->totalDiscount = $oldCart->totalDiscount;
+      $this->totalAmount = $oldCart->totalAmount;
     }
   }
 
-  public function add($item,$id,$qty,$uom,$price){
-      $storedItem = ['qty'=>0, 'uom'=>'', 'price'=>$price, 'amount'=>0, 'item'=>$item];
+  public function add($item,$id,$qty,$uom,$price,$disc){
+      $storedItem = ['qty'=>0, 'uom'=>'', 'price'=>$price,'disc'=>$disc, 'amount'=>0, 'item'=>$item];
       if ($this->items){//jika ada array
         if(array_key_exists($id.'-'.$uom, $this->items)){
           $storedItem = $this->items[$id.'-'.$uom];
@@ -34,19 +38,38 @@ class Cart
         $storedItem['qty']+=$qty; //total product
         $storedItem['uom']= $uom;
         $storedItem['price']=$price;
+        $storedItem['disc']=$price-$disc;
         $storedItem['amount']=$price* $storedItem['qty'];
         $this->items[$id.'-'.$uom] = $storedItem;
         $this->totalQty++;
         $this->totalPrice += $price*$qty;
+        $this->totalDiscount += ($price-$disc)*$qty;
+        if(Auth::user()->customer->customer_category_code=="PKP")
+        {
+          $this->totalTax =($this->totalPrice-$this->totalDiscount)*0.1;
+        }else{
+            $this->totalTax =0;
+        }
+
+        $this->totalAmount=$this->totalPrice-$this->totalDiscount+$this->totalTax;
   }
 
   public function removeItem($id){
       $this->totalQty-=1;
       $this->totalPrice -= $this->items[$id]['amount'] ;
+      $this->totalDiscount -= ($this->items[$id]['disc']*$this->items[$id]['qty']);
+      if(Auth::user()->customer->customer_category_code=="PKP")
+      {
+        $this->totalTax =($this->totalPrice-$this->totalDiscount)*0.1;
+      }else{
+          $this->totalTax =0;
+      }
+
+      $this->totalAmount=$this->totalPrice-$this->totalDiscount+$this->totalTax;
       unset($this->items[$id]);
   }
 
-  public function editItem($id,$qty,$uom,$itemid,$harga){
+  public function editItem($id,$qty,$uom,$itemid,$harga,$disc){
       if ($this->items){//jika ada array
         if(array_key_exists($id, $this->items)){
           $storedItem = $this->items[$id];
@@ -54,12 +77,23 @@ class Cart
           if($storedItem['qty']!=$qty or $storedItem['uom']!=$uom or $storedItem['price']!=$harga )
           {
             $this->totalPrice -= $this->items[$id]['amount'];
+            $this->totalDiscount -= ($this->items[$id]['disc']*$this->items[$id]['qty']);
             $storedItem['qty']=$qty; //total product
             $storedItem['uom']= $uom;
             $storedItem['price']=$harga;
+            $storedItem['disc']=$harga-$disc;
             $storedItem['amount']=$harga* $qty;
             $this->items[$id] = $storedItem;
-            $this->totalPrice +=   $storedItem['amount'];
+            $this->totalPrice += $storedItem['amount'];
+            $this->totalDiscount += ($harga-$disc)*$qty;
+            if(Auth::user()->customer->customer_category_code=="PKP")
+            {
+              $this->totalTax =($this->totalPrice-$this->totalDiscount)*0.1;
+            }else{
+                $this->totalTax =0;
+            }
+
+            $this->totalAmount=$this->totalPrice-$this->totalDiscount+$this->totalTax;
 
           }
         }

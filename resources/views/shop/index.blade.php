@@ -58,6 +58,7 @@
                 </div>
                 @endif
                 <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
+                <input type="hidden" id="disc-{{$product->id}}" value="{{$product->price_diskon}}">
                 <div class ="clearfix" id="addCart-{{$product->id}}">
                   <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success pull-right" role="button">Add to cart</a>
                 </div>

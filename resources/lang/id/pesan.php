@@ -32,5 +32,6 @@ return [
     'cantapprove'=>"Data tidak tersimpan. Anda tidak memiliki akses untuk mengapprove/mereject outlet ini.",
     'successupload' => 'File berhasil terupload',
     'alreadyupload' => 'File telah terupload!',
-    'notmatchdpl' => 'No Pengajuan DPL tidak cocok'
+    'notmatchdpl' => 'No Pengajuan DPL tidak cocok',
+    'itemexist' => 'Item sudah terdapat dalam keranjan'
 ];

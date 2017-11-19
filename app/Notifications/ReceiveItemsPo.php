@@ -14,15 +14,17 @@ class ReceiveItemsPo extends Notification
 {
     use Queueable;
     public $header;
+    public $nosuratjalan;
     public $distributor;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct(SoHeader $h)
+    public function __construct(SoHeader $h, $no_sj)
     {
         $this->header=$h;
+        $this->nosuratjalan = $no_sj;
         $this->distributor = Customer::find($h->distributor_id)->select('customer_name')->first();
     }
 
@@ -46,9 +48,9 @@ class ReceiveItemsPo extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('PO: '.$this->header->customer_po.' telah diterima customer')
+                    ->subject('SJ: '.$this->nosuratjalan.' telah diterima customer')
                     ->greeting('Hai '.$this->distributor->customer_name)
-                    ->line('Pesanan Anda dengan PO nomor: <strong>'.$this->header->customer_po.'</strong> telah diterime customer.')
+                    ->line('Pesanan Anda dengan PO nomor: <strong>'.$this->header->customer_po.'</strong> dan SJ: '.$this->nosuratjalan.' telah diterime customer.')
                     ->line('Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order').'.') ;
     }
 

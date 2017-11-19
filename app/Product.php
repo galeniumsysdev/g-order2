@@ -42,7 +42,13 @@ class Product extends Model
     public function getPrice($id,$uom)
     {
       $hargadiskon = DB::select("select getDiskonPrice ( :cust, :prod, :uom, 1 ) AS harga from dual", ['cust'=>$id,'prod'=>$this->id,'uom'=>$uom]);
-      return $hargadiskon[0]->harga;
+      if($hargadiskon)
+      {
+          return $hargadiskon[0]->harga;
+      }else{
+          return $this->getRealPrice($id,$uom);
+      }
+
     }
 
     public function getRealPrice($id,$uom)
@@ -51,7 +57,16 @@ class Product extends Model
       return $harga[0]->harga;
     }
 
-
+    public function getConversion($uom)
+    {
+      $rate = DB::select("select getItemRate ( :primary_uom, :uom, :id ) AS rate from dual", ['id'=>$this->id,'primary_uom'=>$this->satuan_primary,'uom'=>$uom]);
+      if($rate)
+      {
+        return $rate[0]->rate;
+      }else{
+        return 0;
+      }
+    }
 
 
 

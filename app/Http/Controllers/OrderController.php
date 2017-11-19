@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\User;
 use App\SoHeader;
+use App\SoLine;
 use App\SoShipping;
 use Auth;
 use File;
@@ -27,6 +28,7 @@ class OrderController extends Controller
     {
       $header = DB::table('so_header_v as sh')
               ->where('id','=',$id)
+              ->where('status','!=',-99)
               ->where(function ($query) {
                 $query->orWhere('distributor_id','=',Auth::user()->customer_id)
                       ->orWhere('customer_id','=',Auth::user()->customer_id);
@@ -51,20 +53,20 @@ class OrderController extends Controller
               return view('shop.checkOrder1',compact('header','lines','deliveryno'));
           }*/
       //}
-
+      
 
       if ($user_dist->hasRole('Principal') )    {
         return view('shop.checkOrder1',compact('header','lines','deliveryno'));
       }else {
         $print=Input::get('print','');
         if ($print=="yes"){
-          $pdf = PDF::loadView('shop.pdf_po',compact('header','lines'));
+          $pdf = PDF::loadView('shop.pdf_po',compact('header','lines','deliveryno'));
           $pdf->setPaper('a4','portrait');
           //return $pdf->stream();
           return $pdf->download($header->notrx.'.pdf');
               //return view('shop.pdf_po',compact('header','lines'));
         }
-        return view('shop.checkOrder',compact('header','lines'));
+        return view('shop.checkOrder',compact('header','lines','deliveryno'));
       }
     }
 
@@ -189,12 +191,11 @@ class OrderController extends Controller
 
     public function approvalSO(Request $request)
     {
-      //var_dump($request->all());
+
       $header = SoHeader::where([
         ['id','=',$request->header_id],
         ['distributor_id','=',Auth::user()->customer_id]
       ])->first();
-      //dd($request->alasan."-".$request->approve);
       //echo($header.','.Auth::user()->customer_id);
       if(!$header)
       {
@@ -205,9 +206,9 @@ class OrderController extends Controller
       {
         if(!is_null($header->oracle_customer_id))
         {
-          $connoracle = DB::connection('oracle');
+          /*$connoracle = DB::connection('oracle');
           if($connoracle){
-            /*$oraheader = $connoracle->table('oe_headers_iface_all')->insert([
+            $oraheader = $connoracle->table('oe_headers_iface_all')->insert([
               'order_source_id'=>config('constant.order_source_id')
               ,'orig_sys_document_ref'=>$header->notrx
               ,'org_id'=>$header->org_id
@@ -229,7 +230,7 @@ class OrderController extends Controller
             ]);
             $header->interface_flag="Y";*/
             $header->status=0;
-          }
+          //}
         }else{
           $header->status=1;
         }
@@ -237,18 +238,32 @@ class OrderController extends Controller
 
         $solines = DB::table('so_lines')->where('header_id','=',$request->header_id)->get();
         $i=0;
+        /*validation qty*/
+        foreach($solines as $soline)
+        {
+          if($soline->qty_request_primary<$request->qtyshipping[$soline->line_id])
+          {
+            return redirect()->back()->withError("Gagal simpan! Qty kirim melebihi order")->withInput();
+          }
+        }
+        /*update qty*/
         foreach($solines as $soline)
         {
           $i+=1;
+          if( $request->uom[$soline->line_id]==$soline->uom){
+            $qty = $request->qtyshipping[$soline->line_id]*$soline->conversion_qty;
+          }elseif( $request->uom[$soline->line_id]==$soline->uom_primary){
+            $qty = $request->qtyshipping[$soline->line_id];
+          }
           $update = DB::table('so_lines')
             ->where([
               ['header_id','=',$request->header_id],
               ['line_id','=',$soline->line_id]
             ])
-            ->update(['qty_confirm' => $request->qtyshipping[$soline->line_id]]);
-          if(!is_null($header->oracle_customer_id))
+            ->update(['qty_confirm' => $qty]);
+            /*if(!is_null($header->oracle_customer_id))
           {
-            /*if($oraheader){
+          if($oraheader){
               $oraline = $connoracle->table('oe_lines_iface_all')->insert([
                 'order_source_id'=>config('constant.order_source_id')
                 ,'orig_sys_document_ref' => $header->notrx
@@ -272,29 +287,12 @@ class OrderController extends Controller
                 ,'last_update_date'=>Carbon::now()
                 //,'line_type_id'
                 ,'calculate_price_flag'=>'Y'
-              ]);*/
+              ]);
               $ordertype=config('constant.order_source_id');
               $orgid = $header->org_id;
               $notrx =$header->notrx;
-
-              /*$pdo = DB::connection('oracle')->getPdo();
-
-
-              $stmt = $pdo->prepare("begin :result := XGPL_OM_GORDER_IFACE(:1,:2,:3); end;");
-              $stmt->bindParam(':result', $hsl,\PDO::PARAM_INT);
-              $stmt->bindParam(':1', $ordertype,\PDO::PARAM_INT);
-              $stmt->bindParam(':2',$orgid,\PDO::PARAM_INT);
-              $stmt->bindParam(':3',$notrx,\PDO::PARAM_STR,50);
-              $stmt->execute();
-              //$hsl = DB::connection('oracle')->executeFunction('XGPL_OM_GORDER_IFACE(:1,:2,:3)', [':1' => $ordertype, ':2' => $orgid ,':3' => $notrx], \PDO::PARAM_INT);
-
-
-              if($hsl!=-99999){
-                  $header->oracle_header_id = $hsl;
-              }*/
-
             //}
-          }
+          }*/
         }
         $header->approve=1;
       //  $header->status=1;
@@ -319,20 +317,66 @@ class OrderController extends Controller
 
         return redirect()->route('order.listSO')->withMessage(trans('pesan.rejectSO_msg',['notrx'=>$header->notrx]));
       }elseif($request->kirim=="kirim"){
-        if($header->status==1 and Auth::user()->customer_id ==$header->distributor_id)
+        if($header->status<3 and $header->status>0 and Auth::user()->customer_id ==$header->distributor_id)
         {
-          $solines = DB::table('so_lines')->where('header_id','=',$request->header_id)->get();
+          $this->validate($request, [
+          'deliveryno' => 'required',
+          ]);
+
+          $solines = DB::table('so_lines')->where('header_id','=',$request->header_id)
+                    ->whereIn('line_id',array_keys($request->qtyshipping))
+                    ->get();
+          /*validation qty*/
           foreach($solines as $soline)
           {
-            $update = DB::table('so_lines')
-              ->where([
-                ['header_id','=',$request->header_id],
-                ['line_id','=',$soline->line_id]
-              ])
-              ->update(['qty_shipping' => $request->qtyshipping[$soline->line_id]]);
+            if($soline->qty_request_primary<intval($soline->qty_shipping)+$request->qtyshipping[$soline->line_id])
+            {
+              return redirect()->back()->withError("Gagal simpan! Qty kirim melebihi order")->withInput();
+            }
+            $checkshipping= SoShipping::where(['deliveryno'=>$request->deliveryno
+                            ,'header_id'=>$soline->header_id
+                            ,'line_id'=>$soline->line_id])->first();
+            if($checkshipping){
+              return redirect()->back()->withError("Gagal simpan! Delivery No sudah ada")->withInput();
+            }
+          }
+          /*update shipping*/
+          foreach($solines as $soline)
+          {
+            if($request->qtyshipping[$soline->line_id]>0){
+              $insertkirim = SoShipping::create([
+                'deliveryno'=>$request->deliveryno
+                ,'product_id'=>$soline->product_id
+                ,'uom'=>$soline->uom
+                ,'qty_request'=>$soline->qty_request
+                ,'uom_primary'=>$soline->uom_primary
+                ,'qty_request_primary'=>$soline->qty_request_primary
+                ,'conversion_qty'=>$soline->conversion_qty
+                ,'qty_shipping'=>$request->qtyshipping[$soline->line_id]
+                ,'tgl_kirim'=>Carbon::now()
+                ,'header_id'=>$soline->header_id
+                ,'line_id'=>$soline->line_id
+              ]);
+              $update = DB::table('so_lines')
+                ->where([
+                  ['header_id','=',$request->header_id],
+                  ['line_id','=',$soline->line_id]
+                ])
+                ->update(['qty_shipping' => intval($soline->qty_shipping)+$request->qtyshipping[$soline->line_id]]);
+            }
+
           }
           $header->tgl_kirim =Carbon::now();
-          $header->status=2;
+          $afterheader = DB::table('so_lines_sum_v')->where('header_id','=',$request->header_id)->first();
+
+          if($afterheader->qty_shipping_primary==$afterheader->qty_confirm_primary
+          or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary)
+          {
+            $header->status=3; /*full shipping*/
+          }else{
+            $header->status=2; /*partial shipping*/
+          }
+
           $customer = Customer::where('id','=',$header->customer_id)->first();
           foreach($customer->users as $u)
           {
@@ -360,12 +404,12 @@ class OrderController extends Controller
 
     public function batalPO(Request $request) /*untuk membatalkan PO atau receive item*/
     {
+
       if($request->batal=="batal"){
         $header = SoHeader::where([
           ['id','=',$request->header_id],
           ['customer_id','=',Auth::user()->customer_id]
         ])->first();
-        //dd($header);
         if(!$header)
         {
           return view('errors.403');
@@ -386,33 +430,71 @@ class OrderController extends Controller
         }
       }elseif($request->terima=="terima")
       {
+        $this->validate($request, [
+        'deliveryno' => 'required',
+        ]);
+
         $header = SoHeader::where([
           ['id','=',$request->header_id],
           ['customer_id','=',Auth::user()->customer_id]
         ])->first();
-        //dd($header);
+
         if(!$header)
         {
           return view('errors.403');
         }
-        if($header->status>=0 and $header->status<3)
+        if($header->status>=0 and $header->status<4)
         {
-          $solines = DB::table('so_lines')->where('header_id','=',$request->header_id)->get();
+          /*$soshipping = DB::table('so_shipping')->where([
+            ['header_id','=',$request->header_id],
+            ['deliveryno','=',$request->deliveryno]
+          ])->get();*/
+          $solines = DB::table('so_lines')
+                    ->where('header_id','=',$request->header_id)
+                    ->whereIn('line_id',array_keys($request->qtyreceive))
+                    ->select('line_id',DB::raw("ifnull(qty_accept,0) as qty_accept")
+                      ,DB::raw("ifnull(qty_confirm,qty_request_primary) as qty_confirm")
+                      ,'product_id','uom','qty_request','qty_request_primary','uom_primary','conversion_qty')
+                    ->get();
           foreach($solines as $soline)
           {
+            $qtyterima =0;
+
+            $insshipping =SoShipping::updateorCreate(
+                ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno]
+                ,['qty_accept'=>$request->qtyreceive[$soline->line_id],'product_id'=>$soline->product_id
+                  ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
+                  ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
+                  ,'tgl_terima'=>Carbon::now()
+                 ]
+              )  ;
+              $qtyterima=$soline->qty_accept+$request->qtyreceive[$soline->line_id];
             $update = DB::table('so_lines')
               ->where([
                 ['header_id','=',$request->header_id],
                 ['line_id','=',$soline->line_id]
               ])
-              ->update(['qty_accept' => $request->qtyreceive[$soline->line_id]]);
+              ->update(['qty_accept' => $qtyterima]);
           }
-          $header->tgl_terima= Carbon::now();
-          $header->status = 3;
+          if(is_null($header->tgl_terima))
+          {
+            $header->tgl_terima= Carbon::now();
+          }
+          $afterheader = DB::table('so_lines_sum_v')->where('header_id','=',$request->header_id)->first();
+
+          if($afterheader->qty_accept_primary==$afterheader->qty_confirm_primary
+          or $afterheader->qty_accept_primary==$afterheader->qty_request_primary)
+          {
+              $header->status = 4;
+          }elseif(($afterheader->qty_shipping_primary==$afterheader->qty_confirm_primary and $afterheader->qty_shipping_primary!=0)
+          or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary){
+              $header->status = 3;
+          }else{ $header->status = 2;}
+
           $dist=Customer::where('id','=',$header->distributor_id)->first();
           foreach($dist->users as $d)
           {
-            $d->notify(new ReceiveItemsPo($header));
+            $d->notify(new ReceiveItemsPo($header,$request->deliveryno));
           }
           $header->save();
           return redirect()->route('order.listPO')->withMessage(trans('pesan.receivePO_msg',['notrx'=>$header->notrx]));
@@ -530,6 +612,45 @@ class OrderController extends Controller
       })->export("xlsx");
       return redirect()->route('order.listPO');
       //return 1;
+    }
+
+    public function changeOrderUom(Request $request)
+    {
+      $line = DB::table('So_Lines_v')->where('line_id','=',$request->id)->first();
+      $header = SoHeader::where('id','=',$line->header_id)->select('status','approve')->first();
+
+      if ($request->satuan ==$line->uom)
+      {
+        $price = $line->unit_price;
+        $qtyorder = $line->qty_request;
+        if($header->status==0)
+        {
+            $qtyconfirm =$qtyorder;
+            $qtykirim = $qtyorder;
+            $qtyterima=$qtyorder;
+        }elseif($header->status==1){
+            $qtyconfirm =$line->qty_confirm;
+            $qtykirim = $qtyconfirm;
+            $qtyterima=$qtyconfirm;
+        }
+
+
+      }elseif ($request->satuan ==$line->uom_primary){
+        $price = $line->unit_price/$line->conversion_qty;
+        $qtyorder = $line->qty_request_primary;
+        $qtyconfirm =$line->qty_confirm_primary;
+        $qtykirim = $line->qty_shipping_primary;
+        $qtyterima=$line->qty_accept_primary;
+      }
+
+      return response()->json([
+                      'result' => 'success',
+                      'price' => (float)$price,
+                      'qtyorder' => (float)$qtyorder,
+                      'qtyconfirm' => (float)$qtyconfirm,
+                      'qtyshipping' =>$qtykirim,
+                      'qtyaccept' =>$qtyterima
+                    ],200);
     }
 
 }

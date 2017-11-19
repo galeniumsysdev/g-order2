@@ -67,7 +67,7 @@ class RejectPoByDistributor extends Notification
       }else{
         return (new MailMessage)
                     ->subject('Pembatalan Po: '.$this->header->customer_po)
-                    ->greeting('Pembatalan Po: '.$this->header->customer_po);
+                    ->greeting('Pembatalan Po: '.$this->header->customer_po)
                     ->line('Bersama ini kami informaskikan bahwa PO No: '.$this->header->customer_po.' telah dibatalkan oleh customer.')
                     ->line('Silahkan konfirmasi ke customer untuk penjelasan lebih detail.');
       }

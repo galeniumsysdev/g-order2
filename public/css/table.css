@@ -25,11 +25,11 @@ table#cart tbody td .form-control{
 }
 
 table#cart thead { display: none; }
-table#cart tbody td { display: block; padding: .6rem; min-width:320px;}
+table#cart tbody td { display: block; padding: .6rem; min-width:300px;}
 table#cart tbody tr td:first-child { background: #333; color: #fff; }
 table#cart tbody td:before {
 content: attr(data-th); font-weight: bold;
-display: inline-block; width: 8rem;
+display: inline-block; width: 10rem;
 }
 
 table#cart tfoot td{display:block; }
@@ -41,10 +41,7 @@ table#cart tfoot td .btn{display:block;}
   overflow-x: auto;
   overflow-y: hidden;
 }
-.tab-content{
-  overflow-x: auto;
-  overflow-y: hidden;
-}
+
 .kirim-panel{
   color: #337ab7;
 }
