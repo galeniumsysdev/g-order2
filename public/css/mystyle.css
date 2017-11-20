@@ -1,6 +1,9 @@
-.price{font-size: 14px;
-    font-weight: bold;
+.price{
+   font-size: 14px;
+   font-weight: bold;
+   color: red;
   }
+
 
 .thumbnail .caption h4 a{
     font-size: 14px;
@@ -12,14 +15,12 @@
   flex-wrap: wrap;
 }
 
-.thumbnail {
-  height: 90%;
-}
 
 /* extra positioning */
 .thumbnail {
   display: flex;
   flex-direction: column;
+  height: 90%;
 }
 
 .thumbnail .caption {
@@ -74,6 +75,7 @@
     border-radius: 4px;
     -webkit-transition: border 0.2s ease-in-out;
     transition: border 0.2s ease-in-out;
+    height: 100%;
   }
 
 
@@ -581,6 +583,12 @@ width: 50%;
 border-radius: 0%;
 }
 
-#app {
-  padding-bottom: 5em;
+.navbar-right > li {
+  margin-left: -10px;
+}
+
+.coret{
+  text-decoration:line-through;
+  color: #999;
+  font-size: 12px;
 }

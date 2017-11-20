@@ -19,6 +19,7 @@ Route::get('/getPrice',[
     'uses' => 'ProductController@getPrice'
     ,'as' => 'product.getPrice'
   ]);
+Route::post('/ajax/changeOrderUom', 'OrderController@changeOrderUom');
 
 Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
@@ -69,7 +70,7 @@ Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
     ,'as' => 'product.shoppingCart'
   ]);
-  Route::get('/checkout',[
+  Route::post('/checkout',[
       'uses' => 'ProductController@checkOut'
       ,'as' => 'product.checkOut'
     ]);
@@ -89,7 +90,7 @@ Route::get('/shopping-cart',[
       ,'as' => 'product.removeItem'
     ]);
 
-    Route::post('/checkout',[
+    Route::post('/postcheckout',[
       'uses' => 'ProductController@postOrder'
       ,'as' => 'product.postOrder'
     ]);
@@ -242,7 +243,9 @@ Route::group(['middleware' => ['auth']], function () {
 Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->name('order.getStatusOracle');
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
-Route::get('/oracle/synchronizemodifier', 'BackgroundController@getQualifiers');
+Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
+
+Route::get('/oracle/getdiskon', 'BackgroundController@updateDiskonTable');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));
@@ -278,11 +281,13 @@ Route::get('/dpl/suggestno/success','DPLController@generateSuccess')->name('dpl.
 Route::get('/dpl/suggestno/validation/{outlet_id}/{suggest_no}','DPLController@suggestNoValidation')->name('dpl.suggestNoValidation');
 Route::get('/dpl/distlist/{outlet_id}','DPLController@getDistributorList')->name('dpl.distributorList');
 
-//Route::get('/dpl/discount/form/{suggest_no?}','DPLController@discountForm')->name('dpl.discountForm');
 Route::get('/dpl/discount/form/{suggest_no?}','DPLController@inputDiscount')->name('dpl.discountForm');
 Route::post('/dpl/discount/set','DPLController@discountSet')->name('dpl.discountSet');
 Route::get('/dpl/discount/approval/{suggest_no}','DPLController@discountApprovalForm')->name('dpl.discountApproval');
 Route::post('/dpl/discount/approval','DPLController@discountApprovalSet')->name('dpl.discountApprovalSet');
+
+Route::get('/dpl/discount/{suggest_no}/{notifid}','DPLController@readNotifDiscount')->name('dpl.readNotifDiscount');
+Route::get('/dpl/approval/{suggest_no}/{notifid}','DPLController@readNotifApproval')->name('dpl.readNotifApproval');
 
 Route::get('/dpl/history/{suggest_no}','DPLController@dplLogHistory')->name('dpl.dplHistory');
 
@@ -320,6 +325,6 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 *
 */
 
-Route::get('/test', function () {
-  return view('fixedfooter');
+Route::get('/displayproduct', function () {
+    return view('shop.welcome');
 });

@@ -1,12 +1,12 @@
 <template>
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i>
-          Notifications
+          <span class="hidden-xs">Notifications</span>
           <span class="badge">{{notifCount}}</span>
         </a>
         <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-if="unreadNotifications.length">
           <li v-for="item in unreadNotifications" v-bind:key="item.index">
-            <a v-bind:href="item.data.content.href">
+            <a v-bind:href="item.data.href">
               <span class="item">
                 <span class="item-left">
                   <span class="item-info">

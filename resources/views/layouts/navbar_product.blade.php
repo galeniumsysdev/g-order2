@@ -72,9 +72,10 @@
                         @endif
                         <ul class="nav navbar-right-xs pull-right visible-xs">
                           <li>
-                            <a href="{{url('/home')}}" title="@lang('label.showall') Notification"><i class="fa fa-bell fa-lg"></i>
+                            <!--<a href="{{url('/home')}}" title="@lang('label.showall') Notification"><i class="fa fa-bell fa-lg"></i>
                             &nbsp;<span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
-                          </a>
+                          </a>-->
+                          <notification :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
                           </li>
                         </ul>
                       @endif
@@ -125,7 +126,7 @@
                           <li><a href="{{ route('login') }}"><strong><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; @lang('label.login')</strong></a></li>
                           <li><a href="{{ route('register') }}"><strong><i class="fa fa-user-plus" aria-hidden="true"></i>&nbsp; @lang('label.register')</strong></a></li>
                         @else
-                          <notification :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
+                          <notification class="hidden-xs" :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
                           @if(Auth::user()->can('Outlet_Distributor'))
                             <li><a href="{{ route('customer.listNoo') }}">List Noo</a></li>
                           @endif
@@ -193,7 +194,7 @@
                                 </ul>
                               </li>
                               <li class="hidden-xs">
-                                <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart" aria-hidden="true"></i>&nbsp;<strong class="visible-xs-inline">@lang('label.shopcart')</strong>
+                                <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart" aria-hidden="true"></i>&nbsp;<strong>@lang('label.shopcart')</strong>
                                   <span class="badge" id="shopcart">{{ Session::has('cart')?Session::get('cart')->totalQty:"" }}</span>
                                 </a>
                               </li>

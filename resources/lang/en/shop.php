@@ -14,7 +14,8 @@ return [
 
     'Product' => 'Product',
     'Quantity' => 'Quantity',
-    'Price' => 'Price/Unit',
+    'Price' => 'Unit Price',
+    'listprice' => 'List Price',
     'uom' => 'Unit',
     'qtyorder' => 'Qty Order',
     'qtyavailable' => 'Qty Available',
@@ -24,6 +25,7 @@ return [
     'ContinueShopping' => 'Continue Shopping',
     'CreateOrder' => 'Create Order',
     'Total' => 'Total',
+    'Amount' => 'Amount',
     'Po_num' => 'PO Number',
     'ShipTo' => 'Ship To',
     'BillTo' => 'Bill To',
@@ -39,7 +41,7 @@ return [
     'criteriaso' => 'Trx No/PO No/Customer',
     'from'=>'From',
     'to'=>'To',
-    'Receive' => 'Receive',
+    'Receive' => 'Receive Product',
     'Send' => 'Send',
     'download' => 'Download',
     'receivedate' => 'Receive Date',
@@ -47,4 +49,8 @@ return [
     'print' => 'Print',
     'createexcel' =>'Create Excel',
     'suggestiondpl' => 'Coupon No',
+    'Tax' => 'Tax',
+    'deliveryno' => 'Delivery No',
+    'cancelpo' => 'Cancel PO',
+    'acceptpo' => 'Accept PO'
 ];

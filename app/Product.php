@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Product extends Model
 {
@@ -38,7 +39,34 @@ class Product extends Model
         return $this->hasMany('App\SoLine','product_id');
     }
 
+    public function getPrice($id,$uom)
+    {
+      $hargadiskon = DB::select("select getDiskonPrice ( :cust, :prod, :uom, 1 ) AS harga from dual", ['cust'=>$id,'prod'=>$this->id,'uom'=>$uom]);
+      if($hargadiskon)
+      {
+          return $hargadiskon[0]->harga;
+      }else{
+          return $this->getRealPrice($id,$uom);
+      }
 
+    }
+
+    public function getRealPrice($id,$uom)
+    {
+      $harga = DB::select("select getProductPrice ( :cust, :prod, :uom ) AS harga from dual", ['cust'=>$id,'prod'=>$this->id,'uom'=>$uom]);
+      return $harga[0]->harga;
+    }
+
+    public function getConversion($uom)
+    {
+      $rate = DB::select("select getItemRate ( :primary_uom, :uom, :id ) AS rate from dual", ['id'=>$this->id,'primary_uom'=>$this->satuan_primary,'uom'=>$uom]);
+      if($rate)
+      {
+        return $rate[0]->rate;
+      }else{
+        return 0;
+      }
+    }
 
 
 
