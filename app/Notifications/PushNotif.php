@@ -20,11 +20,14 @@ class PushNotif extends Notification {
 			->android()
 			->title($this->data['title'])
 			->setOption('custom', $this->data)
-			->body($this->data['message']);
+			->body($this->data['message'])
+			->withiOS(PusherMessage::create()
+				->title($this->data['title'])
+				->setOption('custom', $this->data));
 	}
 	/**
      * Get the array representation of the notification.
-     *
+     *pa
      * @param  mixed  $notifiable
      * @return array
      */
