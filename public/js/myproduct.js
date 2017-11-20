@@ -12,11 +12,19 @@ function addCart(id)
                  'id': id,
                  'satuan': $('#satuan-'+id).val(),
                  'qty': $('#qty-'+id).val(),
-                 'hrg':$('#hrg-'+id).val()
+                 'hrg':$('#hrg-'+id).val(),
+                 'disc': $('#disc-'+id).val(),
              },
              success: function(data) {
-               $('#shopcart').html(data.totline) ;
-               $('#shopcart2').html(data.totline) ;
+               if(data.result=="success")
+               {
+                 $('#shopcart').html(data.totline) ;
+                 $('#shopcart2').html(data.totline) ;
+               }else if(data.result=="exist"){
+                 //alert("Item already exist in shopping cart");
+                 swal ( "" ,  "Item already exist in shopping cart" ,  "error" );
+               }
+
              }
          });
     $('#addCart-'+id).show();
@@ -49,10 +57,14 @@ function changeProduct(id){
              success: function(data) {
                var v_id_new = v_id+"-"+$('#stn-'+id).val();
                //alert(v_id_new);
-               $('#totprice2').html("Total: "+data.total) ;
-               $('#totprice1').html("Total: "+data.total) ;
+               //$('#totprice2').html("Total: "+data.subtotal) ;
+               $('#totprice1').html("<label class='visible-xs-inline'>Discount: </label>"+data.subtotal+"</strong>") ;
+               $('#tottax').html("<label class='visible-xs-inline'>Discount: </label>"+data.tax+"</strong>") ;
+               $('#totamount').html("<label class='visible-xs-inline'>Discount: </label>"+data.total+"</strong>") ;
+               $('#totdisc').html("<label class='visible-xs-inline'>Discount: </label>"+data.disctot+"</strong>") ;
                $('#subtot-'+id).html(data.amount) ;
-               $('#hrg-'+id).html(data.price) ;
+               $('#hrg-'+id).html(data.disc) ;
+               $('#disc-'+id).html(data.price) ;
                if(v_uom!=$('#stn-'+id).val())
                {
                   $('#'+id).attr('id',v_id_new);
@@ -88,20 +100,26 @@ function getPrice(id){
     {
       if(v_itemcode.substr(0,2)=='43')
       {
-        $('#lblhrg-'+id).html('$ '+rupiah(data.price)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
+        $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
+        $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
       }else{
-        $('#lblhrg-'+id).html('Rp. '+rupiah(data.price)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
+        $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
+        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
       }
 
       $('#hrg-'+id).val(data.price);
+      $('#disc-'+id).val(data.diskon);
     }else{
       if(v_itemcode.substr(0,2)=='43')
       {
-        $('#lblhrg-'+id).html('$ '+rupiah(data.price)+'/'+v_uom);
+        $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom);
+        $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
       }else {
-        $('#lblhrg-'+id).html('Rp. '+rupiah(data.price)+'/'+v_uom);
+        $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom);
+        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
       }
       $('#hrg-'+id).val(data.price);
+      $('#disc-'+id).val(data.diskon);
     }
       });
       $('#addCart-'+id).show();
@@ -171,6 +189,8 @@ function inputreason()
   }
   return false;
 }
+
+
 /*
 $('#reject_PO').on('click',function(){
   var label =  $('#reject_PO').text()
@@ -232,3 +252,29 @@ $('#coupon_no').blur(function(){
              }
          });
 });
+
+function changeUomOrder(id){
+    var v_uom = $('#uom-'+id).val();
+    $.ajax({
+             type: 'post',
+             url: baseurl+'/ajax/changeOrderUom',
+             data: {
+                 '_token': $('input[name=_token]').val(),
+                 'id': id,
+                 'satuan': $('#uom-'+id).val(),
+             },
+             success: function(data) {
+               if(data.result=="success")
+               {
+                 $("#ord-"+id).html(data.qtyorder);
+                 $("#hrg-"+id).html(rupiah(data.price));
+                
+               }
+
+             },error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    alert("Status: " + textStatus); alert("Error: " + errorThrown);
+                }
+         });
+  return false;
+
+}

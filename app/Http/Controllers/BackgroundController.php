@@ -537,7 +537,7 @@ class BackgroundController extends Controller
                       ->select(  'list_line_id','list_header_id','list_line_type_code','automatic_flag','modifier_level_code'
                         ,'list_price','list_price_uom_code','primary_uom_flag','inventory_item_id','organization_id'
                         ,'operand','arithmetic_operator','override_flag','print_on_invoice_flag','start_date_active'
-                        ,'end_date_active','incompatibility_grp_code','list_line_no','product_precedence','pricing_phase_id'
+                        ,'end_date_active','pricing_group_sequence','incompatibility_grp_code','list_line_no','product_precedence','pricing_phase_id'
                         ,'pricing_attribute_id','product_attribute_context','product_attr','product_attr_val'
                         ,'product_uom_code','comparison_operator_code','pricing_attribute_context','pricing_attr'
                         ,'pricing_attr_value_from','pricing_attr_value_to','pricing_attribute_datatype'
@@ -552,7 +552,7 @@ class BackgroundController extends Controller
                 ,'inventory_item_id'=>$m->inventory_item_id,'organization_id'=>$m->organization_id,'operand'=>$m->operand
                 ,'arithmetic_operator'=>$m->arithmetic_operator,'override_flag'=>$m->override_flag
                 ,'print_on_invoice_flag'=>$m->print_on_invoice_flag,'start_date_active'=>$m->start_date_active
-                ,'end_date_active'=>$m->end_date_active,'incompatibility_grp_code'=>$m->incompatibility_grp_code
+                ,'end_date_active'=>$m->end_date_active,'pricing_group_sequence'=>$m->pricing_group_sequence,'incompatibility_grp_code'=>$m->incompatibility_grp_code
                 ,'list_line_no'=>$m->list_line_no,'product_precedence'=>$m->product_precedence
                 ,'pricing_phase_id'=>$m->pricing_phase_id,'pricing_attribute_id'=>$m->pricing_attribute_id
                 ,'product_attribute_context'=>$m->product_attribute_context,'product_attr'=>$m->product_attr
@@ -596,6 +596,72 @@ class BackgroundController extends Controller
           }
 
         }
+      }
+    }
+
+    public function updateDiskonTable(){
+      $tglskrg =date('Y-m-d');
+      $customerdiskon = db::table('qp_modifier_summary_v')
+                        ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
+                                and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
+                        ->where('product_attr', '=','PRICING_ATTRIBUTE1')
+                        ->where('list_line_type_code','=','DIS')
+                        ->orderBy('list_header_id','asc')
+                        ->get();
+      foreach($customerdiskon as $diskon)
+      {
+        $a=$diskon->list_line_id;
+        $customerlist = db::table('qp_qualifiers_v')
+                        ->where('list_header_id','=',$diskon->list_header_id)
+                        ->where(function ($query) use ($a) {
+                              $query->where('list_line_id', '=', $a)
+                                    ->orWhere('list_line_id', '=', -1);
+                          })
+                          ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
+                                  and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
+                        ->where('qualifier_context','=','customer')
+                        ->where('qualifier_attribute','=','QUALIFIER_ATTRIBUTE2')
+                        ->select('product_attr_val','start_date_active','end_date_active','qualifier_grouping_no')
+                        ->get();
+        $shipto = db::table('qp_qualifiers_v')
+                        ->where('list_header_id','=',$diskon->list_header_id)
+                        ->where(function ($query) use ($a) {
+                              $query->where('list_line_id', '=', $a)
+                                    ->orWhere('list_line_id', '=', -1);
+                          })
+                          ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
+                                  and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
+                        ->where('qualifier_context','=','customer')
+                        ->where('qualifier_attribute','=','QUALIFIER_ATTRIBUTE11')
+                        ->get();
+        if($customerlist){
+            foreach($customerlist as $cust)
+            {
+              $pricing = QpPricingDiskon::updateOrCreate(
+                ['list_header_id'=>$diskon->list_header_id,'list_line_id'=>$diskon->list_line_id,'customer_id'=>$customer->],
+                [,'list_line_type_code'=>$diskon->list_line_type_code
+                ,'modifier_level_code'=>$diskon->modifier_level_code
+                ,'item_id'=>$diskon->product_attr_val
+                , 'operand'=>$diskon->operand
+                ,'arithmetic_operator_code'=>$diskon->arithmetic_operator
+                , 'customer_id'$customer->product_attr_val
+                ,'ship_to_id'=>null
+                ,'bill_to_id'=>null
+                ,'start_date_active'=>$diskon->start_date_active
+                ,'end_date_active'=>$diskon->end_date_active
+                ,'comparison_operator_code'=>$diskon->comparison_operator_code
+                ,'pricing_attribute_context'=>$diskon->pricing_attribute_context
+                ,'pricing_attr'=>$diskon->pricing_attr
+                ,'pricing_attr_value_from'=>$diskon->pricing_attr_value_from
+                ,'pricing_attr_value_to'=>$diskon->pricing_attr_value_to
+                ,'qualifier_grouping_no'=>$customer->qualifier_grouping_no
+                ]
+              );
+            }
+        }else{
+
+        }
+
       }
     }
 

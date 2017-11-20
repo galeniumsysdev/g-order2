@@ -206,6 +206,9 @@ class UserController extends Controller
 
     public function oracleUpdate(Request $request,$id)
     {
+      $this->validate($request, [
+          'email' => 'required|email|unique:users,email,'.
+      ]);
         $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
                     ->where('id','=',$id)
                     ->orderBy('customer_name','asc')->first();
@@ -221,6 +224,9 @@ class UserController extends Controller
         }
 
         $usercustomer = User::where('customer_id','=',$customer->id)->first();
+        $this->validate($request, [
+            'email' => 'required|email|unique:users,email,'.$usercustomer->id        
+        ]);
         if($usercustomer)
         {
             $usercustomer->email = $request->email;
@@ -229,8 +235,10 @@ class UserController extends Controller
           $usercustomer = User::firstorCreate(
                             ['customer_id'=>$customer->id],
                             ['email'=>$request->email,'name'=>$request->customer_name
-                            ,'api_token'=>str_random(60)]
+                            ,'api_token'=>str_random(60)
+                            , 'id'=>Uuid::generate()->string]
                       );
+
         }
         if($request->role!="")
         {

@@ -19,6 +19,7 @@ Route::get('/getPrice',[
     'uses' => 'ProductController@getPrice'
     ,'as' => 'product.getPrice'
   ]);
+Route::post('/ajax/changeOrderUom', 'OrderController@changeOrderUom');
 
 Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
@@ -69,7 +70,7 @@ Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
     ,'as' => 'product.shoppingCart'
   ]);
-  Route::get('/checkout',[
+  Route::post('/checkout',[
       'uses' => 'ProductController@checkOut'
       ,'as' => 'product.checkOut'
     ]);
@@ -89,7 +90,7 @@ Route::get('/shopping-cart',[
       ,'as' => 'product.removeItem'
     ]);
 
-    Route::post('/checkout',[
+    Route::post('/postcheckout',[
       'uses' => 'ProductController@postOrder'
       ,'as' => 'product.postOrder'
     ]);
@@ -242,7 +243,9 @@ Route::group(['middleware' => ['auth']], function () {
 Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->name('order.getStatusOracle');
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
-Route::get('/oracle/synchronizemodifier', 'BackgroundController@getQualifiers');
+Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
+
+Route::get('/oracle/getdiskon', 'BackgroundController@updateDiskonTable');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));
@@ -322,6 +325,6 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 *
 */
 
-Route::get('/test', function () {
-  return view('fixedfooter');
+Route::get('/displayproduct', function () {
+    return view('shop.welcome');
 });

@@ -33,5 +33,6 @@ return [
     'cantapprove'=>"You not Authorize to approve/Reject outlet",
     'successupload' => 'File successfully uploaded',
     'alreadyupload' => 'File has been uploaded!',
-    'notmatchdpl' => 'Suggestion DPL No not match'
+    'notmatchdpl' => 'Suggestion DPL No not match',
+    'itemexist' => 'item already exist in shopping cart'
 ];

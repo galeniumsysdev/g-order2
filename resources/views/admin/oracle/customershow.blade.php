@@ -29,7 +29,11 @@
                   <div class="form-group">
                     <label class="control-label col-sm-2" for="email">@lang('label.email') :</label>
                     <div class="col-sm-10">
+                      @if($customer->user)
                       <input type="text" class="form-control disabled" name="email" value="{{$customer->user->email}}">
+                      @else
+                      <input type="text" class="form-control disabled" name="email" value="">
+                      @endif
                     </div>
                   </div>
                   <div class="tabcard">
@@ -37,8 +41,10 @@
                         <li role="presentation" class="active"><a href="#personal" aria-controls="Personal" role="tab" data-toggle="tab">@lang('label.personal')</a></li>
                         <li role="presentation"><a href="#address" aria-controls="Address" role="tab" data-toggle="tab">@lang('label.address')</a></li>
                         <li role="presentation"><a href="#contact" aria-controls="Contact" role="tab" data-toggle="tab">@lang('label.contact')</a></li>
-                        @if($customer->user->hasRole('Distributor'))
-                        <li role="presentation"><a href="#distributor_cabang" aria-controls="distributor_cabang" role="tab" data-toggle="tab">Distributor Cabang</a></li>
+                        @if($customer->user)
+                          @if($customer->user->hasRole('Distributor'))
+                          <li role="presentation"><a href="#distributor_cabang" aria-controls="distributor_cabang" role="tab" data-toggle="tab">Distributor Cabang</a></li>
+                          @endif
                         @endif
                     </ul>
                     <div class="tab-content">
@@ -74,7 +80,11 @@
                               <select class="form-control" name="role">
                                 <option value="">--</option>
                                 @foreach ($roles as $role)
-                                <option value="{{$role->id}}" {{in_array($role->id,$customer->user->roles->pluck('id')->toArray())?'selected':''}}>{{$role->display_name}}</option>
+                                @if($customer->user)
+                                  <option value="{{$role->id}}" {{in_array($role->id,$customer->user->roles->pluck('id')->toArray())?'selected':''}}>{{$role->display_name}}</option>
+                                @else
+                                  <option value="{{$role->id}}" >{{$role->display_name}}</option>
+                                @endif
                                 @endforeach
                               </select>
                             </div>
@@ -94,7 +104,7 @@
                                  <select name="distributor" class="form-control">
                                    <option value="">--</option>
                                    @foreach($principals as $principal)
-                                   <option value="{{$principal->id}}" {{in_array($principal->customer_id,$customer->hasDistributor()->get()->pluck('id')->toArray())?'selected':''}}>{{$principal->name}}</option>
+                                   <option value="{{$principal->customer_id}}" {{in_array($principal->customer_id,$customer->hasDistributor()->get()->pluck('id')->toArray())?'selected':''}}>{{$principal->name}}</option>
                                    @endforeach
                                  </select>
                             </div>
@@ -113,8 +123,10 @@
                           <div class="form-group" id="status">
                               <div class="col-sm-12">
                                 <button type="submit" name="save_customer" class="btn btn-primary">@lang('label.save')</button>
-                                @if($customer->user->register_flag==0)
-                                  <button type="submit" name="send_customer" class="btn btn-success">Send Invitation Email</button>
+                                @if($customer->user)
+                                  @if($customer->user->register_flag==0)
+                                    <button type="submit" name="send_customer" class="btn btn-success">Send Invitation Email</button>
+                                  @endif
                                 @endif
                               </div>
                           </div>

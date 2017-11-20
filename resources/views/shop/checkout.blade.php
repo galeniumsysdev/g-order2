@@ -15,7 +15,8 @@
           <div class="form-group{{ $errors->has('dist') ? ' has-error' : '' }}">
             <label class="control-label col-sm-3" for="no_order">Distributor :</label>
             <div class="col-sm-8">
-              <input type="text" id="distributor" name="dist" class="form-control" placeholder="Distributor" required readonly="readonly" value="{{$distributor['customer_name']}}">
+              <input type="text" id="distributor" name="dist" class="form-control" placeholder="Distributor" required readonly="readonly" value="{{$distributor->customer_name}}">
+              <input type="hidden" name="dist_id" class="form-control" required value="{{$distributor->id}}">
             </div>
           </div>
             <div class="form-group{{ $errors->has('no_order') ? ' has-error' : '' }}">
@@ -98,6 +99,7 @@
 				<tr>
 					<th style="width:50%" class="text-center">@lang('shop.Product')</th>
 					<th style="width:10%" class="text-center">@lang('shop.Price')</th>
+          <th style="width:10%" class="text-center">@lang('shop.listprice')</th>
 					<th style="width:20%" class="text-center">@lang('shop.Quantity')</th>
 					<th style="width:20%" class="text-center">@lang('shop.SubTotal')</th>
 				</tr>
@@ -115,7 +117,8 @@
 							</div>
 						</div>
 					</td>
-					<td data-th="@lang('shop.Price')" id="hrg-{{$id}}" class="text-center xs-only-text-left">{{ number_format($product['price'],2) }}</td>
+					<td data-th="@lang('shop.Price')" id="hrg-{{$id}}" class="text-center xs-only-text-left">{{ number_format($product['price']-$product['disc'],2) }}</td>
+          <td data-th="@lang('shop.listprice')" id="disc-{{$id}}" class="text-center xs-only-text-left">{{ number_format($product['price'],2) }}</td>
 					<td data-th="@lang('shop.Quantity')" class="text-center xs-only-text-left">
               {{ $product['qty']." ".$product['uom'] }}
 					</td>
@@ -124,13 +127,30 @@
           @endforeach
 			</tbody>
 			<tfoot>
-				<tr class="visible-xs">
-					<td class="text-center" ><strong class="totprice" id="totprice1">Total {{number_format($totalPrice,2)}}</strong></td>
-				</tr>
+        <tr >
+          <td colspan="4" class="text-right hidden-xs"><strong>@lang('shop.SubTotal')</strong></td>
+          <td class="text-right xs-only-text-center" ><strong class="totprice" id="totprice1"><label class="visible-xs-inline">@lang('shop.SubTotal'): </label>{{number_format($totalPrice,2)}}</strong></td>
+          <td class="hidden-xs"></td>
+        </tr>
+        <tr style="border-top-style:hidden;">
+          <td colspan="4" class="text-right hidden-xs"><strong>Discount</strong></td>
+          <td class="text-right xs-only-text-center" ><strong class="totprice" id="totdisc"><label class="visible-xs-inline">Discount: </label>{{number_format($totalDiscount,2)}}</strong></td>
+          <td class="hidden-xs"></td>
+        </tr>
+        <tr style="border-top-style:hidden;">
+          <td colspan="4" class="text-right hidden-xs"><strong>Tax</strong></td>
+          <td class="text-right xs-only-text-center" ><strong class="totprice" id="tottax"><label class="visible-xs-inline">Tax: </label>{{number_format($tax,2)}}</strong></td>
+          <td class="hidden-xs"></td>
+        </tr>
+        <tr  style="border-top-style:hidden;">
+          <td colspan="4" class="text-right hidden-xs"><strong>@lang('shop.Total')</strong></td>
+          <td class="text-right xs-only-text-center" ><strong class="totprice" id="totamount"><label class="visible-xs-inline">@lang('shop.Total'): </label>{{number_format($totalAmount,2)}}</strong></td>
+          <td class="hidden-xs"></td>
+        </tr>
 				<tr>
 					<td><a href="{{route('product.shoppingCart') }}" class="btn btn-warning" style="min-width:200px;"><i class="fa fa-angle-left"></i> @lang('shop.back')</a></td>
-					<td colspan="1" class="hidden-xs"></td>
-					<td class="hidden-xs text-center"><strong id="totprice2">Total {{ number_format($totalPrice,2) }}</strong></td>
+					<td colspan="2" class="hidden-xs"></td>
+					<td class="hidden-xs"></td>
 					<td><button type="submit" class="btn btn-success btn-block">@lang('shop.CreateOrder') <i class="fa fa-angle-right"></i></button></td>
 				</tr>
         <tr style="border-top-style:hidden;">

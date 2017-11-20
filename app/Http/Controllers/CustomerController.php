@@ -69,7 +69,10 @@ class CustomerController extends Controller
         if (!empty($customer->subgroup_dc_id))
         {
           $subgroupdc =SubGroupDatacenter::find($customer->subgroup_dc_id);
-          $groupdcid = $subgroupdc->group_id;
+          if($subgroupdc){
+              $groupdcid = $subgroupdc->group_id;
+          }
+
         }else{
           $groupdcid="";
         }
