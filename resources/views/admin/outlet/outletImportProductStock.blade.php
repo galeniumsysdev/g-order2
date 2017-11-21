@@ -73,29 +73,32 @@
                       </div>
                       <div class="col-md-10">
                         <span class="default-value">
-                          <table id="import-stock" class="table table-striped table-hover table-center-header">
-                            <thead>
-                              <tr>
-                                <th>ID</th>
-                                <th>Title</th>
-                                <th>Stok Terakhir</th>
-                                <th>Stok Baru</th>
-                                <th>Batch</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                            @foreach ($data as $cell)
-                              <tr>
-                                <td>{{ $cell['id'] }}</td>
-                                <td>{{ $cell['nama_barang'] }}</td>
-                                <td>{{ $cell['last_stock'] }}</td>
-                                <td>{{ $cell['stock'] }}</td>
-                                <td>{{ $cell['satuan'] }}</td>
-                                <td>{{ (string)$cell['batch'] }}</td>
-                              </tr>
-                            @endforeach
-                            </tbody>
-                          </table>
+                          <div class="table-responsive">
+                            <table id="import-stock" class="display responsive nowrap" width="100%">
+                              <thead>
+                                <tr>
+                                  <th>Title</th>
+                                  <th>Stok Terakhir</th>
+                                  <th>Stok Baru</th>
+                                  <th>Satuan</th>
+                                  <th>ID</th>
+                                  <th>Batch</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                              @foreach ($data as $cell)
+                                <tr>
+                                  <td>{{ $cell['nama_barang'] }}</td>
+                                  <td>{{ $cell['last_stock'] }}</td>
+                                  <td>{{ $cell['stock'] }}</td>
+                                  <td>{{ $cell['satuan'] }}</td>
+                                  <td>{{ $cell['id'] }}</td>
+                                  <td>{{ (string)$cell['batch'] }}</td>
+                                </tr>
+                              @endforeach
+                              </tbody>
+                            </table>
+                          </div>
                           {!! Form::open(['url' => '/outlet/product/import/stock/process']) !!}
                           {{ Form::hidden('data',$data) }}
                           {{ Form::submit('Execute', array('class'=>'btn btn-primary')) }}
@@ -116,11 +119,11 @@
 @endsection
 @section('js')
 
-<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-<script
-    src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
-<link rel="stylesheet"
-    href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css">
 <script src="{{ asset('js/outletproduct.js') }}"></script>
 
 @endsection

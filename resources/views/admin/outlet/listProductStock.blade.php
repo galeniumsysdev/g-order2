@@ -24,7 +24,7 @@
             <a href="{{ route('outlet.importProductStock') }}" class="btn btn-info pull-right">Import Stock</a>
             <br/><br/>
             <div class="table-responsive">
-              <table id="product-list" class="display responsive nowrap" cellspacing="0" width="100%">
+              <table id="product-list" class="display responsive nowrap" width="100%">
                 <thead>
                   <tr>
                     <th>Title</th>
@@ -40,13 +40,15 @@
                       <td>{!! $cell['stock'] !!}</td>
                       <td>{{ $cell['op_id'] }}</td>
                       <td align="center">
+                        @if ($cell['flag'] == 'outlet')
                         <a href="{{ route('outlet.formProduct',$cell['op_id']) }}" class="btn btn-primary">Edit</a>
                         <a href="{{ route('outlet.deleteProduct',$cell['op_id']) }}" class="btn btn-danger" onclick="if(!confirm('Are you sure want to delete \'{{ $cell['title'] }}\' and its histories?')){return false;}">Delete</a>
+                        @endif
                       </td>
                     </tr>
                   @endforeach
                 </tbody>
-            </table>
+              </table>
             </div>
           </div>
         </div>

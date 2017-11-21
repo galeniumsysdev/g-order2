@@ -6,7 +6,7 @@
 @extends('layouts.navbar_product')
 @section('content')
   <link href="{{ asset('css/table.css') }}" rel="stylesheet">
-  <link href="{{ asset('css/dpl.css') }}" rel="stylesheet">
+  <link href="{{ asset('css/outletproduct.css') }}" rel="stylesheet">
   @if($status= Session::get('msg'))
     <div class="alert alert-info">
         {{$status}}
@@ -24,26 +24,28 @@
               Stock : {{ $last_stock }}
             </h4>
             <br/>
-            <table id="detail-list" class="table table-hover table-center-header">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Qty</th>
-                  <th>Batch No.</th>
-                  <th>Trx. Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($stock as $cell)
-                  <tr class="{{ $cell['class'] }}">
-                    <td>{!! $cell['event'] !!}</td>
-                    <td align="center">{!! $cell['qty'] !!}</td>
-                    <td align="center">{{ $cell['batch'] }}</td>
-                    <td align="center">{{ $cell['trx_date'] }}</td>
+            <div class="table-responsive">
+              <table id="detail-list" class="display responsive nowrap" width="100%">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Qty</th>
+                    <th>Batch No.</th>
+                    <th>Trx. Date</th>
                   </tr>
-                @endforeach
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  @foreach ($stock as $cell)
+                    <tr class="{{ $cell['class'] }}">
+                      <td>{!! $cell['event'] !!}</td>
+                      <td align="center">{!! $cell['qty'] !!}</td>
+                      <td align="center">{{ $cell['batch'] }}</td>
+                      <td align="center">{{ $cell['trx_date'] }}</td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
             <a href="/outlet/product/list" class="btn btn-default">Back</a>
           </div>
         </div>
@@ -53,11 +55,11 @@
 @endsection
 @section('js')
 
-<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-<script
-    src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
-<link rel="stylesheet"
-    href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css">
 <script src="{{ asset('js/outletproduct.js') }}"></script>
 
 @endsection

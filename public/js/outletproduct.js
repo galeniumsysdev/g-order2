@@ -2,19 +2,38 @@ $(document).ready(function() {
 	if($('#product-list').length){
     	$('#product-list').DataTable();
         window.setTimeout(function(){
-            $(window).resize().scroll();
+            $(window).resize();
         },2000);
     }
-    if($('#import-product').length)
+
+    if($('#import-product').length){
     	$('#import-product').DataTable();
-	if($('#import-stock').length)
+        window.setTimeout(function(){
+            $(window).resize();
+        },2000);
+    }
+
+	if($('#import-stock').length){
     	$('#import-stock').DataTable();
-    if($('#trx-list').length)
+        window.setTimeout(function(){
+            $(window).resize();
+        },2000);
+    }
+    if($('#trx-list').length){
         $('#trx-list').DataTable();
-    if($('#detail-list').length)
+        window.setTimeout(function(){
+            $(window).resize();
+        },2000);
+    }
+
+    if($('#detail-list').length){
         $('#detail-list').DataTable({
             'ordering': false,
         });
+        window.setTimeout(function(){
+            $(window).resize();
+        },2000);
+    }
 
     $('.change-product').hide();
 
