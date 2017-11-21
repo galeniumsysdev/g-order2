@@ -13,13 +13,16 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Mail;
 use App\Notifications\VerificationUser;
-use App\Notifications\MarketingGaleniumNotif;
+//use App\Notifications\MarketingGaleniumNotif;
+use App\Events\PusherBroadcaster;
+use App\Notifications\PushNotif;
 use Webpatser\Uuid\Uuid;
 use DB;
 use Image;
 use File;
 use App\CategoryOutlet;
 use Illuminate\Auth\Events\Registered;
+use App\GroupDatacenter;
 
 
 class RegisterController extends Controller
@@ -145,18 +148,24 @@ class RegisterController extends Controller
     {
       $input = $request->all();
 
+
       $validator = $this->validator($input)->validate();
       if ($request->psc=="" and $request->pharma==""){
         //$errors = new array(['error' => [trans('auth.pscflag')]]);
 	      //return Redirect::back()->withErrors('psc', trans('auth.pscflag'))->withInput();
         return redirect(route('register'))->withErrors(['psc'=> [trans('auth.pscflag')]])->withInput();
       }
-      if($request->hasFile('imgphoto')) {
+      if($request->psc=="1" and (is_null($request->groupdc) or is_null($request->subgroupdc) ))
+      {
+        return redirect(route('register'))->withErrors(['groupdc'=> trans('auth.groupdcerror')])->withInput();
+      }
+
+      /*if($request->hasFile('imgphoto')) {
         $validator = Validator::make($request->all(), [
             'imgphoto' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ])->validate();
 
-      }
+      }*/
       $customer = Customer::create([
           'customer_name' => strtoupper($request->name),
           'status' => 'A',
@@ -164,8 +173,27 @@ class RegisterController extends Controller
           'pharma_flag' => $request->pharma,
           'psc_flag' => $request->psc,
           'outlet_type_id' => $request->category,
+          'subgroup_dc_id' => $request->subgroupdc
         ]);
        $customer->save();
+
+       /*getdistributor*/
+       if($request->psc=="1" and $request->pharma=="1")
+       {
+           $distributorpsc = $this->mappingDistributor($request,'PSC');
+           $distributorpharma = $this->mappingDistributor($request,'PHARMA');
+           $distributor = $distributorpsc->union($distributorpharma);
+       }elseif($request->psc=="1"){
+         $distributor = $this->mappingDistributor($request,'PSC');
+       }elseif($request->pharma=="1"){
+         $distributor = $this->mappingDistributor($request,'PHARMA');
+       }
+       $distributor = $distributor->get();
+       if($distributor)
+       {
+         $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+       }
+
        $province=DB::table('provinces')->where('id','=',$request->province)->first();
        $city=DB::table('regencies')->where('id','=',$request->city)->first();
        $district=DB::table('districts')->where('id','=',$request->district)->first();
@@ -221,15 +249,17 @@ class RegisterController extends Controller
       $user->id = Uuid::generate()->string;
       $user->name = strtoupper($request->name);
       $user->email = $request->email;
-      if($request->hasFile('imgphoto')) {
+      /*if($request->hasFile('imgphoto')) {
         $avatar = $request->file('imgphoto');
         $filename = time() . '.' . $avatar->getClientOriginalExtension();
         Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
         $user->avatar = $filename;
-      }
+      }*/
 
       $user->api_token =str_random(60);
       $customer->users()->save($user);
+
+
 
       $data = $user->toArray();
       $user->notify(new VerificationUser($user));
@@ -240,20 +270,66 @@ class RegisterController extends Controller
         return redirect(route('login'))->with('status',trans("passwords.confirm"));
     }
 
+    public function mappingDistributor(Request $request,$tipe)
+    {
+      $distributor = DB::table('customers as c')
+              ->join('users as u','c.id','=','u.customer_id')
+              ->join('role_user as ru','u.id','=','ru.user_id')
+              ->join('roles as r','ru.role_id','=','r.id')
+              ->leftjoin ('distributor_groupdc as dg','c.id','=', 'dg.distributor_id')
+              ->select('c.id','c.customer_name')
+              ->where([
+                ['u.register_flag','=',true],
+                ['c.status','=','A'],
+              ])->whereIn('r.name',['Distributor','Distributor Cabang','Principal']);
+      if($tipe=="PSC"){
+        $distributor = $distributor->where([
+          ['c.psc_flag','=',$request->psc],
+          ['dg.group_id','=',$request->groupdc]
+        ])->whereRaw("((not exists (select 1 from distributor_regency dr where c.id=dr.distributor_id)
+                  	  or exists (select 1 from distributor_regency dr where c.id=dr.distributor_id and dr.regency_id = '".$request->city."')
+                       ))");
+
+      }
+      if($tipe=="PHARMA"){
+        $distributor = $distributor->where([
+          ['c.pharma_flag','=',$request->pharma]
+        ])->whereNull('dg.group_id')
+          ->whereExists(function($query){
+            $query->select (DB::raw(1))
+                  ->from('distributor_regency dr')
+                  ->where([['c.id','=','dr.distributor_id'],['dr.regency_id','=',$request->city]]);
+              });
+      }
+      return $distributor;
+    }
+
 
     public function confirmation($token)
     {
       $user = User::where('api_token',$token)->first();
       //dd($user->customer->psc_flag);
-      if (!is_null($user)){
-        if(!$user->validate_flag){
+      if ($user){
+        if($user->validate_flag=="0"){
           $marketings = User::whereHas('roles', function($q){
               $q->where('name','MarketingGPL');
           })->get();
-
+          $content="<strong>".$user->name."</strong> telah mendaftar di aplikasi ".config('app.name'). "Harap verifikasi segera data outlet/distributor tersebut melalui aplikasi ".config('app.name');
+          $data = [
+            'title'=> 'Register Outlet',
+    				'message' => 'Pendaftaran outlet baru: '.$user->name,
+    				'id' => $user->id,
+    				'href' => url('/manageOutlet')
+            ,'email' => [ 'greeting'=> "Pendaftaran Baru di ". config('app.name'),
+                            'content' => $content,
+                    		    'markdown'=> '',
+                    		    'attribute'=>	array()]
+    			];
           foreach ($marketings as $sales)
           {
-              $sales->notify(new MarketingGaleniumNotif($user));
+              //$sales->notify(new MarketingGaleniumNotif($user));
+              event(new PusherBroadcaster($data, $sales->email));
+              $sales->notify(new PushNotif($data));
           }
           /*
           if ($user->customer->psc_flag ==="1"){
@@ -304,7 +380,8 @@ class RegisterController extends Controller
     {
       $categories = CategoryOutlet::where('enable_flag','Y')->get();
       $provinces = DB::table('provinces')->get();
-      return view('auth.register',compact('categories','provinces'));
+      $groupdcs = GroupDatacenter::where('enabled_flag','1')->get();
+      return view('auth.register',compact('categories','provinces','groupdcs'));
     }
 
     /**

@@ -20,7 +20,7 @@
                 <div class="panel-body">
                   <form class="form-horizontal" enctype="multipart/form-data" role="form" method="POST" action="{{ route('register') }}">
                       {{ csrf_field() }}
-                     <div class="form-horizontal col-sm-6">
+                    <div class="form-horizontal col-sm-6">
                       <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
                           <label for="name" class="col-sm-4 control-label">*@lang('label.outlet')</label>
 
@@ -80,7 +80,7 @@
                              @endif
                          </div>
                        </div>
-<!--
+                      <!--
                       <div class="form-group{{ $errors->has('HP_2') ? ' has-error' : '' }}">
                          <label for="HP_2" class="col-sm-4 control-label">@lang('label.hp2')</label>
 
@@ -102,7 +102,7 @@
                          </div>
                        </div>-->
 
-                      <div class="form-group{{ $errors->has('no_tlpn') ? ' has-error' : '' }}">
+                       <div class="form-group{{ $errors->has('no_tlpn') ? ' has-error' : '' }}">
                          <label for="no_tlpn" class="col-sm-4 control-label">@lang('label.phone')</label>
 
                          <div class="col-sm-8">
@@ -123,7 +123,7 @@
                          </div>
                        </div>
 
-                    <!--  <div class="form-group{{ $errors->has('NPWP') ? ' has-error' : '' }}">
+                       <!--  <div class="form-group{{ $errors->has('NPWP') ? ' has-error' : '' }}">
                          <label for="NPWP" class="col-sm-4 control-label">@lang('label.npwp')</label>
 
                          <div class="col-sm-8">
@@ -137,7 +137,7 @@
                          </div>
                       </div>-->
 
-                      <div class="form-group{{ $errors->has('category') ? ' has-error' : '' }}">
+                        <div class="form-group{{ $errors->has('category') ? ' has-error' : '' }}">
                          <label for="kategori" class="col-sm-4 control-label">*@lang('label.category')</label>
 
                          <div class="col-sm-8">
@@ -177,7 +177,7 @@
                                    <span class="help-block">
                                        <strong>{{ $errors->first('psc') }}</strong>
                                    </span>
-                                   @endif 
+                                   @endif
 
                                    <div class="md-modal md-effect-1" id="modal-1">
                                       <div class="md-content">
@@ -225,7 +225,7 @@
                                    <span class="help-block">
                                        <strong>{{ $errors->first('psc') }}</strong>
                                    </span>
-                                   @endif 
+                                   @endif
 
                                    <div class="md-modal md-effect-2" id="modal-2">
                                       <div class="md-content">
@@ -270,6 +270,40 @@
                                </div>
                             </div>
                         </div>
+
+                        <div class="form-group" id="divkategoridc">
+                          <label for="kategori" class="control-label col-sm-4">**<strong>@lang('label.categorydc') </strong></label>
+                          <div class="col-sm-3">
+                              <select class="form-control" name="groupdc" id="groupdc" onchange="ubah('')" >
+                                <option value=''>--</option>
+                                @foreach($groupdcs as $groupdc)
+                                  @if($groupdc->id==old('groupdc'))
+                                  <option selected='selected' value="{{ $groupdc->id }}">{{ $groupdc->display_name }}</option>
+                                  @else
+                                  <option value="{{$groupdc->id}}">{{$groupdc->display_name}}</option>
+                                  @endif
+
+
+                                @endforeach
+                              </select>
+                              @if ($errors->has('groupdc'))
+                                <span class="help-block">
+                                  <strong>{{ $errors->first('groupdc') }}</strong>
+                                </span>
+                              @endif
+                          </div>
+
+                          <div class="col-sm-5">
+                              <select class="form-control" name="subgroupdc" id="subgroupdc">
+                                  <option value="">--</option>
+                              </select>
+                              @if ($errors->has('subgroupdc'))
+                                <span class="help-block">
+                                  <strong>{{ $errors->first('subgroupdc') }}</strong>
+                                </span>
+                              @endif
+                          </div>
+                         </div>
 
                     </div>
                     <div class="form-horizontal col-sm-6">
@@ -381,8 +415,7 @@
                                   </span>
                               @endif
                           </div>
-                      </div>
-                    </form>
+                      </div>                    
                     </div>
 
                     <div class="form-group">
@@ -392,7 +425,10 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-sm-12 has-error"><span class="help-block">* @lang('label.mandatoryfield')</span></div>
+                    <div class="col-sm-12 has-error">
+                      <span class="help-block">* @lang('label.mandatoryfield')</span>
+                      <span class="help-block">** @lang('label.mandatoryfield') jika Kategori PSC</span>
+                    </div>
                   </form>
 
                 </div>
