@@ -1,7 +1,10 @@
 <template>
     <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i>
+        <a href="#" class="dropdown-toggle hidden-xs" data-toggle="dropdown"><i class="fa fa-bell"></i>
           Notifications
+          <span class="badge">{{notifCount}}</span>
+        </a>
+        <a href="/home" class="dropdown-toggle visible-xs"><i class="fa fa-bell"></i>
           <span class="badge">{{notifCount}}</span>
         </a>
         <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-if="unreadNotifications.length">
@@ -17,7 +20,7 @@
             </a>
           </li>
         </ul>
-        <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-else>
+        <ul class="dropdown-menu alert-dropdown dropdown-notif hidden-xs" role="menu" v-else>
           <li>
             <span class="item">
               <span class="item-left">
