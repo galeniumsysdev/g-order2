@@ -58,13 +58,14 @@ function changeProduct(id){
                var v_id_new = v_id+"-"+$('#stn-'+id).val();
                //alert(v_id_new);
                //$('#totprice2').html("Total: "+data.subtotal) ;
-               $('#totprice1').html("<label class='visible-xs-inline'>Discount: </label>"+data.subtotal+"</strong>") ;
-               $('#tottax').html("<label class='visible-xs-inline'>Discount: </label>"+data.tax+"</strong>") ;
-               $('#totamount').html("<label class='visible-xs-inline'>Discount: </label>"+data.total+"</strong>") ;
+               $('#totprice1').html("<label class='visible-xs-inline'>Subtotal: </label>"+data.subtotal+"</strong>") ;
+               $('#tottax').html("<label class='visible-xs-inline'>Tax: </label>"+data.tax+"</strong>") ;
+               $('#totamount').html("<label class='visible-xs-inline'>Total: </label>"+data.total+"</strong>") ;
                $('#totdisc').html("<label class='visible-xs-inline'>Discount: </label>"+data.disctot+"</strong>") ;
                $('#subtot-'+id).html(data.amount) ;
                $('#hrg-'+id).html(data.disc) ;
                $('#disc-'+id).html(data.price) ;
+
                if(v_uom!=$('#stn-'+id).val())
                {
                   $('#'+id).attr('id',v_id_new);
@@ -101,10 +102,21 @@ function getPrice(id){
       if(v_itemcode.substr(0,2)=='43')
       {
         $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
-        $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
+        if(data.price!=data.diskon)
+        {
+          $('#hrgcoret-'+id).html('');
+        }else{
+            $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
+        }
+
       }else{
         $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
-        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
+        if(data.price!=data.diskon)
+        {
+          $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
+        }else{
+          $('#hrgcoret-'+id).html('');
+        }
       }
 
       $('#hrg-'+id).val(data.price);
@@ -268,7 +280,7 @@ function changeUomOrder(id){
                {
                  $("#ord-"+id).html(data.qtyorder);
                  $("#hrg-"+id).html(rupiah(data.price));
-                
+
                }
 
              },error: function(XMLHttpRequest, textStatus, errorThrown) {

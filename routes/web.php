@@ -70,7 +70,7 @@ Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
     ,'as' => 'product.shoppingCart'
   ]);
-  Route::post('/checkout',[
+  Route::get('/checkout/{distributorid}',[
       'uses' => 'ProductController@checkOut'
       ,'as' => 'product.checkOut'
     ]);
@@ -245,7 +245,7 @@ Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('ord
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
 
-Route::get('/oracle/getdiskon', 'BackgroundController@updateDiskonTable');
+Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));
@@ -326,3 +326,5 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 Route::get('/displayproduct', function () {
     return view('shop.welcome');
 });
+
+Route::get('/product/ratediskon/{groupid}/{productid}/{customerid}','ProductController@getRateDiskon');

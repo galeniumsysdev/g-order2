@@ -19,6 +19,7 @@ use DB;
 use Image;
 use File;
 use App\CategoryOutlet;
+use Illuminate\Auth\Events\Registered;
 
 
 class RegisterController extends Controller

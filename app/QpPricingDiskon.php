@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class QpPricingDiskon extends Model
 {
-  protected $table = 'qp_pricing_diskon';
+  protected $table = 'qp_pricing_discount';
   protected $fillable = [
-    'list_line_id','list_header_id','list_line_type_code','modifier_level_code'
+    'list_line_id','list_header_id','list_line_no','list_line_type_code','modifier_level_code'
     ,'item_id', 'operand','arithmetic_operator_code'
     , 'customer_id','ship_to_id','bill_to_id'
     ,'start_date_active'
