@@ -175,9 +175,8 @@ class DPLController extends Controller {
 			$data = [
 				'title' => 'Pengajuan DPL #'.$suggest_no,
 				'message' => 'untuk '.$dpl_outlet['customer_name'],
-				//'href' => route('dpl.discountApproval',$suggest_no),
-				'suggest_no' => $suggest_no,
-				'href' => 'http://google.com'
+				'id' => $suggest_no,
+				'href' => route('dpl.readNotifDiscount')
 			];
 			foreach ($notified_users as $key => $email) {
 				$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
@@ -241,9 +240,8 @@ class DPLController extends Controller {
 				$data = [
 					'title' => 'Permohonan Approval',
 					'message' => 'Permohonan Approval #'.$suggest_no,
-					//'href' => route('dpl.discountApproval',$suggest_no),
-					'suggest_no' => $suggest_no,
-					'href' => 'http://google.com'
+					'id' => $suggest_no,
+					'href' => route('dpl.readNotifApproval')
 				];
 				foreach ($notified_users as $key => $email) {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
@@ -263,9 +261,8 @@ class DPLController extends Controller {
 				$data = [
 					'title' => 'Usulan Discount #'.$suggest_no.' ditolak',
 					'message' => 'oleh '.Auth::user()->name,
-					//'href' => route('dpl.discountForm',$suggest_no),
-					'suggest_no' => $suggest_no,
-					'href' => 'http://google.com'
+					'id' => $suggest_no,
+					'href' => route('dpl.readNotifApproval')
 				];
 				foreach ($notified_users as $key => $email) {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
@@ -319,6 +316,22 @@ class DPLController extends Controller {
 			$positions['FSM_HSM'][] = $next_approver['email'];
 
 		return $positions;
+	}
+
+	public function readNotifDiscount($suggest_no, $notifid){
+		Auth::User()->notifications()
+		           	->where('id','=',$notifid)
+		            ->update(['read_at' => Carbon::now()]);
+
+		return redirect()->route('dpl.discountApproval',$suggest_no);
+	}
+
+	public function readNotifApproval($suggest_no, $notifid){
+		Auth::User()->notifications()
+		           	->where('id','=',$notifid)
+		            ->update(['read_at' => Carbon::now()]);
+
+		return redirect()->route('dpl.discountForm',$suggest_no);
 	}
 
 	public function dplLog($suggest_no, $type) {

@@ -1,12 +1,12 @@
 <template>
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i>
-          <span class="hidden-xs">Notifications</span>
+          Notifications
           <span class="badge">{{notifCount}}</span>
         </a>
         <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-if="unreadNotifications.length">
           <li v-for="item in unreadNotifications" v-bind:key="item.index">
-            <a v-bind:href="item.data.content.href">
+            <a v-bind:href="item.data.href">
               <span class="item">
                 <span class="item-left">
                   <span class="item-info">
@@ -59,13 +59,11 @@
             this.notifCount = this.count;
             this.unreadNotifications = this.notif;
             Echo.channel(this.email)
-                .listen('.wk-prod', (notification) => {
+                .listen('.notif', (notification) => {
                     this.unreadNotifications.push({
                       data: {
                         subject: notification.message,
-                        content: {
-                          href: notification.href
-                        }
+                        href: notification.href
                       }
                     });
                     this.notifCount = this.notifCount + 1;
