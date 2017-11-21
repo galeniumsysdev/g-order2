@@ -144,7 +144,7 @@
                            <select class="form-control" name="category" required>
                              <option value="">--</option>
                              @forelse($categories as $category)
-                               @if(old('category')==$category->name)
+                               @if(old('category')==$category->id)
                                  <option selected='selected' value="{{$category->id}}">{{$category->name}}</option>
                                @else
                                  <option value="{{$category->id}}">{{$category->name}}</option>
@@ -159,7 +159,7 @@
                                  </span>
                              @endif
                          </div>
-                      </div>
+                        </div>
 
                         <div class="form-group{{ $errors->has('psc') ? ' has-error' : '' }}">
                            <label for="PSY" class="col-sm-4 control-label">*@lang('label.needproduct')</label>
@@ -271,7 +271,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group" id="divkategoridc">
+                        <div class="form-group{{ $errors->has('groupdc') ? ' has-error' : '' }}" id="divkategoridc">
                           <label for="kategori" class="control-label col-sm-4">**<strong>@lang('label.categorydc') </strong></label>
                           <div class="col-sm-3">
                               <select class="form-control" name="groupdc" id="groupdc" onchange="ubah('')" >
@@ -415,7 +415,7 @@
                                   </span>
                               @endif
                           </div>
-                      </div>                    
+                      </div>
                     </div>
 
                     <div class="form-group">

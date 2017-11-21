@@ -94,20 +94,7 @@
 										<td data-title="@lang('label.to')">{{Auth::User()->name}}</td>
 										<td data-title="@lang('label.type')">{{$notif->data['tipe']}}</td>
 										<td data-title="SUBJECT">
-										@if($notif->data['tipe']=="App\\Notifications\\NewoutletDistributionNotif")
-										  <a href="{{route('customer.show',[$notif->data['outlet']['id'],$notif->id] )}}">{{$notif->data['subject']}}</a>
-										@elseif($notif->data['tipe']=="Register Outlet")
-										  <a href="{{route('customer.show',[$notif->data['user']['id'],$notif->id] )}}">{{$notif->data['subject']}}</a>
-                    @elseif(in_array($notif->data['tipe'],array('Pengiriman PO','PO diterima customer','New PO') ))
-                      <a href="{{route('order.notifnewpo',['notifid'=>$notif->id,'id'=>$notif->data['so_header_id']['id']])}}">{{$notif->data['subject']}}</a>
-                    @elseif($notif->data['tipe']=="Reject Outlet")
-                        <a href="{{route('customer.show',[$notif->data['user']['id'],$notif->id] )}}">{{$notif->data['subject']}}</a>
-                    @elseif($notif->data['tipe']=="Pengajuan DPL")
-                        <a href="{{route('dpl.discountApproval',[$notif->data['content']['suggest_no']]) }}">sadfasfaasd</a>
-                    @else
-                    <!--if($notif->type=="App\\Notifications\\RejectPoByDistributor" or $notif->type=="App\\Notifications\\ShippingOrderOracle" or $notif->type=="App\\Notifications\\BookOrderOracle")-->
-                        <a href="{{route('order.notifnewpo',[$notif->id,$notif->data['order']['id']])}}">{{$notif->data['subject']}}</a>
-										@endif
+                      <a href="{{$notif->data['href']}}">{{$notif->data['subject']}}</a>										
 										</td>
 										<td data-title="@lang('label.sent')">{{$notif->created_at }}</td>
 										<td data-title="@lang('label.read')">

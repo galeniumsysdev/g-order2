@@ -71,9 +71,9 @@ class RegisterController extends Controller
             'address' => 'required|string|max:255',
             'province' => 'required',
             'city' => 'required|string|max:100',
-            'subdistricts' => 'required',
+            //'subdistricts' => 'required',
             'district' => 'required',
-            'postal_code' => 'required|digits:5',
+//            'postal_code' => 'required|digits:5',
             'HP_1' => 'required|regex:/(8)[0-9]{8,}/',
             'HP_2' => 'nullable|regex:/(8)[0-9]{8,}/',
             'no_tlpn' => 'nullable|regex:/[0-9]{9}/',
@@ -117,13 +117,38 @@ class RegisterController extends Controller
        if (!$user_check) {
            return back()->with('status', trans('auth.failed'));
        }
-       if(!$user_check->register_flag)
+       if($user_check->register_flag==0)
        {
          if (isset($user_check->customer_id)){
             $customer = Customer::find($user_check->customer_id);
+            $groupdc =$customer->subgroupdc->groupdatacenter->id;
+            $sites = $customer->sites()->where('primary_flag','=','Y')->first();
+            if($sites)
+            {
+              $city = $sites->city_id;
+            }else{
+              $city = null;
+            }
             $customer->longitude = $data['longitude'];
             $customer->langitude = $data['langitude'];
             $customer->save();
+            /*getdistributor*/
+
+            if($customer->psc_flag=="1" and $customer->pharma_flag=="1")
+            {
+                $distributorpsc = $this->mappingDistributor($groupdc,$city,'PSC');
+                $distributorpharma = $this->mappingDistributor($groupdc,$city,'PHARMA');
+                $distributor = $distributorpsc->union($distributorpharma);
+            }elseif($customer->psc_flag=="1"){
+              $distributor = $this->mappingDistributor($groupdc,$city,'PSC');
+            }elseif($customer->pharma_flag=="1"){
+              $distributor = $this->mappingDistributor($groupdc,$city,'PHARMA');
+            }
+            $distributor = $distributor->get();
+            if($distributor)
+            {
+              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+            }
          }
          $user_check->password = bcrypt($data['password']);
          $user_check->register_flag=1;
@@ -177,23 +202,6 @@ class RegisterController extends Controller
         ]);
        $customer->save();
 
-       /*getdistributor*/
-       if($request->psc=="1" and $request->pharma=="1")
-       {
-           $distributorpsc = $this->mappingDistributor($request,'PSC');
-           $distributorpharma = $this->mappingDistributor($request,'PHARMA');
-           $distributor = $distributorpsc->union($distributorpharma);
-       }elseif($request->psc=="1"){
-         $distributor = $this->mappingDistributor($request,'PSC');
-       }elseif($request->pharma=="1"){
-         $distributor = $this->mappingDistributor($request,'PHARMA');
-       }
-       $distributor = $distributor->get();
-       if($distributor)
-       {
-         $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
-       }
-
        $province=DB::table('provinces')->where('id','=',$request->province)->first();
        $city=DB::table('regencies')->where('id','=',$request->city)->first();
        $district=DB::table('districts')->where('id','=',$request->district)->first();
@@ -211,6 +219,10 @@ class RegisterController extends Controller
        $custsites->Country = 'ID';
        $custsites->customer_id = $customer->id;
        $custsites->primary_flag='Y';
+       $custsites->province_id = $request->province;
+       $custsites->city_id=$request->city;
+       $custsites->district_id=$request->district;
+       $custsites->state_id=$request->subdistricts;
        $custsites->save();
 
        $custcontact= new CustomerContact();
@@ -270,7 +282,7 @@ class RegisterController extends Controller
         return redirect(route('login'))->with('status',trans("passwords.confirm"));
     }
 
-    public function mappingDistributor(Request $request,$tipe)
+    public function mappingDistributor($groupdc,$city,$tipe)
     {
       $distributor = DB::table('customers as c')
               ->join('users as u','c.id','=','u.customer_id')
@@ -284,21 +296,21 @@ class RegisterController extends Controller
               ])->whereIn('r.name',['Distributor','Distributor Cabang','Principal']);
       if($tipe=="PSC"){
         $distributor = $distributor->where([
-          ['c.psc_flag','=',$request->psc],
-          ['dg.group_id','=',$request->groupdc]
+          ['c.psc_flag','=',"1"],
+          ['dg.group_id','=',$groupdc]
         ])->whereRaw("((not exists (select 1 from distributor_regency dr where c.id=dr.distributor_id)
-                  	  or exists (select 1 from distributor_regency dr where c.id=dr.distributor_id and dr.regency_id = '".$request->city."')
+                  	  or exists (select 1 from distributor_regency dr where c.id=dr.distributor_id and dr.regency_id = '".$city."')
                        ))");
 
       }
       if($tipe=="PHARMA"){
         $distributor = $distributor->where([
-          ['c.pharma_flag','=',$request->pharma]
+          ['c.pharma_flag','=',"1"]
         ])->whereNull('dg.group_id')
           ->whereExists(function($query){
             $query->select (DB::raw(1))
                   ->from('distributor_regency dr')
-                  ->where([['c.id','=','dr.distributor_id'],['dr.regency_id','=',$request->city]]);
+                  ->where([['c.id','=','dr.distributor_id'],['dr.regency_id','=',$city]]);
               });
       }
       return $distributor;
@@ -354,13 +366,20 @@ class RegisterController extends Controller
             }
           }*/
           $user->validate_flag=1;
+
           //$user->api_token='';
           $user->save();
           //return redirect(route('verification','token'=>$token))->with('status','Your activation is completed. Please Input Your Password')
           return view('auth.verification',['data' => $user]);
           //return redirect(route('login'))->with('status',trans("auth.registerverified"));
         }else{
+          if($user->register_flag==0)
+          {
+            return view('auth.verification',['data' => $user]);
+          }else{
             return redirect(route('login'))->with('status',trans("auth.alreadyverified"));
+          }
+
         }
       }
       return redirect(route('login'))->with('status',trans("auth.registerfailed"));
