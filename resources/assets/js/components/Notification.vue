@@ -1,7 +1,7 @@
 <template>
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i>
-          <span class="hidden-xs">Notifications</span>
+          Notifications
           <span class="badge">{{notifCount}}</span>
         </a>
         <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-if="unreadNotifications.length">
@@ -63,9 +63,7 @@
                     this.unreadNotifications.push({
                       data: {
                         subject: notification.message,
-                        content: {
-                          href: notification.href
-                        }
+                        href: notification.href
                       }
                     });
                     this.notifCount = this.notifCount + 1;
