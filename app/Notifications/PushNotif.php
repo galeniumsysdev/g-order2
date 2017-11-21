@@ -53,9 +53,8 @@ class PushNotif extends Notification {
 		return [
 			'tipe'=> $this->data['title'],
 			'subject'=> $this->data['message'],
-			'id'=> $this->data['suggest_no'],
-			'href'=> $href,
-			'content'=> $this->data
+			'id'=> $this->data['id'],
+			'href'=> $href
 		];
 	}
 }

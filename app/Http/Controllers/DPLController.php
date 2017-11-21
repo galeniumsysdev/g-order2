@@ -241,7 +241,11 @@ class DPLController extends Controller {
 					'title' => 'Permohonan Approval',
 					'message' => 'Permohonan Approval #'.$suggest_no,
 					'id' => $suggest_no,
-					'href' => route('dpl.readNotifApproval')
+					'href' => route('dpl.readNotifApproval'),
+					'email' => [
+						'markdown'=>'',
+						'attribute'=> array()
+					]
 				];
 				foreach ($notified_users as $key => $email) {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
