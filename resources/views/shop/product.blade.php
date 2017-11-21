@@ -1,14 +1,15 @@
-@extends('layouts.navbar_product')
+	@extends('layouts.navbar_product')
 
-@section('content')
-<link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
-<link rel="stylesheet" href="{{ URL::to('css/displayproduct.css') }}">
-<div class="container">
-  @include('shop.carausel')
-</div>
-@foreach($product_flexfields as $flexfield)
-<div class="container-product">
-	<div class="row">
+	@section('content')
+	<link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
+	<link rel="stylesheet" href="{{ URL::to('css/displayproduct.css') }}">
+	<div class="container">
+	@include('shop.carausel')
+	</div>
+
+	@foreach($product_flexfields->take(1) as $flexfield)
+	<div class="container-product">
+	<div class="row" style="margin-left:15px; margin-right:15px;">
     <br>
 		<h4><strong>{{$flexfield->description}}</strong></h4>
 		<p class="font-product"><a href="{{route('product.category',$flexfield->flex_value)}}">Lihat Semua &nbsp;</a><i class="fa fa-angle-right" aria-hidden="true"></i></p>
@@ -51,13 +52,7 @@
               @else
                 Rp.
               @endif
-              @if(Auth::user()->hasRole('Distributor'))
-                 @php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_secondary))
-                {{number_format($disc,2)}}/{{$product->satuan_secondary}}
-              @else
-                @php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_primary))
-                {{number_format($disc,2)}}/{{$product->satuan_primary}}
-              @endif
+              
             </div>
             <div class="price coret" id="hrgcoret-{{$product->id}}">
               @if(Auth::user()->hasRole('Distributor'))
@@ -107,3 +102,4 @@
 <script src="{{ asset('js/myproduct.js') }}"></script>
 <script src="{{ asset('assets/vendors/highlight.js') }}"></script>
 @endsection
+

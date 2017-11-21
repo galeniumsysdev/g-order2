@@ -38,18 +38,7 @@
 
 .img.product{
   height: 100px;
-  width: 100%;
-  display: block;
-  min-height:100px;
 }
-
-
-@media (max-width: 767px) {
-  .img.product{
-    height: 100px;
-    width: 100%;
-    display: block;
-  }
 
   .caption h4 a{
     font-size: 12px;
@@ -584,7 +573,7 @@ border-radius: 0%;
 }
 
 .navbar-right > li {
-  margin-left: -10px;
+  margin-left: 10px;
 }
 
 .coret{
