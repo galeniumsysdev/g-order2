@@ -59,7 +59,7 @@
             this.notifCount = this.count;
             this.unreadNotifications = this.notif;
             Echo.channel(this.email)
-                .listen('.wk-prod', (notification) => {
+                .listen('.notif', (notification) => {
                     this.unreadNotifications.push({
                       data: {
                         subject: notification.message,

@@ -30,7 +30,7 @@ class PusherBroadcaster implements ShouldBroadcast {
 	}
 
 	public function broadcastAs() {
-		return 'wk-prod';
+		return 'notif';
 	}
 
 	/**
