@@ -28,16 +28,16 @@ class PushNotif extends Notification {
 
 	public function toMail($notifiable)
 	{
-		if($this->data['markdown']){
-		  	return (new MailMessage)
-		                      	->subject($this->data['title'])
-		                      	->greeting($this->data['greeting'])
-		                      	->line($this->data['content']);
+		if($this->data['email']['markdown']){
+			return (new MailMessage)
+			          ->subject($this->data['title'])
+			          ->markdown($this->data['email']['markdown'], $this->data['email']['attibute']);
 		}
 		else{
 			return (new MailMessage)
-			          ->subject($this->data['title'])
-			          ->markdown($this->data['markdown'], $this->['attibute']);
+													->subject($this->data['title'])
+													->greeting($this->data['email']['greeting'])
+													->line($this->data['email']['content']);
 		}
 	}
 

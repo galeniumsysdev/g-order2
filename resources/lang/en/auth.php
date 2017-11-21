@@ -22,4 +22,5 @@ return [
     'registerfailed' => 'Your activation was failed',
     'noaccess' => "Don't have access",
     'alreadyregistered' => 'Your account already verified. If you forget your password click forget password in login menu.',
+    'groupdcerror' => "Category Datacenter must be fill if need product=PSC"
 ];

@@ -20,6 +20,7 @@ use App\SoShipping;
 use App\CustomerSite;
 use App\qp_modifier_summary;
 use App\qp_qualifiers;
+use App\QpPricingDiskon;
 
 class BackgroundController extends Controller
 {
@@ -599,70 +600,96 @@ class BackgroundController extends Controller
       }
     }
 
-    public function updateDiskonTable(){
-      $tglskrg =date('Y-m-d');
-      $customerdiskon = db::table('qp_modifier_summary_v')
-                        ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
-                                and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
-                        ->where('product_attr', '=','PRICING_ATTRIBUTE1')
-                        ->where('list_line_type_code','=','DIS')
-                        ->orderBy('list_header_id','asc')
-                        ->get();
-      foreach($customerdiskon as $diskon)
+    public function updateDiskonTable($tglskrg){
+      if(is_null($tglskrg))
       {
-        $a=$diskon->list_line_id;
-        $customerlist = db::table('qp_qualifiers_v')
-                        ->where('list_header_id','=',$diskon->list_header_id)
-                        ->where(function ($query) use ($a) {
-                              $query->where('list_line_id', '=', $a)
-                                    ->orWhere('list_line_id', '=', -1);
-                          })
-                          ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
-                                  and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
-                        ->where('qualifier_context','=','customer')
-                        ->where('qualifier_attribute','=','QUALIFIER_ATTRIBUTE2')
-                        ->select('product_attr_val','start_date_active','end_date_active','qualifier_grouping_no')
-                        ->get();
-        $shipto = db::table('qp_qualifiers_v')
-                        ->where('list_header_id','=',$diskon->list_header_id)
-                        ->where(function ($query) use ($a) {
-                              $query->where('list_line_id', '=', $a)
-                                    ->orWhere('list_line_id', '=', -1);
-                          })
-                          ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
-                                  and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
-                        ->where('qualifier_context','=','customer')
-                        ->where('qualifier_attribute','=','QUALIFIER_ATTRIBUTE11')
-                        ->get();
-        if($customerlist){
-            foreach($customerlist as $cust)
-            {
-              $pricing = QpPricingDiskon::updateOrCreate(
-                ['list_header_id'=>$diskon->list_header_id,'list_line_id'=>$diskon->list_line_id,'customer_id'=>$customer->],
-                [,'list_line_type_code'=>$diskon->list_line_type_code
-                ,'modifier_level_code'=>$diskon->modifier_level_code
-                ,'item_id'=>$diskon->product_attr_val
-                , 'operand'=>$diskon->operand
-                ,'arithmetic_operator_code'=>$diskon->arithmetic_operator
-                , 'customer_id'$customer->product_attr_val
-                ,'ship_to_id'=>null
-                ,'bill_to_id'=>null
-                ,'start_date_active'=>$diskon->start_date_active
-                ,'end_date_active'=>$diskon->end_date_active
-                ,'comparison_operator_code'=>$diskon->comparison_operator_code
-                ,'pricing_attribute_context'=>$diskon->pricing_attribute_context
-                ,'pricing_attr'=>$diskon->pricing_attr
-                ,'pricing_attr_value_from'=>$diskon->pricing_attr_value_from
-                ,'pricing_attr_value_to'=>$diskon->pricing_attr_value_to
-                ,'qualifier_grouping_no'=>$customer->qualifier_grouping_no
-                ]
-              );
-            }
-        }else{
+          $tglskrg =date('Y-m-d');
+      }
 
+      $listheader = QpListHeaders::whereIn('list_type_code',['DLT'])
+                    ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
+              and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
+               ->where('list_header_id','=',22289)
+                ->get();
+
+      foreach ($listheader as $priceheader)
+      {
+        if(is_null($priceheader->start_date_active))
+        {
+          $tglawheader=date_create('2017-01-01');
+        }else{
+          $tglawheader = $priceheader->start_date_active;
+        }
+        if(is_null($priceheader->end_date_active))
+        {
+          $tglakheader=date_create(date('Y').'-12-31');
+        }else{
+          $tglakheader = $priceheader->end_date_active;
         }
 
+        $listdiskon = qp_modifier_summary::where('list_header_id','=',$priceheader->list_header_id)
+                          ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
+                                  and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
+                          ->where('product_attr', '=','PRICING_ATTRIBUTE1')
+                          ->where('list_line_type_code','=','DIS')
+                          ->where('list_line_id','=',23301)
+                          ->orderBy('list_header_id','asc')
+                          ->orderBy('list_line_id','asc')
+                          ->orderBy('pricing_group_sequence','asc')
+                          ->get();
+        foreach($listdiskon as $diskon)
+        {
+          $a=$diskon->list_line_id;
+          echo ('line_id:'.$a);
+          $qualifierlist = qp_qualifiers::where('list_header_id','=',$diskon->list_header_id)
+                          ->where(function ($query) use ($a) {
+                                $query->where('list_line_id', '=', $a)
+                                      ->orWhere('list_line_id', '=', -1);
+                            })
+                            ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
+                                    and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
+                          ;
+
+
+          if($qualifierlist->get())
+          {
+            /*customer id condition*/
+            $customerlist = $qualifierlist->where('qualifier_context','=','customer')
+              ->where('qualifier_attribute','=','QUALIFIER_ATTRIBUTE2')
+              ->get();
+            if($customerlist)
+            {
+              foreach ($customerlist as $cust)
+              {
+
+                QpPricingDiskon::updateorCreate(
+                  ['list_header_id'=>$diskon->list_header_id
+                  , 'list_line_id'=>$diskon->list_line_id
+                  ,'list_line_no' =>$diskon->list_line_no
+                  , 'item_id'=>$diskon->product_attr_val
+                  , 'customer_id'=>$cust->qualifier_attr_value]
+                  ,[
+                  'list_line_type_code'  =>$diskon->list_line_type_code
+                  ,'modifier_level_code'=>$diskon->modifier_level_code
+                  ,'operand'=>$diskon->operand
+                  ,'arithmetic_operator_code'=>$diskon->arithmetic_operator_code
+                  ,'start_date_active'=>$tglawheader
+                  ,'end_date_active'=>$tglakheader
+                  ,'uom_code'=>$diskon->product_uom_code
+                  ,'comparison_operator_code'=>$diskon->comparison_operator_code
+                  ,'pricing_attribute_context'=>$diskon->pricing_attribute_context
+                  ,'pricing_attr'=>$diskon->pricing_atr
+                  ,'pricing_attr_value_from'=>$diskon->pricing_attr_value_from
+                  ,'pricing_attr_value_to'=>$diskon->pricing_attr_value_to
+                  ]
+                );
+              }
+            }
+          }
+        }
       }
+
+
     }
 
 }

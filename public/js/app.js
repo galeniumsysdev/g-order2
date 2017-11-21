@@ -47088,13 +47088,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     this.notifCount = this.count;
     this.unreadNotifications = this.notif;
-    Echo.channel(this.email).listen('.wk-prod', function (notification) {
+    Echo.channel(this.email).listen('.notif', function (notification) {
       _this.unreadNotifications.push({
         data: {
           subject: notification.message,
-          content: {
-            href: notification.href
-          }
+          href: notification.href
         }
       });
       _this.notifCount = _this.notifCount + 1;
@@ -47127,9 +47125,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('i', {
     staticClass: "fa fa-bell"
-  }), _vm._v(" "), _c('span', {
-    staticClass: "hidden-xs"
-  }, [_vm._v("Notifications")]), _vm._v(" "), _c('span', {
+  }), _vm._v("\n      Notifications\n      "), _c('span', {
     staticClass: "badge"
   }, [_vm._v(_vm._s(_vm.notifCount))])]), _vm._v(" "), (_vm.unreadNotifications.length) ? _c('ul', {
     staticClass: "dropdown-menu alert-dropdown dropdown-notif",
@@ -47141,7 +47137,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       key: item.index
     }, [_c('a', {
       attrs: {
-        "href": item.data.content.href
+        "href": item.data.href
       }
     }, [_c('span', {
       staticClass: "item"

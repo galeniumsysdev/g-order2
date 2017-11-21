@@ -61,6 +61,24 @@ function getListSubdistrict(id,old){
   });
 }
 
+function ubah(old){
+    var cat_id =$('#groupdc').val();
+    $.get(baseurl+'/ajax-subcat?cat_id='+cat_id,function(data){
+        //console.log(data);
+          $('#subgroupdc').empty();
+        $.each(data,function(index,subcatObj){
+          if (subcatObj.id==old)
+          {
+            $('#subgroupdc').append('<option value="'+subcatObj.id+'" selected=selected>'+subcatObj.display_name+'</option>');
+          }else{
+            $('#subgroupdc').append('<option value="'+subcatObj.id+'">'+subcatObj.display_name+'</option>');
+          }
+
+        });
+
+  	});
+}
+
 var currentTab = 0; // Current tab is set to be the first tab (0)
 showTab(currentTab); // Display the current tab
 

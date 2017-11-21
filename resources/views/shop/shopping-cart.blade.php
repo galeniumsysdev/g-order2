@@ -8,7 +8,7 @@
   @endif
 <!--<link rel="stylesheet"href="//codeorigin.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />-->
   @if(Session::has('cart'))
-  <form class="form-horizontal" action="{{route('product.checkOut')}}" method="post">
+  <form class="form-horizontal" action="" method="get">
     {{ csrf_field() }}
   <div class="row">
         <div class="col-sm-8 col-md-8 col-md-offset-2 col-sm-offset-2">
@@ -28,7 +28,7 @@
   <div class="row">
     <div class="col-sm-8 col-md-8 col-md-offset-2 col-sm-offset-2">
       <table id="cart" class="table table-hover table-condensed">
-  				<thead>
+  			<thead>
   				<tr>
   					<th style="width:40%" class="text-center">@lang('shop.Product')</th>
   					<th style="width:10%" class="text-center">@lang('shop.Price')</th>
@@ -72,7 +72,7 @@
   					<td data-th="@lang('shop.Amount')" class="text-right xs-only-text-center" id="subtot-{{$id}}">{{  number_format($product['amount'],2) }}</td>
   					<td class="actions" data-th="">
   						<button class="btn btn-info btn-sm" id="rfs-{{$id}}" onclick="return changeProduct(this.id);" ><i class="fa fa-refresh"></i></button>
-  						<a href="{{route('product.removeItem',['id'=>$id]) }}" id="rmv-{{$id}}"><button class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button></a>
+  						<a href="{{route('product.removeItem',['id'=>$id]) }}" id="rmv-{{$id}}"><button  type="button" class="btn btn-danger btn-sm" ><i class="fa fa-trash-o"></i></button></a>
   					</td>
   				</tr>
             @endforeach
@@ -102,7 +102,7 @@
   					<td><a href="{{route('product.index') }}" class="btn btn-warning"><i class="fa fa-angle-left"></i> @lang('shop.ContinueShopping')</a></td>
   					<td colspan="3" class="hidden-xs"></td>
   					<td class="hidden-xs text-center"></td>
-  					<td><button type="submit" class="btn btn-success btn-block">@lang('shop.CheckOut') <i class="fa fa-angle-right"></i></button></td>
+  					<td><a href="#" onclick="checkoutbtn();return false;"><button type="button" class="btn btn-success btn-block">@lang('shop.CheckOut') <i class="fa fa-angle-right"></i></button></a></td>
   				</tr>
           <tr style="border-top-style:hidden;">
             <td class="xs-only-text-left" colspan="6"><small>*@lang('pesan.notfixedprice')</small></td>
@@ -137,5 +137,11 @@ $(function()
 </script>-->
 
 <script src="{{ asset('js/myproduct.js') }}"></script>
-
+<script type="text/javascript">
+function checkoutbtn()
+{
+  var id =$('#distributor').val();
+  window.location = "{{url('/checkout')}}"+"/"+id;
+}
+</script>
 @endsection

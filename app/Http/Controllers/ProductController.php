@@ -172,14 +172,18 @@ class ProductController extends Controller
               where cp.product_id = p.id
                 and cp.flex_value = cat.flex_value
                 and cat.description <> 'BPJS')";
-          if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik']))
+          if(isset(Auth::user()->customer->outet_type_id) and $customer->pharma_flag=="1")
           {
-            $sqlproduct .= " and p.tipe_dot != ('Merah')";
+            if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik']))
+            {
+              $sqlproduct .= " and p.tipe_dot != ('Merah')";
+            }
+            if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik','Toko Obat Berijin']))
+            {
+              $sqlproduct .= " and p.tipe_dot != ('Biru')";
+            }
           }
-          if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik','Toko Obat Berijin']))
-          {
-            $sqlproduct .= " and p.tipe_dot != ('Biru')";
-          }
+
         }
 
 
@@ -451,14 +455,14 @@ class ProductController extends Controller
       return view('shop.shopping-cart',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'distributor'=>$dist]);
     }
 
-    public function checkOut(Request $request){
+    public function checkOut($distributorid){
       if (!Session::has('cart')){
         //Session::forget('cart');
         return view('shop.shopping-cart',['products'=>null]);
       }
       $oldCart = Session::get('cart');
       //$dist = Session::get('distributor_to','');
-      $dist = Customer::where('id','=',$request->dist)->first();
+      $dist = Customer::where('id','=',$distributorid)->first();
       //dd($oldCart);
 
       $cart =  new Cart($oldCart);
@@ -475,7 +479,7 @@ class ProductController extends Controller
       $billto=null;
       if ($dist!='')
       {
-        $userdist = User::where('customer_id','=',$request->dist)->first();
+        $userdist = User::where('customer_id','=',$distributorid)->first();
 
         if ($userdist->hasRole('Principal'))
         {
@@ -807,7 +811,7 @@ class ProductController extends Controller
 
         foreach($cart->items as $product)
         {
-          if($product['uom']!=$product['item']['satuan_primary'])
+          /*if($product['uom']!=$product['item']['satuan_primary'])
           {
             $rate = DB::select("select p.satuan_primary, getItemRate ( p.satuan_primary, :uom, p.id ) AS rate, p.itemcode from products as p where id = :id", ['id'=>$product['item']['id'],'uom'=>$product['uom']]);
             if($rate)
@@ -821,7 +825,38 @@ class ProductController extends Controller
           }else{
             $konversi=1;
             $qtyprimary = $product['qty'];
+          }*/
+          $item = Product::where('id','=',$product['item']['id'])->first();
+          $konversi = $item->getConversion($product['uom']);
+          $qtyprimary = $product['qty']*$konversi;
+          if($konversi==0)
+          {
+            $konversi=1;
+            $qtyprimary=$product['qty'];
           }
+          $tmpprice = $product['price'];
+          $operand_reg =$item->getRateDiskon()->where('pricing_group_sequence','=',1)->first();
+          if($operand_reg)
+          {
+            $disc1 =$operand_reg->operand;
+            $amountdisc1=$tmpprice*$disc1/100;
+            $tmpprice =$tmpprice-$amountdisc1;
+          }else{
+            $disc1 = 0;
+            $amountdisc1=0;
+          }
+          $operand_product = $item->getRateDiskon()->where('pricing_group_sequence','=',2)->first();
+          if($operand_product)
+          {
+            $disc2 =$operand_product->operand;
+            $amountdisc2=$tmpprice*$disc2/100;
+            $tmpprice =$tmpprice-$amountdisc2;
+          }else{
+            $disc2 =0;
+            $amountdisc2=0;
+          }
+
+
           $amount = ($product['price'] - $product['disc']) * $product['qty'];
 
           if($tipetax=="PKP")
@@ -845,6 +880,10 @@ class ProductController extends Controller
             'conversion_qty' => $konversi,
             'tax_type'=>$tipetax,
             'tax_amount'=>$taxamount
+            ,'disc_reg_percentage'=>$disc1
+            ,'disc_product_percentage'=>$disc2
+            ,'disc_reg_amount'=>$amountdisc1
+            ,'disc_product_amount'=>$amountdisc2
           ]);
         }
 
@@ -905,6 +944,20 @@ class ProductController extends Controller
     {
       $products = Product::where('pareto','=',1)->get();
       return view('admin.product.pareto',['products' => $products,'menu'=>'pareto']);
+    }
+
+    public function getRateDiskon( $groupid,$productid,$customerid)
+    {
+      $diskon = DB::table('list_discount_v')
+              ->where([
+                ['pricing_group_sequence','=',$groupid]
+                ,['product_id','=',$productid]
+                ,['customer_id','=',$customerid]
+              ])->select('pricing_group_sequence',DB::raw("sum(operand) as operand"))
+              ->groupBy('pricing_group_sequence')
+              ->get();
+      dd($diskon->where('pricing_group_sequence','=',1)->first());
+      return $diskon;
     }
 
 }

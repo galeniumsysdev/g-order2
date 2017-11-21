@@ -26,7 +26,11 @@ Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
 Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
 Route::get('/ajax/typeaheadProvince', 'ProfileController@getListProvince');
 Route::get('/ajax/typeaheadCity', 'ProfileController@getListCity');
-
+Route::get('/ajax-subcat',function () {
+    $cat_id = Input::get('cat_id');
+    $subcategories = App\SubgroupDatacenter::where('group_id','=',$cat_id)->get();
+    return Response::json($subcategories);
+});
 
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
 
@@ -70,7 +74,7 @@ Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
     ,'as' => 'product.shoppingCart'
   ]);
-  Route::post('/checkout',[
+  Route::get('/checkout/{distributorid}',[
       'uses' => 'ProductController@checkOut'
       ,'as' => 'product.checkOut'
     ]);
@@ -188,11 +192,6 @@ Route::group(['middleware' => ['permission:Outlet_Distributor']], function () {
   Route::get('/tambahDistributor/{id}/{outletid}','CustomerController@addlist');
   Route::patch('/saveOutlet/{customer}', 'CustomerController@update')->name('customer.update');
   Route::post('/rejectbyGPL','CustomerController@rejectGPL')->name('customer.rejectGPL');
-  Route::get('/ajax-subcat',function () {
-      $cat_id = Input::get('cat_id');
-      $subcategories = App\SubgroupDatacenter::where('group_id','=',$cat_id)->get();
-      return Response::json($subcategories);
-  });
 });
 
 /*distributor or principal*/
@@ -245,7 +244,7 @@ Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('ord
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
 
-Route::get('/oracle/getdiskon', 'BackgroundController@updateDiskonTable');
+Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));
@@ -324,7 +323,3 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 /*
 *
 */
-
-Route::get('/displayproduct', function () {
-    return view('shop.welcome');
-});

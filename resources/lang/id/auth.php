@@ -22,4 +22,5 @@ return [
     'registerfailed' => 'Aktivasi account gagal dilakukan',
     'noaccess' => "Error! Tidak punya hak akses",
     'alreadyregistered' => 'Akun anda telah teregistrasi. Silahkan login.',
+    'groupdcerror' => "Kategori Datacenter harus diisi jika produk=PSC"
 ];

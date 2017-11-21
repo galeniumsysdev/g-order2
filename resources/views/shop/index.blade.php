@@ -40,9 +40,14 @@
                 </div>
                 <div class="clearfix price"  id="lblhrg-{{$product->id}}">
                   @if($product->item=="43")
-                    $  {{number_format($product->price_diskon,2)}}/{{$product->satuan_secondary}}
+                    $
                   @else
-                    Rp. {{number_format($product->price_diskon,2)}}/{{$product->satuan_secondary}}
+                    Rp.
+                  @endif
+                  @if(Auth::user()->hasRole('Distributor'))
+                    {{number_format($product->price_diskon,2)}}/{{$product->satuan_secondary}}
+                  @else
+                    {{number_format($product->price_diskon,2)}}/{{$product->satuan_primary}}
                   @endif
                   @if((float)$product->rate!=1)
                   ({{(float)$product->rate." ".$product->satuan_primary}})

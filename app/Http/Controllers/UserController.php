@@ -207,7 +207,7 @@ class UserController extends Controller
     public function oracleUpdate(Request $request,$id)
     {
       $this->validate($request, [
-          'email' => 'required|email|unique:users,email,'.
+          'email' => 'required|email|unique:users,email,'
       ]);
         $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
                     ->where('id','=',$id)
@@ -225,7 +225,7 @@ class UserController extends Controller
 
         $usercustomer = User::where('customer_id','=',$customer->id)->first();
         $this->validate($request, [
-            'email' => 'required|email|unique:users,email,'.$usercustomer->id        
+            'email' => 'required|email|unique:users,email,'.$usercustomer->id
         ]);
         if($usercustomer)
         {

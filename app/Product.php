@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
 
 class Product extends Model
 {
@@ -66,6 +67,18 @@ class Product extends Model
       }else{
         return 0;
       }
+    }
+
+    public function getRateDiskon()
+    {
+      $diskon = DB::table('list_discount_v')
+              ->where([
+              ['product_id','=',$this->inventory_item_id]
+                ,['customer_id','=',Auth::user()->customer->oracle_customer_id]
+              ])->select('pricing_group_sequence',DB::raw("sum(operand) as operand"))
+              ->groupBy('pricing_group_sequence')
+              ->get();
+      return $diskon;
     }
 
 
