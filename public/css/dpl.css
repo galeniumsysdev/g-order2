@@ -80,6 +80,12 @@ table.table-center-header tbody tr td.action-column {
 }
 
 /* Media Queries */
+@media screen and (max-width: 600px){
+  table#cart tbody td {
+    min-width: 0px !important;
+  }
+}
+
 @media (max-width: 992px) {
   .form-wrapper .form-label {
     padding: 0;

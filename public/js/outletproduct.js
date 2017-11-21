@@ -1,6 +1,10 @@
 $(document).ready(function() {
-	if($('#product-list').length)
+	if($('#product-list').length){
     	$('#product-list').DataTable();
+        window.setTimeout(function(){
+            $(window).resize().scroll();
+        },2000);
+    }
     if($('#import-product').length)
     	$('#import-product').DataTable();
 	if($('#import-stock').length)
@@ -10,7 +14,6 @@ $(document).ready(function() {
     if($('#detail-list').length)
         $('#detail-list').DataTable({
             'ordering': false,
-            //'order': [[ 1, 'desc' ]]
         });
 
     $('.change-product').hide();
