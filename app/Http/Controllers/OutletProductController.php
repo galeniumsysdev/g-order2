@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\OutletProducts;
 use App\OutletStock;
+use App\Product;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -66,19 +67,29 @@ class OutletProductController extends Controller
   					->setCreator(Auth::user()->name)
   					->setCompany('PT. Galenium Pharmasia Laboratories')
   					->sheet('Product Stock '.date('Ymd His'), function($sheet){
-  						$sheet->row(1, array('ID','Nama Barang','Stock','Satuan','Batch'));
+  						$sheet->row(1, array('ID','Nama Barang','Stock','Satuan','Kelompok','Batch'));
   						$sheet->setColumnFormat(array('D'=>'@'));
 
-  						$products = OutletProducts::select('outlet_products.id as op_id','unit','title',DB::raw('sum(qty) as product_qty'))
+  						$productsOutlet = OutletProducts::select('outlet_products.id as op_id','title','unit',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'))
   													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
-  													->groupBy('op_id','unit','title')
-  													->get();
+                            ->where('outlet_products.enabled_flag','Y')
+  													->groupBy('op_id','unit','title','flag');
+              $productsAll = Product::select('products.id as op_id','title','products.satuan_primary as unit',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
+                                      ->leftjoin('outlet_stock as os','os.product_id','products.id')
+                                      ->join('category_products as cp','cp.product_id','products.id')
+                                      ->join('categories as c','c.flex_value','cp.flex_value')
+                                      ->where('c.parent','PHARMA')
+                                      ->groupBy('unit','op_id','title','flag')
+                                      ->union($productsOutlet)
+                                      ->orderBy('title')
+                                      ->get();
 
-  						foreach ($products as $key => $prod) {
+  						foreach ($productsAll as $key => $prod) {
   							$sheet->row($key+2, array($prod->op_id,
   																				$prod->title,
   																				($prod->product_qty ? $prod->product_qty : 0),
                                           $prod->unit,
+                                          $prod->flag,
   																				''
   																				));
   						}
@@ -137,24 +148,40 @@ class OutletProductController extends Controller
 
 	public function getListProductStock()
   {
-  	$stock = OutletProducts::select('outlet_products.id as op_id','outlet_products.unit','title',DB::raw('sum(qty) as product_qty'))
+  	$stockOutlet = OutletProducts::select('outlet_products.id as op_id','outlet_products.unit','title',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'))
   													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
-  													->groupBy('op_id','unit','title')
-  													->get();
+                            ->where('outlet_products.enabled_flag','Y')
+  													->groupBy('op_id','unit','title','flag');
+    $stockAll = Product::select('products.id as op_id','products.satuan_primary as unit','title',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
+                              ->leftjoin('outlet_stock as os','os.product_id','products.id')
+                              ->join('category_products as cp','cp.product_id','products.id')
+                              ->join('categories as c','c.flex_value','cp.flex_value')
+                              ->where('c.parent','PHARMA')
+                              ->groupBy('unit','op_id','title','flag')
+                              ->union($stockOutlet)
+                              ->get();
 
-  	return response()->json($stock);
+  	return response()->json($stockAll);
   }
 
   public function listProductStock()
   {
-  	$stock = OutletProducts::select('outlet_products.unit','outlet_products.id as op_id','title',DB::raw('sum(qty) as product_qty'))
+  	$stockOutlet = OutletProducts::select('outlet_products.unit','outlet_products.id as op_id','title',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'))
   													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
-  													->groupBy('unit','op_id','title')
+                            ->where('outlet_products.enabled_flag','Y')
+  													->groupBy('unit','op_id','title','flag');
+    $stockAll = Product::select('products.satuan_primary as unit','products.id as op_id','title',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
+                            ->leftjoin('outlet_stock as os','os.product_id','products.id')
+                            ->join('category_products as cp','cp.product_id','products.id')
+                            ->join('categories as c','c.flex_value','cp.flex_value')
+                            ->where('c.parent','PHARMA')
+                            ->groupBy('unit','op_id','title','flag')
+                            ->union($stockOutlet)
   													->get();
-  	foreach ($stock as $key => $prod) {
-  		$stock[$key]->stock = '<a href="/outlet/product/detail/'.$prod->op_id.'">'.floatval($prod->product_qty).' '.$prod->unit.'</a>';
+  	foreach ($stockAll as $key => $prod) {
+  		$stockAll[$key]->stock = '<a href="/outlet/product/detail/'.$prod->op_id.'">'.floatval($prod->product_qty).' '.$prod->unit.'</a>';
   	}
-  	return view('admin.outlet.listProductStock', array('stock'=>$stock));
+  	return view('admin.outlet.listProductStock', array('stock'=>$stockAll));
   }
 
   public function detailProductStock($product_id)
@@ -248,7 +275,7 @@ class OutletProductController extends Controller
 
   public function deleteProduct($id)
   {
-    $delete = OutletProducts::destroy($id);
+    $delete = OutletProducts::where('id',$id)->update(array('enabled_flag'=>0));
 
     if($delete){
       return redirect()->back()->with('msg','Product deleted successfully.');
@@ -262,8 +289,10 @@ class OutletProductController extends Controller
 
   public function outletTrxList()
   {
-  	$stocks = OutletStock::select('outlet_stock.*', 'outlet_stock.created_at as trx_date', 'outlet_products.*')
+  	$stocks = OutletStock::select('outlet_products.title as outlet_title','products.title as galenium_title','outlet_stock.*', 'outlet_stock.created_at as trx_date', 'outlet_products.*')
   											->leftjoin('outlet_products','outlet_products.id','outlet_stock.product_id')
+                        ->leftjoin('products','products.id','outlet_stock.product_id')
+                        ->where('outlet_products.enabled_flag','Y')
   											->orderBy('outlet_stock.created_at','desc')
   											->get();
   	$trx = array();
@@ -282,7 +311,7 @@ class OutletProductController extends Controller
 	  			$trx[$count]['class'] = 'bg-info';
 	  			$trx[$count]['event'] = 'Adjustment';
 	  		}
-	  		$trx[$count]['title'] = $list->title;
+	  		$trx[$count]['title'] = (!empty($list->outlet_title)) ? $list->outlet_title : $list->galenium_title;
 	  		$trx[$count]['qty'] = $list->qty.' '.$list->unit;
 	  		$trx[$count]['batch'] = $list->batch;
 	  		$trx[$count]['trx_date'] = $list->trx_date;
