@@ -22,13 +22,15 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-use App\Notifications\NewPurchaseOrder;
+//use App\Notifications\NewPurchaseOrder;
 use Mail;
 use App\Mail\CreateNewPo;
 use Illuminate\Database\Eloquent\Collection;
 use App\DPLSuggestNo;
 use App\PoDraftHeader;
 use App\PoDraftLine;
+use App\Events\PusherBroadcaster;
+use App\Notifications\PushNotif;
 
 
 class ProductController extends Controller
@@ -652,7 +654,7 @@ class ProductController extends Controller
       $shipid=null;
       $orgid=null;
       $warehouseid=null;
-      $check_dpl =false;
+      $check_dpl =null;
       if(isset($request->coupon_no))
       {
         $check_dpl = DPLSuggestNo::where('outlet_id',Auth::user()->customer_id)
@@ -665,7 +667,9 @@ class ProductController extends Controller
                        ->withErrors(['coupon_no'=>trans('pesan.notmatchdpl')])
                        ->withInput();
         }
+        $statusso = -99;
       }
+
       //dd($check_dpl);
       /*if(!Session::has('distributor_to'))
       {
@@ -762,13 +766,11 @@ class ProductController extends Controller
            'no_order' => 'required|unique:so_headers,customer_po,null,null,customer_id,'.Auth::user()->customer_id.'|max:50',
            'alamat' => 'required',
         ])->validate();
-        if(isset($request->coupon_no))
+        if(isset($request->coupon_no) and isset($checkdpl))
         {
-          DPLSuggestNo::where('outlet_id',Auth::user()->customer_id)
-                        ->where('suggest_no',$request->coupon_no)
-                        ->whereNull('notrx')
-                        ->update(['notrx'=>$notrx,'distributor_id'=> $request->dist_id]);
-          $statusso = -99;
+          $checkdpl->notrx = $notrx;
+          $checkdpl->distributor_id= $request->dist_id;
+          $checkdpl->save();
         }
       $header= SoHeader::create([
           'distributor_id' => $request->dist_id,
@@ -808,7 +810,7 @@ class ProductController extends Controller
           );
         }
 
-
+        $total =0;
         foreach($cart->items as $product)
         {
           /*if($product['uom']!=$product['item']['satuan_primary'])
@@ -865,6 +867,7 @@ class ProductController extends Controller
           }else{
             $taxamount = 0;
           }
+          $total += ($amount+$taxamount);
 
           SoLine::Create([
             'header_id'=> $header->id,
@@ -887,11 +890,52 @@ class ProductController extends Controller
           ]);
         }
 
-        if($statusso==-99)
+        if($statusso==-99)/*jika DPL notify ke SPV dan selanjutnya*/
         {
-          $data= ['distributor'=>$distributor->id,'user'=>$userdistributor->id,'so_header_id'=>$header->id,'customer'=>auth()->user()->customer_id];
+          $suggest_no=$request->coupon_no;
+          $notified_users = app('App\Http\Controllers\DplController')->getArrayNotifiedEmail($suggest_no,'');
+    			if(!empty($notified_users)){
+    				$data = [
+    					'title' => 'Pengajuan DPL',
+    					'message' => 'Pengajuan DPL #'.$request->coupon_no,
+    					'id' => $suggest_no,
+    					'href' => route('dpl.readNotifApproval'),
+    					'email' => [
+    						'markdown'=>'',
+    						'attribute'=> array()
+    					]
+    				];
+    				foreach ($notified_users as $key => $email) {
+    					foreach ($email as $key => $mail) {
+    						event(new PusherBroadcaster($data, $mail));
+    						$apps_user = User::where('email',$mail)->first();
+    						$apps_user->notify(new PushNotif($data));
+    					}
+    					break;
+    				}
+    			}
+
+        }else{
+          /*$data= ['distributor'=>$distributor->id,'user'=>$userdistributor->id,'so_header_id'=>$header->id,'customer'=>auth()->user()->customer_id];
           //$data= ['distributor'=>$oldDisttributor['id'],'user'=>$u->id,'so_header_id'=>1,'customer'=>auth()->user()->customer_id];
-          $userdistributor->notify(new NewPurchaseOrder($data));
+          $userdistributor->notify(new NewPurchaseOrder($data));*/
+          $newlines = DB::table('so_Lines_v')->where('header_id','=',$header->id)->get();
+          $data = [
+            'title'=> 'New PO',
+    				'message' => 'New PO '.$notrx.' From '.auth()->user()->customer->customer_name,
+    				'id' => $header->id,
+    				'href' => route('order.notifnewpo')
+            ,'email' => [ 'greeting'=> "",
+                            'content' => "",
+                    		    'markdown'=> "emails.orders.create",
+                    		    'attribute'=>	["so_headers"=>$header
+                                          ,"lines"=>$newlines
+                                          ,'total'=>$total
+                                          ,'customer'=>auth()->user()->customer->customer_name]
+                        ]
+    			];
+          event(new PusherBroadcaster($data, $userdistributor->email));
+          $userdistributor->notify(new PushNotif($data));
         }
         //notification to distributor
 
@@ -959,5 +1003,6 @@ class ProductController extends Controller
       dd($diskon->where('pricing_group_sequence','=',1)->first());
       return $diskon;
     }
+
 
 }

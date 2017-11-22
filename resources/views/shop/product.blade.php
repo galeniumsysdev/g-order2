@@ -7,7 +7,7 @@
 	@include('shop.carausel')
 	</div>
 
-	@foreach($product_flexfields->take(1) as $flexfield)
+	@foreach($product_flexfields as $flexfield)
 	<div class="container-product">
 	<div class="row" style="margin-left:15px; margin-right:15px;">
     <br>
@@ -17,7 +17,7 @@
 	</div>
   <div id="carousel-container">
 		<div class="profile-rotater">
-      @foreach($flexfield->products->take(6) as $product)
+      @foreach($flexfield->products->take(10) as $product)
       @php ($price=0)
       @php ($disc=0)
       <div class="col-md-2 col-ms-6 column productbox">
@@ -52,7 +52,13 @@
               @else
                 Rp.
               @endif
-              
+							@if(Auth::user()->hasRole('Distributor'))
+								@php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_secondary))
+								{{number_format($disc,2)}}/{{$product->satuan_secondary}}
+							@else
+								@php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_primary))
+								{{number_format($disc,2)}}/{{$product->satuan_primary}}
+							@endif
             </div>
             <div class="price coret" id="hrgcoret-{{$product->id}}">
               @if(Auth::user()->hasRole('Distributor'))
@@ -102,4 +108,3 @@
 <script src="{{ asset('js/myproduct.js') }}"></script>
 <script src="{{ asset('assets/vendors/highlight.js') }}"></script>
 @endsection
-

@@ -63,6 +63,15 @@ class Customer extends Model
       return $this->belongsTo('App\Customer','parent_dist');
   }
 
+  public function purchaseorders()
+  {
+    return $this->hasMany('App\SoHeader','customer_id');
+  }
+
+  public function salesorders()
+  {
+    return $this->hasMany('App\SoHeader','distributor_id');
+  }
 
 
 }

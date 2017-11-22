@@ -141,10 +141,7 @@ body {
 .navbar-default .navbar-nav > li > a {
     color: #ffffff;background-color:transparent;
 }
-.navbar-default .navbar-nav > li > a:hover,
-.navbar-default .navbar-nav > li > a:focus {
-    color: #FFD700;
-}
+
 
 .navbar-default .navbar-nav > .active > a:focus {
     color: #FFD700;
@@ -573,7 +570,11 @@ border-radius: 0%;
 }
 
 .navbar-right > li {
-  margin-left: 10px;
+  margin-left: 5px;
+}
+
+.nav.navbar-nav.navbar-right >li >a{
+  padding-right: 1px;
 }
 
 .coret{

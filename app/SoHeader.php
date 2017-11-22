@@ -22,4 +22,13 @@ class SoHeader extends Model
     return $this->hasMany('App\SoShipping','header_id');
   }
 
+  public function distributor()
+  {
+    return $this->belongsTo('App\Customer','distributor_id');
+  }
+
+  public function outlet()
+  {
+    return $this->belongsTo('App\Customer','customer_id');
+  }
 }
