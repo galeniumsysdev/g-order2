@@ -900,14 +900,14 @@ class ProductController extends Controller
     					'message' => 'Pengajuan DPL #'.$request->coupon_no,
     					'id' => $suggest_no,
     					'href' => route('dpl.readNotifApproval'),
-    					'email' => [
+    					'mail' => [
     						'greeting'=>'create order',
     						'content'=> 'test create order'
     					]
     				];
     				foreach ($notified_users as $key => $email) {
     					foreach ($email as $key2 => $mail) {
-    						event(new PusherBroadcaster($data, $mail));
+                $data['email'] = $mail;
     						$apps_user = User::where('email',$mail)->first();
     						$apps_user->notify(new PushNotif($data));
     					}
@@ -936,7 +936,7 @@ class ProductController extends Controller
                                           ,'customer'=>auth()->user()->customer->customer_name]
                         ]
     			];
-          event(new PusherBroadcaster($data, $userdistributor->email));
+          $data['email'] = $userdistributor->email;
           $userdistributor->notify(new PushNotif($data));
         }
         //notification to distributor

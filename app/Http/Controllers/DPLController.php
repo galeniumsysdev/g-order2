@@ -187,7 +187,7 @@ class DPLController extends Controller {
 									'next_approver' => $key
 									));
 				foreach ($email as $key => $mail) {
-					event(new PusherBroadcaster($data, $mail));
+					$data['email'] = $mail;
 					$apps_user = User::where('email',$mail)->first();
 					$apps_user->notify(new PushNotif($data));
 				}
@@ -244,7 +244,7 @@ class DPLController extends Controller {
 					'message' => 'Permohonan Approval #'.$suggest_no,
 					'id' => $suggest_no,
 					'href' => route('dpl.readNotifApproval'),
-					'email' => [
+					'mail' => [
 						'markdown'=>'',
 						'attribute'=> array()
 					]
@@ -253,7 +253,7 @@ class DPLController extends Controller {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 						->update(array('approved_by' => Auth::user()->id, 'next_approver' => $key));
 					foreach ($email as $key => $mail) {
-						event(new PusherBroadcaster($data, $mail));
+						$data['email'] = $mail;
 						$apps_user = User::where('email',$mail)->first();
 						$apps_user->notify(new PushNotif($data));
 					}
@@ -274,7 +274,7 @@ class DPLController extends Controller {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 						->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
 					foreach ($email as $key => $mail) {
-						event(new PusherBroadcaster($data, $mail));
+						$data['email'] = $mail;
 						$apps_user = User::where('email',$mail)->first();
 						$apps_user->notify(new PushNotif($data));
 					}
