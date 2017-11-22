@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\PusherPushNotifications\PusherChannel;
 use NotificationChannels\PusherPushNotifications\PusherMessage;
 use Illuminate\Notifications\Messages\MailMessage;
+use \App\Events\PusherBroadcaster;
 
 class PushNotif extends Notification {
 	public function __construct($data) {
@@ -13,7 +14,11 @@ class PushNotif extends Notification {
 	}
 
 	public function via($notifiable) {
-		return [PusherChannel::class, 'database','mail'];
+		return [PusherChannel::class, 'database', 'broadcast', 'mail'];
+	}
+
+	public function toBroadcast($notifiable) {
+		return event(new PusherBroadcaster($this->data, $this->data['email']));
 	}
 
 	public function toPushNotification($notifiable) {
