@@ -78,6 +78,7 @@ class DPLController extends Controller {
 	public function suggestNoValidation($outlet_id, $suggest_no) {
 		$check_dpl = DPLSuggestNo::where('outlet_id', $outlet_id)
 			->where('suggest_no', $suggest_no)
+			->whereNull('notrx')
 			->count();
 
 		if ($check_dpl) {

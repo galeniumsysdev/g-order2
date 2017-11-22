@@ -29,7 +29,7 @@ class PushNotif extends Notification {
 
 	public function toMail($notifiable)
 	{
-		if($this->data['email']['markdown']){
+		if(array_key_exists('markdown', $this->data['email'])){
 			return (new MailMessage)
 			          ->subject($this->data['title'])
 			          ->markdown($this->data['email']['markdown'], $this->data['email']['attribute']);
