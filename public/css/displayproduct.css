@@ -20,6 +20,7 @@ legend {
     font-weight:bold;
 	padding:5px 0 5px 0;
 	font-size: 15px;
+	margin-top: 5%;
 }
 
 .productprice {
@@ -28,7 +29,7 @@ legend {
 }
 
 .pricetext {
-	font-size:12px;
+	font-size:14px;
 	padding-left: 8px;
 	color: red;
 }
@@ -39,12 +40,32 @@ legend {
 }
 .productbox {
   background-color: rgb(232,232,232);
-  padding:10px;
+  padding:5px;
   margin-bottom:10px;
-  -webkit-box-shadow: 0 8px 6px -6px  #999;
-  -moz-box-shadow: 0 8px 6px -6px  #999;
-  box-shadow: 0 8px 6px -6px #999;
   margin-left: 10px;
+  height: 360px;
+}
+
+.productboxTitle {
+  background-color: rgb(232,232,232);
+  padding:10px;
+  height: 80px;
+}
+
+.productboxSatuan {
+  background-color: rgb(232,232,232);
+  padding:10px;
+  height: 50px;
+}
+
+.productboxCart {
+	margin-top: 8px;
+}
+
+.productbox1 {
+  background-color: #fff;
+  padding: 10px;
+  margin-bottom: 5px;
 }
 
 html, body {

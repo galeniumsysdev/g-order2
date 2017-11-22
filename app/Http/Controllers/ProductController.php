@@ -655,6 +655,7 @@ class ProductController extends Controller
       $orgid=null;
       $warehouseid=null;
       $check_dpl =null;
+      $statusso=0;
       if(isset($request->coupon_no))
       {
         $check_dpl = DPLSuggestNo::where('outlet_id',Auth::user()->customer_id)
@@ -734,7 +735,6 @@ class ProductController extends Controller
           }
         }
       //}
-      $statusso=0;
       $thn = date('Y');
       $bln=date('m');
       $tmpnotrx = DB::table('tmp_notrx')->where([
@@ -900,20 +900,22 @@ class ProductController extends Controller
     					'message' => 'Pengajuan DPL #'.$request->coupon_no,
     					'id' => $suggest_no,
     					'href' => route('dpl.readNotifApproval'),
-    					'email' => [
-    						'markdown'=>'',
-    						'attribute'=> array()
+    					'mail' => [
+    						'greeting'=>'create order',
+    						'content'=> 'test create order'
     					]
     				];
     				foreach ($notified_users as $key => $email) {
-    					foreach ($email as $key => $mail) {
-    						event(new PusherBroadcaster($data, $mail));
+    					foreach ($email as $key2 => $mail) {
+                $data['email'] = $mail;
     						$apps_user = User::where('email',$mail)->first();
     						$apps_user->notify(new PushNotif($data));
     					}
-    					break;
+              if($key == 'ASM') break;
     				}
     			}
+          /*$updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
+                                    ->update(array('notrx'=>$notrx));*/
 
         }else{
           /*$data= ['distributor'=>$distributor->id,'user'=>$userdistributor->id,'so_header_id'=>$header->id,'customer'=>auth()->user()->customer_id];
@@ -934,7 +936,7 @@ class ProductController extends Controller
                                           ,'customer'=>auth()->user()->customer->customer_name]
                         ]
     			];
-          event(new PusherBroadcaster($data, $userdistributor->email));
+          $data['email'] = $userdistributor->email;
           $userdistributor->notify(new PushNotif($data));
         }
         //notification to distributor

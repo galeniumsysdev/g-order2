@@ -17,9 +17,9 @@ table#cart tbody td .form-control{
 .actions .btn-danger{
   float:right;
 }
-.row{
+/* .row{
   margin-right:0px;
-}
+} */
 #app{
   padding-bottom: 10em;
 }

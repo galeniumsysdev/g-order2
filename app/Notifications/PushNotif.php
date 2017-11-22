@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\PusherPushNotifications\PusherChannel;
 use NotificationChannels\PusherPushNotifications\PusherMessage;
 use Illuminate\Notifications\Messages\MailMessage;
+use \App\Events\PusherBroadcaster;
 
 class PushNotif extends Notification {
 	public function __construct($data) {
@@ -13,7 +14,12 @@ class PushNotif extends Notification {
 	}
 
 	public function via($notifiable) {
-		return [PusherChannel::class, 'database','mail'];
+		return ['broadcast', PusherChannel::class, 'database', 'mail'];
+	}
+
+	public function toBroadcast($notifiable) {
+		$this->data['href'] = $this->data['href'].'/'.$this->data['id'].'/'.$this->id;
+		return event(new PusherBroadcaster($this->data, $this->data['email']));
 	}
 
 	public function toPushNotification($notifiable) {
@@ -29,16 +35,16 @@ class PushNotif extends Notification {
 
 	public function toMail($notifiable)
 	{
-		if($this->data['email']['markdown']){
+		if(array_key_exists('markdown', $this->data['mail'])){
 			return (new MailMessage)
 			          ->subject($this->data['title'])
-			          ->markdown($this->data['email']['markdown'], $this->data['email']['attribute']);
+			          ->markdown($this->data['mail']['markdown'], $this->data['mail']['attribute']);
 		}
 		else{
 			return (new MailMessage)
 													->subject($this->data['title'])
-													->greeting($this->data['email']['greeting'])
-													->line($this->data['email']['content']);
+													->greeting($this->data['mail']['greeting'])
+													->line($this->data['mail']['content']);
 		}
 	}
 
@@ -50,12 +56,12 @@ class PushNotif extends Notification {
      */
 	public function toDatabase($notifiable)
 	{
-		$href = $this->data['href'].'/'.$this->data['id'].'/'.$this->id;
+		//$href = $this->data['href'].'/'.$this->data['id'].'/'.$this->id;
 		return [
 			'tipe'=> $this->data['title'],
 			'subject'=> $this->data['message'],
 			'id'=> $this->data['id'],
-			'href'=> $href
+			'href'=> $this->data['href']
 		];
 	}
 }

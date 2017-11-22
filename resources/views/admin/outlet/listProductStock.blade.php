@@ -19,10 +19,17 @@
         <div class="panel panel-default">
           <div class="panel-heading"><strong>Product List</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
-            <a href="{{ route('outlet.formProduct') }}" class="btn btn-default">Add Product</a>
-            <a href="{{ route('outlet.importProduct') }}" class="btn btn-default">Import Product</a>
-            <a href="{{ route('outlet.importProductStock') }}" class="btn btn-info pull-right">Import Stock</a>
-            <br/><br/>
+            <div class="product-list-buttons">
+              <div class="row">
+                <div class="col-xs-6">
+                  <a href="{{ route('outlet.formProduct') }}" class="btn btn-default">Add Product</a>
+                  <a href="{{ route('outlet.importProduct') }}" class="btn btn-default">Import Product</a>
+                </div>
+                <div class="col-xs-6">
+                  <a href="{{ route('outlet.importProductStock') }}" class="btn btn-info pull-right">Import Stock</a>
+                </div>
+              </div>
+            </div>
             <div class="table-responsive">
               <table id="product-list" class="display responsive nowrap" width="100%">
                 <thead>
