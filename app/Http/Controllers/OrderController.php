@@ -15,11 +15,14 @@ use Carbon\Carbon;
 use PDO;
 use PDF;
 use App\Customer;
+
 use App\Notifications\RejectPoByDistributor;
 use App\Notifications\ReceiveItemsPo;
 use App\Notifications\ShippingOrderOracle;
 use Illuminate\Support\Facades\Input;
 use Excel;
+use App\Events\PusherBroadcaster;
+use App\Notifications\PushNotif;
 
 
 class OrderController extends Controller
@@ -42,18 +45,11 @@ class OrderController extends Controller
       {
             return view('errors.403');
       }
-      //dd($header->shippings()->select('deliveryno','tgl_kirim')->groupBy('deliveryno','tgl_kirim')->get());
+
       $lines =DB::table('so_lines_v')->where('header_id','=',$id)->get();
       $deliveryno = SoShipping::where('header_id','=',$id)->get();
       $deliveryno = $deliveryno->groupBy('deliveryno','tgl_kirim');
-
-      //if(Auth::user()->customer_id!=$header->customer_id){
-          $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
-        /*  if($user_dist->hasRole('Principal')){
-              return view('shop.checkOrder1',compact('header','lines','deliveryno'));
-          }*/
-      //}
-      
+      $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
 
       if ($user_dist->hasRole('Principal') )    {
         return view('shop.checkOrder1',compact('header','lines','deliveryno'));
@@ -126,13 +122,12 @@ class OrderController extends Controller
 
     public function listSO(Request $request)
     {
-      if ($request->method()=='GET')
-      {
-        $request->tglak = date_format(Carbon::now(),'Y-m-d');
-        $request->tglaw = date_format(Carbon::now()->addDay(-7),'Y-m-d');
-      }
+
       //var_dump($request->tglak."--".$request->tglaw);
-      $liststatus = DB::table('flexvalue')->where([['master','=','status_po'],['enabled_flag','=','Y']])->orderBy('id','asc')->get();
+      $liststatus = DB::table('flexvalue')->where([['master','=','status_po']
+                                                ,['enabled_flag','=','Y']
+                                                ,['id','!=',-99]  ])
+                    ->orderBy('id','asc')->get();
       if(Auth::user()->can('CheckStatusSO'))
       {
           $trx = DB::table('so_header_v as sh')->where('distributor_id','=',Auth::user()->customer_id);
@@ -140,7 +135,13 @@ class OrderController extends Controller
         abort(403, 'Unauthorized action.');
       }
       $request->jns=2;//listso
-
+      if ($request->method()=='GET')
+      {
+        $request->status=0;
+        $trx =$trx->where('status','=',0);
+        $request->tglak = date_format(Carbon::now(),'Y-m-d');
+        $request->tglaw = date_format(Carbon::now()->addDay(-7),'Y-m-d');
+      }
       if($request->excel == "Create Excel" and $request->status=="x")
       {
         $this->createExcel($request,null);
@@ -394,7 +395,7 @@ class OrderController extends Controller
       }
     }
 
-    public function readnotifnewpo($notifid,$id)
+    public function readnotifnewpo($id,$notifid)
     {
        Auth::User()->notifications()
                   ->where('id','=',$notifid)

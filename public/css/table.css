@@ -46,6 +46,6 @@ table#cart tfoot td .btn{display:block;}
   color: #337ab7;
 }
 
-#shipping .panel-group{
+#shipping .panel-group,#btnorder{
   min-width:500px;
 }

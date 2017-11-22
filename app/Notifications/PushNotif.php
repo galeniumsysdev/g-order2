@@ -5,6 +5,7 @@ namespace App\Notifications;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\PusherPushNotifications\PusherChannel;
 use NotificationChannels\PusherPushNotifications\PusherMessage;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class PushNotif extends Notification {
 	public function __construct($data) {
@@ -12,7 +13,7 @@ class PushNotif extends Notification {
 	}
 
 	public function via($notifiable) {
-		return [PusherChannel::class, 'database'];
+		return [PusherChannel::class, 'database','mail'];
 	}
 
 	public function toPushNotification($notifiable) {
@@ -31,7 +32,7 @@ class PushNotif extends Notification {
 		if($this->data['email']['markdown']){
 			return (new MailMessage)
 			          ->subject($this->data['title'])
-			          ->markdown($this->data['email']['markdown'], $this->data['email']['attibute']);
+			          ->markdown($this->data['email']['markdown'], $this->data['email']['attribute']);
 		}
 		else{
 			return (new MailMessage)

@@ -160,7 +160,7 @@ class RegisterController extends Controller
            $roleoutlet = Role::where('name','=','Outlet')->first();
            $user_check->roles()->attach($roleoutlet->id);
          }
-         //$user_check->save();
+         $user_check->save();
          return $user_check;
        }else{
          //return back()->with('status', trans('auth.alreadyregistered'));
@@ -326,7 +326,7 @@ class RegisterController extends Controller
           $marketings = User::whereHas('roles', function($q){
               $q->where('name','MarketingGPL');
           })->get();
-          $content="<strong>".$user->name."</strong> telah mendaftar di aplikasi ".config('app.name'). "Harap verifikasi segera data outlet/distributor tersebut melalui aplikasi ".config('app.name');
+          $content="<strong>".$user->name."</strong> telah mendaftar di aplikasi ".config('app.name'). ". Harap verifikasi segera data outlet/distributor tersebut melalui aplikasi ".config('app.name');
           $data = [
             'title'=> 'Register Outlet',
     				'message' => 'Pendaftaran outlet baru: '.$user->name,
@@ -427,6 +427,11 @@ class RegisterController extends Controller
           return back()->with('status', trans('auth.alreadyregistered'));
         }
 
+    }
+
+    protected function redirectTo()
+    {
+        return route('product.buy');
     }
 
 }

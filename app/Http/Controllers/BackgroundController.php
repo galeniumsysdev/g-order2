@@ -12,6 +12,8 @@ use Carbon\Carbon;
 use App\Notifications\BookOrderOracle;
 use App\Notifications\RejectPOByDistributor;
 use App\Notifications\ShippingOrderOracle;
+use App\Events\PusherBroadcaster;
+use App\Notifications\PushNotif;
 use Excel;
 use App\QpListHeaders;
 use App\OeTransactionType;
@@ -47,7 +49,6 @@ class BackgroundController extends Controller
                   ['approve','=',1],
                   ['status','>=',0],
                   ['status','<',2],
-                  ['notrx','=','PO-20171002-X-00010']
         ])->get();
         if($headers){
           foreach($headers as $h)
@@ -98,16 +99,16 @@ class BackgroundController extends Controller
                     $orapriceadj = $this->getadjustmentSO(null,$h->notrx,$sl);
                     foreach($orapriceadj as $adj )
                     {
-                      echo "bucket1:".$adj->pricing_group_sequence."<br>";
+                      echo "bucket:".$adj->pricing_group_sequence."<br>";
                       echo "amount:".$adj->adjusted_amount."<br>";
                       echo "percentage:".$adj->operand."<br>";
                       if($adj->pricing_group_sequence==1)
                       {
-                        $sl->disc_reg_amount = $adj->adjusted_amount;
+                        $sl->disc_reg_amount = $adj->adjusted_amount*-1;
                         $sl->disc_reg_percentage = $adj->operand;
                       }elseif($adj->pricing_group_sequence==2)
                       {
-                        $sl->disc_product_amount = $adj->adjusted_amount;
+                        $sl->disc_product_amount = $adj->adjusted_amount*-1;
                         $sl->disc_product_percentage = $adj->operand;
                       }
                     }
@@ -122,9 +123,25 @@ class BackgroundController extends Controller
                 $h->save();
                 //notification to user
                  $customer = Customer::where('id','=',$h->customer_id)->first();
+                 $content ='PO Anda nomor '.$h->notrx.' telah dikonfirmasi oleh '.$h->distributor->customer_name.'. Silahkan check PO anda kembali.<br>';
+                 $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                 $data = [
+         					'title' => 'Konfirmasi PO',
+         					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
+         					'id' => $h->id,
+         					'href' => route('order.notifnewpo'),
+         					'email' => [
+         						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
+                    'content' =>$content,
+                    'markdown'=>'',
+         						'attribute'=> array()
+         					]
+         				];
                  foreach($customer->users as $u)
                  {
-                   $u->notify(new BookOrderOracle($h,$customer->customer_name));
+                   //$u->notify(new BookOrderOracle($h,$customer->customer_name));
+                   event(new PusherBroadcaster($data, $u->email));
+                   $u->notify(new PushNotif($data));
                  }
 
 
@@ -227,8 +244,6 @@ class BackgroundController extends Controller
       }
 
     }
-
-
 
     public function synchronize_oracle(){
       $request= DB::table('tbl_request')->where('event','=','synchronize')

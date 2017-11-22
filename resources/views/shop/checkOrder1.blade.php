@@ -96,7 +96,7 @@
           <!--</div>-->
           <div class="col-sm-12">
             <div class="tabcard col-sm-12">
-              @if(isset($deliveryno))
+              @if($deliveryno->count()>1 and $header->status>1)
               <ul class="nav nav-tabs" role="tablist">
                   <li role="presentation" class="active" ><a href="#order" aria-controls="Order" role="tab" data-toggle="tab"><strong>Order</strong></a></li>
                   <li role="presentation"><a href="#shipping" aria-controls="Shipping" role="tab" data-toggle="tab"><strong>Shipping</strong></a></li>
@@ -114,7 +114,8 @@
                       <table  class="table">
                   			<thead>
                   				<tr>
-                  					<th style="width:45%;" class="text-center">@lang('shop.Product')</th>
+                  					<th style="width:35%;" class="text-center">@lang('shop.Product')</th>
+                            <th style="width:10%" class="text-center">@lang('shop.listprice')</th>
                   					<th style="width:10%" class="text-center">@lang('shop.Price')</th>
                             <th style="width:5%" class="text-center">@lang('shop.uom')</th>
                   					<th class="text-center">@lang('shop.qtyorder')</th>
@@ -147,8 +148,12 @@
                   							</div>
                   						</div>
                   					</td>
+                              <td data-th="@lang('shop.listprice')" class="xs-only-text-left text-center">{{ number_format($line->list_price,2) }}</td>
                   					<td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->unit_price,2) }}</td>
-                            <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
+                            <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >
+                              {{ $line->uom }}
+                              <input type="hidden" name="uom[{{$id}}]" value="{{ $line->uom_primary }}">
+                            </td>
                   					<td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
                                 {{ (float)$line->qty_request }}
                   					</td>
@@ -198,94 +203,74 @@
                             @php($total = $taxtotal+$totamount)
                   			</tbody>
                         <tfoot>
-                  				<tr  style="text-align:right">
-                            @if($header->status<0 or ($header->status==0 and Auth::user()->customer_id==$header->customer_id ))
-                  					     <td colspan="4">SubTotal: </td>
-                            @elseif($header->status==1 or ($header->status==0 and Auth::user()->customer_id==$header->distributor_id) )
-                                 <td colspan="5" >SubTotal: </td>
-                            @elseif($header->status==2 and  Auth::user()->customer_id==$header->distributor_id)
-                                  <td colspan="6">SubTotal: </td>
-                            @else
-                                  <td colspan="7">SubTotal: </td>
-                            @endif
-                  					<td><strong id="totprice2">
-                              @if($header->currency=='IDR')
-                              Rp.
-                              @elseif($header->currency=='USD')
-                              $
-                              @endif
+                          @if($header->status<0 or ($header->status==0 and Auth::user()->customer_id==$header->customer_id ))
+                               @php ($colgab = 4)
+                          @elseif($header->status==1 or ($header->status==0 and Auth::user()->customer_id==$header->distributor_id) )
+                               @php ($colgab = 5)
+                          @elseif($header->status==2 and  Auth::user()->customer_id==$header->distributor_id)
+                                @php ($colgab = 6)
+                          @else
+                                @php ($colgab = 7)
+                          @endif
+                          @if($header->currency=='IDR')
+                            @php($curr = "Rp")
+                          @elseif($header->currency=='USD')
+                            @php($curr = "$")
+                          @endif
+                  				<tr>
+                            <td colspan="{{$colgab}}"> Discount Reguler: Rp. {{number_format($header->disc_reg,2)}}</td>
+            					      <td style="text-align:right">
+                              <strong>SubTotal: {{$curr}}</strong>
+                            </td>
+                  					<td style="text-align:right"><strong id="totprice2">
                               {{ number_format($totamount,2) }}</strong>
                             </td>
                   				</tr>
-                          <tr style="text-align:right">
-                            @if($header->status<0 or ($header->status==0 and Auth::user()->customer_id==$header->customer_id ))
-                  					     <td colspan="4">Tax: </td>
-                            @elseif($header->status==1 or ($header->status==0 and Auth::user()->customer_id==$header->distributor_id) )
-                                 <td colspan="5">Tax: </td>
-                            @elseif($header->status==2 and  Auth::user()->customer_id==$header->distributor_id)
-                                  <td colspan="6">Tax: </td>
-                            @else
-                                  <td colspan="7">Tax: </td>
-                            @endif
-                  					<td><strong id="totprice2">
-                              @if($header->currency=='IDR')
-                              Rp.
-                              @elseif($header->currency=='USD')
-                              $
-                              @endif
-                              {{ number_format($taxtotal,2) }}</strong></td>
+                          <tr>
+                            <td colspan="{{$colgab}}">Discount Product: Rp. {{number_format($header->disc_product,2)}}</td>
+                            <td style="text-align:right">
+                              <strong>Tax: {{$curr}}</strong>
+                            </td>
+                  					<td style="text-align:right"><strong id="taxprice">
+                              {{ number_format($taxtotal,2) }}</strong>
+                            </td>
                   				</tr>
-                          <tr  style="text-align:right">
-                            @if($header->status<0 or ($header->status==0 and Auth::user()->customer_id==$header->customer_id ))
-                  					     <td colspan="4">Total: </td>
-                            @elseif($header->status==1 or ($header->status==0 and Auth::user()->customer_id==$header->distributor_id) )
-                                 <td colspan="5" >Total: </td>
-                            @elseif($header->status==2 and  Auth::user()->customer_id==$header->distributor_id)
-                                  <td colspan="6">Total: </td>
-                            @else
-                                  <td colspan="7">Total: </td>
-                            @endif
-                  					<td><strong id="totprice2">
-                              @if($header->currency=='IDR')
-                              Rp.
-                              @elseif($header->currency=='USD')
-                              $
-                              @endif
+                          <tr>
+                            <td colspan="{{$colgab}}">Total Discount   : Rp. {{number_format( ($header->disc_product+$header->disc_reg),2)}}</td>
+                            <td style="text-align:right">
+                              <strong>Total: {{$curr}}<strong>
+                            </td>
+                  					<td style="text-align:right"><strong id="total">
                               {{ number_format($total,2) }}</strong></td>
                   				</tr>
-                          @if($header->status==0 and $header->approve==0 and Auth::user()->customer_id==$header->distributor_id)
-                            <tr>
-                    					<td><!--<a onclick="return false;" id="reject_PO" class="btn btn-warning" style="min-width:200px;">-->
-                                <input type="hidden" id="alasanreject" value="" name="alasan">
-                                <button type="submit" onclick="return inputreason();" name="approve" value="reject" class="btn btn-warning" style="min-width:200px;" >
-                                <i class="fa fa-angle-left" style="color:#fff"></i>@lang('label.reject')
-                                </button>
-                                <!--</a>-->
-                              </td>
-                    					<td colspan="4" class="hidden-xs"></td>
-                    					<td><button type="submit" name="approve" value="approve" class="btn btn-success btn-block text-right">@lang('label.approve')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button></td>
-                    				</tr>
-                          @else
-                            <tr style="border-top-style:hidden;">
-                              <td>
-                                <a href="{{URL::previous()}}" class="btn btn-warning" style="min-width:200px;"><i class="fa fa-angle-left" style="color:#fff"></i>&nbsp;@lang('label.back')</a>
-                              </td>
-                              @if($header->status==2 and Auth::user()->customer_id==$header->customer_id)
-                                <td colspan="6"></td>
-                                <td><button type="submit" name="terima" value="terima" class="btn btn-success btn-block">@lang('shop.Receive')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button> </td>
-                              @elseif($header->status==0 and $header->approve==1 and Auth::user()->customer_id==$header->distributor_id)
-                                <td colspan="4"></td>
-                                <td><button type="submit" name="createExcel" value="Create Excel" class="btn btn-success btn-block">@lang('shop.createexcel')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button> </td>
-                              @elseif($header->status==0 and Auth::user()->customer_id==$header->customer_id)
-                                <td colspan="3"></td>
-                                <td><button type="submit" name="batal" value="batal" class="btn btn-warning btn-block">@lang('label.cancel') <i class="fa fa-angle-right" style="color:#fff"></i></button></td>
-                              @endif
-
-                            </tr>
-                          @endif
                   			</tfoot>
                   		</table>
+                      <div id="btnorder">
+                      <div class="col-sm-3 col-xs-6" style="padding-bottom:10px;">
+                        @if($header->status==0 and $header->approve==0 and Auth::user()->customer_id==$header->distributor_id)
+                        <input type="hidden" id="alasanreject" value="" name="alasan">
+                        <button type="submit" onclick="return inputreason();" name="approve" value="reject" class="btn btn-warning btn-block" >
+                          <i class="fa fa-angle-left" style="color:#fff"></i>@lang('label.reject')
+                        </button>
+                        @else
+                            <a href="{{URL::previous()}}" class="btn btn-warning btn-block" ><i class="fa fa-angle-left" style="color:#fff"></i>@lang('label.back')</a>
+                        @endif
+
+                      </div>
+                        <div class="col-sm-6 hidden-xs"></div>
+                      <div class="col-sm-3 col-xs-6" style="padding-bottom:10px;">
+                        @if($header->status==0 and $header->approve==0 and Auth::user()->customer_id==$header->distributor_id)
+                          <button type="submit" name="approve" value="approve" class="btn btn-success btn-block text-right">@lang('label.approve')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button>
+                        @elseif($header->status==0 and $header->approve==1 and Auth::user()->customer_id==$header->distributor_id)
+                          <button type="submit" name="createExcel" value="Create Excel" class="btn btn-success btn-block">@lang('shop.createexcel')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button>
+                        @elseif($header->status==0 and $header->approve==0 and Auth::user()->customer_id==$header->customer_id)
+                          <button type="submit" name="batal" value="batal" class="btn btn-warning btn-block">@lang('label.cancel') <i class="fa fa-angle-right" style="color:#fff"></i></button>
+                        @elseif($header->status==3 and Auth::user()->customer_id==$header->customer_id and $deliveryno->count()==1)
+                        @endif
+                      </div>
+                      </div>
                     </form>
+
                 </div>
                 @if(isset($deliveryno))
                 <div role="tabpanel" class="tab-pane" id="shipping">

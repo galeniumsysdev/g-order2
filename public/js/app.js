@@ -47060,6 +47060,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
 
 // import NotificationItem from './NotificationItem.vue'
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -47118,7 +47121,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   return _c('li', {
     staticClass: "dropdown"
   }, [_c('a', {
-    staticClass: "dropdown-toggle",
+    staticClass: "dropdown-toggle hidden-xs",
     attrs: {
       "href": "#",
       "data-toggle": "dropdown"
@@ -47126,6 +47129,15 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   }, [_c('i', {
     staticClass: "fa fa-bell"
   }), _vm._v("\n      Notifications\n      "), _c('span', {
+    staticClass: "badge"
+  }, [_vm._v(_vm._s(_vm.notifCount))])]), _vm._v(" "), _c('a', {
+    staticClass: "dropdown-toggle visible-xs",
+    attrs: {
+      "href": "/home"
+    }
+  }, [_c('i', {
+    staticClass: "fa fa-bell"
+  }), _vm._v(" "), _c('span', {
     staticClass: "badge"
   }, [_vm._v(_vm._s(_vm.notifCount))])]), _vm._v(" "), (_vm.unreadNotifications.length) ? _c('ul', {
     staticClass: "dropdown-menu alert-dropdown dropdown-notif",
@@ -47147,7 +47159,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       staticClass: "item-info"
     }, [_vm._v("\n                " + _vm._s(item.data.subject) + "\n              ")])])])])])
   })) : _c('ul', {
-    staticClass: "dropdown-menu alert-dropdown dropdown-notif",
+    staticClass: "dropdown-menu alert-dropdown dropdown-notif hidden-xs",
     attrs: {
       "role": "menu"
     }

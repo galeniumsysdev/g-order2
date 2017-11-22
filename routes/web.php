@@ -232,7 +232,7 @@ Route::group(['middleware' => ['auth']], function () {
   Route::match(['get', 'post'],'/listpo','OrderController@listOrder')->name('order.listPO');
   Route::match(['get', 'post'],'/listso','OrderController@listSO')->name('order.listSO');
   Route::post('/SO/approval','OrderController@approvalSO')->name('order.approvalSO');
-  Route::get('/notif/newpo/{notifid}/{id}','OrderController@readnotifnewpo')->name('order.notifnewpo');
+  Route::get('/notif/newpo/{id?}/{notifid?}','OrderController@readnotifnewpo')->name('order.notifnewpo');
   Route::post('/PO/batal','OrderController@batalPO')->name('order.cancelPO');
   //Route::post('/PO/Receive','OrderController@receivePO')->name('order.receivePO');
   Route::get('/download/PO/{file}', function ($file='') {
