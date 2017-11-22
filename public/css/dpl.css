@@ -100,7 +100,7 @@ table.table-center-header tbody tr td.action-column {
 
 @media screen and (max-width: 768px) {
   .nav>li>a {
-    padding: 12px 15px 11px;
+    padding: 12px 10px 11px;
   }
   .nav>li>.dropdown>a {
     position: relative;
