@@ -893,6 +893,10 @@ class ProductController extends Controller
         if($statusso==-99)/*jika DPL notify ke SPV dan selanjutnya*/
         {
           $suggest_no=$request->coupon_no;
+
+          $updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
+                                    ->update(array('notrx'=>$notrx));
+                                    
           $notified_users = app('App\Http\Controllers\DplController')->getArrayNotifiedEmail($suggest_no,'');
     			if(!empty($notified_users)){
     				$data = [
@@ -909,12 +913,11 @@ class ProductController extends Controller
     					foreach ($email as $key2 => $mail) {
                 $data['email'] = $mail;
     						$apps_user = User::where('email',$mail)->first();
-    						$apps_user->notify(new PushNotif($data));
+                if(!empty($apps_user))
+    						  $apps_user->notify(new PushNotif($data));
     					}
     				}
     			}
-          $updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
-                                    ->update(array('notrx'=>$notrx));
 
         }else{
           /*$data= ['distributor'=>$distributor->id,'user'=>$userdistributor->id,'so_header_id'=>$header->id,'customer'=>auth()->user()->customer_id];
