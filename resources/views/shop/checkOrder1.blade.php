@@ -96,7 +96,7 @@
           <!--</div>-->
           <div class="col-sm-12">
             <div class="tabcard col-sm-12">
-              @if($deliveryno->count()>1 and $header->status>1)
+              @if(($deliveryno->count()>0 and $header->status>1) or ($deliveryno->count()==1 and $header->status>2))
               <ul class="nav nav-tabs" role="tablist">
                   <li role="presentation" class="active" ><a href="#order" aria-controls="Order" role="tab" data-toggle="tab"><strong>Order</strong></a></li>
                   <li role="presentation"><a href="#shipping" aria-controls="Shipping" role="tab" data-toggle="tab"><strong>Shipping</strong></a></li>
@@ -127,8 +127,7 @@
                             @endif
                             @if(Auth::user()->customer_id==$header->customer_id and  $header->status==2)
                               <th class="text-center">@lang('shop.qtyreceive')</th>
-                            @endif
-                            @if($header->status>2)
+                            @elseif($header->status>=2)
                                 <th class="text-center">@lang('shop.qtyreceive')</th>
                             @endif
                   					<th style="width:20%" class="text-center">@lang('shop.SubTotal')</th>
@@ -139,6 +138,24 @@
                           @php($taxtotal=0)
                           @foreach($lines as $line)
                             @php ($id  = $line->line_id)
+                            @if($header->status<2)
+                              @php($uom= $line->uom)
+                              @php ($listprice=$line->list_price)
+                              @php ($unitprice=$line->unit_price)
+                              @php ($uom=$line->uom)
+                              @php($qtyrequest= $line->qty_request)
+                              @php($qtyconfirm= $line->qty_confirm)
+                              @php($qtykirim= $line->qty_shipping)
+                              @php($qtyterima= $line->qty_accept)
+                            @else
+                              @php ($uom = $line->uom_primary)
+                              @php ($listprice=$line->list_price/$line->conversion_qty)
+                              @php ($unitprice=$line->unit_price/$line->conversion_qty)
+                              @php ($qtyrequest= $line->qty_request_primary)
+                              @php ($qtyconfirm= $line->qty_confirm_primary)
+                              @php ($qtykirim= $line->qty_shipping_primary)
+                              @php ($qtyterima= $line->qty_accept_primary)
+                            @endif
                   				<tr>
                   					<td>
                   						<div class="row">
@@ -148,55 +165,45 @@
                   							</div>
                   						</div>
                   					</td>
-                              <td data-th="@lang('shop.listprice')" class="xs-only-text-left text-center">{{ number_format($line->list_price,2) }}</td>
-                  					<td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->unit_price,2) }}</td>
+                            <td data-th="@lang('shop.listprice')" class="xs-only-text-left text-center">
+                              {{ number_format($listprice,2) }}
+                            </td>
+                  					<td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >
+                              {{ number_format($unitprice,2) }}
+                            </td>
                             <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >
-                              {{ $line->uom }}
-                              <input type="hidden" name="uom[{{$id}}]" value="{{ $line->uom_primary }}">
+                                {{ $uom}}
+                                <input type="hidden" name="uom[{{$id}}]" value="{{ $uom }}">
                             </td>
                   					<td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
-                                {{ (float)$line->qty_request }}
+                                {{ (float)$qtyrequest }}
                   					</td>
                             @if($header->status>0 or (Auth::user()->customer_id==$header->distributor_id and $header->status==0))
                               <td data-th="@lang('shop.qtyavailable')" class="text-center xs-only-text-left">
                                 @if(Auth::user()->customer_id==$header->distributor_id and $header->status==0)
                                   <input type="number" name="qtyshipping[{{$id}}]" id="qty-{{$id}}" class="form-control text-center" value="{{ $line->qty_request }}" style="min-width:80px;">
                                 @elseif($header->status>0)
-                                  {{(float)$line->qty_confirm}}
+                                  {{(float)$qtyconfirm}}
                                 @endif
                               </td>
                             @endif
                             @if($header->status>1)
                               <td data-th="@lang('shop.qtyship')" class="text-center xs-only-text-left">
-                                {{(float)$line->qty_shipping}}
+                                {{(float)$qtykirim}}
                               </td>
                             @endif
-                            @if(Auth::user()->customer_id==$header->customer_id and $header->status==2)
+                            @if(Auth::user()->customer_id==$header->customer_id and $header->status==3 and $deliveryno->count()==1)
                               <td data-th="@lang('shop.qtyreceive')" class="text-center xs-only-text-left">
                                 <input type="number" name="qtyreceive[{{$id}}]" id="qty-{{$id}}" class="form-control text-center" value="{{ $line->qty_shipping }}" style="min-width:80px;">
                               </td>
-                            @endif
-                            @if($header->status>2)
+
+                            @elseif($header->status>=2)
                                 <td data-th="@lang('shop.qtyreceive')" class="text-center xs-only-text-left">
-                                  {{(float)$line->qty_accept}}
+                                  {{(float)$qtyterima}}
                                 </td>
                             @endif
                   					<td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
-                              @if($header->status<=0)
-                                {{  number_format($line->amount,2) }}
-                                @php ($amount  = $line->amount)
-                              @elseif($header->status==3)
-                                @php ($amount  = $line->qty_accept*$line->unit_price)
-                                {{ number_format($amount,2)}}
-                              @elseif($header->status==1)
-                                @php ($amount  = $line->qty_confirm*$line->unit_price)
-                                {{ number_format($amount,2)}}
-                              @elseif($header->status>0 and $header->status<3)
-                                @php ($amount  = $line->qty_shipping*$line->unit_price)
-                                {{ number_format($amount,2)}}
-                              @endif
-                              @php($taxtotal += $line->tax_amount)
-                              @php ($totamount  += $amount)
+                              {{number_format($line->amount_confirm,2)}}
                             </td>
                   				</tr>
                             @endforeach
@@ -207,8 +214,7 @@
                                @php ($colgab = 4)
                           @elseif($header->status==1 or ($header->status==0 and Auth::user()->customer_id==$header->distributor_id) )
                                @php ($colgab = 5)
-                          @elseif($header->status==2 and  Auth::user()->customer_id==$header->distributor_id)
-                                @php ($colgab = 6)
+
                           @else
                                 @php ($colgab = 7)
                           @endif
@@ -218,30 +224,30 @@
                             @php($curr = "$")
                           @endif
                   				<tr>
-                            <td colspan="{{$colgab}}"> Discount Reguler: Rp. {{number_format($header->disc_reg,2)}}</td>
-            					      <td style="text-align:right">
+                            <td> Discount Reguler: Rp. {{number_format($header->disc_reg,2)}}</td>
+            					      <td colspan="{{$colgab}}" style="text-align:right">
                               <strong>SubTotal: {{$curr}}</strong>
                             </td>
                   					<td style="text-align:right"><strong id="totprice2">
-                              {{ number_format($totamount,2) }}</strong>
+                              {{ number_format($header->amount,2) }}</strong>
                             </td>
                   				</tr>
                           <tr>
-                            <td colspan="{{$colgab}}">Discount Product: Rp. {{number_format($header->disc_product,2)}}</td>
-                            <td style="text-align:right">
+                            <td>Discount Product: Rp. {{number_format($header->disc_product,2)}}</td>
+                            <td colspan="{{$colgab}}" style="text-align:right">
                               <strong>Tax: {{$curr}}</strong>
                             </td>
                   					<td style="text-align:right"><strong id="taxprice">
-                              {{ number_format($taxtotal,2) }}</strong>
+                              {{ number_format($header->tax_amount,2) }}</strong>
                             </td>
                   				</tr>
                           <tr>
-                            <td colspan="{{$colgab}}">Total Discount   : Rp. {{number_format( ($header->disc_product+$header->disc_reg),2)}}</td>
-                            <td style="text-align:right">
+                            <td>Total Discount   : Rp. {{number_format( ($header->disc_product+$header->disc_reg),2)}}</td>
+                            <td colspan="{{$colgab}}" style="text-align:right">
                               <strong>Total: {{$curr}}<strong>
                             </td>
                   					<td style="text-align:right"><strong id="total">
-                              {{ number_format($total,2) }}</strong></td>
+                              {{ number_format($header->total_amount,2) }}</strong></td>
                   				</tr>
                   			</tfoot>
                   		</table>
@@ -266,6 +272,7 @@
                         @elseif($header->status==0 and $header->approve==0 and Auth::user()->customer_id==$header->customer_id)
                           <button type="submit" name="batal" value="batal" class="btn btn-warning btn-block">@lang('label.cancel') <i class="fa fa-angle-right" style="color:#fff"></i></button>
                         @elseif($header->status==3 and Auth::user()->customer_id==$header->customer_id and $deliveryno->count()==1)
+                          <button type="submit" name="terima" value="terima" class="btn btn-success btn-block">@lang('shop.Receive')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button>
                         @endif
                       </div>
                       </div>
@@ -278,13 +285,21 @@
 
                     @foreach($deliveryno as $key => $delivery)
                     <div class="panel panel-default">
+                      <form action="{{route('order.cancelPO')}}" method="post">
+                        {{ csrf_field() }}
+                        <input type="hidden" name="header_id" value="{{$header->id}}">
+                        <input type="hidden" name="deliveryno" value="{{$key}}">
                       <div class="panel-heading">
                         <h6 class="panel-title kirim-panel">
                           Delivery No:<a data-toggle="collapse" data-parent="#accordion" href="#{{$key}}">{{$key}}</a>
                           <p class="pull-right">Date: {{$delivery->first()->tgl_kirim}}</p>
                         </h6>
                       </div>
+                      @if(Auth::user()->customer_id==$header->customer_id and $delivery->sum('qty_accept')==0)
+                      <div id="{{$key}}" class="panel-collapse collapse in">
+                      @else
                       <div id="{{$key}}" class="panel-collapse collapse">
+                      @endif
                         <div class="panel-body">
                           <table class="table">
                             <thead>
@@ -301,13 +316,25 @@
                                 <td>{{$detail->product->title}}</td>
                                 <td style="text-align:center">{{$detail->uom_primary}}</td>
                                 <td style="text-align:center">{{(float)$detail->qty_shipping}}</td>
-                                <td style="text-align:center">{{(float)$detail->qty_accept}}</td>
+                                <td style="text-align:center">
+                                  @if(Auth::user()->customer_id==$header->customer_id and (int)$detail->qty_accept==0)
+                                    <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}][{{$detail->id}}]">
+                                  @else
+                                    {{(float)$detail->qty_accept}}
+                                  @endif
+                                </td>
                               </tr>
                               @endforeach
                             </tbody>
                           </table>
+                          @if(Auth::user()->customer_id==$header->customer_id and $delivery->sum('qty_accept')==0)
+                          <div class="col-xs-4 col-sm-2 pull-right">
+                            <button type="submit" name="terima" value="terima" class="btn btn-success btn-block btnorder">@lang('shop.Receive')&nbsp;</button>
+                          </div>
+                          @endif
                         </div>
                       </div>
+                    </form>
                     </div>
                     @endforeach
                   </div>

@@ -9,7 +9,10 @@
      {{csrf_field()}}
      <input type="hidden" id="baseurl" value="{{url('/')}}">
      @if(isset($nama_kategori))
-     <div><h2>Category Product: {{$nama_kategori}}</h2></div>
+     <div><h3>Category Product: {{$nama_kategori}}</h3><hr></div>
+     @elseif(Auth::guest())
+      <h3><strong>Top Product</strong></h3>
+      <hr>
      @endif
   @forelse($products->chunk(6) as $productChunk)
     <div class="row display-flex">

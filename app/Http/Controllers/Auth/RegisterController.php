@@ -121,7 +121,11 @@ class RegisterController extends Controller
        {
          if (isset($user_check->customer_id)){
             $customer = Customer::find($user_check->customer_id);
-            $groupdc =$customer->subgroupdc->groupdatacenter->id;
+            if($customer->subgroupdc){
+                $groupdc =$customer->subgroupdc->groupdatacenter;
+            }else $groupdc = null;
+
+            
             $sites = $customer->sites()->where('primary_flag','=','Y')->first();
             if($sites)
             {
@@ -332,15 +336,15 @@ class RegisterController extends Controller
     				'message' => 'Pendaftaran outlet baru: '.$user->name,
     				'id' => $user->id,
     				'href' => url('/manageOutlet')
-            ,'email' => [ 'greeting'=> "Pendaftaran Baru di ". config('app.name'),
+            ,'mail' => [ 'greeting'=> "Pendaftaran Baru di ". config('app.name'),
                             'content' => $content,
-                    		    'markdown'=> '',
-                    		    'attribute'=>	array()]
+                    		]
     			];
           foreach ($marketings as $sales)
           {
+            $data ['email']= $sales->email;
               //$sales->notify(new MarketingGaleniumNotif($user));
-              event(new PusherBroadcaster($data, $sales->email));
+              //event(new PusherBroadcaster($data, $sales->email));
               $sales->notify(new PushNotif($data));
           }
           /*

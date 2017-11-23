@@ -18,7 +18,7 @@
 
 /* extra positioning */
 .thumbnail {
-  display: flex;
+  display: block;
   flex-direction: column;
   height: 90%;
 }

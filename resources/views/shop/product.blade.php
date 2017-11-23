@@ -3,7 +3,7 @@
 	@section('content')
 		<link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
 		<link rel="stylesheet" href="{{ URL::to('css/displayproduct.css') }}">
-	
+
 		<div class="container">
 			@include('shop.carausel')
 		</div>
@@ -16,7 +16,7 @@
 				<p class="font-product"><a href="{{route('product.category',$flexfield->flex_value)}}">Lihat Semua &nbsp;</a><i class="fa fa-angle-right" aria-hidden="true"></i></p>
 				<legend></legend>
 			</div>
-			
+
 			<div id="carousel-container">
 				<div class="profile-rotater">
 					@foreach($flexfield->products->take(6) as $product)
@@ -27,17 +27,17 @@
 							<!--GAMBAR PRODUK-->
 							@if($product->imagePath)
 								<div class="productbox1">
-									<img data-src="holder.js/100%x180" alt="100%x180"  class="img product" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
+									<img data-src="holder.js/100%x180" alt="No Picture"  class="img product" style="height:80px; margin-left:25%;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
 								</div>
 							@else
-								<img data-src="holder.js/100%x180" alt="100%x180" class="img product" src="" data-holder-rendered="true">
+								<img data-src="holder.js/100%x180" alt="No Picture" class="img product" src="" data-holder-rendered="true">
 							@endif
-							
+
 							<!--TITLE-->
 							<div class="productboxTitle">
 								<div class="producttitle"><a href="{{ route('product.detail',['id'=>$product->id])}}">{{$product->title}}</a></div>
 							</div>
-							
+
 							<!--SATUAN-->
 							<div class="productboxSatuan">
 								@if (Auth::check())
@@ -56,43 +56,39 @@
 									</div>
 								@endif
 							</div>
-							<legend>
-							
+
 							<!--PRICE-->
 							<div class="productboxPrice">
 								<div class="productprice">
 									<div class="pull-right"></div>
 									<div class="pricetext" id="lblhrg-{{$product->id}}">
 										@if(substr($product->itemcode,1,2)=="43")
-										$
+											@php ($currency="$")
 										@else
-										Rp.
+											@php ($currency="Rp.")
 										@endif
+										@if(Auth::user()->hasRole('Distributor'))
+											@php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_secondary))
+											@php ($uom = $product->satuan_secondary)
+										@else
+											@php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_primary))
+											@php ($uom = $product->satuan_primary)
+										@endif
+										{{$currency." ".number_format($disc)."/".$uom}}
 									</div>
 									<div class="price coret" id="hrgcoret-{{$product->id}}">
-										@if(Auth::user()->hasRole('Distributor'))
-										@php ($price = $product->getRealPrice(Auth()->user()->id,$product->satuan_secondary))
-										@else
-										@php ($price = $product->getRealPrice(Auth()->user()->id,$product->satuan_primary))
-										@endif
+
+										@php ($price = $product->getRealPrice(Auth()->user()->id,$uom))
+
 										@if($price!=$disc)
-										@if(substr($product->itemcode,1,2)=="43")
-										$
-										@else
-										Rp.
-										@endif
-										@if(Auth::user()->hasRole('Distributor'))
-										{{number_format($price,2)}}/{{$product->satuan_secondary}}
-										@else
-										{{number_format($price,2)}}/{{$product->satuan_primary}}
-										@endif
+											{{$currency." ".number_format($price,2)}}/{{$uom}}
 										@endif
 									</div>
 									<input type="hidden" id="hrg-{{$product->id}}" value="{{$price}}">
 									<input type="hidden" id="disc-{{$product->id}}" value="{{$disc}}">
 								</div>
 							</div>
-							
+
 							<!--ADD TO CART-->
 							<div class="productboxCart">
 								<div class ="clearfix" id="addCart-{{$product->id}}">
@@ -100,21 +96,24 @@
 									<a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button">Add to cart</a>
 								</div>
 							</div>
-						</div>
-							
-							<div class="info-product">
-								@if(Auth::user()->hasRole('Distributor'))
-								@php ($vrate = $satuan->rate)
-								1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}<br>
-								@endif
+
+							<!--DIV CLASS DISTRIBUTOR-->
+							<div class="productboxDist">
+								<div class="info-product" id="info-product-{{$product->id}}">
+									@if(Auth::user()->hasRole('Distributor'))
+										@php ($vrate = $satuan->rate)
+										1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}<br>
+									@endif
+								</div>
 							</div>
+						</div>
 							<!--</div>-->
 						<!--</div>-->
 					@endforeach
 				</div>
 			</div>
 		</div>
-		
+
 		<script>
 		$(document).ready(function() {
 		$('.carousel-container').owlCarousel({

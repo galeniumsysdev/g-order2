@@ -48,7 +48,7 @@ class BackgroundController extends Controller
         $headers = SoHeader::whereNotNull('oracle_customer_id')->where([
                   ['approve','=',1],
                   ['status','>=',0],
-                  ['status','<',2],
+                  ['status','<',3],
         ])->get();
         if($headers){
           foreach($headers as $h)
@@ -90,8 +90,8 @@ class BackgroundController extends Controller
                   if($oraSO)
                   {
                     echo "qty:".$oraSO->ordered_quantity."<br>";
-                    $sl->qty_confirm =$oraSO->ordered_quantity;
-                    $sl->qty_confirm_primary=$oraSO->ordered_quantity_primary;
+                    $sl->qty_confirm =$oraSO->ordered_quantity_primary;
+                    //$sl->qty_confirm_primary=$oraSO->ordered_quantity_primary;
                     $sl->list_price=$oraSO->unit_list_price/$oraSO->ordered_quantity;
                     $sl->unit_price=$oraSO->amount/$oraSO->ordered_quantity;
                     $sl->tax_amount=$oraSO->tax_value;
@@ -130,23 +130,22 @@ class BackgroundController extends Controller
          					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
          					'id' => $h->id,
          					'href' => route('order.notifnewpo'),
-         					'email' => [
+         					'mail' => [
          						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-                    'content' =>$content,
-                    'markdown'=>'',
-         						'attribute'=> array()
+                    'content' =>$content,                  
          					]
          				];
                  foreach($customer->users as $u)
                  {
+                  $data['email']= $u->email;
                    //$u->notify(new BookOrderOracle($h,$customer->customer_name));
-                   event(new PusherBroadcaster($data, $u->email));
+                  // event(new PusherBroadcaster($data, $u->email));
                    $u->notify(new PushNotif($data));
                  }
 
 
               }//endif status==0 (belum di booked)
-              elseif($h->status==1)
+              elseif($h->status>0 and $h->status<3 )
               {
                 echo "status sudah booked belum kirim untuk notrx:".$h->notrx."<br>";
                 $mysoline = SoLine::where([
@@ -154,25 +153,58 @@ class BackgroundController extends Controller
                                     ['qty_confirm','!=',0]
                                     ])
                           ->get();
+                $berubah=false;
                 //getSo di Oracle
                 foreach($mysoline as $sl)
                 {
+                  $jumshippingbefore = $sl->qty_shipping;
                   echo "line:".$sl->line_id."<br>";
                   $ship = $this->getShippingSO($h->notrx,$sl->line_id,$lasttime,$sl->product_id,$h->id);
                   if($ship==1)
                   {
                     $jmlkirim = $sl->shippings()->sum('qty_shipping');
-                    $sl->qty_shipping = $jmlkirim;
-                    $sl->save();
+                    if ($sl->qty_shipping != $jmlkirim)
+                    {
+                      $sl->qty_shipping = $jmlkirim;
+                      $sl->save();
+                      $berubah=true;
+                    }
+
                     //dd($jmlkirim);
                   }
                 }
-                $soline_notsend = SoLine::where([['header_id','=',$h->id],['qty_request_primary','!=','qty_shipping']])->get();
-                if($soline_notsend){
-                  $h->status=2;
-                }else{
-                  $h->status=4;
+
+                //notif to customer jika berubah
+                if($berubah)
+                {
+                  $soline_notsend = SoLine::where([['header_id','=',$h->id],['qty_confirm','!=','qty_shipping']])->get();
+                  if($soline_notsend->count()>0){
+                    $h->status=2;
+                  }else{
+                    $h->status=3;
+                  }
+                  $h->save();
+                  $content = 'PO Anda nomor '.$h->customer_po.' telah dikirimkan oleh '.$h->distributor->customer_name.'. ';
+                  $content .='Silahkan check PO anda kembali.<br>' ;
+                  $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                  $data=[
+                    'title' => 'Pengiriman PO',
+                    'message' => 'PO #'.$h->customer_po.' telah dikirim',
+                    'id' => $h->id,
+                    'href' => route('order.notifnewpo'),
+                    'mail' => [
+                      'greeting'=>'Pengriman Barang PO #'.$h->customer_po.'.',
+                      'content' =>$content,
+                    ]
+                  ];
+                  foreach ($h->outlet->users as $u)
+                  {
+                    $data['email']=$u->email;
+                    //event(new PusherBroadcaster($data, $u->email));
+                    $u->notify(new PushNotif($data));
+                  }
                 }
+
               }
             }//foreach
 
@@ -436,9 +468,10 @@ class BackgroundController extends Controller
                             and wdd.inventory_item_id = mmt.inventory_item_id
                             and mmt.TRANSACTION_TYPE_ID=52) as transaction_date')
                       ,'wdd.inventory_item_id'
+                      ,'wnd.waybill'
                     )
                   ->get();
-            var_dump($oraship);
+          //  var_dump($oraship);
         foreach($oraship as $ship)
         {
           //$productid = Product::where('inventory_item_id','=',$ship->inventory_item_id)->select('id')->first();
@@ -455,6 +488,7 @@ class BackgroundController extends Controller
             ,'conversion_qty'=>$ship->convert_qty
             ,'header_id' =>$headerid
             ,'line_id'=>$lineid
+            ,'waybill'=>$ship->waybill
             ]
           );
         }

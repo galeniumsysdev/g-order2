@@ -927,7 +927,7 @@ class ProductController extends Controller
     				'message' => 'New PO '.$notrx.' From '.auth()->user()->customer->customer_name,
     				'id' => $header->id,
     				'href' => route('order.notifnewpo')
-            ,'email' => [ 'greeting'=> "",
+            ,'mail' => [ 'greeting'=> "",
                             'content' => "",
                     		    'markdown'=> "emails.orders.create",
                     		    'attribute'=>	["so_headers"=>$header
