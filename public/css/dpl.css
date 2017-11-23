@@ -82,30 +82,11 @@ table.table-center-header tbody tr td.action-column {
   color: #FF0000;
 }
 
-/* Custom Nav */
-.nav>li {
-  margin: 0;
-}
-.nav>li+li{
-  margin: 0 0 0 12px;
-}
-
 /* Media Queries */
 @media screen and (max-width: 992px) {
   .form-wrapper .form-label {
     padding: 0;
     text-align: left;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .nav>li>a {
-    padding: 12px 10px 11px;
-  }
-  .nav>li>.dropdown>a {
-    position: relative;
-    display: block;
-    padding: 12px 0 11px;
   }
 }
 
