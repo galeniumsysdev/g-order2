@@ -348,7 +348,7 @@
                                       <td style="text-align:center">{{(float)$detail->qty_shipping}}</td>
                                       <td style="text-align:center">
                                         @if(Auth::user()->customer_id==$header->customer_id and is_null($detail->qty_accept))
-                                          <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}]">
+                                          <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}][{{$detail->id}}]">
                                         @else
                                           {{(float)$detail->qty_accept}}
                                         @endif

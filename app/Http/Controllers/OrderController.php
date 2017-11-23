@@ -244,7 +244,7 @@ class OrderController extends Controller
         {
           if($soline->qty_request_primary<$request->qtyshipping[$soline->line_id])
           {
-            return redirect()->back()->withError("Gagal simpan! Qty kirim melebihi order")->withInput();
+            return redirect()->back()->withError("Gagal simpan! Qty melebihi order")->withInput();
           }
         }
         /*update qty*/
@@ -318,17 +318,16 @@ class OrderController extends Controller
           'message' => 'Penolakan PO #'.$header->customer_po.'dari distributor',
           'id' => $header->id,
           'href' => route('order.notifnewpo'),
-          'email' => [
+          'mail' => [
             'greeting'=>'Penolakan PO #'.$header->customer_po.'.',
             'content' =>$content,
-            'markdown'=>'',
-            'attribute'=> array()
           ]
         ];
         foreach($customer->users as $u)
         {
+          $data['email'] = $u->email;
           //$u->notify(new RejectPoByDistributor($header,1, $request->alasan));
-          event(new PusherBroadcaster($data, $u->email));
+          //event(new PusherBroadcaster($data, $u->email));
           $u->notify(new PushNotif($data));
         }
 
@@ -403,17 +402,16 @@ class OrderController extends Controller
             'message' => 'PO #'.$h->customer_po.' telah dikirim',
             'id' => $h->id,
             'href' => route('order.notifnewpo'),
-            'email' => [
+            'mail' => [
               'greeting'=>'Pengriman Barang PO #'.$h->customer_po.'.',
               'content' =>$content,
-              'markdown'=>'',
-              'attribute'=> array()
             ]
           ];
           foreach($customer->users as $u)
           {
+            $data['email']= $u->email;
             //$u->notify(new ShippingOrderOracle($header,$customer->customer_name));
-            event(new PusherBroadcaster($data, $u->email));
+            //event(new PusherBroadcaster($data, $u->email));
             $u->notify(new PushNotif($data));
           }
           $header->save();
@@ -460,17 +458,16 @@ class OrderController extends Controller
             'message' => 'Pembatalan PO #'.$header->customer_po.'oleh '.$header->outlet->customer_name,
             'id' => $header->id,
             'href' => route('order.notifnewpo'),
-            'email' => [
+            'mail' => [
               'greeting'=>'Pembatalan PO #'.$header->customer_po.'.',
-              'content' =>$content,
-              'markdown'=>'',
-              'attribute'=> array()
+              'content' =>$content,            
             ]
           ];
           foreach($customer->users as $u)
           {
+            $data['email']= $u->email;
             //$u->notify(new RejectPoByDistributor($header,0,""));
-            event(new PusherBroadcaster($data, $u->email));
+            //event(new PusherBroadcaster($data, $u->email));
             $u->notify(new PushNotif($data));
           }
           $header->save();
@@ -483,7 +480,7 @@ class OrderController extends Controller
         $this->validate($request, [
         'deliveryno' => 'required',
         ]);
-
+        //dd($request->qtyreceive);
         $header = SoHeader::where([
           ['id','=',$request->header_id],
           ['customer_id','=',Auth::user()->customer_id]
@@ -510,15 +507,28 @@ class OrderController extends Controller
           foreach($solines as $soline)
           {
             $qtyterima =0;
-
-            $insshipping =SoShipping::updateorCreate(
-                ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno]
-                ,['qty_accept'=>$request->qtyreceive[$soline->line_id],'product_id'=>$soline->product_id
-                  ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
-                  ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
-                  ,'tgl_terima'=>Carbon::now()
-                 ]
-              )  ;
+            foreach($request->qtyreceive[$soline->line_id] as $key => $qty)
+            {
+              if ($key!=-1){
+                $insshipping =SoShipping::updateorCreate(
+                  ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno,'id'=>$key]
+                  ,['qty_accept'=>$qty,'product_id'=>$soline->product_id
+                    ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
+                    ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
+                    ,'tgl_terima'=>Carbon::now()
+                   ]
+                )  ;
+              }else{
+                $insshipping =SoShipping::Create(
+                  ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno
+                    ,'qty_accept'=>$qty,'product_id'=>$soline->product_id
+                    ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
+                    ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
+                    ,'tgl_terima'=>Carbon::now()
+                   ]
+                )  ;
+              }
+            }
               $soline->qty_accept = $soline->shippings->sum('qty_accept');
               $soline->save();
               //$qtyterima=$soline->qty_accept+$request->qtyreceive[$soline->line_id];
@@ -552,17 +562,16 @@ class OrderController extends Controller
             'message' => 'SJ #'.$request->deliveryno.' telah diterima customer',
             'id' => $header->id,
             'href' => route('order.notifnewpo'),
-            'email' => [
+            'mail' => [
               'greeting'=>'SJ: '.$request->deliveryno.' telah diterima customer',
               'content' =>$content,
-              'markdown'=>'',
-              'attribute'=> array()
             ]
           ];
           foreach($dist->users as $d)
           {
+            $data['email']= $d->email;
             //$d->notify(new ReceiveItemsPo($header,$request->deliveryno));
-            event(new PusherBroadcaster($data, $d->email));
+            //event(new PusherBroadcaster($data, $d->email));
             $d->notify(new PushNotif($data));
           }
           $header->save();
@@ -664,7 +673,7 @@ class OrderController extends Controller
                       ->join('products as p','sl.product_id','=','p.id')
                       ->where([
                         ['sl.header_id','=',$h->id]
-                      ])->select('p.itemcode','sl.qty_confirm','sl.uom','sl.line_id')
+                      ])->select('p.itemcode','sl.qty_confirm/sl.conversion_qty as qty_confirm','sl.uom','sl.line_id')
                       ->get();
                 foreach($line as $l)
                 {

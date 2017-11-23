@@ -90,8 +90,8 @@ class BackgroundController extends Controller
                   if($oraSO)
                   {
                     echo "qty:".$oraSO->ordered_quantity."<br>";
-                    $sl->qty_confirm =$oraSO->ordered_quantity;
-                    $sl->qty_confirm_primary=$oraSO->ordered_quantity_primary;
+                    $sl->qty_confirm =$oraSO->ordered_quantity_primary;
+                    //$sl->qty_confirm_primary=$oraSO->ordered_quantity_primary;
                     $sl->list_price=$oraSO->unit_list_price/$oraSO->ordered_quantity;
                     $sl->unit_price=$oraSO->amount/$oraSO->ordered_quantity;
                     $sl->tax_amount=$oraSO->tax_value;
@@ -130,17 +130,16 @@ class BackgroundController extends Controller
          					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
          					'id' => $h->id,
          					'href' => route('order.notifnewpo'),
-         					'email' => [
+         					'mail' => [
          						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-                    'content' =>$content,
-                    'markdown'=>'',
-         						'attribute'=> array()
+                    'content' =>$content,                  
          					]
          				];
                  foreach($customer->users as $u)
                  {
+                  $data['email']= $u->email;
                    //$u->notify(new BookOrderOracle($h,$customer->customer_name));
-                   event(new PusherBroadcaster($data, $u->email));
+                  // event(new PusherBroadcaster($data, $u->email));
                    $u->notify(new PushNotif($data));
                  }
 
@@ -193,16 +192,15 @@ class BackgroundController extends Controller
                     'message' => 'PO #'.$h->customer_po.' telah dikirim',
                     'id' => $h->id,
                     'href' => route('order.notifnewpo'),
-                    'email' => [
+                    'mail' => [
                       'greeting'=>'Pengriman Barang PO #'.$h->customer_po.'.',
                       'content' =>$content,
-                      'markdown'=>'',
-                      'attribute'=> array()
                     ]
                   ];
                   foreach ($h->outlet->users as $u)
                   {
-                    event(new PusherBroadcaster($data, $u->email));
+                    $data['email']=$u->email;
+                    //event(new PusherBroadcaster($data, $u->email));
                     $u->notify(new PushNotif($data));
                   }
                 }

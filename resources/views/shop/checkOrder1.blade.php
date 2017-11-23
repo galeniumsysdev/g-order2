@@ -138,6 +138,24 @@
                           @php($taxtotal=0)
                           @foreach($lines as $line)
                             @php ($id  = $line->line_id)
+                            @if($header->status<2)
+                              @php($uom= $line->uom)
+                              @php ($listprice=$line->list_price)
+                              @php ($unitprice=$line->unit_price)
+                              @php ($uom=$line->uom)
+                              @php($qtyrequest= $line->qty_request)
+                              @php($qtyconfirm= $line->qty_confirm)
+                              @php($qtykirim= $line->qty_shipping)
+                              @php($qtyterima= $line->qty_accept)
+                            @else
+                              @php ($uom = $line->uom_primary)
+                              @php ($listprice=$line->list_price/$line->conversion_qty)
+                              @php ($unitprice=$line->unit_price/$line->conversion_qty)
+                              @php ($qtyrequest= $line->qty_request_primary)
+                              @php ($qtyconfirm= $line->qty_confirm_primary)
+                              @php ($qtykirim= $line->qty_shipping_primary)
+                              @php ($qtyterima= $line->qty_accept_primary)
+                            @endif
                   				<tr>
                   					<td>
                   						<div class="row">
@@ -147,27 +165,31 @@
                   							</div>
                   						</div>
                   					</td>
-                              <td data-th="@lang('shop.listprice')" class="xs-only-text-left text-center">{{ number_format($line->list_price,2) }}</td>
-                  					<td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->unit_price,2) }}</td>
+                            <td data-th="@lang('shop.listprice')" class="xs-only-text-left text-center">
+                              {{ number_format($listprice,2) }}
+                            </td>
+                  					<td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >
+                              {{ number_format($unitprice,2) }}
+                            </td>
                             <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >
-                              {{ $line->uom }}
-                              <input type="hidden" name="uom[{{$id}}]" value="{{ $line->uom_primary }}">
+                                {{ $uom}}
+                                <input type="hidden" name="uom[{{$id}}]" value="{{ $uom }}">
                             </td>
                   					<td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
-                                {{ (float)$line->qty_request }}
+                                {{ (float)$qtyrequest }}
                   					</td>
                             @if($header->status>0 or (Auth::user()->customer_id==$header->distributor_id and $header->status==0))
                               <td data-th="@lang('shop.qtyavailable')" class="text-center xs-only-text-left">
                                 @if(Auth::user()->customer_id==$header->distributor_id and $header->status==0)
                                   <input type="number" name="qtyshipping[{{$id}}]" id="qty-{{$id}}" class="form-control text-center" value="{{ $line->qty_request }}" style="min-width:80px;">
                                 @elseif($header->status>0)
-                                  {{(float)$line->qty_confirm}}
+                                  {{(float)$qtyconfirm}}
                                 @endif
                               </td>
                             @endif
                             @if($header->status>1)
                               <td data-th="@lang('shop.qtyship')" class="text-center xs-only-text-left">
-                                {{(float)$line->qty_shipping}}
+                                {{(float)$qtykirim}}
                               </td>
                             @endif
                             @if(Auth::user()->customer_id==$header->customer_id and $header->status==3 and $deliveryno->count()==1)
@@ -177,7 +199,7 @@
 
                             @elseif($header->status>=2)
                                 <td data-th="@lang('shop.qtyreceive')" class="text-center xs-only-text-left">
-                                  {{(float)$line->qty_accept}}
+                                  {{(float)$qtyterima}}
                                 </td>
                             @endif
                   					<td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
@@ -296,7 +318,7 @@
                                 <td style="text-align:center">{{(float)$detail->qty_shipping}}</td>
                                 <td style="text-align:center">
                                   @if(Auth::user()->customer_id==$header->customer_id and (int)$detail->qty_accept==0)
-                                    <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}]">
+                                    <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}][{{$detail->id}}]">
                                   @else
                                     {{(float)$detail->qty_accept}}
                                   @endif
