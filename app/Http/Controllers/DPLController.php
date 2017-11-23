@@ -178,7 +178,11 @@ class DPLController extends Controller {
 				'title' => 'Pengajuan DPL #'.$suggest_no,
 				'message' => 'untuk '.$dpl_outlet['customer_name'],
 				'id' => $suggest_no,
-				'href' => route('dpl.readNotifDiscount')
+				'href' => route('dpl.readNotifDiscount'),
+				'mail' => [
+					'greeting'=>'',
+					'content'=> ''
+				]
 			];
 			foreach ($notified_users as $key => $email) {
 				$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
@@ -245,8 +249,8 @@ class DPLController extends Controller {
 					'id' => $suggest_no,
 					'href' => route('dpl.readNotifApproval'),
 					'mail' => [
-						'markdown'=>'',
-						'attribute'=> array()
+						'greeting'=>'',
+						'content'=> ''
 					]
 				];
 				foreach ($notified_users as $key => $email) {
@@ -268,7 +272,11 @@ class DPLController extends Controller {
 					'title' => 'Usulan Discount #'.$suggest_no.' ditolak',
 					'message' => 'oleh '.Auth::user()->name,
 					'id' => $suggest_no,
-					'href' => route('dpl.readNotifApproval')
+					'href' => route('dpl.readNotifApproval'),
+					'mail' => [
+						'greeting'=>'',
+						'content'=> ''
+					]
 				];
 				foreach ($notified_users as $key => $email) {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
