@@ -99,41 +99,32 @@ function getPrice(id){
     v_itemcode = data.itemcode;
     if(v_uom!=data.uomprimary || data.konversi!=1)
     {
-      if(v_itemcode.substr(0,2)=='43')
-      {
-        $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
-        if(data.price!=data.diskon)
-        {
-          $('#hrgcoret-'+id).html('');
-        }else{
-            $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
-        }
-
-      }else{
-        $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
-        if(data.price!=data.diskon)
-        {
-          $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
-        }else{
-          $('#hrgcoret-'+id).html('');
-        }
-      }
-
-      $('#hrg-'+id).val(data.price);
-      $('#disc-'+id).val(data.diskon);
+      $('#info-product-'+id).html('1 '+v_uom +' = '+data.konversi+' '+data.uomprimary);
     }else{
-      if(v_itemcode.substr(0,2)=='43')
+      $('#info-product-'+id).html('');
+    }  
+    if(v_itemcode.substr(0,2)=='43')
+    {
+      $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom);
+      if(data.price!=data.diskon)
       {
-        $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom);
-        $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
-      }else {
-        $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom);
-        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
+        $('#hrgcoret-'+id).html('');
+      }else{
+          $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
       }
-      $('#hrg-'+id).val(data.price);
-      $('#disc-'+id).val(data.diskon);
+
+    }else{
+      $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom);
+      if(data.price!=data.diskon)
+      {
+        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
+      }else{
+        $('#hrgcoret-'+id).html('');
+      }
     }
-      });
+    $('#hrg-'+id).val(data.price);
+    $('#disc-'+id).val(data.diskon);
+  });
       $('#addCart-'+id).show();
 }
 
