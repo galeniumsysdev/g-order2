@@ -56,7 +56,7 @@ class PushNotif extends Notification {
      */
 	public function toDatabase($notifiable)
 	{
-		//$href = $this->data['href'].'/'.$this->data['id'].'/'.$this->id;
+		$this->data['href'] = $this->data['href'].'/'.$this->data['id'].'/'.$this->id;
 		return [
 			'tipe'=> $this->data['title'],
 			'subject'=> $this->data['message'],
