@@ -911,11 +911,10 @@ class ProductController extends Controller
     						$apps_user = User::where('email',$mail)->first();
     						$apps_user->notify(new PushNotif($data));
     					}
-              if($key == 'ASM') break;
     				}
     			}
-          /*$updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
-                                    ->update(array('notrx'=>$notrx));*/
+          $updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
+                                    ->update(array('notrx'=>$notrx));
 
         }else{
           /*$data= ['distributor'=>$distributor->id,'user'=>$userdistributor->id,'so_header_id'=>$header->id,'customer'=>auth()->user()->customer_id];
