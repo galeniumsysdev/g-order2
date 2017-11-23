@@ -8,8 +8,9 @@
 			@include('shop.carausel')
 		</div>
 
-	@foreach($product_flexfields->take(1) as $flexfield)
+	@foreach($product_flexfields->take(2) as $flexfield)
 		<div class="container-product">
+			<!--JUDUL KATEGORI-->
 			<div class="row" style="margin-left:15px; margin-right:15px;">
 				<br>
 				<h4><strong>{{$flexfield->description}}</strong></h4>
@@ -23,14 +24,13 @@
 						@php ($price=0)
 						@php ($disc=0)
 						<div class="col-md-2 col-ms-6 column productbox">
-							<!--<div class="thumbnail">-->
 							<!--GAMBAR PRODUK-->
 							@if($product->imagePath)
 								<div class="productbox1">
-									<img data-src="holder.js/100%x180" alt="No Picture"  class="img product" style="height:80px; margin-left:25%;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
+									<img data-src="holder.js/100%x180" alt="No Image"  class="img product" style="height:80px;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
 								</div>
 							@else
-								<img data-src="holder.js/100%x180" alt="No Picture" class="img product" src="" data-holder-rendered="true">
+								<img data-src="holder.js/100%x180" alt="No Image" class="img product" src="" data-holder-rendered="true">
 							@endif
 
 							<!--TITLE-->
@@ -77,11 +77,12 @@
 										{{$currency." ".number_format($disc)."/".$uom}}
 									</div>
 									<div class="price coret" id="hrgcoret-{{$product->id}}">
-
 										@php ($price = $product->getRealPrice(Auth()->user()->id,$uom))
 
 										@if($price!=$disc)
 											{{$currency." ".number_format($price,2)}}/{{$uom}}
+										@else
+											{{$currency." ".number_format($price,1)}}/{{$uom}}
 										@endif
 									</div>
 									<input type="hidden" id="hrg-{{$product->id}}" value="{{$price}}">
