@@ -27,10 +27,10 @@
 							<!--GAMBAR PRODUK-->
 							@if($product->imagePath)
 								<div class="productbox1">
-									<img data-src="holder.js/100%x180" alt="100%x180"  class="img product" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
+									<img data-src="holder.js/100%x180" alt="No Picture"  class="img product" style="height:80px; margin-left:25%;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
 								</div>
 							@else
-								<img data-src="holder.js/100%x180" alt="100%x180" class="img product" src="" data-holder-rendered="true">
+								<img data-src="holder.js/100%x180" alt="No Picture" class="img product" src="" data-holder-rendered="true">
 							@endif
 							
 							<!--TITLE-->
@@ -56,7 +56,6 @@
 									</div>
 								@endif
 							</div>
-							<legend>
 							
 							<!--PRICE-->
 							<div class="productboxPrice">
@@ -100,14 +99,17 @@
 									<a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button">Add to cart</a>
 								</div>
 							</div>
-						</div>
 							
-							<div class="info-product">
-								@if(Auth::user()->hasRole('Distributor'))
-								@php ($vrate = $satuan->rate)
-								1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}<br>
-								@endif
+							<!--DIV CLASS DISTRIBUTOR-->
+							<div class="productboxDist">
+								<div class="info-product">
+									@if(Auth::user()->hasRole('Distributor'))
+									@php ($vrate = $satuan->rate)
+									1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}<br>
+									@endif
+								</div>
 							</div>
+						</div>
 							<!--</div>-->
 						<!--</div>-->
 					@endforeach

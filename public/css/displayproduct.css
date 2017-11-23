@@ -43,7 +43,7 @@ legend {
   padding:5px;
   margin-bottom:10px;
   margin-left: 10px;
-  height: 360px;
+  height: 335%;
 }
 
 .productboxTitle {
@@ -59,6 +59,10 @@ legend {
 }
 
 .productboxCart {
+	margin-top: 8px;
+}
+
+.productboxDist {
 	margin-top: 8px;
 }
 
