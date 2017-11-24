@@ -376,6 +376,7 @@ class DPLController extends Controller {
 			'approver.name as dpl_appr_name',
 			'dpl_suggest_no.suggest_no',
 			'dpl_no.dpl_no',
+			'dpl_suggest_no.notrx',
 			'fill_in',
 			'next_approver')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
@@ -390,11 +391,11 @@ class DPLController extends Controller {
 		foreach ($dpl as $key => $list) {
 			$allowed = DB::select('SELECT privilegeSuggestNo(?,?) AS allowed', [$list->suggest_no, Auth::user()->id]);
 
-			$dpl[$key]->btn_discount = ($list->fill_in && $allowed[0]->allowed) ? '<a href="/dpl/discount/form/' . $list->suggest_no . '" class="btn btn-danger">Discount</a>' : '';
+			$dpl[$key]->btn_discount = ($list->fill_in && $allowed[0]->allowed && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
 
-			$dpl[$key]->btn_confirm = (!$list->fill_in && $allowed[0]->allowed && $list->next_approver == Auth::user()->id) ? '<a href="/dpl/discount/approval/' . $list->suggest_no . '" class="btn btn-primary">Confirmation</a>' : '';
+			$dpl[$key]->btn_confirm = (!$list->fill_in && $allowed[0]->allowed && !empty($list->notrx) && $list->next_approver == Auth::user()->id) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 
-			$dpl[$key]->btn_dpl_no = (!$list->fill_in && empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="/dpl/input/form/' . $list->suggest_no . '" class="btn btn-warning">DPL No.</a>' : '';
+			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
 		}
 
 		return view('admin.dpl.dplList', array('dpl' => $dpl));
