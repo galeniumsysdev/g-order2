@@ -4,7 +4,7 @@
 		<link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
 		<link rel="stylesheet" href="{{ URL::to('css/displayproduct.css') }}">
 
-		<div class="container">
+		<div class="container-fluid">
 			@include('shop.carausel')
 		</div>
 

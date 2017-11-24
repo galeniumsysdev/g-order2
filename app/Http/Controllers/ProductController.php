@@ -304,7 +304,7 @@ class ProductController extends Controller
       $kategory = Category::find($id);
       //$products = $kategory->products()->paginate(12);
       $perPage = 30; // Item per page
-      $oldDisttributor = $this->getDistributor();
+    /*  $oldDisttributor = $this->getDistributor();
 
       if(!is_null($oldDisttributor))
       {
@@ -312,7 +312,7 @@ class ProductController extends Controller
         {
           return view('shop.sites',['distributors' => $oldDisttributor]);
         }
-      }
+      }*/
       $sqlproduct = $this->getSqlProduct();
       $currentPage = Input::get('page') - 1;
       $sqlproduct .= " and exists (select 1

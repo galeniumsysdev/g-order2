@@ -19,11 +19,15 @@
               							<div class="col-md-10" >
               								<select name="tipe" class="form-control">
               									<option value="" >--</option>
-              									<option value="Register Outlet" {{$request->tipe=="Register Outlet"?"selected=selected":""}}>Register Outlet</option>
+                                @foreach($jnsnotif as $key=>$val)
+                                  <option value="{{$val}}" {{$request->tipe==$val?"selected=selected":""}}>{{$val}}</option>
+                                @endforeach
+              									<!--<option value="Register Outlet" {{$request->tipe=="Register Outlet"?"selected=selected":""}}>Register Outlet</option>
               									<option value="Reject Outlet" {{$request->tipe=="Reject Outlet"?"selected=selected":""}}>Reject Outlet</option>
                                 @if(Auth::User()->can('CheckStatusSO'))
                                 <option value="New PO" {{$request->tipe=="New PO"?"selected=selected":""}}>New PO</option>
                                 @endif
+                              -->
               								</select>
               							</div>
               					</div>
@@ -94,7 +98,7 @@
 										<td data-title="@lang('label.to')">{{Auth::User()->name}}</td>
 										<td data-title="@lang('label.type')">{{$notif->data['tipe']}}</td>
 										<td data-title="SUBJECT">
-                      <a href="{{$notif->data['href']}}">{{$notif->data['subject']}}</a>										
+                      <a href="{{$notif->data['href']}}">{{$notif->data['subject']}}</a>
 										</td>
 										<td data-title="@lang('label.sent')">{{$notif->created_at }}</td>
 										<td data-title="@lang('label.read')">

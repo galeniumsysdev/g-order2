@@ -460,7 +460,7 @@ class OrderController extends Controller
             'href' => route('order.notifnewpo'),
             'mail' => [
               'greeting'=>'Pembatalan PO #'.$header->customer_po.'.',
-              'content' =>$content,            
+              'content' =>$content,
             ]
           ];
           foreach($customer->users as $u)
@@ -507,28 +507,31 @@ class OrderController extends Controller
           foreach($solines as $soline)
           {
             $qtyterima =0;
-            foreach($request->qtyreceive[$soline->line_id] as $key => $qty)
+            if(is_array($request->qtyreceive[$soline->line_id]))
             {
-              if ($key!=-1){
-                $insshipping =SoShipping::updateorCreate(
-                  ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno,'id'=>$key]
-                  ,['qty_accept'=>$qty,'product_id'=>$soline->product_id
-                    ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
-                    ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
-                    ,'tgl_terima'=>Carbon::now()
-                   ]
-                )  ;
-              }else{
-                $insshipping =SoShipping::Create(
-                  ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno
-                    ,'qty_accept'=>$qty,'product_id'=>$soline->product_id
-                    ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
-                    ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
-                    ,'tgl_terima'=>Carbon::now()
-                   ]
-                )  ;
+              foreach($request->qtyreceive[$soline->line_id] as $key => $qty)
+              {
+                  $insshipping =SoShipping::updateorCreate(
+                    ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno,'id'=>$key]
+                    ,['qty_accept'=>$qty,'product_id'=>$soline->product_id
+                      ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
+                      ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
+                      ,'tgl_terima'=>Carbon::now()
+                     ]
+                  )  ;
+
               }
+            }else{
+              $insshipping =SoShipping::Create(
+                ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno
+                  ,'qty_accept'=>$request->qtyreceive[$soline->line_id],'product_id'=>$soline->product_id
+                  ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
+                  ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
+                  ,'tgl_terima'=>Carbon::now()
+                 ]
+              )  ;
             }
+
               $soline->qty_accept = $soline->shippings->sum('qty_accept');
               $soline->save();
               //$qtyterima=$soline->qty_accept+$request->qtyreceive[$soline->line_id];
@@ -553,7 +556,7 @@ class OrderController extends Controller
           or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary){
               $header->status = 3;
           }else{ $header->status = 2;}
-
+          $header->save();
           $dist=Customer::where('id','=',$header->distributor_id)->first();
           $content = 'Pesanan Anda dengan PO nomor: <strong>'.$header->customer_po.'</strong> dan SJ: '.$request->deliveryno.' telah diterime customer.<br>';
           $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
@@ -574,7 +577,7 @@ class OrderController extends Controller
             //event(new PusherBroadcaster($data, $d->email));
             $d->notify(new PushNotif($data));
           }
-          $header->save();
+
           return redirect()->route('order.listPO')->withMessage(trans('pesan.receivePO_msg',['notrx'=>$header->notrx]));
         }else{
           return redirect()->route('order.checkPO',$request->header_id)->withMessage(trans('pesan.cantreceivePO',['notrx'=>$header->notrx]));
@@ -729,6 +732,37 @@ class OrderController extends Controller
                       'qtyshipping' =>$qtykirim,
                       'qtyaccept' =>$qtyterima
                     ],200);
+    }
+
+    public function shippingKurir(){
+      return view('shop.kurir',['ship'=>null]);
+    }
+
+    public function searchShipping(Request $request){
+      $this->validate($request, [
+      'nosj' => 'required',
+      ]);
+      $sjnumber=$request->nosj;
+
+      $ship = SoShipping::whereNotNull('source_header_id')
+              //->join('so_header_v as sh','sh.id','=','so_shipping.header_id')
+              //->join('so_lines_v as sl','sl.line_id','=','so_shipping.line_id')
+              ->where(function($query) use ($sjnumber) {
+                          $query->where('deliveryno','=',$sjnumber)
+                          ->orWhere('waybill','=',$sjnumber);
+                        })
+            /*  ->select('sh.notrx','sh.customer_name','sh.distributor_name',
+                    'sh.tgl_order','sh.ship_to_addr','sh.status', 'sl.title'
+                    ,'so_shipping.qty_shipping'
+                    ,'so_shipping.deliveryno'
+                    ,'so_shipping.waybill'
+                    ,'so_shipping.header_id'
+                    ,'so_shipping.line_id'
+                    ,'so_shipping.uom_primary'
+                      )*/->get();
+    $ship= $ship->groupBy('deliveryno');
+      //dd($ship);
+      return view('shop.kurir',compact('ship'));
     }
 
 }

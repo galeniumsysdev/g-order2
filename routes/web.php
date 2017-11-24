@@ -239,6 +239,10 @@ Route::group(['middleware' => ['auth']], function () {
       return response()->download(storage_path('app/PO/'.$file));
   });
 });
+
+Route::get('/SO/shipping', 'OrderController@shippingKurir')->name('order.shippingSO');
+Route::post('/SO/shipping', 'OrderController@searchShipping')->name('order.searchShippingOracle');
+
 Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->name('order.getStatusOracle');
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');

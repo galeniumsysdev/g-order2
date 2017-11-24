@@ -23,4 +23,5 @@
 	  <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
 		  <span class="fa fa-angle-right" aria-hidden="true"></span>
 	  </a>
-</div><!-- Carousel -->
+  </div><!-- Carousel -->
+</div>  

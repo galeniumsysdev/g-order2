@@ -175,8 +175,8 @@ class DPLController extends Controller {
 		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
 		if(!empty($notified_users)){
 			$data = [
-				'title' => 'Pengajuan DPL #'.$suggest_no,
-				'message' => 'untuk '.$dpl_outlet['customer_name'],
+				'title' => 'Pengajuan DPL',
+				'message' => 'Pengajuan DPL #'.$suggest_no.'untuk '.$dpl_outlet['customer_name'],
 				'id' => $suggest_no,
 				'href' => route('dpl.readNotifDiscount'),
 				'mail' => [

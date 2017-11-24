@@ -52,4 +52,5 @@ return [
     'Tax' => 'PPN',
     'deliveryno' => 'No Surat Jalan',
     'cancelpo' => 'Batalkan PO',
+    'ordernum' => 'No.Order',
 ];
