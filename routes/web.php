@@ -240,8 +240,11 @@ Route::group(['middleware' => ['auth']], function () {
   });
 });
 
-Route::get('/SO/shipping', 'OrderController@shippingKurir')->name('order.shippingSO');
-Route::post('/SO/shipping', 'OrderController@searchShipping')->name('order.searchShippingOracle');
+Route::group(['middleware' => ['role:KurirGPL']], function () {
+  Route::get('/SO/shipping', 'OrderController@shippingKurir')->name('order.shippingSO');
+  Route::post('/SO/shipping', 'OrderController@searchShipping')->name('order.searchShippingOracle');
+  Route::post('/SO/shipconfirm', 'OrderController@shipconfirmcourier')->name('order.shipconfirmcourier');
+});
 
 Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->name('order.getStatusOracle');
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');

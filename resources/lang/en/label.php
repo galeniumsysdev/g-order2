@@ -85,5 +85,6 @@ return [
     'year' => 'Year',
     'month' => 'Month',
     'none' => 'None',
-    'donthaveaccount' => "Don't have an account?"
+    'donthaveaccount' => "Don't have an account?",
+    'shipping' => 'Shipping'
 ];

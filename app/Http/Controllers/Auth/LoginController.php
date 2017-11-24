@@ -52,6 +52,8 @@ class LoginController extends Controller
             return redirect('/admin');
         }elseif(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik') ) {
               return redirect('/product/buy');
+        }elseif(Auth::user()->hasRole('KurirGPL'))      {
+              return redirect()->route('order.shippingSO');    
         }else{/*if(Auth::user()->hasRole('Marketing PSC') || Auth::user()->hasRole('Marketing Pharma')) {*/
             return redirect('/home');
         }

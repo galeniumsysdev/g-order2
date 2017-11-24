@@ -735,7 +735,7 @@ class OrderController extends Controller
     }
 
     public function shippingKurir(){
-      return view('shop.kurir',['ship'=>null]);
+      return view('shop.kurir',['ship'=>null,'sjnumber'=>null]);
     }
 
     public function searchShipping(Request $request){
@@ -745,13 +745,13 @@ class OrderController extends Controller
       $sjnumber=$request->nosj;
 
       $ship = SoShipping::whereNotNull('source_header_id')
-              //->join('so_header_v as sh','sh.id','=','so_shipping.header_id')
-              //->join('so_lines_v as sl','sl.line_id','=','so_shipping.line_id')
+              ->join('so_header_v as sh','sh.id','=','so_shipping.header_id')
+              ->join('so_lines_v as sl','sl.line_id','=','so_shipping.line_id')
               ->where(function($query) use ($sjnumber) {
                           $query->where('deliveryno','=',$sjnumber)
                           ->orWhere('waybill','=',$sjnumber);
                         })
-            /*  ->select('sh.notrx','sh.customer_name','sh.distributor_name',
+              ->select('sh.notrx','sh.customer_name','sh.distributor_name',
                     'sh.tgl_order','sh.ship_to_addr','sh.status', 'sl.title'
                     ,'so_shipping.qty_shipping'
                     ,'so_shipping.deliveryno'
@@ -759,10 +759,25 @@ class OrderController extends Controller
                     ,'so_shipping.header_id'
                     ,'so_shipping.line_id'
                     ,'so_shipping.uom_primary'
-                      )*/->get();
-    $ship= $ship->groupBy('deliveryno');
+                    ,'so_shipping.id','so_shipping.tgl_terima_kurir'
+                      )->get();
+
       //dd($ship);
-      return view('shop.kurir',compact('ship'));
+      return view('shop.kurir',compact('ship','sjnumber'));
+    }
+
+    public function shipconfirmcourier(Request $request)
+    {
+      $this->validate($request, [
+        'nosj' => 'required',
+      ]);
+      if($request->btnterima == "confirm")
+      {
+          $updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
+                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);
+          return redirect()->route('order.shippingSO')->withMessage(trans('pesan.update'));
+      }else return redirect()->back();
+
     }
 
 }
