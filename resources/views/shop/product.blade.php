@@ -8,7 +8,7 @@
 			@include('shop.carausel')
 		</div>
 
-	@foreach($product_flexfields->take(2) as $flexfield)
+	@foreach($product_flexfields as $flexfield)
 		<div class="container-product">
 			<!--JUDUL KATEGORI-->
 			<div class="row" style="margin-left:15px; margin-right:15px;">
@@ -20,7 +20,7 @@
 
 			<div id="carousel-container">
 				<div class="profile-rotater">
-					@foreach($flexfield->products->take(6) as $product)
+					@foreach($flexfield->products->take(10) as $product)
 						@php ($price=0)
 						@php ($disc=0)
 						<div class="col-md-2 col-ms-6 column productbox">
@@ -82,7 +82,7 @@
 										@if($price!=$disc)
 											{{$currency." ".number_format($price,2)}}/{{$uom}}
 										@else
-											{{$currency." ".number_format($price,1)}}/{{$uom}}
+											&nbsp;
 										@endif
 									</div>
 									<input type="hidden" id="hrg-{{$product->id}}" value="{{$price}}">

@@ -9,9 +9,9 @@
      {{csrf_field()}}
      <input type="hidden" id="baseurl" value="{{url('/')}}">
      @if(isset($nama_kategori))
-     <div><h3>Category Product: {{$nama_kategori}}</h3><hr></div>
+     <div><h4>Category Product: {{$nama_kategori}}</h4><hr></div>
      @elseif(Auth::guest())
-      <h3><strong>Top Product</strong></h3>
+      <h4><strong>Top Product</strong></h4>
       <hr>
      @endif
   @forelse($products->chunk(6) as $productChunk)
@@ -28,6 +28,8 @@
             </a>
             <div class="caption">
               <h4><a href="{{ route('product.detail',['id'=>$product->id])}}">{{ $product->title }}</a></h4>
+            </div>
+            <div class="boxprice">
               @if(Auth::check())
                 <div class="input-group input-group-sm" style="width:100%">
                     <input type="text" class="form-control" id="qty-{{$product->id}}" name="qty" value=1 size="2" style="text-align:right;width:50%">
@@ -52,12 +54,10 @@
                   @else
                     {{number_format($product->price_diskon,2)}}/{{$product->satuan_primary}}
                   @endif
-                  @if((float)$product->rate!=1)
-                  ({{(float)$product->rate." ".$product->satuan_primary}})
-                  @endif
+
                 </div>
                 @if($product->harga!=$product->price_diskon)
-                <div class="price coret" id="hrgcoret-{{$product->id}}">
+                  <div class="price coret" id="hrgcoret-{{$product->id}}">
                   @if($product->item=="43")
                     $  {{number_format($product->harga,2)}}
                   @else
@@ -65,13 +65,22 @@
                   @endif
                 </div>
                 @endif
+              @endif
+            </div>
+              @if(Auth::check())
                 <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
                 <input type="hidden" id="disc-{{$product->id}}" value="{{$product->price_diskon}}">
                 <div class ="clearfix" id="addCart-{{$product->id}}">
-                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success pull-right" role="button">Add to cart</a>
+                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block" role="button">Add to cart</a>
                 </div>
+                <div class="info-product" id="info-product-{{$product->id}}">
+									@if(Auth::user()->hasRole('Distributor'))
+										@php ($uom= $product->satuan_secondary)
+										1{{$product->satuan_secondary." = ".(float)$product->rate."/".$product->satuan_primary}}<br>
+									@endif
+								</div>
               @endif
-            </div>
+
           </div>
         </div>
       @endforeach
