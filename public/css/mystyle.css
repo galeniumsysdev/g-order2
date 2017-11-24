@@ -17,11 +17,7 @@
   -webkit-flex-wrap:wrap;
 }
 
-
-<<<<<<< Updated upstream
 .thumbnail .boxprice {
-
->>>>>>> Stashed changes
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -82,6 +78,7 @@
     margin-top: -10px;
     display: flex;
     -webkit-flex:1;
+    flex:1;
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
@@ -172,7 +169,7 @@ body {
   margin: 0;
 }
 .nav>li+li{
-  margin: 0 0 0 12px;
+  margin: 0 0 0 6px;
 }
 
 @media (max-width: 767px) {
@@ -586,7 +583,7 @@ border-radius: 0%;
 }
 
 .navbar-right > li {
-  margin-left: 5px;
+  margin-left: 6px;
 }
 
 .nav.navbar-nav.navbar-right >li >a{
