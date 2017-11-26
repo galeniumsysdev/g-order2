@@ -15,7 +15,8 @@
       <hr>
      @endif
   @forelse($products->chunk(6) as $productChunk)
-    <div class="row display-flex">
+    <div class="row">
+      <div class="display-flex">
       @foreach($productChunk as $product)
         <div class="col-xs-6 col-ms-4 col-sm-4 col-md-2" >
           <div class="thumbnail">
@@ -84,6 +85,7 @@
           </div>
         </div>
       @endforeach
+      </div>
     </div>
   @empty
       <div class="row"><h2 align="center">No Product</h2></div>

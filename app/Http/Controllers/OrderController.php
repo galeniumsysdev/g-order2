@@ -676,7 +676,7 @@ class OrderController extends Controller
                       ->join('products as p','sl.product_id','=','p.id')
                       ->where([
                         ['sl.header_id','=',$h->id]
-                      ])->select('p.itemcode','sl.qty_confirm/sl.conversion_qty as qty_confirm','sl.uom','sl.line_id')
+                      ])->select('p.itemcode',DB::raw('sl.qty_confirm/sl.conversion_qty as qty_confirm'),'sl.uom','sl.line_id')
                       ->get();
                 foreach($line as $l)
                 {

@@ -4,12 +4,12 @@
 		<link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
 		<link rel="stylesheet" href="{{ URL::to('css/displayproduct.css') }}">
 
-		<div class="container-fluid">
+		<div class="container">
 			@include('shop.carausel')
 		</div>
 
 	@foreach($product_flexfields as $flexfield)
-		<div class="container-product">
+		<div class="container container-product">
 			<!--JUDUL KATEGORI-->
 			<div class="row" style="margin-left:15px; margin-right:15px;">
 				<br>

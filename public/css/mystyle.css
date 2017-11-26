@@ -10,7 +10,7 @@
   }
 
 
-.row.display-flex {
+.display-flex {
   display: flex;
   flex-wrap: wrap;
   display:-webkit-flex;
@@ -19,11 +19,13 @@
 
 .thumbnail .boxprice {
   display: flex;
+  -webkit-flex:1;
+  flex:1;
   flex-direction: column;
   height: 100%;
 }
 
-.row.display-flex .col-md-2 {
+.display-flex .col-md-2 {
   padding-left: 0px;
   padding-right:10px;
   padding-bottom:5px;
@@ -37,7 +39,7 @@
     font-size: 12px;
   }
 
-  .row.display-flex .col-xs-6 {
+  .display-flex .col-xs-6 {
       padding-left: 15px;
       padding-right:15px;
       padding-bottom:10px;
