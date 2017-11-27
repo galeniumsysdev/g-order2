@@ -159,6 +159,7 @@ class OutletProductController extends Controller
                               ->where('c.parent','PHARMA')
                               ->groupBy('unit','op_id','title','flag')
                               ->union($stockOutlet)
+                              ->orderBy('title')
                               ->get();
 
   	return response()->json($stockAll);
@@ -177,6 +178,7 @@ class OutletProductController extends Controller
                             ->where('c.parent','PHARMA')
                             ->groupBy('unit','op_id','title','flag')
                             ->union($stockOutlet)
+                            ->orderBy('title')
   													->get();
   	foreach ($stockAll as $key => $prod) {
   		$stockAll[$key]->stock = '<a href="/outlet/product/detail/'.$prod->op_id.'">'.floatval($prod->product_qty).' '.$prod->unit.'</a>';
