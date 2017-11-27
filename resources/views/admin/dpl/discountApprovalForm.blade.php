@@ -116,13 +116,13 @@
                           @endif
                           @php ($totamount  += $amount)
                         </td>
-                        <td class="text-center">
+                        <td data-th="Discount Distributor" class="xs-only-text-left text-center">
                           {{ $line->discount }} %
                         </td>
-                        <td class="text-center">
+                        <td data-th="Discount" class="xs-only-text-left text-center">
                           {{ $line->discount_gpl }} %
                         </td>
-                        <td class="text-center">
+                        <td data-th="Bonus" class="xs-only-text-left text-center">
                           {{ $line->bonus_gpl }}
                         </td>
                       </tr>
