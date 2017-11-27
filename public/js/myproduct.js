@@ -102,22 +102,22 @@ function getPrice(id){
       $('#info-product-'+id).html('1 '+v_uom +' = '+data.konversi+' '+data.uomprimary);
     }else{
       $('#info-product-'+id).html('');
-    }  
+    }
     if(v_itemcode.substr(0,2)=='43')
     {
       $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom);
       if(data.price!=data.diskon)
       {
-        $('#hrgcoret-'+id).html('');
+          $('#hrgcoret-'+id).html('$ '+rupiah(data.price)+'/'+v_uom);
       }else{
-          $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
+          $('#hrgcoret-'+id).html('');
       }
 
     }else{
       $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom);
       if(data.price!=data.diskon)
       {
-        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
+        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price)+'/'+v_uom);
       }else{
         $('#hrgcoret-'+id).html('');
       }

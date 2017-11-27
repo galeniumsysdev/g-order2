@@ -95,7 +95,7 @@
                     {{ csrf_field() }}
                     <input type="hidden" name="header_id" value="{{$header->id}}">
                     @if (($deliveryno->count()==0 and ($header->status>=1 and $header->distributor_id == Auth::user()->customer_id))
-                    or ($deliveryno->count()<=1 and $header->status!= 2 and $header->status>= 0 and $header->status< 4 and $header->customer_id == Auth::user()->customer_id))
+                    or ($deliveryno->count()<=1 and $header->status!= 2 and $header->status>= 0 and $header->status<= 4 and $header->customer_id == Auth::user()->customer_id))
                       <div class="form-group {{ $errors->has('deliveryno') ? ' has-error' : '' }}">
                         <label for="subject" class="col-md-2 control-label">@lang('shop.deliveryno')</label>
                         <div class="col-md-4 ">

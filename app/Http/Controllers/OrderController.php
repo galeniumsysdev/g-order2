@@ -394,16 +394,16 @@ class OrderController extends Controller
           }
 
           $customer = Customer::where('id','=',$header->customer_id)->first();
-          $content = 'PO Anda nomor '.$h->customer_po.' telah dikirimkan oleh '.$h->distributor->customer_name.'. ';
+          $content = 'PO Anda nomor '.$header->customer_po.' telah dikirimkan oleh '.$header->distributor->customer_name.'. ';
           $content .='Silahkan check PO anda kembali.<br>' ;
           $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
           $data=[
             'title' => 'Pengiriman PO',
-            'message' => 'PO #'.$h->customer_po.' telah dikirim',
-            'id' => $h->id,
+            'message' => 'PO #'.$header->customer_po.' telah dikirim',
+            'id' => $header->id,
             'href' => route('order.notifnewpo'),
             'mail' => [
-              'greeting'=>'Pengriman Barang PO #'.$h->customer_po.'.',
+              'greeting'=>'Pengriman Barang PO #'.$header->customer_po.'.',
               'content' =>$content,
             ]
           ];

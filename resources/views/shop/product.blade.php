@@ -14,7 +14,9 @@
 			<div class="row" style="margin-left:15px; margin-right:15px;">
 				<br>
 				<h4><strong>{{$flexfield->description}}</strong></h4>
+				@if($flexfield->products->count()>10)
 				<p class="font-product"><a href="{{route('product.category',$flexfield->flex_value)}}">Lihat Semua &nbsp;</a><i class="fa fa-angle-right" aria-hidden="true"></i></p>
+				@endif
 				<legend></legend>
 			</div>
 
@@ -62,7 +64,7 @@
 								<div class="productprice">
 									<div class="pull-right"></div>
 									<div class="pricetext" id="lblhrg-{{$product->id}}">
-										@if(substr($product->itemcode,1,2)=="43")
+										@if(substr($product->itemcode,0,2)=="43")
 											@php ($currency="$")
 										@else
 											@php ($currency="Rp.")
@@ -74,7 +76,7 @@
 											@php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_primary))
 											@php ($uom = $product->satuan_primary)
 										@endif
-										{{$currency." ".number_format($disc)."/".$uom}}
+										{{$currency." ".number_format($disc,2)."/".$uom}}
 									</div>
 									<div class="price coret" id="hrgcoret-{{$product->id}}">
 										@php ($price = $product->getRealPrice(Auth()->user()->id,$uom))

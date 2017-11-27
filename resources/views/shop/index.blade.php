@@ -46,26 +46,23 @@
                 </div>
                 <div class="clearfix price"  id="lblhrg-{{$product->id}}">
                   @if($product->item=="43")
-                    $
+                    @php ($currency="$ ")
                   @else
-                    Rp.
+                    @php ($currency="Rp. ")
                   @endif
                   @if(Auth::user()->hasRole('Distributor'))
-                    {{number_format($product->price_diskon,2)}}/{{$product->satuan_secondary}}
+                    {{$currency.number_format($product->price_diskon,2)}}/{{$product->satuan_secondary}}
                   @else
-                    {{number_format($product->price_diskon,2)}}/{{$product->satuan_primary}}
+                    {{$currency.number_format($product->price_diskon,2)}}/{{$product->satuan_primary}}
                   @endif
 
-                </div>
-                @if($product->harga!=$product->price_diskon)
+                </div>                
                   <div class="price coret" id="hrgcoret-{{$product->id}}">
-                  @if($product->item=="43")
-                    $  {{number_format($product->harga,2)}}
-                  @else
-                    Rp  {{number_format($product->harga,2)}}
-                  @endif
+                    @if($product->harga!=$product->price_diskon)
+                      {{$curreny.number_format($product->harga,2)}}
+                    @endif
                 </div>
-                @endif
+
               @endif
             </div>
               @if(Auth::check())

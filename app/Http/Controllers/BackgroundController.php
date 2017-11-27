@@ -86,8 +86,7 @@ class BackgroundController extends Controller
                           ,DB::raw("inv_convert.inv_um_convert(ola.inventory_item_id,'ola.order_quantity_uom','".$uom."') as rate'")
                           )->get();*/
                   $oraSO=$this->getSalesOrder($h->notrx,$sl);
-                  //dd($oraSO);
-                  if($oraSO)
+                  if(!is_null($oraSO))
                   {
                     echo "qty:".$oraSO->ordered_quantity."<br>";
                     $sl->qty_confirm =$oraSO->ordered_quantity_primary;
@@ -515,10 +514,11 @@ class BackgroundController extends Controller
                     and ola.inventory_item_id = '".$line->inventory_item_id."'
                     and ola.line_category_code ='ORDER'
                     and nvl(ola.CANCELLED_FLAG,'N')='N'
-                    and oha.flow_status_code ='BOOKED'");
+                    and oha.flow_status_code ='BOOKED'
+                having sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) <> 0");
+
         if($oraSO)
         {
-
           return $oraSO;
         }else{
           return null;

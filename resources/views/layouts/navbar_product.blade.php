@@ -59,7 +59,7 @@
                       @else
                           <a class="navbar-brand" href="{{ url('/home') }}" style="color:#fff">
                       @endif
-                          <strong><img class="img-header" src="{{ URL::to('img/logoe1.png') }}"/></strong>
+                          <img class="img-header" src="{{ URL::to('img/logoe1.png') }}"/>
                         </a>
                       @if(Auth::user())
                         @if(Auth::user()->can('Create PO'))
@@ -140,7 +140,7 @@
                             */
                             -->
                             <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>DPL</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">DPL&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                               <ul class="dropdown-menu">
                                 <li><a href="{{route('dpl.generateForm')}}">@lang('label.generatesuggestno')</a></li>
                                 <li><a href="{{route('dpl.list')}}">@lang('label.listsuggestno')</a></li>
@@ -151,7 +151,7 @@
 
                           @if(Auth::user()->can('uploadCMO') or Auth::user()->can('DownloadCMO'))
                             <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>CMO</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CMO&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                               <ul class="dropdown-menu">
                               @if(Auth::user()->can('UploadCMO'))
                                 <li><a href="{{route('files.uploadcmo')}}">@lang('label.upload') CMO</a></li>
@@ -164,7 +164,7 @@
                           @endif
                           @if(Auth::user()->hasRole('Distributor') or Auth::user()->hasRole('Distributor Cabang') or Auth::user()->hasRole('Outlet') or Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Principal'))
                             <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>List Order</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">List Order&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                               <ul class="dropdown-menu">
                                 @if(Auth::user()->can('CheckStatusSO'))
                                   <li><a href="{{route('order.listSO')}}">Check SO</a></li>
@@ -177,7 +177,7 @@
                           @endif
                           @if (Auth::user()->hasRole('Apotik/Klinik'))
                             <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>Product</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Product&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                               <ul class="dropdown-menu">
                                 <li><a href="{{route('outlet.listProductStock')}}">Product List</a></li>
                                 <li><a href="{{route('outlet.importProduct')}}">Import Product</a></li>
@@ -189,7 +189,7 @@
                           @endif
                           @if(Auth::user()->can('Create PO'))
                               <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><strong>@lang('label.categoryproduct')</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">@lang('label.categoryproduct')&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                                 <ul class="dropdown-menu">
                                   @foreach($product_flexfields as $flexfield)
                                   <li><a href="{{route('product.category',$flexfield->flex_value)}}">{{$flexfield->description}}</a></li>
@@ -197,7 +197,7 @@
                                 </ul>
                               </li>
                               <li class="hidden-xs">
-                                <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart" aria-hidden="true"></i>&nbsp;<strong>@lang('label.shopcart')</strong>
+                                <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart" aria-hidden="true"></i>&nbsp;@lang('label.shopcart')
                                   <span class="badge" id="shopcart">{{ Session::has('cart')?Session::get('cart')->totalQty:"" }}</span>
                                 </a>
                               </li>
