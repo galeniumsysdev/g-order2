@@ -453,9 +453,9 @@ class DPLController extends Controller {
 
 			if ($max_dpl_no) {
 				$max_no = intval(substr($max_dpl_no, 6));
-				$dpl_no = date('Ym') . str_pad($max_no + 1, 5, 0, STR_PAD_LEFT);
+				$dpl_no = date('ym') . str_pad($max_no + 1, 4, 0, STR_PAD_LEFT);
 			} else {
-				$dpl_no = date('Ym') . str_pad(1, 5, 0, STR_PAD_LEFT);
+				$dpl_no = date('ym') . str_pad(1, 4, 0, STR_PAD_LEFT);
 			}
 		} else {
 			$dpl_no = $dpl->dpl_no;
@@ -481,6 +481,28 @@ class DPLController extends Controller {
 
 			$so_header = SoHeader::where('suggest_no',$suggest_no)
 								->update(array('dpl_no'=>$dpl_no));
+
+			$data = [
+				'title' => 'Pengisian No. DPL',
+				'message' => 'Pengisian No. DPL untuk #'.$suggest_no,
+				'id' => $suggest_no,
+				'href' => route('dpl.readNotifDPLInput'),
+				'mail' => [
+					'greeting'=>'',
+					'content'=> ''
+				]
+			];
+
+			/*$distributor = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+			            ->where('id','=',$id)
+			            ->orderBy('customer_name','asc')->first();
+
+			$distributor_email = SoHeader::where('suggest_no',$suggest_no)
+										->join('customers')
+
+			$data['email'] = $mail;
+			$apps_user = User::where('email',$mail)->first();
+			$apps_user->notify(new PushNotif($data));*/
 
 			return redirect()->route('dpl.list');
 		} else {
