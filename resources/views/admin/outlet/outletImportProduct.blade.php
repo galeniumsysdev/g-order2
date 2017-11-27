@@ -34,7 +34,7 @@
                     </div>
                   </div>
                 </div>
-                {!! Form::open(['url' => '/outlet/product/import/view', 'files'=>'true']) !!}
+                {!! Form::open(['url' => route('outlet.importProductView'), 'files'=>'true']) !!}
                   <div class="form-group">
                     <div class="container-fluid">
                       <div class="row">
@@ -57,6 +57,7 @@
                         </div>
                         <div class="col-md-10">
                           {{ Form::submit('Submit', array('class'=>'btn btn-info', 'id'=>'btn-import')) }}
+                          <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">Back</a>
                         </div>
                       </div>
                     </div>
@@ -91,7 +92,7 @@
                               @endforeach
                               </tbody>
                             </table>
-                            {!! Form::open(['url' => '/outlet/product/import/process']) !!}
+                            {!! Form::open(['url' => route('outlet.importProductProcess')]) !!}
                             {{ Form::hidden('data',$data) }}
                             {{ Form::submit('Execute', array('class'=>'btn btn-primary')) }}
                             {{ Form::close() }}

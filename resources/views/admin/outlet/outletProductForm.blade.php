@@ -24,7 +24,7 @@
           <div class="panel-body" style="overflow-x:auto;">
             <div id="tabs" class="simple-tabs">
               <div class="form-wrapper">
-                {!! Form::open(['url' => '/outlet/product/submit', 'class'=>'form-product']) !!}
+                {!! Form::open(['url' => route('outlet.submitProduct'), 'class'=>'form-product']) !!}
                 {{ Form::hidden('id', $product->id) }}
                   <div class="form-group">
                     <div class="container-fluid">

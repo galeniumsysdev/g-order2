@@ -30,7 +30,7 @@
               <!-- Transaction In -->
               <div id="trx-in"> 
                 <div class="form-wrapper">
-                  {!! Form::open(['url' => '/outlet/transaction/in/process', 'class'=>'form-trx']) !!}
+                  {!! Form::open(['url' => route('outlet.trxInProcess'), 'class'=>'form-trx']) !!}
                     <div class="form-group">
                       <div class="container-fluid">
                         <div class="row">
@@ -96,7 +96,7 @@
               <!-- Transaction Out -->
               <div id="trx-out"> 
                 <div class="form-wrapper">
-                  {!! Form::open(['url' => '/outlet/transaction/out/process', 'class'=>'form-trx']) !!}
+                  {!! Form::open(['url' => route('outlet.trxOutProcess'), 'class'=>'form-trx']) !!}
                     <div class="form-group">
                       <div class="container-fluid">
                         <div class="row">
