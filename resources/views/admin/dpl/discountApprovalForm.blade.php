@@ -141,7 +141,7 @@
                       <div class="col-md-10">
                       <!-- Form Approve -->
                         <div class="button-wrapper">
-                          {!! Form::open(['url' => '/dpl/discount/approval', 'id'=>'generate-sugg-no-form']) !!}
+                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'generate-sugg-no-form']) !!}
                             {{ Form::hidden('action','Approve') }}
                             {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
                             {{ Form::submit('Approve',array('class'=>'btn btn-primary')) }}
@@ -149,10 +149,11 @@
                         </div>
                       <!-- Form Reject -->
                         <div class="button-wrapper">
-                          {!! Form::open(['url' => '/dpl/discount/approval', 'id'=>'generate-sugg-no-form']) !!}
+                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'generate-sugg-no-form']) !!}
                             {{ Form::hidden('action','Reject') }}
                             {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
                             {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
+                            &nbsp;<a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
                           {{ Form::close() }}
                         </div>
                       </div>

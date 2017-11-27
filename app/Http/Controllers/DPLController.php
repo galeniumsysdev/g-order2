@@ -243,16 +243,30 @@ class DPLController extends Controller {
 			$user_role = Auth::user()->roles;
 			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
 			if(!empty($notified_users)){
-				$data = [
-					'title' => 'Permohonan Approval',
-					'message' => 'Permohonan Approval #'.$suggest_no,
-					'id' => $suggest_no,
-					'href' => route('dpl.readNotifApproval'),
-					'mail' => [
-						'greeting'=>'',
-						'content'=> ''
-					]
-				];
+				if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+					$data = [
+						'title' => 'Permohonan Approval',
+						'message' => 'Permohonan Approval #'.$suggest_no,
+						'id' => $suggest_no,
+						'href' => route('dpl.readNotifApproval'),
+						'mail' => [
+							'greeting'=>'',
+							'content'=> ''
+						]
+					];
+				}
+				else{
+					$data = [
+						'title' => 'Pengisian No. DPL',
+						'message' => 'Pengisian No. DPL untuk #'.$suggest_no,
+						'id' => $suggest_no,
+						'href' => route('dpl.readNotifDPLInput'),
+						'mail' => [
+							'greeting'=>'',
+							'content'=> ''
+						]
+					];
+				}
 				foreach ($notified_users as $key => $email) {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 						->update(array('approved_by' => Auth::user()->id, 'next_approver' => $key));
@@ -329,6 +343,12 @@ class DPLController extends Controller {
 		if($curr_pos == '' || ($curr_pos != 'FSM' && $curr_pos != 'HSM'))
 			$positions['FSM_HSM'][] = $next_approver['email'];
 
+		$fill_no_dpl = User::whereHas('roles', function($q){
+								    $q->where('name', 'Admin DPL');
+								})->first();
+		if($curr_pos == 'FSM' || $curr_pos == 'HSM')
+			$positions['Admin DPL'][] = $fill_no_dpl['email'];
+
 		return $positions;
 	}
 
@@ -346,6 +366,14 @@ class DPLController extends Controller {
 		            ->update(['read_at' => Carbon::now()]);
 
 		return redirect()->route('dpl.discountForm',$suggest_no);
+	}
+
+	public function readNotifDPLInput($suggest_no, $notifid){
+		Auth::User()->notifications()
+		           	->where('id','=',$notifid)
+		            ->update(['read_at' => Carbon::now()]);
+
+		return redirect()->route('dpl.dplNoForm',$suggest_no);
 	}
 
 	public function dplLog($suggest_no, $type) {
@@ -406,13 +434,14 @@ class DPLController extends Controller {
 			'users.name as dpl_mr_name',
 			'outlet.id as dpl_outlet_id',
 			'outlet.customer_name as dpl_outlet_name',
-			'distributor.id as dpl_distributor_id',
+			'sh.distributor_id as dpl_distributor_id',
 			'distributor.customer_name as dpl_distributor_name',
 			'dpl_suggest_no.suggest_no',
-			'dpl_no')
+			'dpl_no.dpl_no')
 			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
-			->join('customers as distributor', 'distributor.id', 'dpl_suggest_no.distributor_id')
+			->join('so_headers as sh', 'sh.notrx', 'dpl_suggest_no.notrx')
+			->join('customers as distributor', 'distributor.id', 'sh.distributor_id')
 			->leftjoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->where('dpl_suggest_no.suggest_no', $suggest_no)
 			->where('active', 1)
@@ -424,9 +453,9 @@ class DPLController extends Controller {
 
 			if ($max_dpl_no) {
 				$max_no = intval(substr($max_dpl_no, 6));
-				$dpl_no = date('Ym') . str_pad($max_no + 1, 5, 0, STR_PAD_LEFT);
+				$dpl_no = date('ym') . str_pad($max_no + 1, 4, 0, STR_PAD_LEFT);
 			} else {
-				$dpl_no = date('Ym') . str_pad(1, 5, 0, STR_PAD_LEFT);
+				$dpl_no = date('ym') . str_pad(1, 4, 0, STR_PAD_LEFT);
 			}
 		} else {
 			$dpl_no = $dpl->dpl_no;
@@ -450,7 +479,32 @@ class DPLController extends Controller {
 			$dpl->suggest_no = $suggest_no;
 			$dpl->save();
 
-			print_r($dpl);
+			$so_header = SoHeader::where('suggest_no',$suggest_no)
+								->update(array('dpl_no'=>$dpl_no));
+
+			$data = [
+				'title' => 'Pengisian No. DPL',
+				'message' => 'Pengisian No. DPL untuk #'.$suggest_no,
+				'id' => $suggest_no,
+				'href' => route('dpl.readNotifDPLInput'),
+				'mail' => [
+					'greeting'=>'',
+					'content'=> ''
+				]
+			];
+
+			/*$distributor = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+			            ->where('id','=',$id)
+			            ->orderBy('customer_name','asc')->first();
+
+			$distributor_email = SoHeader::where('suggest_no',$suggest_no)
+										->join('customers')
+
+			$data['email'] = $mail;
+			$apps_user = User::where('email',$mail)->first();
+			$apps_user->notify(new PushNotif($data));*/
+
+			return redirect()->route('dpl.list');
 		} else {
 			return redirect()->back()->withInput()->with('msg', 'DPL No #' . $dpl_no . ' already exist.');
 		}

@@ -13,7 +13,7 @@
     </div>
   @endif
 
-  {!! Form::open(['url' => '/dpl/discount/set', 'id'=>'generate-sugg-no-form']) !!}
+  {!! Form::open(['url' => route('dpl.discountSet'), 'id'=>'generate-sugg-no-form']) !!}
   {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
   {{ Form::hidden('notrx',$dpl['notrx'],array('id'=>'suggest_no')) }}
   <div class="container">
@@ -150,6 +150,7 @@
                       </div>
                       <div class="col-md-10">
                         {{ Form::submit('Save',array('class'=>'btn btn-primary')) }}
+                        <a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
                       </div>
                     </div>
                   </div>

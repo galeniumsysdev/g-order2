@@ -13,12 +13,12 @@
     </div>
   @endif
 
-  {!! Form::open(['url' => '/dpl/input/set', 'id'=>'dpl-no-input-form']) !!}
+  {!! Form::open(['url' => route('dpl.dplNoSet'), 'id'=>'dpl-no-input-form']) !!}
   <div class="container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Discount Form</strong></div>
+          <div class="panel-heading"><strong>DPL No. Form</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">

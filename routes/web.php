@@ -292,13 +292,14 @@ Route::post('/dpl/discount/set','DPLController@discountSet')->name('dpl.discount
 Route::get('/dpl/discount/approval/{suggest_no}','DPLController@discountApprovalForm')->name('dpl.discountApproval');
 Route::post('/dpl/discount/approval','DPLController@discountApprovalSet')->name('dpl.discountApprovalSet');
 
-Route::get('/dpl/discount/{suggest_no?}/{notifid?}','DPLController@readNotifDiscount')->name('dpl.readNotifDiscount');
-Route::get('/dpl/approval/{suggest_no?}/{notifid?}','DPLController@readNotifApproval')->name('dpl.readNotifApproval');
-
 Route::get('/dpl/history/{suggest_no}','DPLController@dplLogHistory')->name('dpl.dplHistory');
 
 Route::get('/dpl/input/form/{suggest_no}','DPLController@dplNoInputForm')->name('dpl.dplNoForm');
 Route::post('/dpl/input/set','DPLController@dplNoInputSet')->name('dpl.dplNoSet');
+
+Route::get('/dpl/discount/{suggest_no?}/{notifid?}','DPLController@readNotifDiscount')->name('dpl.readNotifDiscount');
+Route::get('/dpl/approval/{suggest_no?}/{notifid?}','DPLController@readNotifApproval')->name('dpl.readNotifApproval');
+Route::get('/dpl/input/{suggest_no?}/{notifid?}','DPLController@readNotifDPLInput')->name('dpl.readNotifDPLInput');
 
 //Organization Structure
 Route::get('/Organization','OrgStructureController@index')->name('org.list');
