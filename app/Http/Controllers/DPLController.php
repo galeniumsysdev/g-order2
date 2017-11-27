@@ -8,6 +8,7 @@ namespace App\Http\Controllers;
 use App\DPLLog;
 use App\DPLNo;
 use App\DPLSuggestNo;
+use App\Customer;
 use App\OrgStructure;
 use App\OutletDistributor;
 use App\SoHeader;
@@ -273,7 +274,8 @@ class DPLController extends Controller {
 					foreach ($email as $key => $mail) {
 						$data['email'] = $mail;
 						$apps_user = User::where('email',$mail)->first();
-						$apps_user->notify(new PushNotif($data));
+						if(!empty($apps_user))
+							$apps_user->notify(new PushNotif($data));
 					}
 					break;
 				}
@@ -298,7 +300,8 @@ class DPLController extends Controller {
 					foreach ($email as $key => $mail) {
 						$data['email'] = $mail;
 						$apps_user = User::where('email',$mail)->first();
-						$apps_user->notify(new PushNotif($data));
+						if(!empty($apps_user))
+							$apps_user->notify(new PushNotif($data));
 					}
 				}
 			}
@@ -472,7 +475,7 @@ class DPLController extends Controller {
 		$this->dplLog($suggest_no, 'Input DPL No #' . $dpl_no);
 
 		$check_dpl = DPLNo::where('dpl_no', $dpl_no)->count();
-
+		
 		if (!$check_dpl) {
 			$dpl = new DPLNo;
 			$dpl->dpl_no = $dpl_no;
@@ -480,29 +483,26 @@ class DPLController extends Controller {
 			$dpl->save();
 
 			$so_header = SoHeader::where('suggest_no',$suggest_no)
-								->update(array('dpl_no'=>$dpl_no));
+								->update(array('dpl_no'=>$dpl_no, 'status'=>0));
+
+			$so_header = SoHeader::where('suggest_no',$suggest_no)->first();
+										
+			$distributor = Customer::where('id','=',$so_header['distributor_id'])->first();
 
 			$data = [
-				'title' => 'Pengisian No. DPL',
-				'message' => 'Pengisian No. DPL untuk #'.$suggest_no,
-				'id' => $suggest_no,
-				'href' => route('dpl.readNotifDPLInput'),
+				'title' => 'DPL Diterima',
+				'message' => 'No.usulan #'.$suggest_no.' diterima',
+				'id' => $so_header['id'],
+				'href' => route('order.notifnewpo'),
 				'mail' => [
 					'greeting'=>'',
 					'content'=> ''
-				]
+				],
+				'email'=> $distributor->user->email
 			];
 
-			/*$distributor = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
-			            ->where('id','=',$id)
-			            ->orderBy('customer_name','asc')->first();
-
-			$distributor_email = SoHeader::where('suggest_no',$suggest_no)
-										->join('customers')
-
-			$data['email'] = $mail;
-			$apps_user = User::where('email',$mail)->first();
-			$apps_user->notify(new PushNotif($data));*/
+			$apps_user = User::where('email',$distributor->user->email)->first();
+			$apps_user->notify(new PushNotif($data));
 
 			return redirect()->route('dpl.list');
 		} else {
