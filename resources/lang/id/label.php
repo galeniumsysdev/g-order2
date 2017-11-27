@@ -85,5 +85,6 @@ return [
     'year' => 'Tahun',
     'month' => 'Bulan',
     'none' => 'Belum diproses',
-    'donthaveaccount' => "Belum punya akun?"
+    'donthaveaccount' => "Belum punya akun?",
+    'shipping' => 'Pengiriman'
 ];

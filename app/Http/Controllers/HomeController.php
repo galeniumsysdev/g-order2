@@ -30,7 +30,9 @@ class HomeController extends Controller
       }
         $request->status_read="0";
         $notifications = Auth::User()->notifications()->whereNull('read_at')->get();
-        return view('home', compact('notifications','request'));
+        $group = array_column(Auth::User()->notifications()->get()->pluck('data')->toArray(),'tipe');
+        $jnsnotif= array_unique($group);
+        return view('home', compact('notifications','request','jnsnotif'));
     }
 
     public function search(Request $request)
@@ -64,8 +66,10 @@ class HomeController extends Controller
         $notifications = $notifications->whereNotNull('read_at');
       }
       $notifications = $notifications->get();
-      //dd($notifications);
-      return view('home', compact('notifications','request'));
+    //  var_dump($notifications->pluck('data')->toArray());
+      $group = array_column(Auth::User()->notifications()->pluck('data')->toArray(),'tipe');
+      $jnsnotif= array_unique($group);
+      return view('home', compact('notifications','request','jnsnotif'));
 
     }
 }

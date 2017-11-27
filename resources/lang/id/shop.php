@@ -52,4 +52,7 @@ return [
     'Tax' => 'PPN',
     'deliveryno' => 'No Surat Jalan',
     'cancelpo' => 'Batalkan PO',
+    'ordernum' => 'No.Order',
+    'finish_shipping'=>'Selesai Kirim',
+    'date_confirm' => 'Tanggal Confirm',
 ];

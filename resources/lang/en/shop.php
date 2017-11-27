@@ -52,5 +52,8 @@ return [
     'Tax' => 'Tax',
     'deliveryno' => 'Delivery No',
     'cancelpo' => 'Cancel PO',
-    'acceptpo' => 'Accept PO'
+    'acceptpo' => 'Accept PO',
+    'ordernum' => 'Order Number',
+    'finish_shipping'=>'Shipping Successfully',
+    'date_confirm'=> 'Date Confirm'
 ];

@@ -12,7 +12,10 @@ class SoShipping extends Model
       ,'uom_primary','qty_request_primary','conversion_qty','qty_shipping','qty_accept','batchno','split_source_id','tgl_kirim'
       ,'tgl_terima','tgl_terima_kurir','userid_kurir','header_id', 'line_id','waybill'
   ];
-
+  public function header()
+  {
+    return $this->belongsTo('App\SoHeader','header_id','id');
+  }
   public function lines()
   {
     return $this->belongsTo('App\SoLine','line_id','line_id');

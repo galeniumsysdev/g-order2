@@ -128,6 +128,7 @@ class ProductController extends Controller
 
   public function getSqlProduct()
   {
+    if(Auth::check()){
     if(Auth::user()->hasRole('Distributor'))
     {
         $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_secondary,1 ) price_diskon from products as p where enabled_flag='Y' ";
@@ -191,6 +192,7 @@ class ProductController extends Controller
 
       //}
     }
+   }
     return $sqlproduct;
   }
 
@@ -302,7 +304,7 @@ class ProductController extends Controller
       $kategory = Category::find($id);
       //$products = $kategory->products()->paginate(12);
       $perPage = 30; // Item per page
-      $oldDisttributor = $this->getDistributor();
+    /*  $oldDisttributor = $this->getDistributor();
 
       if(!is_null($oldDisttributor))
       {
@@ -310,7 +312,7 @@ class ProductController extends Controller
         {
           return view('shop.sites',['distributors' => $oldDisttributor]);
         }
-      }
+      }*/
       $sqlproduct = $this->getSqlProduct();
       $currentPage = Input::get('page') - 1;
       $sqlproduct .= " and exists (select 1
@@ -896,7 +898,7 @@ class ProductController extends Controller
 
           $updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
                                     ->update(array('notrx'=>$notrx));
-                                    
+
           $notified_users = app('App\Http\Controllers\DplController')->getArrayNotifiedEmail($suggest_no,'');
     			if(!empty($notified_users)){
     				$data = [

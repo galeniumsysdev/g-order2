@@ -269,7 +269,7 @@
                           <button type="submit" name="approve" value="approve" class="btn btn-success btn-block text-right">@lang('label.approve')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button>
                         @elseif($header->status==0 and $header->approve==1 and Auth::user()->customer_id==$header->distributor_id)
                           <button type="submit" name="createExcel" value="Create Excel" class="btn btn-success btn-block">@lang('shop.createexcel')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button>
-                        @elseif($header->status==0 and $header->approve==0 and Auth::user()->customer_id==$header->customer_id)
+                        @elseif($header->status==0 and Auth::user()->customer_id==$header->customer_id)
                           <button type="submit" name="batal" value="batal" class="btn btn-warning btn-block">@lang('label.cancel') <i class="fa fa-angle-right" style="color:#fff"></i></button>
                         @elseif($header->status==3 and Auth::user()->customer_id==$header->customer_id and $deliveryno->count()==1)
                           <button type="submit" name="terima" value="terima" class="btn btn-success btn-block">@lang('shop.Receive')&nbsp; <i class="fa fa-angle-right" style="color:#fff"></i></button>

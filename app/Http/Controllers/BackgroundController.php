@@ -132,7 +132,7 @@ class BackgroundController extends Controller
          					'href' => route('order.notifnewpo'),
          					'mail' => [
          						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-                    'content' =>$content,                  
+                    'content' =>$content,
          					]
          				];
                  foreach($customer->users as $u)
@@ -482,7 +482,7 @@ class BackgroundController extends Controller
             ,'uom'=>$ship->src_requested_quantity_uom,'qty_request'=>$ship->src_requested_quantity
             ,'uom_primary'=>$ship->primary_uom,'qty_request_primary'=>$ship->requested_quantity
             ,'qty_shipping'=>$ship->picked_quantity
-            ,'batch_no'=>$ship->lot_number
+            ,'batchno'=>$ship->lot_number
             ,'split_source_id'=>$ship->split_from_delivery_detail_id
             ,'tgl_kirim'=>$ship->transaction_date
             ,'conversion_qty'=>$ship->convert_qty

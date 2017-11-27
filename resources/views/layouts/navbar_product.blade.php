@@ -130,6 +130,9 @@
                           @if(Auth::user()->can('Outlet_Distributor'))
                             <li><a href="{{ route('customer.listNoo') }}">List Noo</a></li>
                           @endif
+                          @if(Auth::user()->hasRole('KurirGPL'))
+                            <li><a href="{{ route('order.shippingSO') }}"><i class="fa fa-truck" aria-hidden="true"></i> @lang('label.shipping')</a></li>
+                          @endif
                           @if(Auth::user()->can('PengajuanDPL'))
                             <!--
                             /**
