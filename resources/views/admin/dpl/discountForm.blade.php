@@ -120,19 +120,19 @@
                           @endif
                           @php ($totamount  += $amount)
                         </td>
-                        <td data-th="Discount<br/>Distributor">
+                        <td data-th="Discount Distributor" class="xs-only-text-left text-center">
                           <div class="input-prepend input-group">
                             <input type="number" name="discount[{{$id}}]" id="discount-{{$id}}" class="form-control text-center" value="{{ $line->discount }}" style="min-width:80px;">
                             <span class="add-on input-group-addon">%</span>
                           </div>
                         </td>
-                        <td data-th="Discount">
+                        <td data-th="Discount" class="xs-only-text-left text-center">
                           <div class="input-prepend input-group">
                             <input type="number" name="discount_gpl[{{$id}}]" id="discount-gpl-{{$id}}" class="form-control text-center" value="{{ $line->discount_gpl }}" style="min-width:80px;">
                             <span class="add-on input-group-addon">%</span>
                           </div>
                         </td>
-                        <td>
+                        <td data-th="Bonus" class="xs-only-text-left text-center">
                           <input type="number" name="bonus_gpl[{{$id}}]" id="bonus-gpl-{{$id}}" class="form-control text-center" value="{{ $line->bonus_gpl }}" style="min-width:80px;">
                         </td>
                       </tr>
