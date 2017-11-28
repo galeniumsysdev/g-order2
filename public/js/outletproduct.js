@@ -7,14 +7,18 @@ $(document).ready(function() {
     }
 
     if($('#import-product').length){
-    	$('#import-product').DataTable();
+    	$('#import-product').DataTable({
+            'order': [],
+        });
         window.setTimeout(function(){
             $(window).resize();
         },2000);
     }
 
 	if($('#import-stock').length){
-    	$('#import-stock').DataTable();
+    	$('#import-stock').DataTable({
+            'order': [],
+        });
         window.setTimeout(function(){
             $(window).resize();
         },2000);
@@ -96,4 +100,11 @@ $(document).ready(function() {
 
     if($('#tabs').length)
         $('#tabs').tabs();
+
+    $('#form-product').submit(function(e){
+        if($('.duplicate').length){
+            e.preventDefault();
+            alert('Please fix the duplicate item(s).');
+        }
+    })
 });

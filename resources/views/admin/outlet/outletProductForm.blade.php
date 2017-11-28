@@ -12,7 +12,7 @@
   <link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
   @if($status= Session::get('msg'))
     <div class="alert alert-info">
-        {{$status}}
+        {!!$status!!}
     </div>
   @endif
 

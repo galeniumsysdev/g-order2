@@ -80,19 +80,21 @@
                                   <th>Title</th>
                                   <th>Satuan</th>
                                   <th>Harga</th>
+                                  <th></th>
                                 </tr>
                               </thead>
                               <tbody>
                               @foreach ($data as $cell)
                                 <tr>
-                                  <td>{{ $cell['nama_barang'] }}</td>
-                                  <td>{{ $cell['satuan'] }}</td>
-                                  <td>{{ number_format(floatval($cell['price']),0,',','.') }}</td>
+                                  <td>{{ strtoupper($cell['nama_barang']) }}</td>
+                                  <td>{{ strtoupper($cell['satuan']) }}</td>
+                                  <td align="right">{{ number_format(floatval($cell['price']),0,',','.') }}</td>
+                                  <td align="center">{!! $cell['exist'] !!}
                                 </tr>
                               @endforeach
                               </tbody>
                             </table>
-                            {!! Form::open(['url' => route('outlet.importProductProcess')]) !!}
+                            {!! Form::open(['url' => route('outlet.importProductProcess'), 'id'=>'form-product']) !!}
                             {{ Form::hidden('data',$data) }}
                             {{ Form::submit('Execute', array('class'=>'btn btn-primary')) }}
                             {{ Form::close() }}

@@ -31,6 +31,13 @@ class OutletProductController extends Controller
 	    $file = $request->file_import;
 
 	    $data = Excel::load($file, function($reader){})->get();
+      foreach ($data as $key => $prod) {
+        $check = OutletProducts::where('title', strtoupper($prod['nama_barang']))->count();
+        if($check)
+          $data[$key]['exist'] = '<span class="text-danger duplicate">Duplicate</span>';
+        else
+          $data[$key]['exist'] = '';
+      }
 	  }
 
   	return view('admin.outlet.outletImportProduct', array('data'=>$data));
@@ -43,8 +50,8 @@ class OutletProductController extends Controller
   	$product = array();
   	foreach ($data as $key => $new) {
   		$product[$key]['id'] = Uuid::generate();
-  		$product[$key]['title'] = $new->nama_barang;
-  		$product[$key]['unit'] = $new->satuan;
+  		$product[$key]['title'] = strtoupper($new->nama_barang);
+  		$product[$key]['unit'] = strtoupper($new->satuan);
   		$product[$key]['price'] = (intval($new->price)) ? intval($new->price) : 0;
   		$product[$key]['enabled_flag'] = 'Y';
   		$product[$key]['created_at'] = date('Y-m-d H:i:s', time());
@@ -250,9 +257,14 @@ class OutletProductController extends Controller
   public function submitProduct(Request $request)
   {
     $id = $request->id;
-    $product_name = $request->product_name;
-    $unit = $request->product_unit;
+    $product_name = strtoupper($request->product_name);
+    $unit = strtoupper($request->product_unit);
     $price = $request->product_price;
+
+    $check = OutletProducts::where('title',$product_name)->count();
+
+    if($check)
+      return redirect()->back()->withInput()->with('msg','<span class="text-danger">Product is already exist.</span>');
 
     if(!$id){
       $product = new OutletProducts;
