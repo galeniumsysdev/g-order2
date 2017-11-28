@@ -48,6 +48,13 @@ $(document).ready(function() {
         });
     }
 
+    if($('.date-range').length){
+        $('.date-range').datetimepicker({
+            format: "DD MMMM YYYY",
+            locale: "en"
+        });
+    }
+
     if($('#product-name-in, #product-name-out').length){
         $.get(window.Laravel.url+'/outlet/product/getList/',
             function (data) {
@@ -107,4 +114,54 @@ $(document).ready(function() {
             alert('Please fix the duplicate item(s).');
         }
     })
+
+    if($('#outlet-name').length){
+        $.get(window.Laravel.url+'/ajax/typeaheadOutlet/',
+            function(data){
+                $('#outlet-name').typeahead({
+                    name: 'outlet',
+                    source: data,
+                    items: 'all',
+                    showHintOnFocus: 'all',
+                    displayText: function (item) {
+                        return item.customer_name;
+                    }
+                });
+            }, 'json');
+    }
+
+    if($('#province').length){
+        $.get(window.Laravel.url+'/ajax/typeaheadProvince/',
+            function(data){
+                $('#province').typeahead({
+                    name: 'province',
+                    source: data,
+                    items: 'all',
+                    showHintOnFocus: 'all',
+                    displayText: function (item) {
+                        return item.name;
+                    },
+                    afterSelect: function (item) {
+                        $('#area').val('');
+                        $('#area').attr('disabled');
+                        $.get(window.Laravel.url+'/ajax/getCity',{
+                            id: item.id
+                        }).done(
+                            function(data){
+                                $('#area').removeAttr('disabled');
+                                $('#area').typeahead('destroy');
+                                $('#area').typeahead({
+                                    name: 'area',
+                                    source: data,
+                                    items: 'all',
+                                    showHintOnFocus: 'all',
+                                    displayText: function (item) {
+                                        return item.name;
+                                    }
+                                });
+                            }, 'json');
+                    }
+                });
+            }, 'json');
+    }
 });
