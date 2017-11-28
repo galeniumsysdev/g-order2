@@ -202,7 +202,7 @@ Route::group(['middleware' => ['permission:ApproveOutlet']], function () {
 /*
 Route::get('/csv/user', function()
 {
-    if (($handle = fopen(public_path() . '/uploads/user2.csv','r')) !== FALSE)
+    if (($handle = fopen(public_path() . '/uploads/USER DPL.csv','r')) !== FALSE)
     {
         while (($data = fgetcsv($handle, 1000, ',')) !==FALSE)
         {
@@ -211,7 +211,6 @@ Route::get('/csv/user', function()
                 $user->name = $data[0];
                 $user->email = $data[1];
                 $user->password = bcrypt('123456');
-                $user->customer_id = $data[2];
                 $user->validate_flag = 1;
                 $user->register_flag = 1;
                 $user->avatar = 'default.jpg';
