@@ -29,6 +29,14 @@ class DPLController extends Controller {
 	public function generateSuggestNoForm() {
 		$user = Auth::User();
 		$outlets = OutletDistributor::join('customers', 'customers.id', 'outlet_distributor.outlet_id')
+			->join('users as u','customers.id','u.customer_id')
+			->join('role_user as ru','ru.user_id','u.id')
+			->join('roles as r','ru.role_id','r.id')
+			->where('customers.pharma_flag','=','1')
+			->whereIn('r.name',['Outlet','Apotik/Klinik'])
+			->where('customers.status','=','A')
+			->where('u.register_flag','=',1)
+			->select('customers.id','customers.customer_name')
 			->get();
 
 		$outlet_list = array('---Pilih---');
@@ -176,8 +184,8 @@ class DPLController extends Controller {
 		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
 		if(!empty($notified_users)){
 			$data = [
-				'title' => 'Pengajuan DPL',
-				'message' => 'Pengajuan DPL #'.$suggest_no.'untuk '.$dpl_outlet['customer_name'],
+				'title' => 'Permohonan Approval',
+				'message' => 'Permohonan Approval DPL #'.$suggest_no,
 				'id' => $suggest_no,
 				'href' => route('dpl.readNotifDiscount'),
 				'mail' => [
@@ -475,23 +483,58 @@ class DPLController extends Controller {
 		$this->dplLog($suggest_no, 'Input DPL No #' . $dpl_no);
 
 		$check_dpl = DPLNo::where('dpl_no', $dpl_no)->count();
-		
+
 		if (!$check_dpl) {
 			$dpl = new DPLNo;
 			$dpl->dpl_no = $dpl_no;
 			$dpl->suggest_no = $suggest_no;
 			$dpl->save();
-
-			$so_header = SoHeader::where('suggest_no',$suggest_no)
-								->update(array('dpl_no'=>$dpl_no, 'status'=>0));
-
 			$so_header = SoHeader::where('suggest_no',$suggest_no)->first();
-										
+			$so_header->dpl_no = $dpl_no;
+			$so_header->status = 0;
+			$so_header->save();
+
+			$solines = SoLine::where('header_id','=',$so_header->id)
+								->where(function($query1){
+										$query1->whereNotNull('discount')
+														->orWhereNotNull('discount_gpl')
+														->orWhereNotNull('bonus_gpl');
+								})
+								->get();
+			foreach($solines as $soline){
+				if(intval($soline->bonus_gpl)!=0)
+				{
+					$newline = SoLine::Create(['header_id'=>$soline->headeR_id
+													,'product_id'=>$soline->product_id
+													,'uom'=>$soline->uom_primary
+													,'qty_request'=>$soline->bonus_gpl
+													,'list_price'=>$soline->list_price
+													,'unit_price'=>0
+													,'amount'=>0
+													,'tax_amount'=>0
+													,'tax_type'=>$soline->tax_type
+													,'conversion_qty'=>1
+													,'inventory_item_id'=>$soline->inventory_item_id
+													,'uom_primary'=>$soline->uom_primary
+													,'qty_request_primary'=>$soline->bonus_gpl
+													]);
+				}else{
+						$discount = intval($soline->discount)+intval($soline->discount_gpl);
+						$unitprice = $soline->list_price * (100-$discount)/100;
+						$soline->unit_price = $unitprice;
+						$soline->amount=$soline->qty_request*$unitprice;
+						$soline->save();
+				}
+			}
+
+			/*$so_header = SoHeader::where('suggest_no',$suggest_no)
+								->update(array('dpl_no'=>$dpl_no, 'status'=>0));*/
+
 			$distributor = Customer::where('id','=',$so_header['distributor_id'])->first();
 
 			$data = [
-				'title' => 'DPL Diterima',
-				'message' => 'No.usulan #'.$suggest_no.' diterima',
+				'title' => 'New PO DPL',
+				'message' => 'New PO '.$so_header->notrx.' dg DPL#'.$dpl_no,
 				'id' => $so_header['id'],
 				'href' => route('order.notifnewpo'),
 				'mail' => [

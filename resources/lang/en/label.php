@@ -21,7 +21,7 @@ return [
     'address' => 'Address',
     'province' => 'Province',
     'city_regency' => 'City / Regency',
-    'subdistrict' => 'Subdistrict',
+    'subdistrict' => 'District',
     'urban_village' => 'Urban Village',
     'postalcode' => 'Postal Code',
     'hp1' => 'Handphone 1',

@@ -29,7 +29,7 @@ class ProfileController extends Controller
                     ['u.id','=',$user->id],
                     ['c.status','=','A'],
                   ])
-                  ->select('u.email','c.id','u.name','co.name as tipeoutlet','c.tax_reference','u.avatar')
+                  ->select('u.email','c.id','u.name','co.name as tipeoutlet','c.tax_reference','u.avatar','c.psc_flag','c.export_flag','c.pharma_flag','c.tollin_flag')
                   ->first();
       $customer_sites = CustomerSite::where('customer_id','=',$user->customer_id)->orderBy('site_use_code')->get();
       $customer_contacts = CustomerContact::where('customer_id','=',$user->customer_id)->get();
