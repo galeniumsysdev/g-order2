@@ -22,13 +22,14 @@
           <div class="thumbnail">
             <a href="{{ route('product.detail',['id'=>$product->id])}}" title="{{ $product->title }}">
             @if($product->imagePath)
-              <img data-src="holder.js/100%x180" alt="100%x180"  class="img product" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
+              <img data-src="holder.js/100%x180" alt="No Picture"  class="img product" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
             @else
-              <img data-src="holder.js/100%x180" alt="100%x180" class="img product" src="" data-holder-rendered="true">
+              <img data-src="holder.js/100%x180" alt="No Picture" class="img product" src="" data-holder-rendered="true">
             @endif
             </a>
-            <div class="caption">
-              <h4><a href="{{ route('product.detail',['id'=>$product->id])}}">{{ $product->title }}</a></h4>
+            <legend></legend>
+			<div class="caption">
+              <h4 style="text-align:center; margin-top:-2px; margin-bottom:-5px;"><a href="{{ route('product.detail',['id'=>$product->id])}}">{{ $product->title }}</a></h4>
             </div>
             <div class="boxprice">
               @if(Auth::check())
@@ -72,13 +73,12 @@
                   <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block" role="button">Add to cart</a>
                 </div>
                 <div class="info-product" id="info-product-{{$product->id}}">
-									@if(Auth::user()->hasRole('Distributor'))
-										@php ($uom= $product->satuan_secondary)
-										1{{$product->satuan_secondary." = ".(float)$product->rate."/".$product->satuan_primary}}<br>
-									@endif
-								</div>
+					@if(Auth::user()->hasRole('Distributor'))
+						@php ($uom= $product->satuan_secondary)
+						1{{$product->satuan_secondary." = ".(float)$product->rate."/".$product->satuan_primary}}<br>
+					@endif
+				</div>
               @endif
-
           </div>
         </div>
       @endforeach
