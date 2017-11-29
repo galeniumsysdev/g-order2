@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -27,7 +27,7 @@
                       <div class="col-md-12">
                         <div class="default-value">
                           <label for="outlet">
-                            [ <a href="/outlet/product/download/template/product">Download Template</a> ]
+                            [ <a href="{{route('outlet.downloadTemplateProduct')}}">Download Template</a> ]
                           </label>
                         </div>
                       </div>

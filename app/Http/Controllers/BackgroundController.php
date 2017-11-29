@@ -16,6 +16,7 @@ use App\Events\PusherBroadcaster;
 use App\Notifications\PushNotif;
 use Excel;
 use App\QpListHeaders;
+use App\QpListLine;
 use App\OeTransactionType;
 use App\User;
 use App\SoShipping;
@@ -49,6 +50,7 @@ class BackgroundController extends Controller
                   ['approve','=',1],
                   ['status','>=',0],
                   ['status','<',3],
+                  ['notrx','=','PO-20171124-XI-00024']
         ])->get();
         if($headers){
           foreach($headers as $h)
@@ -86,6 +88,7 @@ class BackgroundController extends Controller
                           ,DB::raw("inv_convert.inv_um_convert(ola.inventory_item_id,'ola.order_quantity_uom','".$uom."') as rate'")
                           )->get();*/
                   $oraSO=$this->getSalesOrder($h->notrx,$sl);
+                //  dd($oraSO);
                   if(!is_null($oraSO))
                   {
                     echo "qty:".$oraSO->ordered_quantity."<br>";
@@ -109,6 +112,8 @@ class BackgroundController extends Controller
                       {
                         $sl->disc_product_amount = $adj->adjusted_amount*-1;
                         $sl->disc_product_percentage = $adj->operand;
+                      }else{
+                        $sl->disc_product_amount += $adj->adjusted_amount*-1;
                       }
                     }
                     $sl->save();
@@ -116,6 +121,7 @@ class BackgroundController extends Controller
                 }//endforeach soline
                 //
                 //$oraheader = $connoracle->selectone('select min(booked_date)');
+                $newline =$this->getadjustmentHeaderSO($h->notrx,$h->id);
                 $h->status=1;
                 $h->interface_flag="Y";
                 $h->status_oracle ="BOOKED";
@@ -295,7 +301,7 @@ class BackgroundController extends Controller
           'event'=>'synchronize',
         ]);
         echo "request id:".$newrequest."<br>";*/
-
+        $this->getMasterItem($lasttime);
         $qp_listheader = $connoracle->table('qp_list_headers')
                     ->where('last_update_date','>=',$lasttime)
                     ->select('List_header_id','name', 'description','version_no', 'currency_code'
@@ -312,6 +318,29 @@ class BackgroundController extends Controller
             ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
             ]
           );
+        }
+        $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
+                        ->where('qll.last_update_date','>=',$lasttime)
+                        ->where('list_line_type_code','=','PLL')
+                        ->get();
+        if($qp_listlines)
+        {
+          foreach($qp_listlines as $ql)
+          {
+            $myqplines = QpListLine::updateOrCreate(
+              ['list_line_id'=>$ql->list_lis_id],
+              ['list_header_id'=>$ql->list_header_id
+              ,'product_attribute_context'=>$ql->product_attribute_context
+              , 'product_attr_value'=>$ql->product_attr_value
+              , 'product_uom_code'=>$ql->product_uom_code
+              ,'start_date_active'=>$ql->start_date_active
+              ,'end_date_Active'=>$ql->end_date_active
+              ,'revision_date'=>$ql->revision_date
+              ,'operand'=>$ql->operand
+              ,'currency_code'=>$ql->currency_code
+              ,'enabled_flag'=>$ql->enabled_flag
+            ]);
+          }
         }
         $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
                           ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
@@ -373,6 +402,7 @@ class BackgroundController extends Controller
           }
         }
         $customersite = $this->getCustomerSites($lasttime);
+
         //$customrsite =
         //DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
       }
@@ -499,10 +529,11 @@ class BackgroundController extends Controller
 
     public function getSalesOrder($notrx, SoLine $line)
     {
+      echo "notrx:".$notrx.", uom:".$line->uom;
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $oraSO=$connoracle->selectone("select sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) as ordered_quantity
-                  , sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,'".$line->uom."', '".$line->primary_uom."')) as ordered_quantity_primary
+                  , sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,'".$line->uom."', '".$line->uom_primary."')) as ordered_quantity_primary
                   , sum(ordered_quantity*unit_selling_price) as amount
                   , sum(ordered_quantity*unit_list_price) as unit_list_price
                   , sum(tax_value) tax_value
@@ -530,7 +561,6 @@ class BackgroundController extends Controller
     {
       $connoracle = DB::connection('oracle');
       if($connoracle){
-
         if(is_null($bucket))
         {
           return $connoracle->select("select pricing_group_sequence,sum(adjusted_amount) as adjusted_amount, sum(operand) as operand
@@ -551,6 +581,7 @@ class BackgroundController extends Controller
                                     and nvl(ola.CANCELLED_FLAG,'N')='N'
                                 group by pricing_group_sequence
                                 order by pricing_group_sequence");
+
         }else{
           return $connoracle->selectone("select pricing_group_sequence,sum(adjusted_amount) as adjusted_amount, sum(operand) as operand
                                 from oe_price_adjustments opa
@@ -576,6 +607,74 @@ class BackgroundController extends Controller
       }else{
         return null;
       }
+    }
+
+    public function getadjustmentHeaderSO($notrx,$headerid)
+    {
+      $connoracle = DB::connection('oracle');
+      $newadjustment=false;
+      if($connoracle){
+        $oraSOheader = $connoracle->table('oe_order_lines_all as ola')
+                      ->whereRaw( "ola.attribute1 = '".$notrx."'")
+                      ->where('ola.booked_flag','=','Y')
+                      ->select('ola.header_id')
+                      ->groupBy('ola.header_id')
+                      ->get();
+        foreach($oraSOheader as $soheader)
+        {
+          echo "header id:".$soheader->header_id."<br>";
+          $adjustmentso = $connoracle->table('oe_order_lines_all as ola')
+                        ->join('mtl_system_items as msi',function($query1){
+                            $query1->on('msi.inventory_item_id','=','ola.inventory_item_id')
+                                    ->on('msi.organization_id','=','ola.ship_from_org_id');
+                        })
+                        ->where('header_id','=',$soheader->header_id)
+                        ->where('ola.ORDERED_QUANTITY','!=',0)
+                        ->whereNull('ola.attribute1')
+                        ->whereNull('ola.attribute2')
+                        ->where('ola.line_category_code','=','ORDER')
+                        ->whereExists(function($query){
+                            $query->select(DB::raw(1))
+                                  ->from('oe_price_adjustments as opa')
+                                  ->whereRaw(' opa.header_id=ola.headeR_id and opa.line_id = ola.line_id');
+                        })
+                        ->select('ola.headeR_id', 'ola.line_id', 'ola.ORDERED_QUANTITY', 'ola.INVENTORY_ITEM_ID'
+                                , 'ola.ORDERED_QUANTITY', 'ola.unit_list_price'
+                                , 'ola.ORDER_QUANTITY_UOM', 'ola.unit_selling_price'
+                                , DB::raw('inv_convert.inv_um_convert(ola.inventory_item_id,ola.ORDER_QUANTITY_UOM, msi.primary_uom_code ) as conversion')
+                                ,'ola.tax_value','msi.primary_uom_code'
+                              );
+
+          $adjustmentso=$adjustmentso->get() ;
+          foreach($adjustmentso as $soline)
+          {
+            echo $soline->line_id;
+            $product = DB::table('products')->where('inventory_item_id','=',$soline->inventory_item_id)->select('id')->first();
+            $newline = SoLine::updateOrCreate(['oracle_line_id'=>$soline->line_id],
+                        ['header_id'=>$headerid
+                        ,'product_id'=>$product->id
+                        ,'uom'=> $soline->order_quantity_uom
+                        ,'qty_request'=>$soline->ordered_quantity
+                        ,'qty_confirm'=>$soline->ordered_quantity*$soline->conversion
+                        ,'list_price'=>$soline->unit_list_price
+                        , 'unit_price'=>$soline->unit_selling_price
+                        ,'amount'=>$soline->unit_selling_price*$soline->ordered_quantity
+                        ,'tax_amount'=>$soline->tax_value
+                        ,'oracle_line_id'=>$soline->line_id
+                        ,'conversion_qty'=>$soline->conversion
+                        ,'inventory_item_id'=>$soline->inventory_item_id
+                        ,'uom_primary'=>$soline->primary_uom_code
+                        ,'qty_request_primary'=>$soline->ordered_quantity*$soline->conversion
+                        ]
+                        );
+            $updateoraline = $connoracle->table('oe_order_lines_all as ola')
+                            ->where('ola.line_id','=',$soline->line_id)
+                            ->update(['attribute1'=>$notrx,'attribute2'=>$newline->line_id]);
+            $newadjustment =true;
+          }
+        }
+        return $newadjustment;
+      }else return $newadjustment;
     }
 
     public function getModifierSummary()
@@ -741,4 +840,172 @@ class BackgroundController extends Controller
 
     }
 
+    public function getMasterItem($tglskrg)
+    {
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $master_products = $connoracle->table('mtl_system_items as msi')
+            ->where('customer_order_enabled_flag','=','Y')
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                      ->from('mtl_parameters as mp')
+                      ->whereRaw(' master_organization_id = msi.organization_id');
+            })
+            ->where('last_update_date','>=',$tglskrg)
+            ->select('inventory_item_id', 'organization_id', 'segment1', 'description',  'primary_uom_code', 'secondary_uom_code'
+                      ,DB::raw("inv_convert.inv_um_convert(msi.inventory_item_id,msi.secondary_uom_code, msi.primary_uom_code) as conversion")
+                      , 'enabled_flag'
+                      , 'attribute1')
+            ->orderBy('segment1');
+        if($master_products){
+          $insert_flag=false;
+            foreach($master_products as $mp)
+            {
+              $query1 = Product::where('inventory_item_id','=',$mp->inventory_item_id)->first();
+              if($query1){//update
+                $update = Product::updateOrCreate(
+                       ['inventory_item_id'=>$mp->inventory_item_id],
+                       ['title'=>$mp->description
+                        ,'itemcode'=>$mp->segment1
+                        ,'satuan_primary'=>$mp->primary_uom_code
+                        ,'satuan_secondary'=>$mp->secondary_uom_code
+                        ,'conversion'=>$mp->conversion_qty
+                        ,'enabled_flag'=>$mp->enabled_flag
+                      ]);
+              }else{//insert
+                $insert = Product::Create(
+                      ['inventory_item_id'=>$mp->inventory_item_id
+                        ,'title'=>$mp->description
+                        ,'itemcode'=>$mp->segment1
+                        ,'satuan_primary'=>$mp->primary_uom_code
+                        ,'satuan_secondary'=>$mp->secondary_uom_code
+                        ,'conversion'=>$mp->conversion_qty
+                        ,'enabled_flag'=>$mp->enabled_flag
+                      ]);
+                $insert_flag =true;
+              }
+            }
+
+            if($insert_flag)
+            {
+              //notif ke sysadmin
+            }
+            return true;
+        }
+
+      }
+    }
+
+    public function getMasterDiscount($tglskrg){
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $modifiers = $connoracle->table('qp_list_headers as qlh')
+                      ->join('qp_modifier_summary_v as qms','qlh.list_header_id','=','qms.list_header_id')
+                      ->where('product_attribute_context','=','ITEM')
+                      ->whereRaw('nvl(qlh.end_date_active,trunc(sysdate)+1) >= trunc(sysdate) and
+                                  nvl(qms.end_date_active,trunc(sysdate)+1) >= trunc(sysdate)')
+                      ->select('qlh.list_header_id', 'qms.list_line_id', 'qms.list_line_no', 'qms.list_line_type_code', 'qms.MODIFIER_LEVEL_CODE'
+                          , 'qms.operand', 'qms.arithmetic_operator'
+                          , 'qms.comparison_operator_code','qms.PRICING_ATTRIBUTE_CONTEXT'
+                          , 'qms.pricing_attr', 'qms.pricing_attr_value_from', 'qms.pricing_attr_value_to'
+                          , 'qms.PRICING_GROUP_SEQUENCE', 'qlh.ORIG_ORG_ID'
+                          , 'qms.product_attr_val','qms.PRODUCT_UOM_CODE','qms.product_attr')
+                      ->orderBy('qlh.list_header_id','asc')
+                      ->orderBy('qlh.list_line_no','asc')
+                      ->get();
+        if($modifiers)
+        {
+          foreach ($modifiers as $m){
+            $qualifiers = $connoracle->table('qp_qualifiers_v as qqv')
+                          ->whereRaw("qqv.list_header_id =".$m->list_header_id."and (qqv.list_line_id=-1 or qqv.list_line_id=".$m->list_line_id." )" )
+                          ->whereRaw("nvl(qms.end_date_active,trunc(sysdate)+1) >= trunc(sysdate) ")
+                          ->select('qualifier_id','comparison_operator_code','qualifier_context','qualifier_attribute'
+                                  ,  'qualifier_attr_value'
+                                  )
+                          ->get();
+            if($quelifiers)
+            {
+              foreach($qualifiers as $q)
+              {
+                if($q->qualifier_context == "CUSTOMER" and $q->qualifier_attribute=="QUALIFIER_ATTRIBUTE2")
+                  $discount = QpPricingDiskon::updateOrCreate(
+                        ['list_header_id'=>$m->list_header_id
+                        , 'list_line_id'=>$m->list_line_id
+                        ,'list_line_no' =>$m->list_line_no],
+                        [ 'item_id'=>$m->product_attr_val
+                        ,'list_line_type_code'  =>$m->list_line_type_code
+                        ,'modifier_level_code'=>$m->modifier_level_code
+                        ,'operand'=>$m->operand
+                        ,'arithmetic_operator_code'=>$m->arithmetic_operator_code
+                        ,'start_date_active'=>$m->start_date_active
+                        ,'end_date_active'=>$m->end_date_active
+                        ,'uom_code'=>$m->product_uom_code
+                        ,'comparison_operator_code'=>$m->comparison_operator_code
+                        ,'pricing_attribute_context'=>$m->pricing_attribute_context
+                        ,'pricing_attr'=>$m->pricing_atr
+                        ,'pricing_attr_value_from'=>$m->pricing_attr_value_from
+                        ,'pricing_attr_value_to'=>$m->pricing_attr_value_to
+                        ,'product_attr'=>$m->product_attr
+                        ,'customer_id'=>$q->qualifier_attr_value
+                      ]);
+                elseif($q->qualifier_context == "CUSTOMER" and $q->qualifier_attribute=="QUALIFIER_ATTRIBUTE11")
+                $discount = QpPricingDiskon::updateOrCreate(
+                      ['list_header_id'=>$m->list_header_id
+                      , 'list_line_id'=>$m->list_line_id
+                      ,'list_line_no' =>$m->list_line_no],
+                      [ 'item_id'=>$m->product_attr_val
+                      ,'list_line_type_code'  =>$m->list_line_type_code
+                      ,'modifier_level_code'=>$m->modifier_level_code
+                      ,'operand'=>$m->operand
+                      ,'arithmetic_operator_code'=>$m->arithmetic_operator_code
+                      ,'start_date_active'=>$m->start_date_active
+                      ,'end_date_active'=>$m->end_date_active
+                      ,'uom_code'=>$m->product_uom_code
+                      ,'comparison_operator_code'=>$m->comparison_operator_code
+                      ,'pricing_attribute_context'=>$m->pricing_attribute_context
+                      ,'pricing_attr'=>$m->pricing_atr
+                      ,'pricing_attr_value_from'=>$m->pricing_attr_value_from
+                      ,'pricing_attr_value_to'=>$m->pricing_attr_value_to
+                      ,'product_attr'=>$m->product_attr
+                      ,'ship_to_id'=>$q->qualifier_attr_value
+                    ]);
+                elseif($q->qualifier_context == "CUSTOMER")  {
+                    if($q->qualifier_attribute=="QUALIFIER_ATTRIBUTE33")
+                    {
+                      /*address4*/
+                    }elseif($q->qualifier_attribute=="QUALIFIER_ATTRIBUTE32"){
+                      /*Subchannel*/
+                    }
+
+                }elseif($q->qualifier_context == "CUSTOMER" and $q->qualifier_attribute=="QUALIFIER_ATTRIBUTE32")  {
+
+                }
+              }
+
+            } else{
+              $discount = QpPricingDiskon::updateOrCreate(
+                ['list_header_id'=>$m->list_header_id
+                , 'list_line_id'=>$m->list_line_id
+                ,'list_line_no' =>$m->list_line_no],
+                [ 'item_id'=>$m->product_attr_val
+                ,'list_line_type_code'  =>$m->list_line_type_code
+                ,'modifier_level_code'=>$m->modifier_level_code
+                ,'operand'=>$m->operand
+                ,'arithmetic_operator_code'=>$m->arithmetic_operator_code
+                ,'start_date_active'=>$m->start_date_active
+                ,'end_date_active'=>$m->end_date_active
+                ,'uom_code'=>$m->product_uom_code
+                ,'comparison_operator_code'=>$m->comparison_operator_code
+                ,'pricing_attribute_context'=>$m->pricing_attribute_context
+                ,'pricing_attr'=>$m->pricing_atr
+                ,'pricing_attr_value_from'=>$m->pricing_attr_value_from
+                ,'pricing_attr_value_to'=>$m->pricing_attr_value_to
+                ,'product_attr'=>$m->product_attr
+                ]
+              );
+            }
+          }
+        }
+      }
+    }
 }

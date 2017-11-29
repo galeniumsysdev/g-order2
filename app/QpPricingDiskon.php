@@ -16,7 +16,7 @@ class QpPricingDiskon extends Model
     ,'comparison_operator_code'
     ,'pricing_attribute_context','pricing_attr'
     ,'pricing_attr_value_from','pricing_attr_value_to'
-    ,'qualifier_grouping_no'
+    ,'qualifier_grouping_no','product_attr'
   ];
 
 }
