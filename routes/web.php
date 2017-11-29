@@ -26,6 +26,7 @@ Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
 Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
 Route::get('/ajax/typeaheadProvince', 'ProfileController@getListProvince');
 Route::get('/ajax/typeaheadCity', 'ProfileController@getListCity');
+Route::get('/ajax/typeaheadOutlet', 'OutletProductController@getListOutlet');
 Route::get('/ajax-subcat',function () {
     $cat_id = Input::get('cat_id');
     $subcategories = App\SubgroupDatacenter::where('group_id','=',$cat_id)->get();
@@ -296,6 +297,7 @@ Route::get('/dpl/discount/form/{suggest_no?}','DPLController@inputDiscount')->na
 Route::post('/dpl/discount/set','DPLController@discountSet')->name('dpl.discountSet');
 Route::get('/dpl/discount/approval/{suggest_no}','DPLController@discountApprovalForm')->name('dpl.discountApproval');
 Route::post('/dpl/discount/approval','DPLController@discountApprovalSet')->name('dpl.discountApprovalSet');
+Route::get('/dpl/discount/view/{suggest_no}','DPLController@discountView')->name('dpl.discountView');
 
 Route::get('/dpl/history/{suggest_no}','DPLController@dplLogHistory')->name('dpl.dplHistory');
 
@@ -312,21 +314,24 @@ Route::get('/Organization/{user_id}/setting','OrgStructureController@setting')->
 Route::post('/Organization/{user_id}/setting/save','OrgStructureController@saveSetting')->name('org.saveSetting');
 
 //Outlet Product and Stock
+//---Product---
 Route::get('/outlet/product/download/template/product','OutletProductController@downloadTemplateProduct')->name('outlet.downloadTemplateProduct');
 Route::get('/outlet/product/import','OutletProductController@importProduct')->name('outlet.importProduct');
 Route::post('/outlet/product/import/view','OutletProductController@importProductView')->name('outlet.importProductView');
 Route::post('/outlet/product/import/process','OutletProductController@importProductProcess')->name('outlet.importProductProcess');
-
+//---Stock---
 Route::get('/outlet/product/download/template/stock','OutletProductController@downloadTemplateStock')->name('outlet.downloadTemplateStock');
 Route::get('/outlet/product/import/stock','OutletProductController@importProductStock')->name('outlet.importProductStock');
 Route::post('/outlet/product/import/stock/view','OutletProductController@importProductStockView')->name('outlet.importProductStockView');
 Route::post('/outlet/product/import/stock/process','OutletProductController@importProductStockProcess')->name('outlet.importProductStockProcess');
+Route::get('/outlet/product/download/stock','OutletProductController@downloadProductStock')->name('outlet.downloadStock');
+Route::post('/outlet/product/download/stock/process','OutletProductController@downloadProductStockProcess')->name('outlet.downloadStockProcess');
 
 Route::get('/outlet/product/list','OutletProductController@listProductStock')->name('outlet.listProductStock');
 Route::get('/outlet/product/form/{id?}','OutletProductController@formProduct')->name('outlet.formProduct');
 Route::post('/outlet/product/submit','OutletProductController@submitProduct')->name('outlet.submitProduct');
 Route::get('/outlet/product/delete/{id}','OutletProductController@deleteProduct')->name('outlet.deleteProduct');
-Route::get('/outlet/product/detail/{product_id}','OutletProductController@detailProductStock')->name('outlet.detailProductStock');
+Route::get('/outlet/product/detail/{product_id}/{flag?}','OutletProductController@detailProductStock')->name('outlet.detailProductStock');
 Route::get('/outlet/product/getList','OutletProductController@getListProductStock')->name('outlet.getListProductStock');
 
 Route::get('/outlet/transaction','OutletProductController@outletTrx')->name('outlet.trx');

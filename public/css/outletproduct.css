@@ -1,4 +1,7 @@
-.product-container .dropdown-menu{
+.product-container .dropdown-menu,
+.outlet-container .dropdown-menu,
+.province-container .dropdown-menu,
+.area-container .dropdown-menu{
 	max-height: 300px;
 	overflow-y: auto;
 }

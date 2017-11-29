@@ -106,6 +106,33 @@ class DPLController extends Controller {
 		return response()->json($distributors);
 	}
 
+	public function discountView($suggest_no) {
+		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
+			'users.name as dpl_mr_name',
+			'outlet.id as dpl_outlet_id',
+			'outlet.customer_name as dpl_outlet_name',
+			'suggest_no',
+			'notrx',
+			'fill_in')
+			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
+			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
+			->where('suggest_no', $suggest_no)
+			->where('active', 1)
+			->first();
+
+		$header = DB::table('so_header_v as sh')
+			->where('notrx', '=', $dpl['notrx'])->first();
+		$lines = DB::table('so_lines_v')->where('header_id', '=', $header->id)->get();
+
+		$user_dist = User::where('customer_id', '=', $header->distributor_id)->first();
+
+		$distributor_list = OutletDistributor::join('customers', 'customers.id', 'outlet_distributor.distributor_id')
+			->where('outlet_id', $dpl['outlet_id'])
+			->get();
+
+		return view('admin.dpl.discountView', compact('dpl', 'header', 'lines', 'distributor_list'));
+	}
+
 	public function inputDiscount($suggest_no) {
 		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
 			'users.name as dpl_mr_name',
@@ -277,8 +304,14 @@ class DPLController extends Controller {
 					];
 				}
 				foreach ($notified_users as $key => $email) {
-					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-						->update(array('approved_by' => Auth::user()->id, 'next_approver' => $key));
+					if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+							->update(array('approved_by' => Auth::user()->id, 'next_approver' => $key));
+					}
+					else{
+						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+							->update(array('approved_by' => Auth::user()->id, 'next_approver' => ''));
+					}
 					foreach ($email as $key => $mail) {
 						$data['email'] = $mail;
 						$apps_user = User::where('email',$mail)->first();

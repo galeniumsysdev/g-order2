@@ -7,14 +7,18 @@ $(document).ready(function() {
     }
 
     if($('#import-product').length){
-    	$('#import-product').DataTable();
+    	$('#import-product').DataTable({
+            'order': [],
+        });
         window.setTimeout(function(){
             $(window).resize();
         },2000);
     }
 
 	if($('#import-stock').length){
-    	$('#import-stock').DataTable();
+    	$('#import-stock').DataTable({
+            'order': [],
+        });
         window.setTimeout(function(){
             $(window).resize();
         },2000);
@@ -39,6 +43,13 @@ $(document).ready(function() {
 
     if($('#trx-in-date, #trx-out-date').length){
         $('#trx-in-date, #trx-out-date').datetimepicker({
+            format: "DD MMMM YYYY",
+            locale: "en"
+        });
+    }
+
+    if($('.date-range').length){
+        $('.date-range').datetimepicker({
             format: "DD MMMM YYYY",
             locale: "en"
         });
@@ -96,4 +107,61 @@ $(document).ready(function() {
 
     if($('#tabs').length)
         $('#tabs').tabs();
+
+    $('#form-product').submit(function(e){
+        if($('.duplicate').length){
+            e.preventDefault();
+            alert('Please fix the duplicate item(s).');
+        }
+    })
+
+    if($('#outlet-name').length){
+        $.get(window.Laravel.url+'/ajax/typeaheadOutlet/',
+            function(data){
+                $('#outlet-name').typeahead({
+                    name: 'outlet',
+                    source: data,
+                    items: 'all',
+                    showHintOnFocus: 'all',
+                    displayText: function (item) {
+                        return item.customer_name;
+                    }
+                });
+            }, 'json');
+    }
+
+    if($('#province').length){
+        $.get(window.Laravel.url+'/ajax/typeaheadProvince/',
+            function(data){
+                $('#province').typeahead({
+                    name: 'province',
+                    source: data,
+                    items: 'all',
+                    showHintOnFocus: 'all',
+                    displayText: function (item) {
+                        return item.name;
+                    },
+                    afterSelect: function (item) {
+                        $('#area').val('');
+                        $('#area').attr('disabled');
+                        $.get(window.Laravel.url+'/ajax/getCity',{
+                            id: item.id
+                        }).done(
+                            function(data){
+                                $('#area').removeAttr('disabled');
+                                $('#area').typeahead('destroy');
+                                $('#area').typeahead({
+                                    name: 'area',
+                                    source: data,
+                                    items: 'all',
+                                    showHintOnFocus: 'all',
+                                    displayText: function (item) {
+                                        return item.name;
+                                    }
+                                });
+                            }, 'json');
+                    }
+                });
+            }, 'json');
+    }
 });
