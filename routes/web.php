@@ -184,6 +184,8 @@ Route::group(['middleware' => ['role:IT Galenium']], function () {
 Route::get('/manageOutlet/{id}/{notif_id}', 'CustomerController@show')->name('customer.show');
 //Route::get('/searchNoo', 'CustomerController@searchNoo')->name('customer.searchNoo');
 Route::get('customer/searchOutlet', 'CustomerController@searchOutlet')->name('customer.searchoutlet');
+Route::get('customer/searchDistributor', 'CustomerController@searchDistributor')->name('customer.searchDistributor');
+
 
 
 Route::group(['middleware' => ['permission:Outlet_Distributor']], function () {
@@ -274,6 +276,10 @@ Route::group(['middleware' => ['permission:DownloadCMO']], function () {
 });
 Route::group(['middleware' => ['role:Principal']], function () {
   Route::put('/approvecmo/{id}', 'FilesController@approvecmo')->name('files.approvecmo');
+  /*report order*/
+  Route::get('/report/order','OrderController@rptOrderForm')->name('report.orderform');
+  Route::post('/report/order','OrderController@rptOrderForm')->name('report.orderexcel');
+  /*end report order*/
 });
 
 /**

@@ -594,4 +594,20 @@ class CustomerController extends Controller
       $data = $data->get();
       return response()->json($data);
     }
+
+    public function searchDistributor(Request $request)
+    {
+      $data = DB::table('customers as c')
+              ->join('users as u','c.id','=','u.customer_id')
+              ->join('role_user as ru','u.id','=','ru.user_id')
+              ->join('roles as r','ru.role_id','=','r.id')
+              ->select('c.id','c.customer_name')
+              ->where([
+                ['u.register_flag','=',true],
+                ['c.status','=','A'],
+              ])->whereIn('r.name',['Distributor','Distributor Cabang','Principal'])
+              ->orderBy('c.customer_name','asc')
+              ->get();
+      return response()->json($data);
+    }
 }

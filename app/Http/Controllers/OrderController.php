@@ -780,4 +780,90 @@ class OrderController extends Controller
 
     }
 
+    public function rptOrderForm(Request $request)
+    {
+      if ($request->method()=='GET')
+      {
+        $provinces = DB::table('provinces')->get();
+        $channels = DB::table('subgroup_datacenters')
+                  ->join('group_datacenters','group_datacenters.id','=','subgroup_datacenters.group_id')
+                  ->select('subgroup_datacenters.id',DB::raw("concat(group_datacenters.display_name,'-',subgroup_datacenters.display_name) as name"))
+                  ->orderBy('group_datacenters.id','asc')
+                  ->orderBy('subgroup_datacenters.id','asc')
+                  ->get();
+        return view('admin.report.order',compact('provinces','request','channels'));
+      }else{
+        //echo ("tglaw:".$request->tglaw."tgl_akhir:".$request->tglak);
+        $datalist = DB::table('so_header_v as sh')
+                    ->join('customers as c','sh.customer_id','c.id')
+                    ->leftjoin('subgroup_datacenters as sdc','c.subgroup_dc_id','sdc.id')
+                    ->leftjoin('group_datacenters as gdc','sdc.group_id','gdc.id')
+                    ->where('sh.tgl_order','>=',$request->tglaw)
+                    ->where('sh.tgl_order','<=',$request->tglak)
+                    ->select('sh.notrx','sh.customer_name','sh.tgl_order','sh.distributor_name','ship_to_addr as alamat','status_name'
+                              , DB::raw("case
+                                        		when c.psc_flag='1' and c.pharma_flag='1' then 'PSC/PHARMA'
+                                        	  when c.psc_flag='1' and c.pharma_flag='0' then 'PSC'
+                                        	  else 'PHARMA'
+                                        	end as divisi")
+                              , DB::raw("concat(gdc.display_name,'-',sdc.display_name) as channel")
+                              , 'sh.tgl_approve','sh.id'
+                            );
+          //dd($datalist->get())     ;
+          if(isset($request->dist_id))
+          {
+            $datalist=$datalist->where('sh.distributor_id','=',$request->dist_id);
+          }
+          if(isset($request->outlet_id))
+          {
+            $datalist=$datalist->where('sh.customer_id','=',$request->outlet_id);
+          }
+
+          if(isset($request->psc_flag) and isset($request->pharma_flag))
+          {
+            $datalist=$datalist->where(function($query){
+              $query->where('psc_flag','=',"1")
+                    ->orWhere('pharma_flag','=',"1");
+            });
+          }elseif(isset($request->psc_flag)){
+            $datalist=$datalist->where('psc_flag','=',"1");
+          }elseif(isset($request->pharma_flag)){
+            $datalist=$datalist->where('pharma_flag','=',"1");
+          }
+
+          if($request->channel)
+          {
+            $datalist=$datalist->where('subgroup_dc_id','=',$request->channel);
+          }
+
+          if(isset($request->propinsi))
+          {
+            $datalist=$datalist->where('sh.province_id','=',$request->propinsi);
+          }
+
+          $datalist =$datalist->get();
+          foreach($datalist as $d)
+          {
+            $lines = DB::table('so_lines_v')
+                  ->where('header_id','=',$d->id)
+                  ->get();
+            $d->lines = $lines;
+          }
+
+          //dd($datalist);
+
+        //return view('admin.report.orderview',compact('datalist','request'));
+        /*$template = Excel::loadView('admin.report.orderview', array('datalist'=>$datalist))
+                    ->setTitle('Order'.Carbon::now())->sheet('Order');
+
+        $template =$template->export('xls');*/
+        Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request) {
+            $excel->sheet('order', function($sheet) use($datalist,$request) {
+                $sheet->loadView('admin.report.orderview',array('datalist'=>$datalist,'request'=>$request));
+            });
+
+        })->export('xlsx');
+      }
+    }
+
 }
