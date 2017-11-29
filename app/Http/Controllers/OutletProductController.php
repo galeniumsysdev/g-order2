@@ -399,6 +399,9 @@ class OutletProductController extends Controller
   {
     $data['start_date'] = date('Y-m-d 00:00:00',strtotime($request->start_date));
     $data['end_date'] = date('Y-m-d 23:59:59',strtotime($request->end_date));
+    $data['outlet_name'] = $request->outlet_name;
+    $data['province'] = $request->province;
+    $data['area'] = $request->area;
     return Excel::create('Report Stock '.$data['start_date'], function($excel) use($data){
       $excel->setTitle('Report Stock ')
             ->setCreator(Auth::user()->name)
@@ -414,12 +417,20 @@ class OutletProductController extends Controller
               $stockOutlet = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.*','outlet.customer_name as outlet_name')
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
-                                  ->where('outlet_products.enabled_flag','Y');
+                                  ->join('customer_sites as cs','cs.customer_id','outlet.id')
+                                  ->where('outlet_products.enabled_flag','Y')
+                                  ->where('outlet.customer_name',$data['outlet_name'])
+                                  ->where('province',$data['province'])
+                                  ->where('city',$data['area']);
 
               $stockAll = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.*','outlet.customer_name as outlet_name')
                                   ->join('products','products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
+                                  ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('products.Enabled_Flag','Y')
+                                  ->where('outlet.customer_name',$data['outlet_name'])
+                                  ->where('province',$data['province'])
+                                  ->where('city',$data['area'])
                                   ->union($stockOutlet)
                                   ->orderBy('title','asc')
                                   ->get();
