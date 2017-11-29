@@ -24,6 +24,7 @@
                 <thead>
                   <tr>
                     <th>Suggest No.</th>
+                    <th>No. Trx</th>
                     <th>Last Approver</th>
                     <th>DPL No.</th>
                     <th>MR</th>
@@ -35,7 +36,16 @@
                 <tbody>
                   @foreach($dpl as $list)
                   <tr>
-                    <td class="text-center">{{ $list->suggest_no }}</td>
+                    <td class="text-center">
+                      @if($list->notrx)
+                        <a href="{{ route('dpl.discountView',$list->suggest_no) }}">{{ $list->suggest_no }}</a>
+                      @else
+                        {{ $list->suggest_no }}
+                      @endif
+                    </td>
+                    <td>
+                      {{ $list->notrx }}
+                    </td>
                     <td>{{ $list->dpl_appr_name }}</td>
                     <td class="text-center">{{ $list->dpl_no }}</td>
                     <td>{{ $list->dpl_mr_name }}</td>
