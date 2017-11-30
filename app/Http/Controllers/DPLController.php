@@ -562,7 +562,7 @@ class DPLController extends Controller {
 			foreach($solines as $soline){
 				if(intval($soline->bonus_gpl)!=0)
 				{
-					$newline = SoLine::Create(['header_id'=>$soline->headeR_id
+					$newline = SoLine::Create(['header_id'=>$so_header->id
 													,'product_id'=>$soline->product_id
 													,'uom'=>$soline->uom_primary
 													,'qty_request'=>$soline->bonus_gpl
