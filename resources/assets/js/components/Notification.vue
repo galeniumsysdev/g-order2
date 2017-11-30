@@ -71,7 +71,7 @@
                     });
                     this.notifCount = this.notifCount + 1;
                     Notification.requestPermission( permission => {
-                      let notif = new Notification(notification.message || 'Judul', {
+                      let notif = new Notification(notification.title || 'Judul', {
                         body: notification.message, // content for the alert
                         icon: "https://pusher.com/static_logos/320x320.png" // optional image url
                       });

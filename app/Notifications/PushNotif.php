@@ -30,7 +30,7 @@ class PushNotif extends Notification {
 			->setOption('custom', $this->data)
 			->body($this->data['message'])
 			->withiOS(PusherMessage::create()
-				->title($this->data['title'])
+				->title($this->data['message'])
 				->setOption('custom', $this->data));
 	}
 
