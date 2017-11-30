@@ -281,7 +281,7 @@ class DPLController extends Controller {
 
 		$role_prev_approve = $prev_approver['name'];
 
-		$notified_users = $this->getArrayNotifiedEmail($list->suggest_no, $role_prev_approve);
+		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve);
 		if(!empty($notified_users)){
 			foreach ($notified_users as $ind => $email) {
 				if(strpos($ind, $user_role) === false){
