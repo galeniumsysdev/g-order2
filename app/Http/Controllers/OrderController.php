@@ -31,7 +31,7 @@ class OrderController extends Controller
     {
       $header = DB::table('so_header_v as sh')
               ->where('id','=',$id)
-              ->where('status','!=',-99)
+              //->where('status','!=',-99)
               ->where(function ($query) {
                 $query->orWhere('distributor_id','=',Auth::user()->customer_id)
                       ->orWhere('customer_id','=',Auth::user()->customer_id);
@@ -205,38 +205,6 @@ class OrderController extends Controller
       //dd('test');
       if($request->approve=="approve")
       {
-        if(!is_null($header->oracle_customer_id))
-        {
-          /*$connoracle = DB::connection('oracle');
-          if($connoracle){
-            $oraheader = $connoracle->table('oe_headers_iface_all')->insert([
-              'order_source_id'=>config('constant.order_source_id')
-              ,'orig_sys_document_ref'=>$header->notrx
-              ,'org_id'=>$header->org_id
-              ,'sold_from_org_id'=>$header->org_id
-              ,'ship_from_org_id'=>$header->warehouse
-              ,'ordered_date'=>$header->tgl_order
-              ,'order_type_id'=>$header->order_type_id
-              ,'sold_to_org_id'=>$header->oracle_customer_id
-              ,'payment_term_id'=>$header->payment_term_id
-              ,'operation_code'=>'INSERT'
-              ,'created_by'=>-1
-              ,'creation_date'=>Carbon::now()
-              ,'last_updated_by'=>-1
-              ,'last_update_date'=>Carbon::now()
-              ,'customer_po_number'=>$header->customer_po
-              ,'price_list_id'=>$header->price_list_id
-              ,'ship_to_org_id'=>$header->oracle_ship_to
-              ,'invoice_to_org_id'=>$header->oracle_bill_to
-            ]);
-            $header->interface_flag="Y";*/
-            $header->status=0;
-          //}
-        }else{
-          $header->status=1;
-        }
-
-
         $solines = DB::table('so_lines')->where('header_id','=',$request->header_id)->get();
         $i=0;
         /*validation qty*/
@@ -256,12 +224,14 @@ class OrderController extends Controller
           }elseif( $request->uom[$soline->line_id]==$soline->uom_primary){
             $qty = $request->qtyshipping[$soline->line_id];
           }
+
           $update = DB::table('so_lines')
             ->where([
               ['header_id','=',$request->header_id],
               ['line_id','=',$soline->line_id]
             ])
             ->update(['qty_confirm' => $qty]);
+
             /*if(!is_null($header->oracle_customer_id))
           {
           if($oraheader){
@@ -295,6 +265,33 @@ class OrderController extends Controller
             //}
           }*/
         }
+        if($header->status==-99 and isset($header->nodpl)){
+          $checkconfirm = DB::table('so_lines')
+            ->where([
+              ['header_id','=',$request->header_id],
+              ['qty_request_primary','!=','qty_confirm']
+            ])
+            ->where(function($query){
+                $query->whereNotNull('discount')
+                  ->orwhereNotNull('discount_gpl')
+                  ->orwhereNotNull('bonus_gpl');
+            })->get() ;
+            if($checkconfirm)//jika ada qty
+            {
+              //notfullconfirm
+              $header->status=-99;
+              $header->save();
+              return redirect()->route('order.listSO')->withMessage('Qty Konfirmasi tidak full 1 SO. PO menunggu konfirmasi principal Galenium kembali');
+            }
+        }
+
+        if(!is_null($header->oracle_customer_id))
+        {
+            $header->status=0;
+        }else{
+          $header->status=1;
+        }
+
         $header->approve=1;
       //  $header->status=1;
         $header->tgl_approve=Carbon::now();

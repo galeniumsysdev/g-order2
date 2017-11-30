@@ -198,8 +198,26 @@ class ProductController extends Controller
 
   public function getIndex()
   {
-    $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
-    return view('shop.index',['products' => $products]);
+    if(Auth::check()){
+      if(Auth::user()->can('Create PO')){
+        $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
+        return view('shop.index',['products' => $products]);
+      }else{
+        if(Auth::user()->hasRole('IT Galenium')) {
+            return redirect('/admin');
+        }elseif(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik') ) {
+              return redirect('/product/buy');
+        }elseif(Auth::user()->hasRole('KurirGPL'))      {
+              return redirect()->route('order.shippingSO');
+        }else{/*if(Auth::user()->hasRole('Marketing PSC') || Auth::user()->hasRole('Marketing Pharma')) {*/
+            return redirect('/home');
+        }
+      }
+
+    }else{
+      return view('auth.login');
+    }
+
   }
 
   public function displayProduct(Request $request)
@@ -663,8 +681,8 @@ class ProductController extends Controller
         $check_dpl = DPLSuggestNo::where('outlet_id',Auth::user()->customer_id)
                       ->where('suggest_no',$request->coupon_no)
                       ->whereNull('notrx')
-                      ->get();
-        if($check_dpl->isEmpty())
+                      ->count();
+        if(!$check_dpl)
         {
           return redirect()->back()
                        ->withErrors(['coupon_no'=>trans('pesan.notmatchdpl')])
