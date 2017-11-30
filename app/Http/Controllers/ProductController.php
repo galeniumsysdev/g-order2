@@ -899,7 +899,7 @@ class ProductController extends Controller
           $updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
                                     ->update(array('notrx'=>$notrx));
 
-          $notified_users = app('App\Http\Controllers\DplController')->getArrayNotifiedEmail($suggest_no,'');
+          $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($suggest_no,'');
     			if(!empty($notified_users)){
     				$data = [
     					'title' => 'Pengajuan DPL',
