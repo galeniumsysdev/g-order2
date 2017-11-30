@@ -489,14 +489,15 @@ class DPLController extends Controller {
 			$dpl[$key]->btn_discount = ($list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
 
 			$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
-									->where('role_user.user_id',$list->approved_by)->first();
+									->where('role_user.user_id',$list->approved_by)
+									->first();
 
 			$role_prev_approve = $prev_approver['name'];
 
-			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve);
+			$notified_users = $this->getArrayNotifiedEmail($list->suggest_no, $role_prev_approve);
 			if(!empty($notified_users)){
-				foreach ($notified_users as $key => $email) {
-					if(strpos($key, $role) !== false){
+				foreach ($notified_users as $ind => $email) {
+					if(strpos($ind, $role) !== false){
 						$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 						break;
 					}
