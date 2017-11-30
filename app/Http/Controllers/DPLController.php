@@ -498,7 +498,7 @@ class DPLController extends Controller {
 				foreach ($notified_users as $key => $email) {
 					if(strpos($key, $role) !== false){
 						$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
-						break();
+						break;
 					}
 				}
 			}			

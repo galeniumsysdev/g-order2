@@ -40,6 +40,7 @@
                       </div>
                     </div>
                   </div>
+                  @if(Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik'))
                   <div class="form-group">
                     <div class="container-fluid">
                       <div class="row">
@@ -82,6 +83,7 @@
                       </div>
                     </div>
                   </div>
+                  @endif
                   <div class="form-group">
                     <div class="container-fluid">
                       <div class="row">

@@ -403,10 +403,10 @@ class OutletProductController extends Controller
     $data['outlet_name'] = $request->outlet_name;
     $data['province'] = $request->province;
     $data['area'] = $request->area;
-    return Excel::create('Report Stock '.$data['start_date'], function($excel) use($data){
-      $excel->setTitle('Report Stock ')
+    return Excel::create('Report Stock', function($excel) use($data){
+      $excel->setTitle('Report Stock')
             ->setCreator(Auth::user()->name)
-            ->sheet('Report Stock ', function($sheet) use($data){
+            ->sheet('Report Stock', function($sheet) use($data){
               $sheet->row(1, array('STOCK OUTLET'));
               $sheet->row(3, array('NAMA OUTLET','PRODUK','BATCH','QUANTITY'));
               $sheet->row(4, array('','','','Beg','In','Out','End'));
@@ -419,20 +419,33 @@ class OutletProductController extends Controller
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
-                                  ->where('outlet_products.enabled_flag','Y')
-                                  ->where('outlet.customer_name',$data['outlet_name'])
-                                  ->where('province',$data['province'])
-                                  ->where('city',$data['area']);
+                                  ->where('outlet_products.enabled_flag','Y');
+              
+              if($data['outlet_name'])
+                $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
+
+              if($data['province'])
+                $stockOutlet = $stockOutlet->where('province',$data['province']);
+
+              if($data['area'])
+                $stockOutlet = $stockOutlet->where('city',$data['area']);
 
               $stockAll = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.*','outlet.customer_name as outlet_name')
                                   ->join('products','products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
-                                  ->where('products.Enabled_Flag','Y')
-                                  ->where('outlet.customer_name',$data['outlet_name'])
-                                  ->where('province',$data['province'])
-                                  ->where('city',$data['area'])
-                                  ->union($stockOutlet)
+                                  ->where('products.Enabled_Flag','Y');
+
+              if($data['outlet_name'])
+                $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
+
+              if($data['province'])
+                $stockAll = $stockAll->where('province',$data['province']);
+
+              if($data['area'])
+                $stockAll = $stockAll->where('city',$data['area']);
+
+              $stockAll = $stockAll->union($stockOutlet)
                                   ->orderBy('title','asc')
                                   ->get();
 
