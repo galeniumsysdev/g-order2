@@ -466,6 +466,7 @@ class DPLController extends Controller {
 			'dpl_no.dpl_no',
 			'dpl_suggest_no.notrx',
 			'fill_in',
+			'approved_by',
 			'next_approver')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
