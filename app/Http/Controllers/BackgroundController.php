@@ -50,7 +50,7 @@ class BackgroundController extends Controller
                   ['approve','=',1],
                   ['status','>=',0],
                   ['status','<',3],
-                  ['notrx','=','PO-20171124-XI-00024']
+                //  ['notrx','=','PO-20171124-XI-00024']
         ])->get();
         if($headers){
           foreach($headers as $h)

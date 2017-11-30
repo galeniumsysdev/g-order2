@@ -172,6 +172,9 @@
                                 @if(Auth::user()->can('Create PO'))
                                   <li><a href="{{route('order.listPO')}}">Check PO</a></li>
                                 @endif
+                                @if(Auth::user()->hasRole('Principal'))
+                                  <li><a href="{{route('report.orderform')}}">Report Order</a></li>
+                                @endif
                               </ul>
                             </li>
                           @endif
