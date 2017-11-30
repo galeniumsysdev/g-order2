@@ -23,6 +23,7 @@ class PushNotif extends Notification {
 	}
 
 	public function toPushNotification($notifiable) {
+		$this->data['href'] = $this->data['href'].'/'.$this->data['id'].'/'.$this->id;
 		return PusherMessage::create()
 			->android()
 			->title($this->data['title'])
