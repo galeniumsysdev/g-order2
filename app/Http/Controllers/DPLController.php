@@ -272,7 +272,8 @@ class DPLController extends Controller {
 		}
 
 		$user_role = Auth::user()->roles;
-		if(strpos($dpl['next_approver'], $user_role[0]->name)){
+
+		if(strpos($dpl['next_approver'], $user_role[0]->name) === false){
 			return redirect()->route('dpl.discountView',$suggest_no);
 		}
 
@@ -487,7 +488,7 @@ class DPLController extends Controller {
 
 			$dpl[$key]->btn_discount = ($list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
 
-			$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && strpos($list->next_approver, $role)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+			$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && strpos($list->next_approver, $role) !== false) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 
 			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
 
