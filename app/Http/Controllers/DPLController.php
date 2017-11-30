@@ -334,7 +334,6 @@ class DPLController extends Controller {
 						if(!empty($apps_user))
 							$apps_user->notify(new PushNotif($data));
 					}
-					break;
 				}
 			}
 		} else {
