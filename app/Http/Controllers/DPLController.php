@@ -490,7 +490,7 @@ class DPLController extends Controller {
 
 			$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && strpos($list->next_approver, $role) !== false && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 
-			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
+			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
 
 			array_push($dpl_show, $dpl[$key]);
 		}
@@ -499,6 +499,11 @@ class DPLController extends Controller {
 	}
 
 	public function dplNoInputForm($suggest_no) {
+		$user_role = Auth::user()->roles;
+
+		if($user_role[0]->name != 'Admin DPL'){
+			return view('errors.403');
+		}
 		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
 			'users.name as dpl_mr_name',
 			'outlet.id as dpl_outlet_id',
