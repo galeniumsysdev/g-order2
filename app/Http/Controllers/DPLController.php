@@ -255,6 +255,7 @@ class DPLController extends Controller {
 			'suggest_no',
 			'notrx',
 			'fill_in',
+			'approved_by',
 			'next_approver')
 			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
@@ -274,8 +275,19 @@ class DPLController extends Controller {
 
 		$user_role = Auth::user()->roles;
 
-		if(strpos($dpl['next_approver'], $user_role[0]->name) === false){
-			return redirect()->route('dpl.discountView',$suggest_no);
+		$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
+								->where('role_user.user_id',$dpl['approved_by'])
+								->first();
+
+		$role_prev_approve = $prev_approver['name'];
+
+		$notified_users = $this->getArrayNotifiedEmail($list->suggest_no, $role_prev_approve);
+		if(!empty($notified_users)){
+			foreach ($notified_users as $ind => $email) {
+				if(strpos($ind, $user_role) === false){
+					return redirect()->route('dpl.discountView',$suggest_no);
+				}
+			}
 		}
 
 		$lines = DB::table('so_lines_v')->where('header_id', '=', $header->id)->get();

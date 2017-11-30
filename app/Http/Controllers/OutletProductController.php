@@ -415,11 +415,12 @@ class OutletProductController extends Controller
               $sheet->mergeCells('B3:B4');
               $sheet->mergeCells('C3:C4');
 
-              $stockOutlet = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.*','outlet.customer_name as outlet_name')
+              $stockOutlet = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
-                                  ->where('outlet_products.enabled_flag','Y');
+                                  ->where('outlet_products.enabled_flag','Y')
+                                  ->groupby('os_id','title','product_id','outlet_name');
               
               if($data['outlet_name'])
                 $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
@@ -430,11 +431,12 @@ class OutletProductController extends Controller
               if($data['area'])
                 $stockOutlet = $stockOutlet->where('city',$data['area']);
 
-              $stockAll = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.*','outlet.customer_name as outlet_name')
+              $stockAll = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('products','products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
-                                  ->where('products.Enabled_Flag','Y');
+                                  ->where('products.Enabled_Flag','Y')
+                                  ->groupby('os_id','title','product_id','outlet_name');
 
               if($data['outlet_name'])
                 $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
@@ -450,18 +452,18 @@ class OutletProductController extends Controller
                                   ->get();
 
               foreach ($stockAll as $key => $prod) {
-                $begin = OutletStock::where('id',$prod->os_id)
+                $begin = OutletStock::where('product_id',$prod->product_id)
                                         ->whereDate('created_at','<=',$data['start_date'])
                                         ->sum('qty');
-                $end = OutletStock::where('id',$prod->os_id)
+                $end = OutletStock::where('product_id',$prod->product_id)
                                         ->whereDate('created_at','<=',$data['end_date'])
                                         ->sum('qty');
-                $in = OutletStock::where('id',$prod->os_id)
+                $in = OutletStock::where('product_id',$prod->product_id)
                                         ->whereDate('created_at','>=',$data['start_date'])
                                         ->whereDate('created_at','<=',$data['end_date'])
                                         ->where('qty','>',0)
                                         ->sum('qty');
-                $out = OutletStock::where('id',$prod->os_id)
+                $out = OutletStock::where('product_id',$prod->product_id)
                                         ->whereDate('created_at','>=',$data['start_date'])
                                         ->whereDate('created_at','<=',$data['end_date'])
                                         ->where('qty','<',0)
