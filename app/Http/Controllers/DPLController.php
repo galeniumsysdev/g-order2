@@ -14,6 +14,7 @@ use App\OutletDistributor;
 use App\SoHeader;
 use App\SoLine;
 use App\User;
+use App\Role;
 use Carbon\Carbon;
 use Auth;
 use Illuminate\Http\Request;
@@ -487,7 +488,20 @@ class DPLController extends Controller {
 
 			$dpl[$key]->btn_discount = ($list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
 
-			$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && strpos($list->next_approver, $role) !== false && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+			$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
+									->where('role_user.user_id',$list->approved_by)->first();
+
+			$role_prev_approve = $prev_approver['name'];
+
+			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve);
+			if(!empty($notified_users)){
+				foreach ($notified_users as $key => $email) {
+					if(strpos($key, $role) !== false){
+						$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+						break();
+					}
+				}
+			}			
 
 			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
 

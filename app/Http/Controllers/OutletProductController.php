@@ -51,6 +51,7 @@ class OutletProductController extends Controller
   	$product = array();
   	foreach ($data as $key => $new) {
   		$product[$key]['id'] = Uuid::generate();
+      $product[$key]['outlet_id'] = Auth::user()->customer_id;
   		$product[$key]['title'] = strtoupper($new->nama_barang);
   		$product[$key]['unit'] = strtoupper($new->satuan);
   		$product[$key]['price'] = (intval($new->price)) ? intval($new->price) : 0;
