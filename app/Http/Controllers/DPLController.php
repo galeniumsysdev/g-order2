@@ -283,11 +283,15 @@ class DPLController extends Controller {
 
 		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve);
 		if(!empty($notified_users)){
+			$check_count = 0;
 			foreach ($notified_users as $ind => $email) {
-				if(strpos($ind, $user_role) === false){
-					return redirect()->route('dpl.discountView',$suggest_no);
+				if(strpos($ind, $user_role[0]->name) !== false){
+					$check_count++;
+					break;
 				}
 			}
+			if($check_count == 0)
+				return redirect()->route('dpl.discountView',$suggest_no);
 		}
 
 		$lines = DB::table('so_lines_v')->where('header_id', '=', $header->id)->get();
