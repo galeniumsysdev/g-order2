@@ -11,18 +11,18 @@
     <title>{{ config('app.name', 'g-Order') }}</title>
 
     <!-- Styles -->
-		<!--<link rel="stylesheet" href="product.css">-->
+	<!--<link rel="stylesheet" href="product.css">-->
 	<link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,700&subset=latin-ext,vietnamese" rel="stylesheet">
 
-  <link href="https://fonts.googleapis.com/css?family=Pacifico&subset=latin-ext,vietnamese" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Pacifico&subset=latin-ext,vietnamese" rel="stylesheet">
 	<link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
 
-  <link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">
+	<link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">
 
-  <link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
-  <!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
-  <link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
-  <link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
+	<link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
+	<!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
+	<link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
+	<link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
 
     <!-- Scripts -->
     <script>
@@ -90,7 +90,7 @@
                       <div class="input-group">
                         <input type="text" class="form-control" name="search_product" placeholder="@lang('label.searchproduct')" aria-label="Search for..." value="">
                         <span class="input-group-btn">
-                          <button type="submit" class="btn btn-default"><i class="fa fa-search" aria-hidden="true"></i></button>
+							<button type="submit" class="btn btn-default"><i class="fa fa-search" aria-hidden="true"></i></button>
                         </span>
                       </div>
                     </form>
@@ -252,7 +252,7 @@
                                     <li>
                                         <div class="navbar-login navbar-login-session">
                                                 <div class="links">
-                                                    <p class="navbar-header-logout">
+                                                    <p class="navbar-header-logout" style="text-align:center;">
                                                       <a href="{{ route('logout') }}"
                                                           onclick="event.preventDefault();
                                                                    document.getElementById('logout-form').submit();">

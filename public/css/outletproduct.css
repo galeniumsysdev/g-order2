@@ -5,3 +5,13 @@
 	max-height: 300px;
 	overflow-y: auto;
 }
+
+#start-date{
+	width: 47%;
+	float: left;
+}
+
+#end-date{
+	width: 47%;
+	float: right;
+}

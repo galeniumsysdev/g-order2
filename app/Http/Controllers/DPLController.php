@@ -134,6 +134,10 @@ class DPLController extends Controller {
 	}
 
 	public function inputDiscount($suggest_no) {
+		$allowed = DB::select('SELECT privilegeSuggestNo(?,?) AS allowed', [$suggest_no, Auth::user()->id]);
+		if(empty($allowed)){
+			return view('errors.403');
+		}
 		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
 			'users.name as dpl_mr_name',
 			'outlet.id as dpl_outlet_id',
@@ -239,13 +243,18 @@ class DPLController extends Controller {
 	}
 
 	public function discountApprovalForm($suggest_no) {
+		$allowed = DB::select('SELECT privilegeSuggestNo(?,?) AS allowed', [$suggest_no, Auth::user()->id]);
+		if(empty($allowed)){
+			return view('errors.403');
+		}
 		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
 			'users.name as dpl_mr_name',
 			'outlet.id as dpl_outlet_id',
 			'outlet.customer_name as dpl_outlet_name',
 			'suggest_no',
 			'notrx',
-			'fill_in')
+			'fill_in',
+			'next_approver')
 			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->where('suggest_no', $suggest_no)
@@ -261,6 +270,12 @@ class DPLController extends Controller {
 		if (!$header) {
 			return view('errors.403');
 		}
+
+		$user_role = Auth::user()->roles;
+		if($user_role[0]->name != $dpl['next_approver']){
+			return redirect()->route('dpl.discountView',$suggest_no);
+		}
+
 		$lines = DB::table('so_lines_v')->where('header_id', '=', $header->id)->get();
 
 		$user_dist = User::where('customer_id', '=', $header->distributor_id)->first();
@@ -460,17 +475,23 @@ class DPLController extends Controller {
 			->where('active', 1)
 			->get();
 
+		$dpl_show = array();
 		foreach ($dpl as $key => $list) {
 			$allowed = DB::select('SELECT privilegeSuggestNo(?,?) AS allowed', [$list->suggest_no, Auth::user()->id]);
 
-			$dpl[$key]->btn_discount = ($list->fill_in && $allowed[0]->allowed && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
+			if(!$allowed)
+				continue;
 
-			$dpl[$key]->btn_confirm = (!$list->fill_in && $allowed[0]->allowed && !empty($list->notrx) && $list->next_approver == Auth::user()->id) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+			$dpl[$key]->btn_discount = ($list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
+
+			$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && $list->next_approver == Auth::user()->id) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 
 			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
+
+			array_push($dpl_show, $dpl[$key]);
 		}
 
-		return view('admin.dpl.dplList', array('dpl' => $dpl));
+		return view('admin.dpl.dplList', array('dpl' => $dpl_show));
 	}
 
 	public function dplNoInputForm($suggest_no) {
