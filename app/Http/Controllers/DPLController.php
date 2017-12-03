@@ -558,7 +558,7 @@ class DPLController extends Controller {
 			foreach($solines as $soline){
 				if(intval($soline->bonus_gpl)!=0)
 				{
-					$newline = SoLine::Create(['header_id'=>$soline->headeR_id
+					/*$newline = SoLine::Create(['header_id'=>$so_header->id
 													,'product_id'=>$soline->product_id
 													,'uom'=>$soline->uom_primary
 													,'qty_request'=>$soline->bonus_gpl
@@ -571,7 +571,7 @@ class DPLController extends Controller {
 													,'inventory_item_id'=>$soline->inventory_item_id
 													,'uom_primary'=>$soline->uom_primary
 													,'qty_request_primary'=>$soline->bonus_gpl
-													]);
+												]);*/
 				}else{
 						$discount = intval($soline->discount)+intval($soline->discount_gpl);
 						$unitprice = $soline->list_price * (100-$discount)/100;

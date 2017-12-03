@@ -215,7 +215,9 @@ class ProductController extends Controller
       }
 
     }else{
-      return view('auth.login');
+      //return view('auth.login');
+      $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
+      return view('shop.index',['products' => $products]);
     }
 
   }

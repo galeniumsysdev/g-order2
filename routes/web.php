@@ -252,6 +252,7 @@ Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->nam
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
+Route::get('/oracle/conversion', 'BackgroundController@getkonversi');
 
 Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
 /*

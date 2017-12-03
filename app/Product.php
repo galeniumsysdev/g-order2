@@ -11,7 +11,7 @@ class Product extends Model
   use Uuids;
 
     public $incrementing = false;
-    protected $fillable = ['imagePath','title','description','description_en','price','satuan_primary','satuan_secondary','inventory_item_id','itemcode','Enabled_Flag','pareto','tipe_dot','long_description'];
+    protected $fillable = ['imagePath','title','description','description_en','price','satuan_primary','satuan_secondary','inventory_item_id','itemcode','Enabled_Flag','pareto','tipe_dot','long_description','conversion'];
 
     public function categories()
     {

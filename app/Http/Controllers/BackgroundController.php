@@ -24,6 +24,8 @@ use App\CustomerSite;
 use App\qp_modifier_summary;
 use App\qp_qualifiers;
 use App\QpPricingDiskon;
+use App\Product;
+use App\UomConversion;
 
 class BackgroundController extends Controller
 {
@@ -295,13 +297,15 @@ class BackgroundController extends Controller
       echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
       $connoracle = DB::connection('oracle');
       if($connoracle){
-        /*$newrequest= DB::table('tbl_request')->insertGetId([
+        $newrequest= DB::table('tbl_request')->insertGetId([
           'created_at'=>Carbon::now(),
           'updated_at'=>Carbon::now(),
           'event'=>'synchronize',
         ]);
-        echo "request id:".$newrequest."<br>";*/
-        $this->getMasterItem($lasttime);
+        echo "request id:".$newrequest."<br>";
+        $this->getMasterItem(date_create("2017-07-01"));
+        $this->getConversionItem(date_create("2017-07-01"));
+        //dd();
         $qp_listheader = $connoracle->table('qp_list_headers')
                     ->where('last_update_date','>=',$lasttime)
                     ->select('List_header_id','name', 'description','version_no', 'currency_code'
@@ -320,15 +324,19 @@ class BackgroundController extends Controller
           );
         }
         $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
+                        ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
                         ->where('qll.last_update_date','>=',$lasttime)
-                        ->where('list_line_type_code','=','PLL')
+                        ->where('qll.list_line_type_code','=','PLL')
+                        ->select('qll.list_line_id', 'qll.list_header_id', 'product_attribute_context','product_attr_value'
+                                ,'product_uom_code','qll.start_date_active','qll.end_date_active','revision_date','operand'
+                                ,'qlh.currency_code','qlh.active_flag')
                         ->get();
         if($qp_listlines)
         {
           foreach($qp_listlines as $ql)
           {
             $myqplines = QpListLine::updateOrCreate(
-              ['list_line_id'=>$ql->list_lis_id],
+              ['list_line_id'=>$ql->list_line_id],
               ['list_header_id'=>$ql->list_header_id
               ,'product_attribute_context'=>$ql->product_attribute_context
               , 'product_attr_value'=>$ql->product_attr_value
@@ -338,7 +346,7 @@ class BackgroundController extends Controller
               ,'revision_date'=>$ql->revision_date
               ,'operand'=>$ql->operand
               ,'currency_code'=>$ql->currency_code
-              ,'enabled_flag'=>$ql->enabled_flag
+              ,'enabled_flag'=>$ql->active_flag
             ]);
           }
         }
@@ -404,7 +412,7 @@ class BackgroundController extends Controller
         $customersite = $this->getCustomerSites($lasttime);
 
         //$customrsite =
-        //DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
+        DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
       }
     }
 
@@ -417,7 +425,7 @@ class BackgroundController extends Controller
                     ->join('hz_locations hl','hps.location_id','=','hl.location_id')
                     ->join('HZ_CUST_SITE_USES_ALL hcsua', 'hcas.CUST_ACCT_SITE_ID','=','hcsua.CUST_ACCT_SITE_ID')
                     ->whereIn('site_use_code', ['SHIP_TO','BILL_TO'])
-                    //->where('ac.last_update_date','>=',$lasttime)
+                    ->where('ac.last_update_date','>=',$lasttime)
                     ->select('cust_account_id', 'hcas.cust_acct_site_id as cust_acct_site_id', 'hcas.party_site_id', 'bill_to_flag', 'ship_to_flag', 'hcas.orig_system_reference', 'hcas.status as status', 'hcas.org_id as org_id'
                         , 'hcsua.SITE_USE_id as site_use_id'
                         , 'hcsua.site_use_code as site_use_code', 'hcsua.BILL_TO_SITE_USE_ID as bill_to_site_use_id'
@@ -856,11 +864,13 @@ class BackgroundController extends Controller
                       ,DB::raw("inv_convert.inv_um_convert(msi.inventory_item_id,msi.secondary_uom_code, msi.primary_uom_code) as conversion")
                       , 'enabled_flag'
                       , 'attribute1')
-            ->orderBy('segment1');
+            ->orderBy('segment1')->get();
+
         if($master_products){
           $insert_flag=false;
             foreach($master_products as $mp)
             {
+              echo ('Product:'.$mp->segment1."<br>");
               $query1 = Product::where('inventory_item_id','=',$mp->inventory_item_id)->first();
               if($query1){//update
                 $update = Product::updateOrCreate(
@@ -869,7 +879,7 @@ class BackgroundController extends Controller
                         ,'itemcode'=>$mp->segment1
                         ,'satuan_primary'=>$mp->primary_uom_code
                         ,'satuan_secondary'=>$mp->secondary_uom_code
-                        ,'conversion'=>$mp->conversion_qty
+                        ,'conversion'=>$mp->conversion
                         ,'enabled_flag'=>$mp->enabled_flag
                       ]);
               }else{//insert
@@ -879,7 +889,7 @@ class BackgroundController extends Controller
                         ,'itemcode'=>$mp->segment1
                         ,'satuan_primary'=>$mp->primary_uom_code
                         ,'satuan_secondary'=>$mp->secondary_uom_code
-                        ,'conversion'=>$mp->conversion_qty
+                        ,'conversion'=>$mp->conversion
                         ,'enabled_flag'=>$mp->enabled_flag
                       ]);
                 $insert_flag =true;
@@ -889,6 +899,7 @@ class BackgroundController extends Controller
             if($insert_flag)
             {
               //notif ke sysadmin
+
             }
             return true;
         }
@@ -1007,5 +1018,67 @@ class BackgroundController extends Controller
           }
         }
       }
+    }
+
+    public function getConversionItem($tglskrg){
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $conversions = $connoracle->table('mtl_uom_conversions as muc')
+                    ->join('mtl_system_items as msi','muc.INVENTORY_ITEM_ID' ,'=','msi.inventory_item_id')
+                    ->join('MTL_UNITS_OF_MEASURE_VL as mum','muc.uom_class','=','mum.uom_class')
+                    ->whereExists(function ($query) {
+                        $query->select(DB::raw(1))
+                              ->from('mtl_parameters as mp')
+                              ->whereRaw(' master_organization_id = msi.organization_id');
+                    })
+                    ->where('mum.BASE_UOM_FLAG','=','Y')
+                    ->where('msi.CUSTOMER_ORDER_FLAG','=','Y')
+                    ->where('muc.last_update_date','>=',$tglskrg)
+                    ->select('msi.inventory_item_id','msi.segment1','msi.description','muc.uom_code','muc.uom_class'
+                              ,DB::raw("INV_CONVERT.inv_um_convert(muc.inventory_item_id, muc.UOM_CODE, mum.uom_code) as conversion_rate")
+                              ,'mum.uom_code as base_uom','muc.width','muc.height','muc.dimension_uom')
+                    ->get();
+        //dd($conversions->toSQL());
+        foreach($conversions as $c){
+          echo ('konversi'.$c->inventory_item_id.'dari '.$c->uom_code.' ke '.$c->base_uom."<br>");
+          $mysqlproduct = Product::where('inventory_item_id','=',$c->inventory_item_id)
+                      ->select('id')
+                      ->first();
+          if($mysqlproduct) {
+            echo"Product id :".$mysqlproduct->id."<br>";
+            $mysqlconversion = DB::table('uom_conversions')->where('product_id'=>$mysqlproduct->id,
+              'uom_code'=>$c->uom_code,
+              'base_uom'=>$c->base_uom])->first();
+            if($mysqlconversion)
+            {
+              $mysqlconversion->uom_class = $c->uom_class;
+              $mysqlconversion->rate = $c->conversion_rate;
+              $mysqlconversion->width = $c->width;
+              $mysqlconversion->height = $c->height;
+              $mysqlconversion->dimension_uom = $c->$c->dimension_uom;
+              $mysqlconversion->save();
+            } else{
+              DB::table('uom_conversions')->insert([
+                  'product_id'=>$mysqlproduct->id,
+                  'uom_code'=>$c->uom_code,
+                  'base_uom'=>$c->base_uom,
+                  'uom_class'=>$c->uom_class
+                  ,'rate'=>$c->conversion_rate
+                  ,'width'=>$c->width
+                  ,'height'=>$c->height
+                  ,'dimension_uom'=>$c->dimension_uom
+              ]);
+            }
+
+          }
+
+        }
+       }
+       return true;
+    }
+
+    public function getkonversi()
+    {
+      $this->getConversionItem(date_create("2017-07-01"));
     }
 }

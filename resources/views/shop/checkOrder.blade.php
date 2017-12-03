@@ -53,7 +53,14 @@
                     <input type="text" class="form-control" value="{{$header->status_name}}" readonly>
                 </div>
               </div>
-
+              @if($header->suggest_no)
+              <div class="form-group">
+                <label for="name" class="col-md-2 control-label">@lang('shop.suggestiondpl')</label>
+                  <div class="col-md-10" >
+                    <input type="text" class="form-control" value="{{$header->suggest_no}}" readonly>
+                  </div>
+              </div>
+              @endif
             </div>
             <div class="form-horizontal col-sm-6">
               <div class="form-group"><br class="hidden-xs">
@@ -71,9 +78,17 @@
               <div class="form-group">
                 <label for="name" class="col-md-2 control-label">@lang('shop.ShipTo')</label>
                   <div class="col-md-10" >
-                    <textarea class="form-control" readonly>{{$header->ship_to_addr}}</textarea>
+                    <textarea class="form-control" rows="2" readonly>{{$header->ship_to_addr}}</textarea>
                   </div>
               </div>
+              @if($header->dpl_no)
+                <div class="form-group">
+                  <label for="name" class="col-md-2 control-label">DPL No</label>
+                    <div class="col-md-10" >
+                      <input type="text" class="form-control" name="dpl_no" value="{{$header->dpl_no}}" readonly>
+                    </div>
+                </div>
+              @endif
             </div>
           <br>
 
