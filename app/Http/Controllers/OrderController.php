@@ -210,7 +210,7 @@ class OrderController extends Controller
         /*validation qty*/
         foreach($solines as $soline)
         {
-          if($soline->qty_request_primary<$request->qtyshipping[$soline->line_id])
+          if($soline->qty_request_primary+$solline->bonus_gpl<$request->qtyshipping[$soline->line_id])
           {
             return redirect()->back()->withError("Gagal simpan! Qty melebihi order")->withInput();
           }
@@ -267,10 +267,9 @@ class OrderController extends Controller
         }
         if($header->status==-99 and isset($header->nodpl)){
           $checkconfirm = DB::table('so_lines')
-            ->where([
-              ['header_id','=',$request->header_id],
-              ['qty_request_primary','!=','qty_confirm']
-            ])
+            ->where(
+              'header_id','=',$request->header_id
+            )->whereRaw('qty_request_primary+bonus_gpl != qty_confirm')
             ->where(function($query){
                 $query->whereNotNull('discount')
                   ->orwhereNotNull('discount_gpl')
@@ -279,8 +278,31 @@ class OrderController extends Controller
             if($checkconfirm)//jika ada qty
             {
               //notfullconfirm
+              $dpl = DPLSuggestNo::where('suggest_no', $header->suggest_no)
+                ->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
               $header->status=-99;
               $header->save();
+              $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($suggest_no);
+        			if(!empty($notified_users)){
+        				$data = [
+        					'title' => 'Resetting DPL',
+        					'message' => 'Stock utk DPL #'.$header->dpl_no.' tdk mencukupi',
+        					'id' => $header->suggest_no,
+        					'href' => route('dpl.readNotifApproval'),
+        					'mail' => [
+        						'greeting'=>'',
+        						'content'=> ''
+        					]
+        				];
+        				foreach ($notified_users as $key => $email) {
+        					foreach ($email as $key => $mail) {
+        						$data['email'] = $mail;
+        						$apps_user = User::where('email',$mail)->first();
+        						if(!empty($apps_user))
+        							$apps_user->notify(new PushNotif($data));
+        					}
+        				}
+        			}
               return redirect()->route('order.listSO')->withMessage('Qty Konfirmasi tidak full 1 SO. PO menunggu konfirmasi principal Galenium kembali');
             }
         }

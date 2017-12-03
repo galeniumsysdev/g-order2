@@ -280,15 +280,15 @@ class ProductController extends Controller
   {
     $perPage = 12; // Item per page
     $currentPage = Input::get('page') - 1;
-    $oldDisttributor = $this->getDistributor();
+  //  $oldDisttributor = $this->getDistributor();
 
-    if(!is_null($oldDisttributor))
+/*    if(!is_null($oldDisttributor))
     {
       if(!is_array($oldDisttributor))
       {
         return view('shop.sites',['distributors' => $oldDisttributor]);
       }
-    }
+    }*/
     $sqlproduct = $this->getSqlProduct();
 
     if(isset($request->search_product))
@@ -708,7 +708,11 @@ class ProductController extends Controller
             $currency='IDR';
         }
 
-        $tipetax=$customer->customer_category_code;
+        //$tipetax=$customer->customer_category_code;
+        if($customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
+        and $customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M"){
+          $tipetax ="10%";
+        }else $tipetax= null;
         $userdistributor = User::where('customer_id','=',$request->dist_id)->first();
         if($userdistributor->hasRole('Principal')) /*jika ke gpl atau YMP maka data oracle harus diisi*/
         {
@@ -883,7 +887,7 @@ class ProductController extends Controller
 
           $amount = ($product['price'] - $product['disc']) * $product['qty'];
 
-          if($tipetax=="PKP")
+          if($tipetax=="10%")
           {
             $taxamount = ($product['price'] - $product['disc']) * $product['qty'] *0.1;
           }else{

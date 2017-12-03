@@ -341,8 +341,8 @@ class DPLController extends Controller {
 			$notified_users = $this->getArrayNotifiedEmail($suggest_no);
 			if(!empty($notified_users)){
 				$data = [
-					'title' => 'Usulan Discount #'.$suggest_no.' ditolak',
-					'message' => 'oleh '.Auth::user()->name,
+					'title' => 'Usulan Discount ditolak',
+					'message' => 'Usulan Discount #'.$suggest_no.' ditolak oleh '.Auth::user()->name,
 					'id' => $suggest_no,
 					'href' => route('dpl.readNotifApproval'),
 					'mail' => [

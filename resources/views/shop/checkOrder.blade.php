@@ -135,6 +135,11 @@
                 					<th style="width:10%" class="text-center">@lang('shop.Price')</th>
                           <th style="width:7%" class="text-center">@lang('shop.uom')</th>
                 					<th class="text-center">@lang('shop.qtyorder')</th>
+                          @if($header->dpl_no)
+                          <th style="width:5%" class="text-center">Disc Distributor(%)</th>
+                          <th style="width:5%" class="text-center">Disc GPL(%)</th>
+                          <th style="width:5%" class="text-center">Bonus GPL</th>
+                          @endif
                           @if($header->status>=0)
                               @if(Auth::user()->customer_id==$header->distributor_id or
                                (Auth::user()->customer_id==$header->customer_id and $header->status>=1)
@@ -167,15 +172,21 @@
                 						</div>
                 					</td>
                 					<td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" id="hrg-{{$id}}">
-                            {{ number_format($line->unit_price/$line->conversion_qty,2) }}
+                            {{ number_format($line->list_price/$line->conversion_qty,2) }}
                           </td>
                           <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center">
                               {{ $line->uom_primary }}
                               <input type="hidden" name="uom[{{$id}}]" value="{{ $line->uom_primary }}">
                           </td>
+
                 					<td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left" id="ord-{{$id}}">
                               {{ $line->qty_request_primary }}
                 					</td>
+                          @if($header->dpl_no)
+                          <td data-th="Disc Distributor(%)" class="xs-only-text-left text-center">{{$line->discount}}</td>
+                          <td data-th="Disc GPL(%)" class="xs-only-text-left text-center">{{$line->discount_gpl}}</td>
+                          <td data-th="Bonus GPL" class="xs-only-text-left text-center">{{(int)$line->bonus_gpl." ".$line->uom_primary}}</td>
+                          @endif
                           @if($header->status>=0)
                               @if(Auth::user()->customer_id==$header->distributor_id or
                                (Auth::user()->customer_id==$header->customer_id and $header->status>=1)
@@ -184,7 +195,7 @@
                                   @if($header->status>=1)
                                   {{number_format($line->qty_confirm_primary,2)}}
                                   @else
-                                    <input type="number" name="qtyshipping[{{$id}}]" class="form-control" value="{{(float)$line->qty_request_primary}}">
+                                    <input type="number" name="qtyshipping[{{$id}}]" class="form-control" value="{{(float)$line->qty_request_primary+$line->bonus_gpl}}">
                                   @endif
                                 </td>
                               @endif
@@ -227,74 +238,45 @@
                         @endforeach
                 			</tbody>
                       <tfoot>
+                        @if($header->currency=='IDR')
+                          @php($curr= "Rp.")
+                        @elseif($header->currency=='USD')
+                          @php($curr= "$")
+                        @endif
+                        @if($header->status< 0)
+                             @php($colgab=4)
+                        @elseif($header->status==0)
+                             @php($colgab=5)
+                        @elseif($header->status==1)
+                             @php($colgab=6)
+                        @elseif($header->status>1)
+                             @php($colgab=7)
+                        @endif
+                        @if($header->dpl_no)
+                          @php($colgab=$colgab+3)
+                        @endif
                 				<tr class="visible-xs">
                 					<td class="text-center" ><strong class="totprice" id="totprice1">Total
-                          @if($header->currency=='IDR')
-                            Rp.
-                          @elseif($header->currency=='USD')
-                            $
-                          @endif
-                          {{number_format($header->amount_confirm+$header->tax_amount,2)}}
+                          {{$curr." ".number_format($header->amount_confirm+$header->tax_amount,2)}}
                           </strong>
                           </td>
                 				</tr>
                 				<tr class="hidden-xs">
-                          @if($header->status< 0)
-                					     <td colspan="4" class="hidden-xs text-right">SubTotal: </td>
-                          @elseif($header->status==0)
-                					     <td colspan="5" class="hidden-xs text-right">SubTotal: </td>
-                          @elseif($header->status==1)
-                               <td colspan="6" class="hidden-xs text-right">SubTotal: </td>
-                          @elseif($header->status>1)
-                               <td colspan="7" class="hidden-xs text-right">SubTotal: </td>
-                          @endif
+                					<td colspan="{{$colgab}}" class="hidden-xs text-right">SubTotal: </td>
                 					<td class="hidden-xs text-right"><strong id="totprice2">
-                            @if($header->currency=='IDR')
-                            Rp.
-                            @elseif($header->currency=='USD')
-                            $
-                            @endif
-                            {{ number_format($header->amount_confirm,2) }}</strong></td>
+                            {{ $curr." ".number_format($header->amount_confirm,2) }}</strong></td>
                 				</tr>
                         <tr class="hidden-xs">
-
-                          @if($header->status<0)
-                               <td colspan="4" class="hidden-xs text-right">
-                          @elseif($header->status==0)
-                              <td colspan="5" class="hidden-xs text-right">
-                          @elseif($header->status==1)
-                               <td colspan="6" class="hidden-xs text-right">
-                          @elseif($header->status>1)
-                               <td colspan="7" class="hidden-xs text-right">
-                          @endif
-                          Tax </td>
+                          <td colspan="{{$colgab}}" class="hidden-xs text-right">Tax </td>
                 					<td class="hidden-xs text-right"><strong id="totprice2">
-                            @if($header->currency=='IDR')
-                            Rp.
-                            @elseif($header->currency=='USD')
-                            $
-                            @endif
-                            {{ number_format($header->tax_amount,2) }}</strong></td>
+                            {{ $curr." ".number_format($header->tax_amount,2) }}</strong>
+                          </td>
                 				</tr>
                         <tr class="hidden-xs">
-                          @if($header->status<0)
-                               <td colspan="4" class="hidden-xs text-right">
-                          @elseif($header->status==0)
-                              <td colspan="5" class="hidden-xs text-right">
-                          @elseif($header->status==1)
-                               <td colspan="6" class="hidden-xs text-right">
-                          @elseif($header->status>1)
-                               <td colspan="7" class="hidden-xs text-right">
-                          @endif
-                          Total </td>
+                          <td colspan="{{$colgab}}" class="hidden-xs text-right">Total </td>
                 					<td class="hidden-xs text-right"><strong id="totprice2">
-                            @if($header->currency=='IDR')
-                            Rp.
-                            @elseif($header->currency=='USD')
-                            $
-                            @endif
-
-                            {{ number_format(($header->amount_confirm+$header->tax_amount),2) }}</strong></td>
+                            {{ $curr." ".number_format(($header->amount_confirm+$header->tax_amount),2) }}</strong>
+                          </td>
                 				</tr>
 
                 			</tfoot>

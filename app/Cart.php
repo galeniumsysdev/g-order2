@@ -44,7 +44,9 @@ class Cart
         $this->totalQty++;
         $this->totalPrice += $price*$qty;
         $this->totalDiscount += ($price-$disc)*$qty;
-        if(Auth::user()->customer->customer_category_code=="PKP")
+        //if(Auth::user()->customer->customer_category_code=="PKP")
+        if(Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
+        and Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M")
         {
           $this->totalTax =($this->totalPrice-$this->totalDiscount)*0.1;
         }else{
@@ -58,7 +60,9 @@ class Cart
       $this->totalQty-=1;
       $this->totalPrice -= $this->items[$id]['amount'] ;
       $this->totalDiscount -= ($this->items[$id]['disc']*$this->items[$id]['qty']);
-      if(Auth::user()->customer->customer_category_code=="PKP")
+      //if(Auth::user()->customer->customer_category_code=="PKP")
+      if(Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
+      and Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M")
       {
         $this->totalTax =($this->totalPrice-$this->totalDiscount)*0.1;
       }else{
@@ -86,7 +90,9 @@ class Cart
             $this->items[$id] = $storedItem;
             $this->totalPrice += $storedItem['amount'];
             $this->totalDiscount += ($harga-$disc)*$qty;
-            if(Auth::user()->customer->customer_category_code=="PKP")
+            //if(Auth::user()->customer->customer_category_code=="PKP")
+            if(Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
+            and Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M")
             {
               $this->totalTax =($this->totalPrice-$this->totalDiscount)*0.1;
             }else{
