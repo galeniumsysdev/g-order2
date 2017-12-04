@@ -14,6 +14,7 @@ use App\OutletDistributor;
 use App\SoHeader;
 use App\SoLine;
 use App\User;
+use App\Role;
 use Carbon\Carbon;
 use Auth;
 use Illuminate\Http\Request;
@@ -254,6 +255,7 @@ class DPLController extends Controller {
 			'suggest_no',
 			'notrx',
 			'fill_in',
+			'approved_by',
 			'next_approver')
 			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
@@ -272,8 +274,24 @@ class DPLController extends Controller {
 		}
 
 		$user_role = Auth::user()->roles;
-		if(strpos($dpl['next_approver'], $user_role[0]->name)){
-			return redirect()->route('dpl.discountView',$suggest_no);
+
+		$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
+								->where('role_user.user_id',$dpl['approved_by'])
+								->first();
+
+		$role_prev_approve = $prev_approver['name'];
+
+		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve);
+		if(!empty($notified_users)){
+			$check_count = 0;
+			foreach ($notified_users as $ind => $email) {
+				if(strpos($ind, $user_role[0]->name) !== false){
+					$check_count++;
+					break;
+				}
+			}
+			if($check_count == 0)
+				return redirect()->route('dpl.discountView',$suggest_no);
 		}
 
 		$lines = DB::table('so_lines_v')->where('header_id', '=', $header->id)->get();
@@ -333,7 +351,6 @@ class DPLController extends Controller {
 						if(!empty($apps_user))
 							$apps_user->notify(new PushNotif($data));
 					}
-					break;
 				}
 			}
 		} else {
@@ -465,6 +482,7 @@ class DPLController extends Controller {
 			'dpl_no.dpl_no',
 			'dpl_suggest_no.notrx',
 			'fill_in',
+			'approved_by',
 			'next_approver')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
@@ -487,9 +505,23 @@ class DPLController extends Controller {
 
 			$dpl[$key]->btn_discount = ($list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
 
-			$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && strpos($list->next_approver, $role)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+			$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
+									->where('role_user.user_id',$list->approved_by)
+									->first();
 
-			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
+			$role_prev_approve = $prev_approver['name'];
+
+			$notified_users = $this->getArrayNotifiedEmail($list->suggest_no, $role_prev_approve);
+			if(!empty($notified_users)){
+				foreach ($notified_users as $ind => $email) {
+					if(strpos($ind, $role) !== false){
+						$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+						break;
+					}
+				}
+			}
+
+			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
 
 			array_push($dpl_show, $dpl[$key]);
 		}
@@ -498,6 +530,11 @@ class DPLController extends Controller {
 	}
 
 	public function dplNoInputForm($suggest_no) {
+		$user_role = Auth::user()->roles;
+
+		if($user_role[0]->name != 'Admin DPL'){
+			return view('errors.403');
+		}
 		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
 			'users.name as dpl_mr_name',
 			'outlet.id as dpl_outlet_id',

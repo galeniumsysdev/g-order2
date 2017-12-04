@@ -51,6 +51,7 @@ class OutletProductController extends Controller
   	$product = array();
   	foreach ($data as $key => $new) {
   		$product[$key]['id'] = Uuid::generate();
+      $product[$key]['outlet_id'] = Auth::user()->customer_id;
   		$product[$key]['title'] = strtoupper($new->nama_barang);
   		$product[$key]['unit'] = strtoupper($new->satuan);
   		$product[$key]['price'] = (intval($new->price)) ? intval($new->price) : 0;
@@ -402,10 +403,10 @@ class OutletProductController extends Controller
     $data['outlet_name'] = $request->outlet_name;
     $data['province'] = $request->province;
     $data['area'] = $request->area;
-    return Excel::create('Report Stock '.$data['start_date'], function($excel) use($data){
-      $excel->setTitle('Report Stock ')
+    return Excel::create('Report Stock', function($excel) use($data){
+      $excel->setTitle('Report Stock')
             ->setCreator(Auth::user()->name)
-            ->sheet('Report Stock ', function($sheet) use($data){
+            ->sheet('Report Stock', function($sheet) use($data){
               $sheet->row(1, array('STOCK OUTLET'));
               $sheet->row(3, array('NAMA OUTLET','PRODUK','BATCH','QUANTITY'));
               $sheet->row(4, array('','','','Beg','In','Out','End'));
@@ -414,40 +415,55 @@ class OutletProductController extends Controller
               $sheet->mergeCells('B3:B4');
               $sheet->mergeCells('C3:C4');
 
-              $stockOutlet = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.*','outlet.customer_name as outlet_name')
+              $stockOutlet = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
-                                  ->where('outlet.customer_name',$data['outlet_name'])
-                                  ->where('province',$data['province'])
-                                  ->where('city',$data['area']);
+                                  ->groupby('os_id','title','product_id','outlet_name');
+              
+              if($data['outlet_name'])
+                $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
 
-              $stockAll = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.*','outlet.customer_name as outlet_name')
+              if($data['province'])
+                $stockOutlet = $stockOutlet->where('province',$data['province']);
+
+              if($data['area'])
+                $stockOutlet = $stockOutlet->where('city',$data['area']);
+
+              $stockAll = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('products','products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('products.Enabled_Flag','Y')
-                                  ->where('outlet.customer_name',$data['outlet_name'])
-                                  ->where('province',$data['province'])
-                                  ->where('city',$data['area'])
-                                  ->union($stockOutlet)
+                                  ->groupby('os_id','title','product_id','outlet_name');
+
+              if($data['outlet_name'])
+                $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
+
+              if($data['province'])
+                $stockAll = $stockAll->where('province',$data['province']);
+
+              if($data['area'])
+                $stockAll = $stockAll->where('city',$data['area']);
+
+              $stockAll = $stockAll->union($stockOutlet)
                                   ->orderBy('title','asc')
                                   ->get();
 
               foreach ($stockAll as $key => $prod) {
-                $begin = OutletStock::where('id',$prod->os_id)
+                $begin = OutletStock::where('product_id',$prod->product_id)
                                         ->whereDate('created_at','<=',$data['start_date'])
                                         ->sum('qty');
-                $end = OutletStock::where('id',$prod->os_id)
+                $end = OutletStock::where('product_id',$prod->product_id)
                                         ->whereDate('created_at','<=',$data['end_date'])
                                         ->sum('qty');
-                $in = OutletStock::where('id',$prod->os_id)
+                $in = OutletStock::where('product_id',$prod->product_id)
                                         ->whereDate('created_at','>=',$data['start_date'])
                                         ->whereDate('created_at','<=',$data['end_date'])
                                         ->where('qty','>',0)
                                         ->sum('qty');
-                $out = OutletStock::where('id',$prod->os_id)
+                $out = OutletStock::where('product_id',$prod->product_id)
                                         ->whereDate('created_at','>=',$data['start_date'])
                                         ->whereDate('created_at','<=',$data['end_date'])
                                         ->where('qty','<',0)
