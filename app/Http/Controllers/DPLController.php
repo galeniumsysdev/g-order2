@@ -108,14 +108,16 @@ class DPLController extends Controller {
 	}
 
 	public function discountView($suggest_no) {
-		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
-			'users.name as dpl_mr_name',
+		$dpl = DPLSuggestNo::select('mr.id as dpl_mr_id',
+			'mr.name as dpl_mr_name',
 			'outlet.id as dpl_outlet_id',
 			'outlet.customer_name as dpl_outlet_name',
 			'suggest_no',
 			'notrx',
-			'fill_in')
-			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
+			'fill_in',
+			'approver.name as approver_name')
+			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
+			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->where('suggest_no', $suggest_no)
 			->where('active', 1)
@@ -139,15 +141,17 @@ class DPLController extends Controller {
 		if(empty($allowed)){
 			return view('errors.403');
 		}
-		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
-			'users.name as dpl_mr_name',
+		$dpl = DPLSuggestNo::select('mr.id as dpl_mr_id',
+			'mr.name as dpl_mr_name',
 			'outlet.id as dpl_outlet_id',
 			'outlet.customer_name as dpl_outlet_name',
 			'dpl_suggest_no.suggest_no',
 			'outlet_id',
 			'notrx',
-			'fill_in')
-			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
+			'fill_in',
+			'approver.name as approver_name')
+			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
+			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->leftjoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->where('dpl_suggest_no.suggest_no', $suggest_no)
@@ -236,7 +240,6 @@ class DPLController extends Controller {
 					$apps_user = User::where('email',$mail)->first();
 					$apps_user->notify(new PushNotif($data));
 				}
-				break;
 			}
 		}
 
@@ -248,16 +251,18 @@ class DPLController extends Controller {
 		if(empty($allowed)){
 			return view('errors.403');
 		}
-		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
-			'users.name as dpl_mr_name',
+		$dpl = DPLSuggestNo::select('mr.id as dpl_mr_id',
+			'mr.name as dpl_mr_name',
 			'outlet.id as dpl_outlet_id',
 			'outlet.customer_name as dpl_outlet_name',
 			'suggest_no',
 			'notrx',
 			'fill_in',
 			'approved_by',
-			'next_approver')
-			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
+			'next_approver',
+			'approver.name as approver_name')
+			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
+			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->where('suggest_no', $suggest_no)
 			->where('active', 1)
@@ -285,7 +290,7 @@ class DPLController extends Controller {
 		if(!empty($notified_users)){
 			$check_count = 0;
 			foreach ($notified_users as $ind => $email) {
-				if(strpos($ind, $user_role[0]->name) !== false){
+				if(strpos($ind, $user_role[0]->name) !== false && ($role_prev_approve != 'FSM' && $role_prev_approve != 'HSM')){
 					$check_count++;
 					break;
 				}
@@ -491,6 +496,7 @@ class DPLController extends Controller {
 			->leftJoin('so_headers', 'so_headers.notrx', 'dpl_suggest_no.notrx')
 			->leftjoin('customers as distributor', 'distributor.id', 'so_headers.distributor_id')
 			->where('active', 1)
+			->orderby('dpl_suggest_no.created_at','desc')
 			->get();
 
 		$user_role = Auth::user()->roles;
@@ -515,7 +521,7 @@ class DPLController extends Controller {
 			if(!empty($notified_users)){
 				foreach ($notified_users as $ind => $email) {
 					if(strpos($ind, $role) !== false){
-						$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+						$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 						break;
 					}
 				}

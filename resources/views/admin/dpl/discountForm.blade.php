@@ -70,6 +70,34 @@
                   </div>
                 </div>
                 <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">No. Usulan</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">{{ $dpl->suggest_no }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">No. DPL</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">{{ $header->dpl_no }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>
                       <tr>

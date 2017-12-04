@@ -1,6 +1,8 @@
 $(document).ready(function(){
 	if($('#dpl-list').length){
-    	$('#dpl-list').DataTable();
+    	$('#dpl-list').DataTable({
+    		'order': []
+    	});
         window.setTimeout(function(){
             $(window).resize();
         },2000);
