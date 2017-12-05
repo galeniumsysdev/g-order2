@@ -4,7 +4,7 @@
           Notifications
           <span class="badge">{{notifCount}}</span>
         </a>
-        <a href="#" class="dropdown-toggle visible-xs" id="notif-mobile" onclick="javascript:void(0)"><i class="fa fa-bell"></i>
+        <a href="#" class="dropdown-toggle visible-xs" onclick="redirectToHome()"><i class="fa fa-bell"></i>
           <span class="badge">{{notifCount}}</span>
         </a>
         <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-if="unreadNotifications.length">
@@ -14,6 +14,17 @@
                 <span class="item-left">
                   <span class="item-info">
                     {{item.data.subject}}
+                  </span>
+                </span>
+              </span>
+            </a>
+          </li>
+          <li id="readmore-notif" v-if="notifCount > 5">
+            <a href="#" onclick="redirectToHome()">
+              <span class="item">
+                <span class="item-left">
+                  <span class="item-info">
+                    [ Read More ]
                   </span>
                 </span>
               </span>
@@ -61,12 +72,12 @@
         mounted() {
             this.notifCount = this.count;
             this.unreadNotifications = this.notif;
-            $('#notif-mobile').click(function(){
-              window.location.href = window.Laravel.url+'/home';
-            })
             Echo.channel(this.email)
                 .listen('.notif', (notification) => {
-                    this.unreadNotifications.push({
+                    if(this.unreadNotifications.length == 5){
+                      this.unreadNotifications.splice(4,1);
+                    }
+                    this.unreadNotifications.unshift({
                       data: {
                         subject: notification.message,
                         href: notification.href

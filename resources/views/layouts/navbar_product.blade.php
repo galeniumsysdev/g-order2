@@ -296,6 +296,10 @@
       document.getElementById("loader").style.display = "none";
       document.getElementById("myDiv").style.display = "block";
     }
+
+    function redirectToHome() {
+      window.location.href = window.Laravel.url+'/home';
+    }
     </script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.js"></script>
