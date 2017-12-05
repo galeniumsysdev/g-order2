@@ -57,10 +57,10 @@
                     {{$currency.number_format($product->price_diskon,2)}}/{{$product->satuan_primary}}
                   @endif
 
-                </div>                
+                </div>
                   <div class="price coret" id="hrgcoret-{{$product->id}}">
                     @if($product->harga!=$product->price_diskon)
-                      {{$curreny.number_format($product->harga,2)}}
+                      {{$currency.number_format($product->harga,2)}}
                     @endif
                 </div>
 
