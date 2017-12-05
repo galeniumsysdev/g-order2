@@ -10,11 +10,12 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('/',  [
-  'uses' => 'ProductController@getIndex',
-  'as' => 'product.index'
-]);
+Route::group(['middleware' => 'prevent-back-history'],function(){
+  Route::get('/',  [
+    'uses' => 'ProductController@getIndex',
+    'as' => 'product.index'
+  ]);
+});
 Route::get('/getPrice',[
     'uses' => 'ProductController@getPrice'
     ,'as' => 'product.getPrice'
@@ -50,7 +51,7 @@ Route::get('product/category/{id}', [
   ,'as' => 'product.category'
 ]);
 
-Route::group(['middleware'=>'auth'],function(){
+Route::group(['middleware'=>['auth','prevent-back-history']],function(){
   Route::get('profile', 'ProfileController@profile')->name('profile.index');
   Route::post('profile', 'ProfileController@update_avatar')->name('profile.update');
   Route::post('add-address', 'ProfileController@addaddress')->name('profile.address');
@@ -69,7 +70,7 @@ Route::group(['middleware'=>'auth'],function(){
   Route::post('/home', 'HomeController@search')->name('notif.search');
 });
 
-Route::group(['middleware'=>['permission:Create PO']],function(){
+Route::group(['middleware'=>['permission:Create PO','prevent-back-history']],function(){
 Route::get('/product/buy', 'ProductController@displayProduct')->name('product.buy');
 Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
@@ -103,7 +104,11 @@ Route::get('/shopping-cart',[
 
 
 
-Auth::routes();
+Route::group(['middleware' => 'prevent-back-history'],function(){
+  Auth::routes();
+  //Route::get('/home', 'HomeController@index');
+});
+
 
 Route::group(['middleware' => ['web']], function () {
   Route::post('language-chooser','LanguageController@changeLanguage');
@@ -121,7 +126,7 @@ Route::get('/users/verification/{token}','Auth\RegisterController@verification_e
 
 Route::post('/register2','Auth\RegisterController@register2')->name('register2');
 
-Route::group(['middleware' => ['role:IT Galenium']], function () {
+Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], function () {
   Route::resource('role',  'RoleController');
   Route::get('/rolepdf', [
     'uses' => 'RoleController@makePDF'
@@ -229,7 +234,7 @@ Route::get('/test', function () {
     return view('testtable');
 });*/
 /*check PO from Outlet/Distributor*/
-Route::group(['middleware' => ['auth']], function () {
+Route::group(['middleware' => ['auth','prevent-back-history']], function () {
   Route::get('/checkPO/{id}','OrderController@checkOrder')->name('order.checkPO');
   Route::match(['get', 'post'],'/listpo','OrderController@listOrder')->name('order.listPO');
   Route::match(['get', 'post'],'/listso','OrderController@listSO')->name('order.listSO');
@@ -242,7 +247,7 @@ Route::group(['middleware' => ['auth']], function () {
   });
 });
 
-Route::group(['middleware' => ['role:KurirGPL']], function () {
+Route::group(['middleware' => ['role:KurirGPL','prevent-back-history']], function () {
   Route::get('/SO/shipping', 'OrderController@shippingKurir')->name('order.shippingSO');
   Route::post('/SO/shipping', 'OrderController@searchShipping')->name('order.searchShippingOracle');
   Route::post('/SO/shipconfirm', 'OrderController@shipconfirmcourier')->name('order.shipconfirmcourier');
@@ -261,14 +266,14 @@ Route::get('/test',function () {
 });*/
 
 
-Route::group(['middleware' => ['permission:UploadCMO']], function () {
+Route::group(['middleware' => ['permission:UploadCMO','prevent-back-history']], function () {
     Route::get('uploadCMO', 'FilesController@upload')->name('files.uploadcmo');
     Route::post('/handleUpload', 'FilesController@handleUpload');
     Route::get('/downloadCMO/{file}', function ($file='') {
         return response()->download(storage_path('app/uploads/'.$file));
     });
 });
-Route::group(['middleware' => ['permission:DownloadCMO']], function () {
+Route::group(['middleware' => ['permission:DownloadCMO','prevent-back-history']], function () {
   Route::get('viewAlldownloadfile', 'FilesController@downfunc')->name('files.viewfile');
   Route::get('/downloadCMO/{file}', function ($file='') {
       return response()->download(storage_path('app/uploads/'.$file));
@@ -276,7 +281,7 @@ Route::group(['middleware' => ['permission:DownloadCMO']], function () {
   Route::post('/viewAlldownloadfile', 'FilesController@search')->name('files.postviewfile');
   route::get('notifrejectcmo/{notifid}/{id}','FilesController@readNotif')->name('files.readnotif');
 });
-Route::group(['middleware' => ['role:Principal']], function () {
+Route::group(['middleware' => ['role:Principal','prevent-back-history']], function () {
   Route::put('/approvecmo/{id}', 'FilesController@approvecmo')->name('files.approvecmo');
   /*report order*/
   Route::get('/report/order','OrderController@rptOrderForm')->name('report.orderform');

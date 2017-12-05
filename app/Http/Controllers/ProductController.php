@@ -199,10 +199,10 @@ class ProductController extends Controller
   public function getIndex()
   {
     if(Auth::check()){
-      if(Auth::user()->can('Create PO')){
+      /*if(Auth::user()->can('Create PO')){
         $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
         return view('shop.index',['products' => $products]);
-      }else{
+      }else{*/
         if(Auth::user()->hasRole('IT Galenium')) {
             return redirect('/admin');
         }elseif(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik') ) {
@@ -212,7 +212,7 @@ class ProductController extends Controller
         }else{/*if(Auth::user()->hasRole('Marketing PSC') || Auth::user()->hasRole('Marketing Pharma')) {*/
             return redirect('/home');
         }
-      }
+      //}
 
     }else{
       //return view('auth.login');
