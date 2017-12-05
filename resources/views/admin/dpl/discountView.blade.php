@@ -79,7 +79,7 @@
                     </div>
                   </div>
                 </div>
-                @if($dpl->reason)
+                @if($dpl->log_type == 'Reject')
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">

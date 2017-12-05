@@ -134,6 +134,7 @@ class DPLController extends Controller {
 					->first();
 		$dpl->reason = nl2br($log['reason']);
 		$dpl->reject_by = $log['name'];
+		$dpl->log_type = $log['type'];
 
 		$user_dist = User::where('customer_id', '=', $header->distributor_id)->first();
 
@@ -185,6 +186,7 @@ class DPLController extends Controller {
 					->first();
 		$dpl->reason = nl2br($log['reason']);
 		$dpl->reject_by = $log['name'];
+		$dpl->log_type = $log['type'];
 
 		$user_dist = User::where('customer_id', '=', $header->distributor_id)->first();
 

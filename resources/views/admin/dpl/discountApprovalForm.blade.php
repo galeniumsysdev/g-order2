@@ -172,7 +172,7 @@
                       <div class="col-md-10">
                       <!-- Form Approve -->
                         <div class="button-wrapper">
-                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'generate-sugg-no-form']) !!}
+                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'discount-approve-form']) !!}
                             {{ Form::hidden('action','Approve') }}
                             {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
                             {{ Form::submit('Approve',array('class'=>'btn btn-primary')) }}
@@ -180,7 +180,7 @@
                         </div>
                       <!-- Form Reject -->
                         <div class="button-wrapper">
-                          <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#reasonReject">Reject</a>
+                          <a href="#" class="btn btn-danger" data-toggle="modal" data-backdrop="static" data-target="#reasonReject">Reject</a>
                         </div>
                         <div class="button-wrapper">
                           <a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
@@ -211,18 +211,13 @@
           id="authenticationModalLabel">Reason Reject</h4>
         </div>
         <div class="modal-body text-center">
-          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'generate-sugg-no-form']) !!}
+          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'discount-reject-form']) !!}
             {{ Form::hidden('action','Reject') }}
             {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
-            {{ Form::textarea('reason_reject','',array('class'=>'form-control')) }}
+            {{ Form::textarea('reason_reject','',array('class'=>'form-control','required'=>'required')) }}
             <br/>
             {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
           {{ Form::close() }}
-        </div>
-        <div class="modal-footer">
-          <button type="button" 
-             class="btn btn-default" 
-             data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
