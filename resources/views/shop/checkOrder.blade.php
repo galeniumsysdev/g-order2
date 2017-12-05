@@ -255,26 +255,21 @@
                         @if($header->dpl_no)
                           @php($colgab=$colgab+3)
                         @endif
-                				<tr class="visible-xs">
-                					<td class="text-center" ><strong class="totprice" id="totprice1">Total
-                          {{$curr." ".number_format($header->amount_confirm+$header->tax_amount,2)}}
-                          </strong>
-                          </td>
-                				</tr>
-                				<tr class="hidden-xs">
+
+                				<tr>
                 					<td colspan="{{$colgab}}" class="hidden-xs text-right">SubTotal: </td>
-                					<td class="hidden-xs text-right"><strong id="totprice2">
+                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">SubTotal:</label>
                             {{ $curr." ".number_format($header->amount_confirm,2) }}</strong></td>
                 				</tr>
-                        <tr class="hidden-xs">
+                        <tr>
                           <td colspan="{{$colgab}}" class="hidden-xs text-right">Tax </td>
-                					<td class="hidden-xs text-right"><strong id="totprice2">
+                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">Tax:</label>
                             {{ $curr." ".number_format($header->tax_amount,2) }}</strong>
                           </td>
                 				</tr>
-                        <tr class="hidden-xs">
+                        <tr>
                           <td colspan="{{$colgab}}" class="hidden-xs text-right">Total </td>
-                					<td class="hidden-xs text-right"><strong id="totprice2">
+                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">Total:</label>
                             {{ $curr." ".number_format(($header->amount_confirm+$header->tax_amount),2) }}</strong>
                           </td>
                 				</tr>
@@ -283,7 +278,11 @@
                 		</table>
                     <div class="col-xs-12 col-sm-3">
                         @if($header->status==0 and Auth::user()->customer_id==$header->distributor_id)
-                          <button type="submit" name="approve" value="reject" class="btn btn-block btn-warning btnorder" ><i class="fa fa-angle-left" style="color:#fff"></i>@lang('label.reject') PO
+                          <!--<button type="submit" name="approve" value="reject" class="btn btn-block btn-warning btnorder" ><i class="fa fa-angle-left" style="color:#fff"></i>@lang('label.reject') PO-->
+                          <input type="hidden" id="alasanreject" value="" name="alasan">
+                          <button type="submit" onclick="return inputreason();" name="approve" value="reject" class="btn btn-warning btn-block btnorder" >
+                            <i class="fa fa-angle-left" style="color:#fff"></i>@lang('label.reject') PO
+                          </button>
                         @elseif($header->status==0 and Auth::user()->customer_id==$header->customer_id)
                           <button type="submit"  name="batal" value="batal" class="btn btn-block btn-warning btnorder" ><i class="fa fa-angle-left" style="color:#fff"></i> @lang('shop.cancelpo')</button>
                         @elseif($header->status==1 or ($header->status==3 and $deliveryno->count()==1))

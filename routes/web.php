@@ -299,6 +299,8 @@ Route::post('/dpl/discount/set','DPLController@discountSet')->name('dpl.discount
 Route::get('/dpl/discount/approval/{suggest_no}','DPLController@discountApprovalForm')->name('dpl.discountApproval');
 Route::post('/dpl/discount/approval','DPLController@discountApprovalSet')->name('dpl.discountApprovalSet');
 Route::get('/dpl/discount/view/{suggest_no}','DPLController@discountView')->name('dpl.discountView');
+Route::post('/dpl/discount/split','DPLController@dplDiscountSplit')->name('dpl.discountSplit');
+
 
 Route::get('/dpl/history/{suggest_no}','DPLController@dplLogHistory')->name('dpl.dplHistory');
 

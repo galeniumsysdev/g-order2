@@ -327,6 +327,7 @@ class BackgroundController extends Controller
                         ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
                         ->where('qll.last_update_date','>=',$lasttime)
                         ->where('qll.list_line_type_code','=','PLL')
+                        ->where('qll.product_attribute','=','PRICING_ATTRIBUTE1')
                         ->select('qll.list_line_id', 'qll.list_header_id', 'product_attribute_context','product_attr_value'
                                 ,'product_uom_code','qll.start_date_active','qll.end_date_active','revision_date','operand'
                                 ,'qlh.currency_code','qlh.active_flag')
@@ -349,7 +350,7 @@ class BackgroundController extends Controller
               ,'enabled_flag'=>$ql->active_flag
             ]);
           }
-        }
+        }        
         $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
                           ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
                           ->where([['otta.transaction_type_code', '=', 'ORDER'],

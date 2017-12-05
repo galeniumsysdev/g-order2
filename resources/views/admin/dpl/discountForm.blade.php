@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -159,26 +159,13 @@
                             </div>
                           </div>
                         </td>
-                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->unit_price,2) }}</td>
+                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price,2) }}</td>
                         <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
                         <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
                             {{ $line->qty_request }}
                         </td>
-                        <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
-                          @if($header->status<=0)
+                        <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">                          
                             {{  number_format($line->amount,2) }}
-                            @php ($amount  = $line->amount)
-                          @elseif($header->status==3)
-                            @php ($amount  = $line->qty_accept*$line->unit_price)
-                            {{ number_format($amount,2)}}
-                          @elseif($header->status==1)
-                          @php ($amount  = $line->qty_confirm*$line->unit_price)
-                          {{ number_format($amount,2)}}
-                          @elseif($header->status>0 and $header->status<3)
-                            @php ($amount  = $line->qty_shipping*$line->unit_price)
-                            {{ number_format($amount,2)}}
-                          @endif
-                          @php ($totamount  += $amount)
                         </td>
                         <td data-th="Discount Distributor" class="xs-only-text-left text-center">
                           <div class="input-prepend input-group">
@@ -223,7 +210,7 @@
     </div>
   </div>
   {{ Form::close() }}
-      
+
 @endsection
 @section('js')
 

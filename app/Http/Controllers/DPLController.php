@@ -157,7 +157,8 @@ class DPLController extends Controller {
 			'outlet_id',
 			'notrx',
 			'fill_in',
-			'approver.name as approver_name')
+			'approver.name as approver_name',
+			'dpl_no.dpl_no')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
@@ -196,8 +197,10 @@ class DPLController extends Controller {
 		foreach ($distributors as $key => $distributor) {
 			$distributor_list[$distributor->distributor_id] = $distributor->customer_name;
 		}
-
-		return view('admin.dpl.discountForm', compact('dpl', 'header', 'lines', 'distributor_list'));
+		if($dpl->dpl_no)
+		{
+			return view('admin.dpl.discountReform', compact('dpl', 'header', 'lines', 'distributor_list'));
+		}else return view('admin.dpl.discountForm', compact('dpl', 'header', 'lines', 'distributor_list'));
 	}
 
 	public function discountSet(Request $request) {
@@ -601,13 +604,23 @@ class DPLController extends Controller {
 
 		$this->dplLog($suggest_no, 'Input DPL No #' . $dpl_no);
 
-		$check_dpl = DPLNo::where('dpl_no', $dpl_no)->count();
-
+		$check_dpl = DPLNo::where('dpl_no', $dpl_no)->first();
+		if ($check_dpl) {
+			if(!is_null($check_dpl->suggest_no))
+			{
+				return redirect()->back()->withInput()->with('msg', 'DPL No #' . $dpl_no . ' already exist.');
+			}else{
+				$check_dpl->suggest_no = $suggest_no;
+				$check_dpl->save();
+				$dpl = $check_dpl;
+			}
+		}
 		if (!$check_dpl) {
 			$dpl = new DPLNo;
 			$dpl->dpl_no = $dpl_no;
 			$dpl->suggest_no = $suggest_no;
 			$dpl->save();
+		}
 			$so_header = SoHeader::where('suggest_no',$suggest_no)->first();
 			$so_header->dpl_no = $dpl_no;
 			$so_header->status = 0;
@@ -621,9 +634,9 @@ class DPLController extends Controller {
 								})
 								->get();
 			foreach($solines as $soline){
-				if(intval($soline->bonus_gpl)!=0)
+				/*if(intval($soline->bonus_gpl)!=0)
 				{
-					/*$newline = SoLine::Create(['header_id'=>$so_header->id
+					$newline = SoLine::Create(['header_id'=>$so_header->id
 													,'product_id'=>$soline->product_id
 													,'uom'=>$soline->uom_primary
 													,'qty_request'=>$soline->bonus_gpl
@@ -636,12 +649,17 @@ class DPLController extends Controller {
 													,'inventory_item_id'=>$soline->inventory_item_id
 													,'uom_primary'=>$soline->uom_primary
 													,'qty_request_primary'=>$soline->bonus_gpl
-												]);*/
-				}else{
+												]);
+				}else*/
+				if(intval($soline->discount)+intval($soline->discount_gpl)!=0){
 						$discount = intval($soline->discount)+intval($soline->discount_gpl);
 						$unitprice = $soline->list_price * (100-$discount)/100;
 						$soline->unit_price = $unitprice;
 						$soline->amount=$soline->qty_request*$unitprice;
+						if($soline->tax_type=="10%")
+						{
+							$soline->tax_amount =0.1*$soline->amount;
+						}
 						$soline->save();
 				}
 			}
@@ -667,9 +685,134 @@ class DPLController extends Controller {
 			$apps_user->notify(new PushNotif($data));
 
 			return redirect()->route('dpl.list');
-		} else {
-			return redirect()->back()->withInput()->with('msg', 'DPL No #' . $dpl_no . ' already exist.');
-		}
+
 	}
 
+	public function dplDiscountSplit(Request $request){
+		$distributor = $request->distributor;
+		$notrx = $request->notrx;
+		$so_header = SoHeader::where('notrx', $notrx)->first();
+		if($request->Save)
+		{
+			if($so_header->distributor_id!=$request->distributor)
+			{
+				SoLine::where('header_id','=',$so_header->id)
+				->update(['qty_confirm'=>null,'unit_price'=>'list_price']);
+				$updateDPL = DPLNo::where('dpl_no',$so_header->dpl_no)
+																		->update(array('suggest_no'=>null));
+				$so_header->dpl_no=null;
+				$so_header->save();
+			}
+			$this->discountSet($request);
+			return redirect('/dpl/list');
+		}elseif($request->Split)
+		{
+			if(is_null($request->lineid))
+			{
+					return redirect()->back()->withError(trans('pesan.nosplitline'))->withInput();
+			}
+
+			if($so_header){
+					$so_lines = SoLine::where('header_id','=',$so_header->id)
+											->whereNotIn('line_id',$request->lineid)
+											->get();
+
+				 if($so_lines->isEmpty())	{
+					 return redirect()->back()->withError(trans('pesan.errsplitall'))->withInput();
+				 }else{
+					 $this->generateExec($request);
+					 $suggest_no = \Session::get('suggest_no');
+					 if($suggest_no){
+						 $thn =substr($notrx,3,4);
+			       $bln=substr($notrx,7,2);
+			       $tmpnotrx = DB::table('tmp_notrx')->where([
+			           ['tahun','=',$thn],
+			           ['bulan','=',$bln],
+			       ])->select('lastnum')->first();
+			       if(!$tmpnotrx)
+			       {
+			           $tmpnotrx = 0;
+			       }else{
+			           $tmpnotrx = (int)$tmpnotrx->lastnum;
+			       }
+			       $lastnumber=$tmpnotrx+1;
+						 $newnotrx = 'PO-'.date('Ymd').'-'.app('App\Http\Controllers\ProductController')->getRomanNumerals(date('m')).'-'.str_pad($lastnumber,5,'0',STR_PAD_LEFT) ;
+						 echo "insert soheader:".$suggest_no;
+						 $newheader = SoHeader::Create([
+							 	'customer_id'=>$so_header->customer_id,
+								'distributor_id' =>$distributor,
+								'cust_ship_to' =>$so_header->cust_ship_to,
+								'cust_bill_to' =>$so_header->cust_bill_to,
+								'customer_po' =>$so_header->customer_po."_copy1",
+								'file_po' =>$so_header->file_po,
+								'approve'=>$so_header->approve,
+								'tgl_order'=>$so_header->tgl_order,
+								'currency'=>$so_header->currency,
+								'oracle_ship_to'=>$so_header->oracle_ship_to,
+								'oracle_bill_to'=>$so_header->oracle_bill_to,
+								'oracle_customer_id'=>$so_header->oracle_customer_id,
+								'notrx'=>$newnotrx,
+								'status'=>-99,
+								'org_id'=>$so_header->org_id,
+								'warehouse'=>$so_header->warehouse,
+								'suggest_no'=>$suggest_no,
+								'split_from_id'=>$so_header->id
+						 ]);
+						 if($tmpnotrx==0){
+		           DB::table('tmp_notrx')->insert(
+		               ['tahun' => $thn,'bulan'=>$bln,'lastnum'=>$lastnumber]
+		           );
+		         }else{
+		           DB::table('tmp_notrx')->where([
+		               ['tahun','=',  $thn],
+		               ['bulan','=',$bln]
+		             ])
+		             ->update(
+		               ['lastnum'=>$lastnumber]
+		           );
+		         }
+						 /*Update soline with new header_id*/
+						 if($so_header->distributor_id!=$request->distributor){
+							 $newlines = SoLine::where('header_id','=',$so_header->id)
+ 	 	 						->whereNotIn('line_id',$request->lineid)
+ 								->update(['header_id'=>$newheader->id,'qty_confirm'=>null]);
+						 }else{
+							 $newlines = SoLine::where('header_id','=',$so_header->id)
+ 	 	 						->whereNotIn('line_id',$request->lineid)
+ 								->update(['header_id'=>$newheader->id]);
+						 }
+						 //dd("suggestno:" $suggest_no);
+							$updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
+			                                    ->update(array('notrx'=>$newnotrx));
+							$this->dplLog($suggest_no, 'Split From Trx #' . $notrx);
+			          $notified_users = $this->getArrayNotifiedEmail($suggest_no,'');
+							//	dd($notified_users);
+			    			if(!empty($notified_users)){
+			    				$data = [
+			    					'title' => 'Pengajuan DPL',
+			    					'message' => 'Pengajuan DPL #'.$suggest_no,
+			    					'id' => $suggest_no,
+			    					'href' => route('dpl.readNotifApproval'),
+			    					'mail' => [
+			    						'greeting'=>'create order',
+			    						'content'=> 'test create order'
+			    					]
+			    				];
+			    				foreach ($notified_users as $key => $email) {
+			    					foreach ($email as $key2 => $mail) {
+			                $data['email'] = $mail;
+			    						$apps_user = User::where('email',$mail)->first();
+			                if(!empty($apps_user))
+			    						  $apps_user->notify(new PushNotif($data));
+			    					}
+			    				}
+			    			}
+								return redirect('/dpl/list');
+					 }
+
+				 }
+			}
+
+		}
+	}
 }

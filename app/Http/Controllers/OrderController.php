@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Input;
 use Excel;
 use App\Events\PusherBroadcaster;
 use App\Notifications\PushNotif;
+use App\DPLSuggestNo;
 
 
 class OrderController extends Controller
@@ -210,7 +211,7 @@ class OrderController extends Controller
         /*validation qty*/
         foreach($solines as $soline)
         {
-          if($soline->qty_request_primary+$solline->bonus_gpl<$request->qtyshipping[$soline->line_id])
+          if($soline->qty_request_primary+$soline->bonus_gpl<$request->qtyshipping[$soline->line_id])
           {
             return redirect()->back()->withError("Gagal simpan! Qty melebihi order")->withInput();
           }
@@ -265,7 +266,7 @@ class OrderController extends Controller
             //}
           }*/
         }
-        if($header->status==-99 and isset($header->nodpl)){
+        if(isset($header->dpl_no)){
           $checkconfirm = DB::table('so_lines')
             ->where(
               'header_id','=',$request->header_id
@@ -275,14 +276,14 @@ class OrderController extends Controller
                   ->orwhereNotNull('discount_gpl')
                   ->orwhereNotNull('bonus_gpl');
             })->get() ;
-            if($checkconfirm)//jika ada qty
+            if($checkconfirm->count())//jika ada qty
             {
               //notfullconfirm
               $dpl = DPLSuggestNo::where('suggest_no', $header->suggest_no)
                 ->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
               $header->status=-99;
               $header->save();
-              $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($suggest_no);
+              $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);
         			if(!empty($notified_users)){
         				$data = [
         					'title' => 'Resetting DPL',
@@ -322,35 +323,65 @@ class OrderController extends Controller
         //$this->createExcel(null,$h->id);
         return redirect()->route('order.listSO')->withMessage(trans('pesan.approveSO_msg',['notrx'=>$header->notrx]));
       }elseif($request->approve=="reject"){
-        $update = DB::table('so_lines')
-          ->where('header_id','=',$request->header_id)
-          ->update(['qty_confirm' => 0]);
-        $header->status=-2;
-        $header->alasan_tolak=$request->alasan;
-        $header->tgl_approve=Carbon::now();
-        $header->save();
-        $customer = Customer::where('id','=',$header->customer_id)->first();
-        $content = "Mohon maaf, bersama ini kami informasikan bahwa PO anda No:".$header->customer_po." telah dibatalkan.";
-        $content .="<br>Silahkan konfirmasi ke Distributor untuk penjelasan lebih detail.";
-        $data=[
-          'title' => 'Penolakan PO',
-          'message' => 'Penolakan PO #'.$header->customer_po.'dari distributor',
-          'id' => $header->id,
-          'href' => route('order.notifnewpo'),
-          'mail' => [
-            'greeting'=>'Penolakan PO #'.$header->customer_po.'.',
-            'content' =>$content,
-          ]
-        ];
-        foreach($customer->users as $u)
+        if(isset($header->dpl_no))
         {
-          $data['email'] = $u->email;
-          //$u->notify(new RejectPoByDistributor($header,1, $request->alasan));
-          //event(new PusherBroadcaster($data, $u->email));
-          $u->notify(new PushNotif($data));
-        }
+          $dpl = DPLSuggestNo::where('suggest_no', $header->suggest_no)
+            ->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
+          $header->status=-99;
+          $header->save();
+          $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);
+          if(!empty($notified_users)){
+            $data = [
+              'title' => 'Resetting DPL',
+              'message' => 'Penolakan PO utk DPL #'.$header->dpl_no,
+              'id' => $header->suggest_no,
+              'href' => route('dpl.readNotifApproval'),
+              'mail' => [
+                'greeting'=>'Penolakan PO utk DPL #'.$header->dpl_no,
+                'content'=> 'Kami informasikan untuk DPL #'.$header->dpl_no.' dan no.trx:'.$header->notrx.', ditolak oleh distributor.<br>Harap setting ulang pengajuan dpl kembali.'
+              ]
+            ];
+            foreach ($notified_users as $key => $email) {
+              foreach ($email as $key => $mail) {
+                $data['email'] = $mail;
+                $apps_user = User::where('email',$mail)->first();
+                if(!empty($apps_user))
+                  $apps_user->notify(new PushNotif($data));
+              }
+            }
+          }
+          return redirect()->route('order.listSO')->withMessage('PO '.$header->customer_po.' ditolak.');
+        }else{
+          $update = DB::table('so_lines')
+            ->where('header_id','=',$request->header_id)
+            ->update(['qty_confirm' => 0]);
+          $header->status=-2;
+          $header->alasan_tolak=$request->alasan;
+          $header->tgl_approve=Carbon::now();
+          $header->save();
+          $customer = Customer::where('id','=',$header->customer_id)->first();
+          $content = "Mohon maaf, bersama ini kami informasikan bahwa PO anda No:".$header->customer_po." telah dibatalkan.";
+          $content .="<br>Silahkan konfirmasi ke Distributor untuk penjelasan lebih detail.";
+          $data=[
+            'title' => 'Penolakan PO',
+            'message' => 'Penolakan PO #'.$header->customer_po.'dari distributor',
+            'id' => $header->id,
+            'href' => route('order.notifnewpo'),
+            'mail' => [
+              'greeting'=>'Penolakan PO #'.$header->customer_po.'.',
+              'content' =>$content,
+            ]
+          ];
+          foreach($customer->users as $u)
+          {
+            $data['email'] = $u->email;
+            //$u->notify(new RejectPoByDistributor($header,1, $request->alasan));
+            //event(new PusherBroadcaster($data, $u->email));
+            $u->notify(new PushNotif($data));
+          }
 
-        return redirect()->route('order.listSO')->withMessage(trans('pesan.rejectSO_msg',['notrx'=>$header->notrx]));
+          return redirect()->route('order.listSO')->withMessage(trans('pesan.rejectSO_msg',['notrx'=>$header->notrx]));
+        }
       }elseif($request->kirim=="kirim"){
         if($header->status<3 and $header->status>0 and Auth::user()->customer_id ==$header->distributor_id)
         {

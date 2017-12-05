@@ -32,7 +32,9 @@
 									<img data-src="holder.js/100%x180" alt="No Image"  class="img product" style="height:80px;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
 								</div>
 							@else
-								<img data-src="holder.js/100%x180" alt="No Image" class="img product" src="" data-holder-rendered="true">
+							<div class="productbox1">
+								<img data-src="holder.js/100%x180" alt="No Image" class="img product" style="height:80px;" src="" data-holder-rendered="true">
+							</div>
 							@endif
 
 							<!--TITLE-->
@@ -83,8 +85,7 @@
 
 										@if($price!=$disc)
 											{{$currency." ".number_format($price,2)}}/{{$uom}}
-										@else
-											&nbsp;
+										
 										@endif
 									</div>
 									<input type="hidden" id="hrg-{{$product->id}}" value="{{$price}}">
