@@ -4,7 +4,7 @@
           Notifications
           <span class="badge">{{notifCount}}</span>
         </a>
-        <a href="/home" class="dropdown-toggle visible-xs"><i class="fa fa-bell"></i>
+        <a href="#" class="dropdown-toggle visible-xs" id="notif-mobile" onclick="javascript:void(0)"><i class="fa fa-bell"></i>
           <span class="badge">{{notifCount}}</span>
         </a>
         <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-if="unreadNotifications.length">
@@ -61,6 +61,9 @@
         mounted() {
             this.notifCount = this.count;
             this.unreadNotifications = this.notif;
+            $('#notif-mobile').click(function(){
+              window.location.href = window.Laravel.url+'/home';
+            })
             Echo.channel(this.email)
                 .listen('.notif', (notification) => {
                     this.unreadNotifications.push({
