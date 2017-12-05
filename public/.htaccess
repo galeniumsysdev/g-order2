@@ -4,7 +4,7 @@
     </IfModule>
 
     RewriteEngine On
-	  RewriteBase /gOrder2
+	  RewriteBase /gOrder
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d

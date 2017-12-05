@@ -253,9 +253,9 @@ class CustomerController extends Controller
         $user->avatar = $filename;
       }
       $user->name=$request->name;
-      //$user->save();
-      //$user->detachRoles($user->roles);
-      //$user->roles()->attach($request->role);
+      $user->save();
+      $user->detachRoles($user->roles);
+      $user->roles()->attach($request->role);
       $customer = Customer::find($user->customer_id);
       //dd($customer->hasDistributor->count());
       $customer->tax_reference = $request->npwp;

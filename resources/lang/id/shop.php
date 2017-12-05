@@ -55,4 +55,5 @@ return [
     'ordernum' => 'No.Order',
     'finish_shipping'=>'Selesai Kirim',
     'date_confirm' => 'Tanggal Confirm',
+    'select'=>'Pilih',
 ];
