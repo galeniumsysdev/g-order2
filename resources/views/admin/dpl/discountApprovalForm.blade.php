@@ -93,6 +93,7 @@
                     </div>
                   </div>
                 </div>
+                @if($header->dpl_no)
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
@@ -107,6 +108,7 @@
                     </div>
                   </div>
                 </div>
+                @endif
                 <div class="form-group">
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>
@@ -191,12 +193,10 @@
                         </div>
                       <!-- Form Reject -->
                         <div class="button-wrapper">
-                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'generate-sugg-no-form']) !!}
-                            {{ Form::hidden('action','Reject') }}
-                            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
-                            {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
-                            &nbsp;<a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
-                          {{ Form::close() }}
+                          <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#reasonReject">Reject</a>
+                        </div>
+                        <div class="button-wrapper">
+                          <a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
                         </div>
                       </div>
                     </div>
@@ -205,6 +205,37 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="reasonReject" 
+       tabindex="-1" role="dialog" 
+       aria-labelledby="reasonRejectModalLabel">
+    <div class="modal-dialog" id="modal-dialog-reason-reject" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" 
+            data-dismiss="modal" 
+            aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" 
+          id="authenticationModalLabel">Reason Reject</h4>
+        </div>
+        <div class="modal-body text-center">
+          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'generate-sugg-no-form']) !!}
+            {{ Form::hidden('action','Reject') }}
+            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
+            {{ Form::textarea('reason_reject','',array('class'=>'form-control')) }}
+            <br/>
+            {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
+          {{ Form::close() }}
+        </div>
+        <div class="modal-footer">
+          <button type="button" 
+             class="btn btn-default" 
+             data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
