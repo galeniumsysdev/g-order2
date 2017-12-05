@@ -83,6 +83,37 @@
                     </div>
                   </div>
                 </div>
+                @if($dpl->reason)
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">Ditolak oleh</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">{{ $dpl->reject_by }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">Alasan reject</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">{!! $dpl->reason !!}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endif
+                @if($header->dpl_no)
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
@@ -97,6 +128,7 @@
                     </div>
                   </div>
                 </div>
+                @endif
                 <div class="form-group">
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>

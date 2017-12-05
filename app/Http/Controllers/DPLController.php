@@ -127,6 +127,14 @@ class DPLController extends Controller {
 			->where('notrx', '=', $dpl['notrx'])->first();
 		$lines = DB::table('so_lines_v')->where('header_id', '=', $header->id)->get();
 
+		/*Reason reject, if any*/
+		$log = DPLLog::join('users','users.id','dpl_log.done_by')
+					->where('suggest_no',$suggest_no)
+					->orderby('dpl_log.id','desc')
+					->first();
+		$dpl->reason = nl2br($log['reason']);
+		$dpl->reject_by = $log['name'];
+
 		$user_dist = User::where('customer_id', '=', $header->distributor_id)->first();
 
 		$distributor_list = OutletDistributor::join('customers', 'customers.id', 'outlet_distributor.distributor_id')
@@ -169,6 +177,14 @@ class DPLController extends Controller {
 			return view('errors.403');
 		}
 		$lines = DB::table('so_lines_v')->where('header_id', '=', $header->id)->get();
+
+		/*Reason reject, if any*/
+		$log = DPLLog::join('users','users.id','dpl_log.done_by')
+					->where('suggest_no',$suggest_no)
+					->orderby('dpl_log.id','desc')
+					->first();
+		$dpl->reason = nl2br($log['reason']);
+		$dpl->reject_by = $log['name'];
 
 		$user_dist = User::where('customer_id', '=', $header->distributor_id)->first();
 
@@ -361,6 +377,7 @@ class DPLController extends Controller {
 					}
 				}
 			}
+			$this->dplLog($suggest_no, $action);
 		} else {
 			$user_role = Auth::user()->roles;
 			$notified_users = $this->getArrayNotifiedEmail($suggest_no);
@@ -386,9 +403,9 @@ class DPLController extends Controller {
 					}
 				}
 			}
+			$reason = $request->reason_reject;
+			$this->dplLog($suggest_no, $action, $reason);
 		}
-
-		$this->dplLog($suggest_no, $action);
 
 		return redirect('/dpl/list');
 	}
@@ -460,10 +477,12 @@ class DPLController extends Controller {
 		return redirect()->route('dpl.dplNoForm',$suggest_no);
 	}
 
-	public function dplLog($suggest_no, $type) {
+	public function dplLog($suggest_no, $type, $reason = "") {
 		$log = new DPLLog;
 		$log->suggest_no = $suggest_no;
 		$log->type = $type;
+		if($reason)
+			$log->reason = $reason;
 		$log->done_by = Auth::user()->id;
 		$log->save();
 	}
