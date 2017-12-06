@@ -210,7 +210,7 @@ Route::group(['middleware' => ['permission:ApproveOutlet']], function () {
 /*
 Route::get('/csv/user', function()
 {
-    if (($handle = fopen(public_path() . '/uploads/USER DPL.csv','r')) !== FALSE)
+    if (($handle = fopen(public_path() . '/uploads/user DPL.csv','r')) !== FALSE)
     {
         while (($data = fgetcsv($handle, 1000, ',')) !==FALSE)
         {
@@ -218,6 +218,7 @@ Route::get('/csv/user', function()
                 $user->id = Webpatser\Uuid\Uuid::generate();
                 $user->name = $data[0];
                 $user->email = $data[1];
+              //  $user->customer_id = $data[2];
                 $user->password = bcrypt('123456');
                 $user->validate_flag = 1;
                 $user->register_flag = 1;
@@ -257,7 +258,7 @@ Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->nam
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
-Route::get('/oracle/conversion', 'BackgroundController@getkonversi');
+
 
 Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
 /*
