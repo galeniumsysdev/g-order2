@@ -209,7 +209,7 @@
 
                           <!--bahasa dropdown-->
                           <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp;{{ app()->getLocale() }}&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp; &nbsp;{{ app()->getLocale() }}&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                             <ul class="dropdown-menu">
                               <li id="LI_201">
                                   <a href="#" id="idLang" onclick="changeLanguage('id');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/indonesia.png" alt="" width="20" height="20" id="IMG_203" /><span id="SPAN_204"><span id="SPAN_205">&nbsp; Indonesia (id)</span></span></a>
@@ -240,7 +240,7 @@
                                                 </div>
                                                 <div class="col-lg-8">
                                                     <p class="text-left"><strong>{{Auth::user()->name}}</strong></p>
-                                                    <p class="text-left small">{{Auth::user()->email}}</p>
+                                                    <p class="text-left small" style="font-size:15px;">{{Auth::user()->email}}</p>
                                                     <p class="text-left">
                                                         <a href="{{route('profile.index')}}" class="btn btn-black btn-block btn-sm">@lang('label.viewacct')</a>
                                                     </p>
@@ -252,11 +252,11 @@
                                     <li>
                                         <div class="navbar-login navbar-login-session">
                                                 <div class="links">
-                                                    <p class="navbar-header-logout" style="text-align:center;">
+                                                    <p class="navbar-header-logout" style="text-align:center; margin-top:20px;">
                                                       <a href="{{ route('logout') }}"
                                                           onclick="event.preventDefault();
                                                                    document.getElementById('logout-form').submit();">
-                                                          <strong>@lang('label.logout')</strong>
+                                                          <i class="fa fa-sign-out" aria-hidden="true"></i>&nbsp; <strong>@lang('label.logout')</strong>
                                                       </a>
 
                                                       <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

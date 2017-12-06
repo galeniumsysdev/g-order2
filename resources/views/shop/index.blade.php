@@ -33,7 +33,7 @@
             </div>
             <div class="boxprice">
               @if(Auth::check())
-                <div class="input-group input-group-sm" style="width:100%">
+                <div class="input-group input-group-sm" style="width:100%; margin-left:8px;">
                     <input type="text" class="form-control" id="qty-{{$product->id}}" name="qty" value=1 size="2" style="text-align:right;width:50%">
                     <select name="satuan" class="form-control" style="width:40% " id="satuan-{{$product->id}}" onChange="getPrice('{{$product->id}}')">
                       @foreach($product->uom as $satuan)
@@ -70,7 +70,7 @@
                 <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
                 <input type="hidden" id="disc-{{$product->id}}" value="{{$product->price_diskon}}">
                 <div class ="clearfix" id="addCart-{{$product->id}}">
-                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block" role="button">Add to cart</a>
+                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block" style="margin-top:25px;" role="button">Add to cart</a>
                 </div>
                 <div class="info-product" id="info-product-{{$product->id}}">
 					@if(Auth::user()->hasRole('Distributor'))
