@@ -191,6 +191,7 @@ Route::get('customer/searchDistributor', 'CustomerController@searchDistributor')
 
 Route::group(['middleware' => ['permission:Outlet_Distributor']], function () {
   Route::match(['get','post'],'/searchNoo', 'CustomerController@listNoo')->name('customer.listNoo');
+  Route::match(['get','post'],'/reportNoo', 'CustomerController@reportNoo')->name('customer.reportNoo');
   Route::get('/searchCustomer/{search}/{id}','CustomerController@search');
   Route::get('/tambahDistributor/{id}/{outletid}','CustomerController@addlist');
   Route::patch('/saveOutlet/{customer}', 'CustomerController@update')->name('customer.update');
@@ -342,3 +343,5 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 /*
 *
 */
+Route::get('ExportClients', 'ExcelController@ExportClients');
+Auth::routes();

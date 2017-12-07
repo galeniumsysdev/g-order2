@@ -514,7 +514,7 @@ class CustomerController extends Controller
 
     }
 
-
+	/*LIST NOO*/
     public function listNoo(Request $request)
     {
       $categories = CategoryOutlet::where('enable_flag','Y')->orderBy('name','asc')->get();
@@ -585,6 +585,81 @@ class CustomerController extends Controller
 
       return view('admin.customer.listNoo',compact('categories','roles','outlets','request','subgroupdc'));
     }
+	/*-------*/
+	
+	/*REPORT NOO*/
+    public function reportNoo(Request $request)
+    {
+      $categories = CategoryOutlet::where('enable_flag','Y')->orderBy('name','asc')->get();
+      $roles = Role::whereIn('name',['Outlet','Apotik/Klinik'])->get();
+      $subgroupdc=DB::table('subgroup_datacenters as s')
+                  ->join('group_datacenters as g','g.id','=','s.group_id')
+                  ->where([['s.enabled_flag','=',1],['g.enabled_flag','=',1]])
+                  ->select('s.id as id','g.name as group','s.name as subgroup')
+                  ->get();
+      if($request->isMethod('post'))
+      {
+        $outlets = Customer::wherenull('oracle_customer_id');
+        $outlets =$outlets->leftjoin('category_outlets as co','co.id','=','customers.outlet_type_id');
+        $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=','customers.subgroup_dc_id');
+        if($request->name)
+        {
+            $outlets = $outlets->where('customer_name','like',$request->name."%");
+        }
+        if ($request->category!="")
+        {
+            $outlets = $outlets->where('outlet_type_id','=',$request->category);
+        }
+        if ($request->role!="")
+        {
+            $r=$request->role;
+            $outlets = $outlets->whereExists(function ($query) use($r) {
+                  $query->select(DB::raw(1))
+                        ->from('users as u')
+                        ->join('role_user as ru','ru.user_id','=','u.id')
+                        ->join('roles as r','r.id','=','ru.role_id')
+                        ->whereRaw("u.customer_id = customers.id and r.id = '".$r."'");
+              });
+        }else{
+          $outlets = $outlets->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                      ->from('users as u')
+                      ->join('role_user as ru','ru.user_id','=','u.id')
+                      ->join('roles as r','r.id','=','ru.role_id')
+                      ->whereRaw("u.customer_id = customers.id and r.name in ('Apotik/Klinik','Outlet')");
+            });
+        }
+        if($request->psc_flag=="1" and $request->pharma_flag!="1")
+        {
+            $outlets = $outlets->where('psc_flag','=','1');
+        }
+        if($request->pharma_flag=="1" and $request->psc_flag!="1")
+        {
+            $outlets = $outlets->where('pharma_flag','=','1');
+        }
+        if($request->pharma_flag=="1" and $request->psc_flag=="1")
+        {
+            $outlets = $outlets->where(function ($query) {
+              $query->where('pharma_flag','=','1')
+                    ->orWhere('psc_flag','=','1');
+            });
+        }
+        //dd($request->subgroupdc);
+        if($request->subgroupdc)
+        {
+          $outlets = $outlets->whereIn('subgroup_dc_id',$request->subgroupdc);
+        }
+        //var_dump($outlets->toSql());
+        $outlets = $outlets->select('customers.customer_name as customer_name','customers.id as id','co.name as category_name','tax_reference','pharma_flag','psc_flag','sdc.name as subdc','customers.status');
+        $outlets = $outlets->get();
+      }else{
+        $outlets = null;
+      }
+
+      return view('admin.customer.reportNoo',compact('categories','roles','outlets','request','subgroupdc'));
+    }
+	/*-------*/
+	
     public function searchOutlet(Request $request)
     {
       $data = Customer::where("customer_name","LIKE",$request->input('query')."%")

@@ -128,7 +128,13 @@
                         @else
                           <notification class="hidden-xs" :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
                           @if(Auth::user()->can('Outlet_Distributor'))
-                            <li><a href="{{ route('customer.listNoo') }}">List Noo</a></li>
+						   <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">NOO &nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
+                            <ul class="dropdown-menu">
+								<li><a href="{{ route('customer.listNoo') }}"><strong>List NOO</strong></a></li>
+								<li><a href="{{ route('customer.reportNoo') }}"><strong>Report NOO</strong></a></li>
+                            </ul>
+                          </li>
                           @endif
                           @if(Auth::user()->hasRole('KurirGPL'))
                             <li><a href="{{ route('order.shippingSO') }}"><i class="fa fa-truck" aria-hidden="true"></i> @lang('label.shipping')</a></li>

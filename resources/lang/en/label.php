@@ -86,5 +86,7 @@ return [
     'month' => 'Month',
     'none' => 'None',
     'donthaveaccount' => "Don't have an account?",
-    'shipping' => 'Shipping'
+    'shipping' => 'Shipping',
+	'channel' => 'Channel',
+	'distributor' => 'Distributor'
 ];

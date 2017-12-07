@@ -86,5 +86,7 @@ return [
     'month' => 'Bulan',
     'none' => 'Belum diproses',
     'donthaveaccount' => "Belum punya akun?",
-    'shipping' => 'Pengiriman'
+    'shipping' => 'Pengiriman',
+	'channel' => 'Channel',
+	'distributor' => 'Distributor'
 ];
