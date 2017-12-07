@@ -375,7 +375,7 @@ class BackgroundController extends Controller
                     ->leftjoin('HZ_CUSTOMER_PROFILES as hcp','ac.customer_id', 'hcp.cust_Account_id')
                     ->leftjoin('ra_terms as rt','hcp.STANDARD_TERMS','rt.term_id')
                     ->whereIn('customer_class_code',['REGULER','DISTRIBUTOR PSC','DISTRIBUTOR PHARMA','OUTLET','EXPORT','TOLL IN'])
-                    //->where('ac.last_update_date','>=',$lasttime)
+                    ->where('ac.last_update_date','>=',$lasttime)
                     ->select('customer_name' , 'customer_number','customer_id', 'ac.status', 'ac.attribute3 as CUSTOMER_CATEGORY_CODE'
                           , DB::raw('ac.CUSTOMER_CLASS_CODE as customer_class_code')
                           , 'primary_salesrep_id'
@@ -436,7 +436,7 @@ class BackgroundController extends Controller
                               ->whereRaw("ac.customer_id = hcas.cust_Account_id")
                               ->wherein('customer_class_code',['REGULER','DISTRIBUTOR PSC','DISTRIBUTOR PHARMA','OUTLET','EXPORT','TOLL IN']);
                               })
-                  //  ->where('ac.last_update_date','>=',$lasttime)
+                    ->where('ac.last_update_date','>=',$lasttime)
                     ->select('cust_account_id', 'hcas.cust_acct_site_id as cust_acct_site_id', 'hcas.party_site_id', 'bill_to_flag', 'ship_to_flag', 'hcas.orig_system_reference', 'hcas.status as status', 'hcas.org_id as org_id'
                         , 'hcsua.SITE_USE_id as site_use_id'
                         , 'hcsua.site_use_code as site_use_code', 'hcsua.BILL_TO_SITE_USE_ID as bill_to_site_use_id'

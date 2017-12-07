@@ -38,8 +38,8 @@ class CategoryProductController extends Controller
     public function store(Request $request)
     {
       $this->validate($request, [
-         'code' => 'required|unique:category_outlets,flex_value|max:5',
-         'name' => 'required|unique:category_outlets,description|max:191',
+         'code' => 'required|unique:categories,flex_value|max:5',
+         'name' => 'required|unique:categories,description|max:191',
          'parent'=> 'required',
       ]);
       if ($request->status<>'Y')

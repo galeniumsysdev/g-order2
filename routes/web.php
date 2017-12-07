@@ -207,10 +207,10 @@ Route::group(['middleware' => ['permission:ApproveOutlet']], function () {
   Route::post('/approveOutlet','CustomerController@approve')->name('customer.approve');
   Route::post('/rejectOutlet','CustomerController@reject')->name('customer.reject');
 });
-/*
+
 Route::get('/csv/user', function()
 {
-    if (($handle = fopen(public_path() . '/uploads/user DPL.csv','r')) !== FALSE)
+    if (($handle = fopen(public_path() . '/uploads/user2.csv','r')) !== FALSE)
     {
         while (($data = fgetcsv($handle, 1000, ',')) !==FALSE)
         {
@@ -218,7 +218,7 @@ Route::get('/csv/user', function()
                 $user->id = Webpatser\Uuid\Uuid::generate();
                 $user->name = $data[0];
                 $user->email = $data[1];
-              //  $user->customer_id = $data[2];
+                $user->customer_id = $data[2];
                 $user->password = bcrypt('123456');
                 $user->validate_flag = 1;
                 $user->register_flag = 1;
@@ -230,10 +230,32 @@ Route::get('/csv/user', function()
 
     return \App\User::all();
 });
-
+/*
 Route::get('/test', function () {
     return view('testtable');
-});*/
+});
+Route::get('/csv/cabang', function()
+{
+    if (($handle = fopen(public_path() . '/uploads/distributor cabang.csv','r')) !== FALSE)
+    {
+        while (($data = fgetcsv($handle, 1000, ',')) !==FALSE)
+        {
+                $custumer = new \App\Customer();
+                $custumer->id = Webpatser\Uuid\Uuid::generate();
+                $custumer->customer_name = $data[0];
+                $custumer->customer_number = $data[1];
+                $custumer->psc_flag = $data[2];
+                $custumer->pharma_flag=$data[3];
+                $custumer->parent_dist=$data[4];
+                $custumer->status='A';
+                $custumer->save();
+        }
+        fclose($handle);
+    }
+
+    return \App\Customer::whereNotNull('parent_dist');
+});
+*/
 /*check PO from Outlet/Distributor*/
 Route::group(['middleware' => ['auth','prevent-back-history']], function () {
   Route::get('/checkPO/{id}','OrderController@checkOrder')->name('order.checkPO');
