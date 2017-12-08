@@ -389,13 +389,27 @@ class BackgroundController extends Controller
         foreach($customers as $c)
         {
           echo "customer:".$c->customer_id."<br>";
+          $psc_flag=null;
+          $pharma_flag=null;
+          $export_flag=null;
+          $tollin_flag=null;
+          if($c->customer_class_code == 'DISTRIBUTOR PSC' or $c->customer_class_code=='OUTLET')
+          {
+            $psc_flag="1";
+          }elseif($c->customer_class_code == 'DISTRIBUTOR PHARMA'){
+            $pharma_flag="1";
+          }elseif($c->customer_class_code == 'TOLL IN'){
+            $tollin_flag="1";
+          }elseif($c->customer_class_code == 'EXPORT'){
+            $export_flag="1";
+          }
           $mycustomer = Customer::updateOrCreate(
             ['oracle_customer_id'=>$c->customer_id],
             ['customer_name'=>$c->customer_name,'customer_number'=>$c->customer_number,'status'=>$c->status
             ,'customer_category_code'=>$c->customer_category_code,'customer_class_code'=>$c->customer_class_code
             ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
             ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
-            ,'payment_term_name'=>$c->payment_term
+            ,'payment_term_name'=>$c->payment_term,'psc_flag'=>$psc_flag,'pharma_flag'=>$pharma_flag,'export_flag'=>$export_flag,'tollin_flag'=>$tollin_flag
             ]
           );
           if($c->status=='I'){
