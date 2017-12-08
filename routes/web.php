@@ -375,5 +375,4 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 /*
 *
 */
-Route::get('ExportClients', 'ExcelController@ExportClients');
-Auth::routes();
+Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');

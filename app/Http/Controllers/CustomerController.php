@@ -528,7 +528,7 @@ class CustomerController extends Controller
       {
         $outlets = Customer::wherenull('oracle_customer_id');
         $outlets =$outlets->leftjoin('category_outlets as co','co.id','=','customers.outlet_type_id');
-        $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=','customers.subgroup_dc_id');
+        $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=',' customers.subgroup_dc_id');
         if($request->name)
         {
             $outlets = $outlets->where('customer_name','like',$request->name."%");
@@ -592,6 +592,7 @@ class CustomerController extends Controller
     {
       $categories = CategoryOutlet::where('enable_flag','Y')->orderBy('name','asc')->get();
       $roles = Role::whereIn('name',['Outlet','Apotik/Klinik'])->get();
+      $regencies = DB::table('regencies')->get();
       $subgroupdc=DB::table('subgroup_datacenters as s')
                   ->join('group_datacenters as g','g.id','=','s.group_id')
                   ->where([['s.enabled_flag','=',1],['g.enabled_flag','=',1]])
@@ -656,7 +657,7 @@ class CustomerController extends Controller
         $outlets = null;
       }
 
-      return view('admin.customer.reportNoo',compact('categories','roles','outlets','request','subgroupdc'));
+      return view('admin.customer.reportNoo',compact('categories','roles','outlets','request','subgroupdc','regencies'));
     }
 	/*-------*/
 	

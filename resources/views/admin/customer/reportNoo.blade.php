@@ -11,7 +11,7 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
           <div class="panel-body">
             <div id="frmsearch" class="panel panel-default">
               <br>
-              <form action="{{route('customer.reportNoo')}}" class="form-horizontal" method="post" role="form">
+              <form action="{{route('ExportClients')}}" class="form-horizontal" method="post" role="form">
                 {{csrf_field()}}
                 <div class="form-group">
                   <label class="control-label col-sm-2" for="email" style="margin-left:15px;"><strong>@lang('label.distributor') :</strong></label>
@@ -24,9 +24,9 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
                     <div class="col-sm-8" style="margin-left:15px; margin-right:15px; margin-top:10px;">
                       <select class="form-control" name="role" id="role">
                         <option value="">--</option>
-                        <!--@foreach($roles as $role)
-                            <option value="{{$role->id}}">{{$role->display_name}}</option>
-                        @endforeach-->
+                        @foreach($regencies as $regencie)
+                            <option value="{{$regencie->id}}">{{$regencie->name}}</option>
+                        @endforeach
                       </select>
                     </div>
                 </div>
@@ -54,8 +54,8 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
                 <div class="form-group">
                     <div class="col-sm-9 col-sm-offset-2">
                         <button type="submit" id="btn-search" class="btn btn-primary">
-                          <a href="http://localhost/gOrder/ExportClients">Download Excel
-                        </a></button>
+                          Download Excel
+                        </button>
                     </div>
                 </div>
               </form>
