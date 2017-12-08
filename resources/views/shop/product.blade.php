@@ -1,5 +1,5 @@
 	@extends('layouts.navbar_product')
-
+	
 	@section('content')
 		<link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
 		<link rel="stylesheet" href="{{ URL::to('css/displayproduct.css') }}">
@@ -85,7 +85,7 @@
 
 										@if($price!=$disc)
 											{{$currency." ".number_format($price,2)}}/{{$uom}}
-										
+
 										@endif
 									</div>
 									<input type="hidden" id="hrg-{{$product->id}}" value="{{$price}}">

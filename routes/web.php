@@ -210,7 +210,7 @@ Route::group(['middleware' => ['permission:ApproveOutlet']], function () {
 /*
 Route::get('/csv/user', function()
 {
-    if (($handle = fopen(public_path() . '/uploads/USER DPL.csv','r')) !== FALSE)
+    if (($handle = fopen(public_path() . '/uploads/user3.csv','r')) !== FALSE)
     {
         while (($data = fgetcsv($handle, 1000, ',')) !==FALSE)
         {
@@ -218,6 +218,7 @@ Route::get('/csv/user', function()
                 $user->id = Webpatser\Uuid\Uuid::generate();
                 $user->name = $data[0];
                 $user->email = $data[1];
+                $user->customer_id = $data[2];
                 $user->password = bcrypt('123456');
                 $user->validate_flag = 1;
                 $user->register_flag = 1;
@@ -232,7 +233,31 @@ Route::get('/csv/user', function()
 
 Route::get('/test', function () {
     return view('testtable');
+});
+Route::get('/csv/cabang', function()
+{
+    if (($handle = fopen(public_path() . '/uploads/outlet.csv','r')) !== FALSE)
+    {
+        while (($data = fgetcsv($handle, 1000, ',')) !==FALSE)
+        {
+                $custumer = new \App\Customer();
+                $custumer->id = Webpatser\Uuid\Uuid::generate();
+                $custumer->customer_name = $data[0];
+                $custumer->customer_number = $data[1];
+                $custumer->psc_flag = $data[2];
+                $custumer->pharma_flag=$data[3];
+                //$custumer->parent_dist=$data[4];
+                $custumer->outlet_type_id=$data[4];
+                //$custumer->subgroup_dc_id=$data[5];
+                $custumer->status='A';
+                $custumer->save();
+        }
+        fclose($handle);
+    }
+
+  //  return \App\Customer::whereNotNull('parent_dist');
 });*/
+
 /*check PO from Outlet/Distributor*/
 Route::group(['middleware' => ['auth','prevent-back-history']], function () {
   Route::get('/checkPO/{id}','OrderController@checkOrder')->name('order.checkPO');
@@ -257,7 +282,7 @@ Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->nam
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
-Route::get('/oracle/conversion', 'BackgroundController@getkonversi');
+
 
 Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
 /*

@@ -303,8 +303,8 @@ class BackgroundController extends Controller
           'event'=>'synchronize',
         ]);
         echo "request id:".$newrequest."<br>";
-        $this->getMasterItem(date_create("2017-07-01"));
-        $this->getConversionItem(date_create("2017-07-01"));
+        $this->getMasterItem($lasttime);
+        $this->getConversionItem($lasttime);
         //dd();
         $qp_listheader = $connoracle->table('qp_list_headers')
                     ->where('last_update_date','>=',$lasttime)
@@ -350,7 +350,7 @@ class BackgroundController extends Controller
               ,'enabled_flag'=>$ql->active_flag
             ]);
           }
-        }        
+        }
         $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
                           ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
                           ->where([['otta.transaction_type_code', '=', 'ORDER'],
@@ -372,26 +372,44 @@ class BackgroundController extends Controller
           );
         }
         $customers = $connoracle->table('ar_customers as ac')
-                    ->whereIn('customer_class_code',['REGULER','DISTRIBUTOR PSC','DISTRIBUTOR PHARMA','RETAIL','EXPORT'])
+                    ->leftjoin('HZ_CUSTOMER_PROFILES as hcp','ac.customer_id', 'hcp.cust_Account_id')
+                    ->leftjoin('ra_terms as rt','hcp.STANDARD_TERMS','rt.term_id')
+                    ->whereIn('customer_class_code',['REGULER','DISTRIBUTOR PSC','DISTRIBUTOR PHARMA','OUTLET','EXPORT','TOLL IN'])
                     ->where('ac.last_update_date','>=',$lasttime)
-                    ->select('customer_name' , 'customer_number','customer_id', 'status', 'attribute2 as CUSTOMER_CATEGORY_CODE'
-                          , DB::raw('nvl(ac.CUSTOMER_CLASS_CODE,attribute3) as customer_class_code')
+                    ->select('customer_name' , 'customer_number','customer_id', 'ac.status', 'ac.attribute3 as CUSTOMER_CATEGORY_CODE'
+                          , DB::raw('ac.CUSTOMER_CLASS_CODE as customer_class_code')
                           , 'primary_salesrep_id'
                           , 'tax_reference'
                           , 'tax_code'
                           , 'price_list_id'
                           , 'order_type_id'
-                          , 'customer_name_phonetic' )
+                          , 'customer_name_phonetic'
+                          , 'rt.name as payment_term' )
                     ->get();
         foreach($customers as $c)
         {
           echo "customer:".$c->customer_id."<br>";
+          $psc_flag=null;
+          $pharma_flag=null;
+          $export_flag=null;
+          $tollin_flag=null;
+          if($c->customer_class_code == 'DISTRIBUTOR PSC' or $c->customer_class_code=='OUTLET')
+          {
+            $psc_flag="1";
+          }elseif($c->customer_class_code == 'DISTRIBUTOR PHARMA'){
+            $pharma_flag="1";
+          }elseif($c->customer_class_code == 'TOLL IN'){
+            $tollin_flag="1";
+          }elseif($c->customer_class_code == 'EXPORT'){
+            $export_flag="1";
+          }
           $mycustomer = Customer::updateOrCreate(
             ['oracle_customer_id'=>$c->customer_id],
             ['customer_name'=>$c->customer_name,'customer_number'=>$c->customer_number,'status'=>$c->status
             ,'customer_category_code'=>$c->customer_category_code,'customer_class_code'=>$c->customer_class_code
             ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
             ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
+            ,'payment_term_name'=>$c->payment_term,'psc_flag'=>$psc_flag,'pharma_flag'=>$pharma_flag,'export_flag'=>$export_flag,'tollin_flag'=>$tollin_flag
             ]
           );
           if($c->status=='I'){
@@ -426,6 +444,12 @@ class BackgroundController extends Controller
                     ->join('hz_locations hl','hps.location_id','=','hl.location_id')
                     ->join('HZ_CUST_SITE_USES_ALL hcsua', 'hcas.CUST_ACCT_SITE_ID','=','hcsua.CUST_ACCT_SITE_ID')
                     ->whereIn('site_use_code', ['SHIP_TO','BILL_TO'])
+                    ->whereExists(function ($query) {
+                        $query->select(DB::raw(1))
+                              ->from('ar_customers as ac')
+                              ->whereRaw("ac.customer_id = hcas.cust_Account_id")
+                              ->wherein('customer_class_code',['REGULER','DISTRIBUTOR PSC','DISTRIBUTOR PHARMA','OUTLET','EXPORT','TOLL IN']);
+                              })
                     ->where('ac.last_update_date','>=',$lasttime)
                     ->select('cust_account_id', 'hcas.cust_acct_site_id as cust_acct_site_id', 'hcas.party_site_id', 'bill_to_flag', 'ship_to_flag', 'hcas.orig_system_reference', 'hcas.status as status', 'hcas.org_id as org_id'
                         , 'hcsua.SITE_USE_id as site_use_id'
@@ -434,26 +458,47 @@ class BackgroundController extends Controller
                         , 'hcsua.price_list_id as price_list_id'
                         , 'hcsua.order_type_id as order_type_id'
                         , 'hcsua.tax_code as tax_code'
-                        ,  'hl.ADDRESS1', 'hl.address2 as kecamatan','hl.address3 as kabupaten', 'hl.address4 as wilayah'
+                        ,  'hl.ADDRESS1', 'hl.address2 as kecamatan','hl.address3 as kelurahan', 'hl.address4 as wilayah'
                         ,  'hl.city', 'hl.province', 'hl.country'
-                        , 'hcsua.WAREHOUSE_ID','hl.POSTAL_CODE')
+                        , 'hcsua.WAREHOUSE_ID','hl.POSTAL_CODE','hcsua.primary_flag')
                     ->get();
         if($sites)
         {
           foreach ($sites as $site)
           {
               echo "Sites:".$site->cust_account_id."<br>";
+              $province_id=null;
+              $city_id=null;
+              $desa_id=null;
+              $kecamatan_id=null;
               $customer = Customer::where('oracle_customer_id','=',$site->cust_account_id)->first();
+              $city =DB::table('regencies')->where('name','=',$site->city)->first() ;
+              $provinces = DB::table('provinces')->where('name','=',$site->province)->first() ;
+              if($city) $city_id = $city->id;
+              if($provinces) $province_id = $provinces->id;
+              $kecamatan = DB::table('districts')->whereRaw("upper(name)=upper('".addslashes($site->kecamatan)."') and ifnull('".$city_id."',regency_id)=regency_id")->first();
+              if($kecamatan) $kecamatan_id = $kecamatan->id;
+              $villages = DB::table('villages')->whereRaw("upper(name)=upper('".addslashes($site->kelurahan)."') and district_id like '".$city_id."%'")->first();
+              if($villages)
+              {
+                $desa_id=$villages->id;
+                if(is_null($kecamatan_id))
+                {
+                  $kecamatan_id = $villages->district_id;
+                }
+              }
+
               if($customer)
               {
                 $mycustomersite = CustomerSite::updateOrCreate(
                   ['oracle_customer_id'=>$site->cust_account_id,'cust_acct_site_id'=>$site->cust_acct_site_id,'site_use_id'=>$site->site_use_id],
-                  ['site_use_code'=>$site->site_use_code,'status'=>$site->status,'bill_to_site_use_id'=>$site->bill_to_site_use_id
+                  ['site_use_code'=>$site->site_use_code,'primary_flag'=>$site->primary_flag,'status'=>$site->status,'bill_to_site_use_id'=>$site->bill_to_site_use_id
                   ,'payment_term_id'=>$site->payment_term_id,'price_list_id'=>$site->price_list_id
                   ,'order_type_id'=>$site->order_type_id,'tax_code'=>$site->tax_code
-                  ,'address1'=>$site->address1,'state'=>$site->kecamatan,'district'=>$site->kabupaten
+                  ,'address1'=>$site->address1,'state'=>$site->kelurahan,'district'=>$site->kecamatan
                   ,'city'=>$site->city,'province'=>$site->province,'postal_code'=>$site->postal_code,'Country'=>$site->country
                   ,'org_id'=>$site->org_id,'warehouse'=>$site->warehouse_id,'customer_id'=>$customer->id
+                  ,'city_id'=>$city_id,'province_id'=>$province_id,'district_id'=>$kecamatan_id,'state_id'=>$desa_id,'area'=>$site->wilayah
                   ]
                 );
                 echo "Sites berhasil ditambah/update<br>";
@@ -1047,7 +1092,7 @@ class BackgroundController extends Controller
                       ->first();
           if($mysqlproduct) {
             echo"Product id :".$mysqlproduct->id."<br>";
-            $mysqlconversion = DB::table('uom_conversions')->where('product_id'=>$mysqlproduct->id,
+            $mysqlconversion = DB::table('uom_conversions')->where(['product_id'=>$mysqlproduct->id,
               'uom_code'=>$c->uom_code,
               'base_uom'=>$c->base_uom])->first();
             if($mysqlconversion)
@@ -1056,7 +1101,7 @@ class BackgroundController extends Controller
               $mysqlconversion->rate = $c->conversion_rate;
               $mysqlconversion->width = $c->width;
               $mysqlconversion->height = $c->height;
-              $mysqlconversion->dimension_uom = $c->$c->dimension_uom;
+              $mysqlconversion->dimension_uom = $c->dimension_uom;
               $mysqlconversion->save();
             } else{
               DB::table('uom_conversions')->insert([
@@ -1078,8 +1123,4 @@ class BackgroundController extends Controller
        return true;
     }
 
-    public function getkonversi()
-    {
-      $this->getConversionItem(date_create("2017-07-01"));
-    }
 }
