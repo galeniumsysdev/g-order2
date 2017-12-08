@@ -586,12 +586,13 @@ class CustomerController extends Controller
       return view('admin.customer.listNoo',compact('categories','roles','outlets','request','subgroupdc'));
     }
 	/*-------*/
-	
+
 	/*REPORT NOO*/
     public function reportNoo(Request $request)
     {
       $categories = CategoryOutlet::where('enable_flag','Y')->orderBy('name','asc')->get();
       $roles = Role::whereIn('name',['Outlet','Apotik/Klinik'])->get();
+      $regencies = DB::table('regencies')->get();
       $subgroupdc=DB::table('subgroup_datacenters as s')
                   ->join('group_datacenters as g','g.id','=','s.group_id')
                   ->where([['s.enabled_flag','=',1],['g.enabled_flag','=',1]])
@@ -651,15 +652,15 @@ class CustomerController extends Controller
         }
         //var_dump($outlets->toSql());
         $outlets = $outlets->select('customers.customer_name as customer_name','customers.id as id','co.name as category_name','tax_reference','pharma_flag','psc_flag','sdc.name as subdc','customers.status');
-        $outlets = $outlets->get();
+        $outlets = $outlets->get();      
       }else{
         $outlets = null;
       }
 
-      return view('admin.customer.reportNoo',compact('categories','roles','outlets','request','subgroupdc'));
+      return view('admin.customer.reportNoo',compact('categories','roles','outlets','request','subgroupdc','regencies'));
     }
 	/*-------*/
-	
+
     public function searchOutlet(Request $request)
     {
       $data = Customer::where("customer_name","LIKE",$request->input('query')."%")

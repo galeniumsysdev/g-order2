@@ -67,6 +67,8 @@ class AppServiceProvider extends ServiceProvider
                                               and p.inventory_item_id = qll.product_attr_value
                                               and qll.list_header_id = '".$customer->price_list_id."')");
 
+          }else{
+            $product_flexfields =$product_flexfields->where('parent','not like','TollIn');
           }
           if(Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))
           {

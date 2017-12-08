@@ -35,8 +35,8 @@
 
 .img.product{
   height: 100px;
-  margin-top: 8px;
-  margin-bottom: 10px;
+  /*margin-top: 8px;
+  margin-bottom: 10px;*/
 }
 
   .caption h4 a{
@@ -632,7 +632,7 @@ border-radius: 0%;
 }
 
 /* Button Styleee
-* 
+*
 */
 .img-responsive{
   display:block;

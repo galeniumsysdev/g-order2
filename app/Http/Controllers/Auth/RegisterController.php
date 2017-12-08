@@ -125,7 +125,7 @@ class RegisterController extends Controller
                 $groupdc =$customer->subgroupdc->groupdatacenter;
             }else $groupdc = null;
 
-            
+
             $sites = $customer->sites()->where('primary_flag','=','Y')->first();
             if($sites)
             {
@@ -148,7 +148,9 @@ class RegisterController extends Controller
             }elseif($customer->pharma_flag=="1"){
               $distributor = $this->mappingDistributor($groupdc,$city,'PHARMA');
             }
+
             $distributor = $distributor->get();
+
             if($distributor)
             {
               $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
@@ -204,6 +206,13 @@ class RegisterController extends Controller
           'outlet_type_id' => $request->category,
           'subgroup_dc_id' => $request->subgroupdc
         ]);
+        /*if($request->psc=="1")
+        {
+          $customer->price_list_id = config('constant.price_rbp')
+        }elseif($request->pharma=="1")
+        {
+          $customer->price_list_id = config('constant.price_hna')
+        }*/
        $customer->save();
 
        $province=DB::table('provinces')->where('id','=',$request->province)->first();
@@ -302,8 +311,8 @@ class RegisterController extends Controller
         $distributor = $distributor->where([
           ['c.psc_flag','=',"1"],
           ['dg.group_id','=',$groupdc]
-        ])->whereRaw("((not exists (select 1 from distributor_regency dr where c.id=dr.distributor_id)
-                  	  or exists (select 1 from distributor_regency dr where c.id=dr.distributor_id and dr.regency_id = '".$city."')
+        ])->whereRaw("((not exists (select 1 from distributor_regency as dr where c.id=dr.distributor_id)
+                  	  or exists (select 1 from distributor_regency as dr where c.id=dr.distributor_id and dr.regency_id = '".$city."')
                        ))");
 
       }
@@ -311,12 +320,9 @@ class RegisterController extends Controller
         $distributor = $distributor->where([
           ['c.pharma_flag','=',"1"]
         ])->whereNull('dg.group_id')
-          ->whereExists(function($query){
-            $query->select (DB::raw(1))
-                  ->from('distributor_regency dr')
-                  ->where([['c.id','=','dr.distributor_id'],['dr.regency_id','=',$city]]);
-              });
+          ->whereRaw("exists (select 1 from distributor_regency as dr where c.id = dr.distributor_id and dr.regency_id = '".$city."')");
       }
+
       return $distributor;
     }
 

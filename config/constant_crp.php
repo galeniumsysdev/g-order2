@@ -14,10 +14,10 @@ return [
     */
 
     'flex_value_set_id' => 1016850,
-    'org_id'=> 97,
+    'org_id'=> 106,
     'order_source_id'=>1001,
-    'warehouseid_YMP' =>94,
-    'warehouseid_GPL' =>83,
+    'warehouseid_YMP' =>99,
+    'warehouseid_GPL' =>141,
     'allowedFileTypes' => 'pdf','xls',
     'maxFileSize' => 1000*2,
      'fileDestinationPath' => 'uploads',

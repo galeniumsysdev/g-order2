@@ -62,7 +62,7 @@
 
 				<div class="container">
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">@lang('label.city')</label>
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.city_regency')</label>
             <div class="col-sm-10">
 
               <input type="text" data-provide="typeahead" id="city-name" name="city" value="{{ $site->city }}" placeholder="@lang('label.city')" class="form-control">
@@ -72,7 +72,7 @@
 
 				<div class="container">
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">@lang('label.regency')</label>
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.subdistrict')</label>
             <div class="col-sm-10">
 
               <input type="text" name="district" value="{{ $site->district }}" placeholder="@lang('label.regency')" class="form-control">
@@ -82,7 +82,7 @@
 
 				<div class="container">
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">@lang('label.state')</label>
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.urban_village')</label>
             <div class="col-sm-10">
               <input type="text" name="state" placeholder="@lang('label.state')" class="form-control" value="{{ $site->state }}">
             </div>

@@ -174,6 +174,13 @@ class ProductController extends Controller
               from qp_list_lines_v qll
               where qll.product_attr_value = p.inventory_item_id
                 and qll.list_header_id = '".$customer->price_list_id."')";
+        }else{
+          $sqlproduct .= " and exists (select 1
+              from category_products as cp
+                ,categories cat
+              where cp.product_id = p.id
+                and cp.flex_value = cat.flex_value
+                and cat.parent not like 'TollIn')";
         }
 
         if(Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))

@@ -215,15 +215,15 @@
 
                                <div class="checkbox">
                                  <label>
-                                   @if( old('psc')=="1")
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc" checked="checked">
+                                   @if( old('pharma')=="1")
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma" checked="checked">
                                    @else
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc">
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma">
                                    @endif
 
-                                   @if ($errors->has('psc'))
+                                   @if ($errors->has('pharma'))
                                    <span class="help-block">
-                                       <strong>{{ $errors->first('psc') }}</strong>
+                                       <strong>{{ $errors->first('pharma') }}</strong>
                                    </span>
                                    @endif
 
@@ -286,11 +286,6 @@
 
                                 @endforeach
                               </select>
-                              @if ($errors->has('groupdc'))
-                                <span class="help-block">
-                                  <strong>{{ $errors->first('groupdc') }}</strong>
-                                </span>
-                              @endif
                           </div>
 
                           <div class="col-sm-5">
@@ -302,6 +297,13 @@
                                   <strong>{{ $errors->first('subgroupdc') }}</strong>
                                 </span>
                               @endif
+                          </div>
+                          <div class="col-sm-8">
+                            @if ($errors->has('groupdc'))
+                              <span class="help-block">
+                                <strong>{{ $errors->first('groupdc') }}</strong>
+                              </span>
+                            @endif
                           </div>
                          </div>
 

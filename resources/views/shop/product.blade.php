@@ -1,5 +1,5 @@
 	@extends('layouts.navbar_product')
-	
+
 	@section('content')
 		<link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
 		<link rel="stylesheet" href="{{ URL::to('css/displayproduct.css') }}">
@@ -29,11 +29,11 @@
 							<!--GAMBAR PRODUK-->
 							@if($product->imagePath)
 								<div class="productbox1">
-									<img data-src="holder.js/100%x180" alt="No Image"  class="img product" style="height:80px;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
+									<img data-src="holder.js/100%x180" alt="No Image"  class="img product"  src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
 								</div>
 							@else
 							<div class="productbox1">
-								<img data-src="holder.js/100%x180" alt="No Image" class="img product" style="height:80px;" src="" data-holder-rendered="true">
+								<img data-src="holder.js/100%x180" alt="No Image" class="img product" src="" data-holder-rendered="true">
 							</div>
 							@endif
 

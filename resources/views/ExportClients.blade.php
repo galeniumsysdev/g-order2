@@ -13,13 +13,30 @@
         <td><strong>AREA</strong></td>
         <td><strong>KOORDINAT</strong></td>
         <td><strong>CHANNEL</strong></td>
-        <td><strong>DIVISI</strong></td> 
+        <td><strong>DIVISI</strong></td>
         <td><strong>TGL. REGISTER</strong></td>
         <td><strong>ID CUSTOMER</strong></td>
         <td><strong>DISTRIBUTOR</strong></td>
         <td><strong>STATUS</strong></td>
       </tr>
     </thead>
+    <tbody>      
+        @foreach($customers as $customer)
+        <tr>
+        <td></td>
+        <td>{{$customer->customer_name}}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        @endforeach
+    </tbody>
   </table>
 </body>
 </html>
