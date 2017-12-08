@@ -36,6 +36,9 @@ table.table-center-header tbody tr td.action-column {
 .no-padding {
   padding: 0;
 }
+.modal .modal-body textarea{
+  height: 150px;
+}
 
 /* Custom tabs */
 .simple-tabs.ui-tabs,

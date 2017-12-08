@@ -34,5 +34,7 @@ return [
     'successupload' => 'File successfully uploaded',
     'alreadyupload' => 'File has been uploaded!',
     'notmatchdpl' => 'Suggestion DPL No not match',
-    'itemexist' => 'item already exist in shopping cart'
+    'itemexist' => 'item already exist in shopping cart',
+    'nosplitline' => 'Please select min:1 line to be split!',
+    'errsplitall' => 'Failed to Split. To Split cannot select all line.'
 ];

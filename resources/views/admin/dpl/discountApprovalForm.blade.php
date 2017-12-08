@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -93,6 +93,7 @@
                     </div>
                   </div>
                 </div>
+                @if($header->dpl_no)
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
@@ -107,6 +108,7 @@
                     </div>
                   </div>
                 </div>
+                @endif
                 <div class="form-group">
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>
@@ -137,26 +139,13 @@
                             </div>
                           </div>
                         </td>
-                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->unit_price,2) }}</td>
+                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price,2) }}</td>
                         <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
                         <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
                             {{ $line->qty_request }}
                         </td>
                         <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
-                          @if($header->status<=0)
                             {{  number_format($line->amount,2) }}
-                            @php ($amount  = $line->amount)
-                          @elseif($header->status==3)
-                            @php ($amount  = $line->qty_accept*$line->unit_price)
-                            {{ number_format($amount,2)}}
-                          @elseif($header->status==1)
-                          @php ($amount  = $line->qty_confirm*$line->unit_price)
-                          {{ number_format($amount,2)}}
-                          @elseif($header->status>0 and $header->status<3)
-                            @php ($amount  = $line->qty_shipping*$line->unit_price)
-                            {{ number_format($amount,2)}}
-                          @endif
-                          @php ($totamount  += $amount)
                         </td>
                         <td data-th="Discount Distributor" class="xs-only-text-left text-center">
                           {{ $line->discount }} %
@@ -183,7 +172,7 @@
                       <div class="col-md-10">
                       <!-- Form Approve -->
                         <div class="button-wrapper">
-                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'generate-sugg-no-form']) !!}
+                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'discount-approve-form']) !!}
                             {{ Form::hidden('action','Approve') }}
                             {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
                             {{ Form::submit('Approve',array('class'=>'btn btn-primary')) }}
@@ -191,12 +180,10 @@
                         </div>
                       <!-- Form Reject -->
                         <div class="button-wrapper">
-                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'generate-sugg-no-form']) !!}
-                            {{ Form::hidden('action','Reject') }}
-                            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
-                            {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
-                            &nbsp;<a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
-                          {{ Form::close() }}
+                          <a href="#" class="btn btn-danger" data-toggle="modal" data-backdrop="static" data-target="#reasonReject">Reject</a>
+                        </div>
+                        <div class="button-wrapper">
+                          <a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
                         </div>
                       </div>
                     </div>
@@ -205,6 +192,32 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="reasonReject" 
+       tabindex="-1" role="dialog" 
+       aria-labelledby="reasonRejectModalLabel">
+    <div class="modal-dialog" id="modal-dialog-reason-reject" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" 
+            data-dismiss="modal" 
+            aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" 
+          id="authenticationModalLabel">Reason Reject</h4>
+        </div>
+        <div class="modal-body text-center">
+          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'discount-reject-form']) !!}
+            {{ Form::hidden('action','Reject') }}
+            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
+            {{ Form::textarea('reason_reject','',array('class'=>'form-control','required'=>'required')) }}
+            <br/>
+            {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
+          {{ Form::close() }}
         </div>
       </div>
     </div>

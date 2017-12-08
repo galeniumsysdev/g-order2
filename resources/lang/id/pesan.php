@@ -33,5 +33,7 @@ return [
     'successupload' => 'File berhasil terupload',
     'alreadyupload' => 'File telah terupload!',
     'notmatchdpl' => 'No Pengajuan DPL tidak cocok',
-    'itemexist' => 'Item sudah terdapat dalam keranjan'
+    'itemexist' => 'Item sudah terdapat dalam keranjang',
+    'nosplitline' => 'Pilih minimal 1 product yang ingin di split!',
+    'errsplitall' => 'Gagal Split. Line so terpilih semua!'
 ];

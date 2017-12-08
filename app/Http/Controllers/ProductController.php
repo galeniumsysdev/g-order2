@@ -167,6 +167,15 @@ class ProductController extends Controller
                 and cp.flex_value = cat.flex_value
                 and cat.parent not like 'INTERNATIONAL')";
         }
+
+        if($customer->tollin_flag=="1")
+        {
+          $sqlproduct .= " and exists (select 1
+              from qp_list_lines_v qll
+              where qll.product_attr_value = p.inventory_item_id
+                and qll.list_header_id = '".$customer->price_list_id."')";
+        }
+
         if(Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))
         {
           $sqlproduct .= " and exists (select 1
@@ -193,16 +202,17 @@ class ProductController extends Controller
       //}
     }
    }
+   //var_dump($sqlproduct);
     return $sqlproduct;
   }
 
   public function getIndex()
   {
     if(Auth::check()){
-      if(Auth::user()->can('Create PO')){
+      /*if(Auth::user()->can('Create PO')){
         $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
         return view('shop.index',['products' => $products]);
-      }else{
+      }else{*/
         if(Auth::user()->hasRole('IT Galenium')) {
             return redirect('/admin');
         }elseif(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik') ) {
@@ -212,11 +222,12 @@ class ProductController extends Controller
         }else{/*if(Auth::user()->hasRole('Marketing PSC') || Auth::user()->hasRole('Marketing Pharma')) {*/
             return redirect('/home');
         }
-      }
+      //}
 
     }else{
       //return view('auth.login');
       $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
+      //dd(Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->toSQL());
       return view('shop.index',['products' => $products]);
     }
 
@@ -427,21 +438,22 @@ class ProductController extends Controller
           }
         }
       }
+      //echo("<br>Product:".$product->imagePath);
+      if(is_null($product->imagePath) or $product->imagePath=="")
+      {
+        $this->validate($request, [
+            'input_img' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $input['imagename'] = time().'.'.$image->getClientOriginalExtension();
+        $destinationPath = public_path('img');
+      //  dd($destinationPath);
+        $image->move($destinationPath, $input['imagename']);
+        $product->imagePath = $input['imagename'] ;
+      }
     }
 
-    //echo("<br>Product:".$product->imagePath);
-    if(is_null($product->imagePath) or $product->imagePath=="")
-    {
-      $this->validate($request, [
-          'input_img' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-      ]);
 
-      $input['imagename'] = time().'.'.$image->getClientOriginalExtension();
-      $destinationPath = public_path('img');
-    //  dd($destinationPath);
-      $image->move($destinationPath, $input['imagename']);
-      $product->imagePath = $input['imagename'] ;
-    }
     //dd('stop');
     //$product=Product::find($id);
     $product->title =  $request->nama;
@@ -450,9 +462,13 @@ class ProductController extends Controller
     $product->description =$request->id_descr;
     $product->description_en =$request->en_descr;
     $product->save();
-    //$product->categories()->detach();
-    //$product->categories()->attach($request->category);
-  //  $product->categories()->sync([$request->category]);
+    if($request->category){
+      $product->categories()->detach();
+      $product->categories()->attach($request->category);
+      //$product->categories()->sync([$request->category]);
+    }
+
+
 
     return redirect()->route('product.master',$id)->withMessage('Product Updated');
   }

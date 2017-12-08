@@ -180,6 +180,7 @@
                                 @endif
                                 @if(Auth::user()->hasRole('Principal'))
                                   <li><a href="{{route('report.orderform')}}">Report Order</a></li>
+                                  <li><a href="{{route('outlet.downloadStock')}}">Report Stock Outlet</a></li>
                                 @endif
                               </ul>
                             </li>
@@ -193,6 +194,7 @@
                                 <li><a href="{{route('outlet.importProductStock')}}">Import Stock</a></li>
                                 <li><a href="{{route('outlet.trx')}}">Transaction In/Out</a></li>
                                 <li><a href="{{route('outlet.trxList')}}">Transaction List</a></li>
+                                <li><a href="{{route('outlet.downloadStock')}}">Report Stock</a></li>
                               </ul>
                             </li>
                           @endif
@@ -299,6 +301,10 @@
     function showPage() {
       document.getElementById("loader").style.display = "none";
       document.getElementById("myDiv").style.display = "block";
+    }
+
+    function redirectToHome() {
+      window.location.href = window.Laravel.url+'/home';
     }
     </script>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
