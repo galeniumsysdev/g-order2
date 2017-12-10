@@ -54,8 +54,8 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
                 <div class="form-group">
                     <div class="col-sm-9 col-sm-offset-2">
                         <button type="submit" id="btn-search" class="btn btn-primary">
-                          <a href="http://localhost/gOrder/ExportClients">Download Excel
-                        </a></button>
+                          Download Excel
+                        </button>
                     </div>
                 </div>
               </form>

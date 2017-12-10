@@ -528,7 +528,7 @@ class CustomerController extends Controller
       {
         $outlets = Customer::wherenull('oracle_customer_id');
         $outlets =$outlets->leftjoin('category_outlets as co','co.id','=','customers.outlet_type_id');
-        $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=','customers.subgroup_dc_id');
+        $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=',' customers.subgroup_dc_id');
         if($request->name)
         {
             $outlets = $outlets->where('customer_name','like',$request->name."%");
@@ -652,7 +652,7 @@ class CustomerController extends Controller
         }
         //var_dump($outlets->toSql());
         $outlets = $outlets->select('customers.customer_name as customer_name','customers.id as id','co.name as category_name','tax_reference','pharma_flag','psc_flag','sdc.name as subdc','customers.status');
-        $outlets = $outlets->get();      
+        $outlets = $outlets->get();
       }else{
         $outlets = null;
       }
