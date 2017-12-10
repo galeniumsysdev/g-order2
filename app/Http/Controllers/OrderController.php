@@ -313,6 +313,27 @@ class OrderController extends Controller
             $header->status=0;
         }else{
           $header->status=1;
+          /*notify outlet*/
+          $customer = Customer::where('id','=',$header->customer_id)->first();
+          $content ='PO Anda nomor '.$header->notrx.' telah dikonfirmasi oleh '.$header->distributor->customer_name.'. Silahkan check PO anda kembali.<br>';
+          $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+          $data = [
+           'title' => 'Konfirmasi PO',
+           'message' => 'Konfirmasi PO '.$header->customer_po.' oleh distributor.',
+           'id' => $header->id,
+           'href' => route('order.notifnewpo'),
+           'mail' => [
+             'greeting'=>'Konfirmasi PO '.$header->customer_po.' oleh distributor.',
+             'content' =>$content,
+           ]
+         ];
+          foreach($customer->users as $u)
+          {
+           $data['email']= $u->email;
+            //$u->notify(new BookOrderOracle($h,$customer->customer_name));
+           // event(new PusherBroadcaster($data, $u->email));
+            $u->notify(new PushNotif($data));
+          }
         }
 
         $header->approve=1;
