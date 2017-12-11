@@ -200,4 +200,10 @@ class ProfileController extends Controller
       $city = DB::table('regencies')->where('name','like',$request->input('query')."%")->get();
       return response()->json($city);
   }
+
+  public function addaddressview()
+  {
+      $provinces = $provinces = DB::table('provinces')->get();
+      return view('auth.profile.add_address',compact('provinces'));
+  }
 }

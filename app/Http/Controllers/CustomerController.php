@@ -54,12 +54,12 @@ class CustomerController extends Controller
 
       if (Auth::user()->ability(array('MarketingGPL','Marketing PSC', 'Marketing Pharma'),'') )
       {
-        if ($customer->Status=="R")
-        {
+      /*  if ($customer->Status=="A")
+        {*/
           Auth::User()->notifications()
                       ->where('id','=',$notif_id)
                         ->update(['read_at' => Carbon::now()]);
-        }
+        //}
 
         if($customer->contact()->where('contact_type', 'EMAIL')->first())
         {
@@ -377,7 +377,7 @@ class CustomerController extends Controller
     {
       $user = User::find($outletid);
       $outlet = Customer::find($user->customer_id);
-      $distributor_user->notify(new NewoutletDistributionNotif($user,$distributor));
+    //  $distributor_user->notify(new NewoutletDistributionNotif($user,$distributor));
       $outlet->hasDistributor()->attach($id);
       return Response::json($distributor);
     }

@@ -56,9 +56,7 @@ Route::group(['middleware'=>['auth','prevent-back-history']],function(){
   Route::post('profile', 'ProfileController@update_avatar')->name('profile.update');
   Route::post('add-address', 'ProfileController@addaddress')->name('profile.address');
   Route::post('add-contact', 'ProfileController@addcontact')->name('profile.contact');
-  Route::get('/add_address', function () {
-    return view('auth.profile.add_address');
-  });
+  Route::get('/add_address', 'profileController@addaddressview');
   Route::match(['patch','get'],'/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   //Route::get('/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   Route::get('/add_contact', function () {
