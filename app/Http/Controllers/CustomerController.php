@@ -54,12 +54,12 @@ class CustomerController extends Controller
 
       if (Auth::user()->ability(array('MarketingGPL','Marketing PSC', 'Marketing Pharma'),'') )
       {
-        if ($customer->Status=="R")
-        {
+        /*if ($customer->Status=="R")
+        {*/
           Auth::User()->notifications()
                       ->where('id','=',$notif_id)
                         ->update(['read_at' => Carbon::now()]);
-        }
+        //}
 
         if($customer->contact()->where('contact_type', 'EMAIL')->first())
         {
