@@ -54,7 +54,7 @@ class CustomerController extends Controller
 
       if (Auth::user()->ability(array('MarketingGPL','Marketing PSC', 'Marketing Pharma'),'') )
       {
-      /*  if ($customer->Status=="A")
+        /*if ($customer->Status=="R")
         {*/
           Auth::User()->notifications()
                       ->where('id','=',$notif_id)
