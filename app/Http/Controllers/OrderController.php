@@ -693,9 +693,9 @@ class OrderController extends Controller
         $header =$header->select('c.customer_name','sh.customer_po', DB::raw('date_format(tgl_order,"%d-%b-%Y %H:%i:%s") as tgl_order')
                            , 'sh.oracle_ship_to','sh.currency', 'sh.oracle_bill_to',DB::raw('"ENT" as ent')
                            ,DB::raw('"*NB" as nb'),'sh.id', 'ot.name as transaction_name','ql.name as price_name', 'c.customer_number','sh.warehouse','sh.notrx'
-                          )
-                  ->get();
-      //dd($header);
+                         )
+                 ->get();
+      
         //$header=$header->toArray();
         //$data= json_decode( json_encode($header), true);
         //$i=0;            //  dd($header->toArray());
@@ -709,11 +709,11 @@ class OrderController extends Controller
           foreach($header as $h)
           {
             //$i++;
-            if (Auth::user()->name=='YASA MITRA PERDANA, PT')
+            if (Auth::user()->name=='YASA MITRA PERDANA, PT.')
             {
               //if($h->)
               $warehouse = config('constant.def_warehouse_YMP');
-            }elseif (Auth::user()->name=='GALENIUM PHARMASHIA LABORATOEIS, PT'){
+            }elseif (Auth::user()->name=='GALENIUM PHARMASIA LABORATORIES, PT.'){
               $warehouse = config('constant.def_warehouse_GPL');
             }
             $connoracle = DB::connection('oracle');
@@ -751,7 +751,7 @@ class OrderController extends Controller
                       ->get();
                 foreach($line as $l)
                 {
-                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom,'','',$h->tgl_order,'','','','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
+                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom,'','','','',$h->tgl_order,'','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
 
                 }
                 $sheet->appendRow(array('*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*PB','*IR'));

@@ -282,8 +282,7 @@ class ProductController extends Controller
       $dp->uom=$uom;
     }
 
-    $products = collect($dataproduct);
-
+    $products = collect($dataproduct);    
 
     /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
     $products= new LengthAwarePaginator($pagedData, count($products), $perPage);

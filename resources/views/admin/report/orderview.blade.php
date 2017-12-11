@@ -29,10 +29,10 @@
     <td>{{$request->channel}}</td>
   </tr>
   @endif
-  @if($request->divisi)
+  @if($request->psc_flag=="1" or $pharma_flag=="1")
   <tr>
     <td>Divisi</td>
-    <td>{{$request->divisi}}
+    <td>
       @if($request->psc_flag=="1" and $request->pharma_flag=="1")
         PSC/PHARMA
       @elseif($request->psc_flag=="1")

@@ -49,10 +49,11 @@
 										<input type="text" class="form-control input-sm" name="qty" id="qty-{{$product->id}}" value=1 style="text-align:right;width:40%"  onkeypress="return isNumberKey(event)" >
 										<select name="satuan" class="form-control input-sm" style="width:50%;" id="satuan-{{$product->id}}" onChange="getPrice('{{$product->id}}')">
 											@foreach($product->uom as $satuan)
-												@php ($vrate =1)
 												@if(Auth::user()->hasRole('Distributor'))
+													@php ($vrate =$satuan->rate)
 													<option value="{{$satuan->uom_code}}" {{$product->satuan_secondary==$satuan->uom_code?'selected':''}}>{{$satuan->uom_code}}</option>
 													@else
+													@php ($vrate =1)
 													<option value="{{$satuan->uom_code}}" {{$product->satuan_primary==$satuan->uom_code?'selected':''}}>{{$satuan->uom_code}}</option>
 												@endif
 											@endforeach
@@ -80,12 +81,13 @@
 										@endif
 										{{$currency." ".number_format($disc,2)."/".$uom}}
 									</div>
-									<div class="price coret" id="hrgcoret-{{$product->id}}">
+									<div class="price coret" style="text-align:left" id="hrgcoret-{{$product->id}}">
 										@php ($price = $product->getRealPrice(Auth()->user()->id,$uom))
 
 										@if($price!=$disc)
 											{{$currency." ".number_format($price,2)}}/{{$uom}}
-
+										@else
+											&nbsp;
 										@endif
 									</div>
 									<input type="hidden" id="hrg-{{$product->id}}" value="{{$price}}">
@@ -105,8 +107,7 @@
 							<div class="productboxDist">
 								<div class="info-product" id="info-product-{{$product->id}}">
 									@if(Auth::user()->hasRole('Distributor'))
-										@php ($vrate = $satuan->rate)
-										1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}<br>
+										1{{$product->satuan_secondary." = ".(float)$product->conversion."/".$product->satuan_primary}}<br>
 									@endif
 								</div>
 							</div>

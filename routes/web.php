@@ -375,8 +375,5 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 /*
 *
 */
-<<<<<<< HEAD
+
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
-=======
-Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
->>>>>>> Ani

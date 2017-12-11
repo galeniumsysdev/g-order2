@@ -89,8 +89,8 @@
                                       <thead>
                                         <tr>
                                           <th width="60%">@lang('label.address')</th>
-                                          <th width="10%">@lang('label.city')</th>
-                                          <th width="5%">@lang('label.state')</th>
+                                          <th width="10%">@lang('label.city_regency')</th>
+                                          <th width="5%">@lang('label.subdistrict')</th>
                                           <th width="5%">@lang('label.postalcode')</th>
                                         </tr>
                                       </thead>

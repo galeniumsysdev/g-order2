@@ -145,6 +145,11 @@ class ProfileController extends Controller
   public function editAddress(Request $request,$id)
   {
     $site = CustomerSite::find($id);
+    if(is_null($site->langitude))
+    {
+      $site->langitude =$site->customer->langitude;
+      $site->longitude =$site->customer->longitude;
+    }
     $provinces = $provinces = DB::table('provinces')->get();
     if($request->isMethod('patch'))
     {
@@ -193,6 +198,6 @@ class ProfileController extends Controller
   {
       //$id = Input::get('id');
       $city = DB::table('regencies')->where('name','like',$request->input('query')."%")->get();
-      return Response::json($city);
+      return response()->json($city);
   }
 }

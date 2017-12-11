@@ -528,7 +528,7 @@ class CustomerController extends Controller
       {
         $outlets = Customer::wherenull('oracle_customer_id');
         $outlets =$outlets->leftjoin('category_outlets as co','co.id','=','customers.outlet_type_id');
-        $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=',' customers.subgroup_dc_id');
+        $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=','customers.subgroup_dc_id');
         if($request->name)
         {
             $outlets = $outlets->where('customer_name','like',$request->name."%");

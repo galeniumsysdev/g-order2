@@ -16,18 +16,29 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
                 <div class="form-group">
                   <label class="control-label col-sm-2" for="email" style="margin-left:15px;"><strong>@lang('label.distributor') :</strong></label>
                     <div class="col-sm-8" style="margin-left:15px; margin-right:15px; margin-top:9px;">
-                      <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="name" id="name" value="{{$request->name}}" >
+                      <div class="input-group col-sm-12">
+                        <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="distributor" id="distributor" value="" >
+                        <span class="input-group-addon" id="change-dist">
+                          <i class="fa fa-times" aria-hidden="true"></i>
+                        </span>
+                        <input type="hidden" name="dist_id" id="dist_id">
+                    </div>
                     </div>
                 </div>
                 <div class="form-group">
                   <label class="control-label col-sm-2" for="role" style="margin-left:15px;"><strong>Area :</strong></label>
                     <div class="col-sm-8" style="margin-left:15px; margin-right:15px; margin-top:10px;">
-                      <select class="form-control" name="role" id="role">
+                      <!--<select class="form-control" name="city" id="city">
                         <option value="">--</option>
                         @foreach($regencies as $city)
                             <option value="{{$city->id}}">{{$city->name}}</option>
-                        @endforeach-->
-                      </select>
+                        @endforeach
+                      </select>-->
+                      <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="city" id="city" value="" >
+                      <span class="input-group-addon" id="change-city">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                      </span>
+                      <input type="hidden" name="city_id" id="city_id">
                     </div>
                 </div>
                 <div class="form-group">
@@ -67,9 +78,61 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
 </div>
 @endsection
 @section('js')
+@section('js')
 <script src="{{ asset('js/moment-with-locales.js') }}"></script>
 <script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
 <script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
-<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#change-dist').hide();
+    $('#change-city').hide();
+    /*typeahead distributor*/
+    var path2 = "{{ route('customer.searchDistributor') }}";
+    $.get(path2,
+        function (data) {
+            $('#distributor').typeahead({
+                source: data,
+                items: 10,
+                showHintOnFocus: 'all',
+                displayText: function (item) {
+                    return item.customer_name;
+                },
+                afterSelect: function (item) {
+                  $('#distributor').val(item.customer_name);
+                  $('#dist_id').val(item.id);
+                  $('#change-dist').show();
+                  $('#distributor').attr('readonly','readonly');
+                }
+            });
+          }, 'json');
+      $('#change-dist').click(function(){
+          $(this).hide();
+          $('#distributor').removeAttr('readonly').val('');
+          $('#dist_id').val('');
+      });
+      var path = window.Laravel.url+"/ajax/typeaheadCity";
+      $.get(path,
+          function (data) {
+              $('#city').typeahead({
+                  source: data,
+                  items: 10,
+                  showHintOnFocus: 'all',
+                  displayText: function (item) {
+                      return item.name;
+                  },
+                  afterSelect: function (item) {
+                    $('#city').val(item.name);
+                    $('#city_id').val(item.id);
+                    $('#change-city').show();
+                    $('#city').attr('readonly','readonly');
+                  }
+              });
+            }, 'json');
+            $('#change-city').click(function(){
+                $(this).hide();
+                $('#city').removeAttr('readonly').val('');
+                $('#city_id').val('');
+            });
+  });
+</script>
 @endsection
