@@ -680,11 +680,11 @@ class OrderController extends Controller
         }
         if(isset($request->tglaw) )
         {
-          $header =$header->where('tgl_order','>=',$request->tglaw);
+          $header =$header->wheredate('tgl_order','>=',$request->tglaw);
         }
         if(isset($request->tglak) )
         {
-          $header =$header->where('tgl_order','<=',$request->tglak);
+          $header =$header->wheredate('tgl_order','<=',$request->tglak);
         }
         if(isset($id))
         {
@@ -693,8 +693,9 @@ class OrderController extends Controller
         $header =$header->select('c.customer_name','sh.customer_po', DB::raw('date_format(tgl_order,"%d-%b-%Y %H:%i:%s") as tgl_order')
                            , 'sh.oracle_ship_to','sh.currency', 'sh.oracle_bill_to',DB::raw('"ENT" as ent')
                            ,DB::raw('"*NB" as nb'),'sh.id', 'ot.name as transaction_name','ql.name as price_name', 'c.customer_number','sh.warehouse','sh.notrx'
-                         )
-                 ->get();
+                         );
+                        
+        $header =$header->get();
 
         //$header=$header->toArray();
         //$data= json_decode( json_encode($header), true);

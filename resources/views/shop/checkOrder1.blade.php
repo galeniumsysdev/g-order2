@@ -233,7 +233,7 @@
                             </td>
                   				</tr>
                           <tr>
-                            <td>Discount Product: Rp. {{number_format($header->disc_product,2)}}</td>
+                            <td>Discount Promo: Rp. {{number_format($header->disc_product,2)}}</td>
                             <td colspan="{{$colgab}}" style="text-align:right">
                               <strong>Tax: {{$curr}}</strong>
                             </td>
