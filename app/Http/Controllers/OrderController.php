@@ -747,11 +747,11 @@ class OrderController extends Controller
                       ->join('products as p','sl.product_id','=','p.id')
                       ->where([
                         ['sl.header_id','=',$h->id]
-                      ])->select('p.itemcode',DB::raw('sl.qty_confirm/sl.conversion_qty as qty_confirm'),'sl.uom','sl.line_id')
+                      ])->select('p.itemcode',DB::raw('sl.qty_confirm as qty_confirm'),'sl.uom_primary','sl.line_id')
                       ->get();
                 foreach($line as $l)
                 {
-                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom,'','','','',$h->tgl_order,'','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
+                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom_primary,'','','','',$h->tgl_order,'','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
 
                 }
                 $sheet->appendRow(array('*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*PB','*IR'));

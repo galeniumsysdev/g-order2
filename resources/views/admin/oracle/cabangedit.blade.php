@@ -46,7 +46,11 @@
                 <label for="outlet" class="col-sm-2 control-label">*@lang('label.address')</label>
 
                 <div class="col-sm-8">
-                    <textarea id="address" rows="3" class="form-control" name="address" required>{{ $alamat->address1 }}</textarea>
+                    <textarea id="address" rows="3" class="form-control" name="address" required>
+			@if($alamat)
+			{{ $alamat->address1 }}
+			@endif
+		     </textarea>
 
                     @if ($errors->has('address'))
                         <span class="help-block">
