@@ -124,31 +124,39 @@ class BackgroundController extends Controller
                 //
                 //$oraheader = $connoracle->selectone('select min(booked_date)');
                 $newline =$this->getadjustmentHeaderSO($h->notrx,$h->id);
-                $h->status=1;
-                $h->interface_flag="Y";
-                $h->status_oracle ="BOOKED";
-                $h->save();
-                //notification to user
-                 $customer = Customer::where('id','=',$h->customer_id)->first();
-                 $content ='PO Anda nomor '.$h->notrx.' telah dikonfirmasi oleh '.$h->distributor->customer_name.'. Silahkan check PO anda kembali.<br>';
-                 $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
-                 $data = [
-         					'title' => 'Konfirmasi PO',
-         					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-         					'id' => $h->id,
-         					'href' => route('order.notifnewpo'),
-         					'mail' => [
-         						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-                    'content' =>$content,
-         					]
-         				];
-                 foreach($customer->users as $u)
-                 {
-                  $data['email']= $u->email;
-                   //$u->notify(new BookOrderOracle($h,$customer->customer_name));
-                  // event(new PusherBroadcaster($data, $u->email));
-                   $u->notify(new PushNotif($data));
-                 }
+                $oraheader = $connoracle->selectone("select min(booked_date) as booked_date from oe_order_headers_all oha
+                              where  oha.flow_status_code ='BOOKED' and exists (select 1 from oe_ordeR_lines_all ola
+                                          where ola.headeR_id =oha.headeR_id
+                                            and nvl(ola.attribute1,oha.orig_sys_document_ref)='".$h->notrx."')");
+                //dd($oraheader);
+                if(!is_null($oraheader->booked_date))
+                {
+                  $h->status=1;
+                  $h->interface_flag="Y";
+                  $h->status_oracle ="BOOKED";
+                  $h->save();
+                  //notification to user
+                   $customer = Customer::where('id','=',$h->customer_id)->first();
+                   $content ='PO Anda nomor '.$h->notrx.' telah dikonfirmasi oleh '.$h->distributor->customer_name.'. Silahkan check PO anda kembali.<br>';
+                   $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                   $data = [
+           					'title' => 'Konfirmasi PO',
+           					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
+           					'id' => $h->id,
+           					'href' => route('order.notifnewpo'),
+           					'mail' => [
+           						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
+                      'content' =>$content,
+           					]
+           				];
+                   foreach($customer->users as $u)
+                   {
+                    $data['email']= $u->email;
+                     //$u->notify(new BookOrderOracle($h,$customer->customer_name));
+                    // event(new PusherBroadcaster($data, $u->email));
+                     $u->notify(new PushNotif($data));
+                   }
+                }
 
 
               }//endif status==0 (belum di booked)
@@ -583,7 +591,7 @@ class BackgroundController extends Controller
 
     public function getSalesOrder($notrx, SoLine $line)
     {
-      echo "notrx:".$notrx.", uom:".$line->uom;
+      echo "notrx:".$notrx.", uom:".$line->uom."<br>";
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $oraSO=$connoracle->selectone("select sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) as ordered_quantity

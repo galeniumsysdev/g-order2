@@ -695,7 +695,7 @@ class OrderController extends Controller
                            ,DB::raw('"*NB" as nb'),'sh.id', 'ot.name as transaction_name','ql.name as price_name', 'c.customer_number','sh.warehouse','sh.notrx'
                          )
                  ->get();
-      
+
         //$header=$header->toArray();
         //$data= json_decode( json_encode($header), true);
         //$i=0;            //  dd($header->toArray());
@@ -741,7 +741,7 @@ class OrderController extends Controller
                 //$sheet->row($i,json_decode( json_encode($h), true));
                 //$sheet->appendRow(json_decode( json_encode($h), true));
                 $sheet->appendRow(array($h->customer_name,$h->customer_number,$h->transaction_name,$h->customer_po,$h->tgl_order
-                                  ,$h->price_name,$h->oracle_ship_to,config('constant.def_salesperson'),'','',$h->currency,$h->oracle_bill_to
+                                  ,$h->price_name,$h->oracle_ship_to,'','','',$h->currency,$h->oracle_bill_to
                                   ,'','','ENT','','',$warehouse,'*NB'));
                 $line = DB::table('so_lines as sl')
                       ->join('products as p','sl.product_id','=','p.id')
