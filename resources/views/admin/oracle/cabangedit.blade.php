@@ -47,9 +47,10 @@
 
                 <div class="col-sm-8">
                     <textarea id="address" rows="3" class="form-control" name="address" required>
-                    @if($alamat)  {{ $alamat->address1 }}
-                    @endif
-                    </textarea>
+			@if($alamat)
+			{{ $alamat->address1 }}
+			@endif
+		     </textarea>
 
                     @if ($errors->has('address'))
                         <span class="help-block">
