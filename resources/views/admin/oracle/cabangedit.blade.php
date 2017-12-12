@@ -46,7 +46,10 @@
                 <label for="outlet" class="col-sm-2 control-label">*@lang('label.address')</label>
 
                 <div class="col-sm-8">
-                    <textarea id="address" rows="3" class="form-control" name="address" required>{{ $alamat->address1 }}</textarea>
+                    <textarea id="address" rows="3" class="form-control" name="address" required>
+                    @if($alamat)  {{ $alamat->address1 }}
+                    @endif
+                    </textarea>
 
                     @if ($errors->has('address'))
                         <span class="help-block">
@@ -59,11 +62,15 @@
               <label for="province" class="col-sm-2 control-label">*@lang('label.province')</label>
 
               <div class="col-sm-8">
-                  <select name="province" class="form-control" id="province" onchange="getListCity(this.value,{{$alamat->city_id}})" required>
+                  <select name="province" class="form-control" id="province" onchange="getListCity(this.value,{{$alamat?$alamat->city_id:''}})" required>
                     <option value="">--</option>
                     @foreach($provinces as $province)
-                      @if($alamat->province_id==$province->id)
-                        <option selected='selected' value="{{$province->id}}">{{$province->name}}</option>
+                      @if($alamat)
+                        @if($alamat->province_id==$province->id)
+                          <option selected='selected' value="{{$province->id}}">{{$province->name}}</option>
+                        @else
+                          <option value="{{$province->id}}">{{$province->name}}</option>
+                        @endif
                       @else
                         <option value="{{$province->id}}">{{$province->name}}</option>
                       @endif
@@ -82,7 +89,7 @@
                 <label for="city" class="col-sm-2 control-label">*@lang('label.city_regency')</label>
 
                 <div class="col-sm-8">
-                  <select name="city" class="form-control" id="city" onchange="getListDistrict(this.value,{{$alamat->district_id}})" required>
+                  <select name="city" class="form-control" id="city" onchange="getListDistrict(this.value,{{$alamat?$alamat->district_id:''}})" required>
                     <option value="">--</option>
                   </select>
                     <!--<input id="city" type="city" class="form-control" name="city" value="{{ old('city') }}" required>-->
@@ -100,7 +107,7 @@
 
                 <div class="col-sm-8">
                     <!--<input id="regency" type="regency" class="form-control" name="regency" value="{{ old('regency') }}" required>-->
-                    <select name="district" class="form-control" id="district" onchange="getListSubdistrict(this.value,{{$alamat->state_id}})" required>
+                    <select name="district" class="form-control" id="district" onchange="getListSubdistrict(this.value,{{$alamat?$alamat->state_id:''}})" required>
                       <option value="">--</option>
                     </select>
 
@@ -176,10 +183,12 @@
 @section('js')
 <script src="{{ asset('js/register.js') }}"></script>
 <script type="text/javascript">
+@if($alamat)
 $(document).ready(function() {
   getListCity({{is_null($alamat->province_id)?0:$alamat->province_id}},{{is_null($alamat->city_id)?0:$alamat->city_id}});
   getListDistrict({{is_null($alamat->city_id)?0:$alamat->city_id}},{{is_null($alamat->district_id)?0:$alamat->district_id}});
   getListSubdistrict({{is_null($alamat->district_id)?0:$alamat->district_id}},{{is_null($alamat->state_id)?0:$alamat->state_id}});
 });
+@endif
 </script>
 @endsection
