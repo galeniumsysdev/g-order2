@@ -54,9 +54,8 @@
       				<tr>
       					<td >
       						<div class="row">
-      							<div class="col-sm-2 hidden-xs"><img src="{{ asset('img//'.$line->imagePath) }}" alt="..." class="img-responsive"/></div>
       							<div class="col-sm-10">
-      								<h4 >{{ $line->title }}</h4>
+      								{{ $line->title }}
       							</div>
       						</div>
       					</td>
@@ -67,7 +66,7 @@
       					</td>
 
       					<td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
-                    {{  number_format($line->amount,2) }}                  
+                    {{  number_format($line->amount,2) }}
                 </td>
       				</tr>
                 @endforeach
@@ -77,9 +76,9 @@
       					<td colspan="4" class="text-right">SubTotal: </td>
       					<td class="text-right"><strong id="totprice2">
                   @if($header->currency=='IDR')
-                  @php($curr = "Rp.")
+                    @php($curr = "Rp.")
                   @elseif($header->currency=='USD')
-                  @php($curr = "$")
+                    @php($curr = "$")
                   @endif
                   {{ $curr.number_format($header->amount,2) }}</strong></td>
       				</tr>

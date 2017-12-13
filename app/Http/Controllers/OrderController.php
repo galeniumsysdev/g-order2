@@ -416,7 +416,7 @@ class OrderController extends Controller
           /*validation qty*/
           foreach($solines as $soline)
           {
-            if($soline->qty_request_primary<intval($soline->qty_shipping)+$request->qtyshipping[$soline->line_id])
+            if($soline->qty_confirm<intval($soline->qty_shipping)+$request->qtyshipping[$soline->line_id])
             {
               return redirect()->back()->withError("Gagal simpan! Qty kirim melebihi order")->withInput();
             }
@@ -457,7 +457,7 @@ class OrderController extends Controller
           $afterheader = DB::table('so_lines_sum_v')->where('header_id','=',$request->header_id)->first();
 
           if($afterheader->qty_shipping_primary==$afterheader->qty_confirm_primary
-          or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary)
+          /*or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary*/)
           {
             $header->status=3; /*full shipping*/
           }else{
@@ -694,7 +694,7 @@ class OrderController extends Controller
                            , 'sh.oracle_ship_to','sh.currency', 'sh.oracle_bill_to',DB::raw('"ENT" as ent')
                            ,DB::raw('"*NB" as nb'),'sh.id', 'ot.name as transaction_name','ql.name as price_name', 'c.customer_number','sh.warehouse','sh.notrx'
                          );
-                        
+
         $header =$header->get();
 
         //$header=$header->toArray();
