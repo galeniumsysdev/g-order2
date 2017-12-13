@@ -470,11 +470,11 @@ class OrderController extends Controller
           $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
           $data=[
             'title' => 'Pengiriman PO',
-            'message' => 'PO #'.$header->customer_po.' telah dikirim',
+            'message' => 'PO #'.$header->customer_po.' telah dikirim dgn SJ#'.$request->deliveryno,
             'id' => $header->id,
             'href' => route('order.notifnewpo'),
             'mail' => [
-              'greeting'=>'Pengriman Barang PO #'.$header->customer_po.'.',
+              'greeting'=>'Pengiriman Barang PO #'.$header->customer_po.', SJ#'.$request->deliveryno,
               'content' =>$content,
             ]
           ];
