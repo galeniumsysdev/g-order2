@@ -556,7 +556,7 @@ class ProductController extends Controller
         $product->uom=$uom;
         $oldCart = Session::has('cart')?Session::get('cart'):null;
         if(!is_null($oldCart))
-        {
+        { /*check product barang yang sama ada di keranjang belanja*/
           if(array_key_exists($id.'-'.$request->satuan, $oldCart->items)){
             return response()->json([
                             'result' => 'exist',

@@ -67,9 +67,7 @@
       					</td>
 
       					<td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
-                    {{  number_format($line->amount,2) }}
-                    @php ($amount  = $line->amount)
-                    @php ($totamount  += $amount)
+                    {{  number_format($line->amount,2) }}                  
                 </td>
       				</tr>
                 @endforeach
@@ -79,31 +77,21 @@
       					<td colspan="4" class="text-right">SubTotal: </td>
       					<td class="text-right"><strong id="totprice2">
                   @if($header->currency=='IDR')
-                  Rp.
+                  @php($curr = "Rp.")
                   @elseif($header->currency=='USD')
-                  $
+                  @php($curr = "$")
                   @endif
-                  {{ number_format($totamount,2) }}</strong></td>
+                  {{ $curr.number_format($header->amount,2) }}</strong></td>
       				</tr>
               <tr>
       					<td colspan="4" class="text-right">Tax: </td>
       					<td class="text-right"><strong id="totprice2">
-                  @if($header->currency=='IDR')
-                  Rp.
-                  @elseif($header->currency=='USD')
-                  $
-                  @endif
-                  {{ number_format(0,2) }}</strong></td>
+                  {{ $curr.number_format($header->tax_amount,2) }}</strong></td>
       				</tr>
               <tr>
       					<td colspan="4" class="text-right">Total: </td>
       					<td class="text-right"><strong id="totprice2">
-                  @if($header->currency=='IDR')
-                  Rp.
-                  @elseif($header->currency=='USD')
-                  $
-                  @endif
-                  {{ number_format($totamount,2) }}</strong></td>
+                  {{ $curr.number_format($header->total_amount,2) }}</strong></td>
       				</tr>
       			</tfoot>
       		</table>
