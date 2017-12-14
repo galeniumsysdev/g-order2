@@ -60,7 +60,7 @@
                       <div class="form-group">
                         <label for="name" class="col-md-2 control-label">@lang('label.year')</label>
                           <div class="col-md-9" >
-                            {{ Form::selectYear('tahun', 2017, date('Y'), $tahun, ['class' => 'form-control']) }}
+                            {{ Form::selectYear('tahun', 2017, date('Y')+1, $tahun, ['class' => 'form-control']) }}
                           </div>
                       </div>
 

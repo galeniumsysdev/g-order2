@@ -53,9 +53,9 @@
                 @php ($id  = $line->line_id)
       				<tr>
       					<td >
-      						<div class="row">      							
+      						<div class="row">
       							<div class="col-sm-10">
-      								<h4 >{{ $line->title }}</h4>
+      								{{ $line->title }}
       							</div>
       						</div>
       					</td>

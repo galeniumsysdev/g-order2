@@ -595,7 +595,7 @@ class BackgroundController extends Controller
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $oraSO=$connoracle->selectone("select sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) as ordered_quantity
-                  , sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,'".$line->uom."', '".$line->uom_primary."')) as ordered_quantity_primary
+                  , sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom_primary."')) as ordered_quantity_primary
                   , sum(ordered_quantity*unit_selling_price) as amount
                   , sum(ordered_quantity*unit_list_price) as unit_list_price
                   , sum(tax_value) tax_value

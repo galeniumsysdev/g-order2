@@ -242,7 +242,7 @@ class DPLController extends Controller {
 		if(!empty($notified_users)){
 			$data = [
 				'title' => 'Permohonan Approval',
-				'message' => 'Permohonan Approval DPL #'.$suggest_no,
+				'message' => 'Permohonan Approval #'.$suggest_no,
 				'id' => $suggest_no,
 				'href' => route('dpl.readNotifDiscount'),
 				'mail' => [
