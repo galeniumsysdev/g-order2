@@ -76,9 +76,9 @@
       					<td colspan="4" class="text-right">SubTotal: </td>
       					<td class="text-right"><strong id="totprice2">
                   @if($header->currency=='IDR')
-                    @php($curr = "Rp.")
+                  @php($curr = "Rp.")
                   @elseif($header->currency=='USD')
-                    @php($curr = "$")
+                  @php($curr = "$")
                   @endif
                   {{ $curr.number_format($header->amount,2) }}</strong></td>
       				</tr>

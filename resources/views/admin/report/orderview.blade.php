@@ -4,7 +4,7 @@
   <tr>
     <td>Period</td>
     <td>{{date_format(date_create($request->tglaw),'d-M-Y') }} s.d {{date_format(date_create($request->tglak),'d-M-Y')}}</td>
-  </tr>  
+  </tr>
 </table>
 <table>
   <thead>

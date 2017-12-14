@@ -181,7 +181,7 @@ class BackgroundController extends Controller
                     if ($sl->qty_shipping != $jmlkirim)
                     {
                       $sl->qty_shipping = $jmlkirim;
-                      $sl->save();                      
+                      $sl->save();
                       $berubah=true;
                     }
 
