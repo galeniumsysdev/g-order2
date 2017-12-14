@@ -23,10 +23,15 @@
                       <label for="name" class="col-md-2 control-label">@lang('label.distributor')</label>
                         <div class="col-md-9" >
                           <div class="input-group">
-                            <input type="text" name="distributor" class="form-control" placeholder="@lang('label.search') distributor.." aria-label="@lang('label.search') distributor.." value="{{$distributor}}">
+                            <!--<input type="text" name="distributor" class="form-control" placeholder="@lang('label.search') distributor.." aria-label="@lang('label.search') distributor.." value="{{$distributor}}">
                             <span class="input-group-btn">
                               <button class="btn btn-secondary" type="button"><i class="fa fa-search" aria-hidden="true"></i></button>
+                            </span>-->
+                            <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="distributor" id="distributor" value="" >
+                            <span class="input-group-addon" id="change-dist">
+                              <i class="fa fa-times" aria-hidden="true"></i>
                             </span>
+                            <input type="hidden" name="dist_id" id="dist_id">
                           </div>
 
                           </div>
@@ -60,7 +65,7 @@
                       <div class="form-group">
                         <label for="name" class="col-md-2 control-label">@lang('label.year')</label>
                           <div class="col-md-9" >
-                            {{ Form::selectYear('tahun', 2017, date('Y'), $tahun, ['class' => 'form-control']) }}
+                            {{ Form::selectYear('tahun', 2017, date('Y')+1, $tahun, ['class' => 'form-control']) }}
                           </div>
                       </div>
 
@@ -154,4 +159,38 @@
     </div>
   </div>
 
+@endsection
+@section('js')
+<script src="{{ asset('js/moment-with-locales.js') }}"></script>
+<script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
+<script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
+<script>
+  $(document).ready(function() {
+    $('#change-dist').hide();
+    /*typeahead distributor*/
+    var path2 = "{{ route('customer.searchDistributor') }}";
+    $.get(path2,
+        function (data) {
+            $('#distributor').typeahead({
+                source: data,
+                items: 10,
+                showHintOnFocus: 'all',
+                displayText: function (item) {
+                    return item.customer_name;
+                },
+                afterSelect: function (item) {
+                  $('#distributor').val(item.customer_name);
+                  $('#dist_id').val(item.id);
+                  $('#change-dist').show();
+                  $('#distributor').attr('readonly','readonly');
+                }
+            });
+          }, 'json');
+      $('#change-dist').click(function(){
+          $(this).hide();
+          $('#distributor').removeAttr('readonly').val('');
+          $('#dist_id').val('');
+      });
+  });
+</script>
 @endsection

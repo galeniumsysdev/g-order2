@@ -11,7 +11,9 @@ use DB;
 use Auth;
 use File;
 use Carbon\Carbon;
-use App\Notifications\RejectCmo;
+//use App\Notifications\RejectCmo;
+use App\Events\PusherBroadcaster;
+use App\Notifications\PushNotif;
 
 class FilesController extends Controller
 {
@@ -103,6 +105,7 @@ class FilesController extends Controller
                   ->get();
         return view ('files.viewfile',compact('downloads','bulan','tahun','distributor','status'));
     }
+
   public function search(Request $request){
       $bulan = $request->bulan;
       $tahun = $request->tahun;
@@ -143,7 +146,7 @@ class FilesController extends Controller
   }
 
   public function approvecmo(Request $request, $id){
-    var_dump($request->approve);
+    //var_dump($request->approve);
     if($request->approve=="approve")
     {
       DB::table('files_cmo')->where('id','=',$id)->wherenull('approve')
@@ -151,11 +154,25 @@ class FilesController extends Controller
     }elseif($request->approve=="reject"){
        DB::table('files_cmo')->where('id','=',$id)->wherenull('approve')
         ->update(['approve' => 0, 'first_download'=>Carbon::now(),'updated_at'=>Carbon::now()]);
-        $cmo_distributor =FileCMO::find($id);
+      $cmo_distributor =FileCMO::find($id);
       $userdistributor =User::where('customer_id','=',$cmo_distributor->getDistributor->id)->first();
+      $content = 'Mohon maaf, Harap upload kembali file CMO Anda untuk period:'.$cmo_distributor->period.'.';
+      $content .='Silahkan konfirmasi ke Yasa Mitra Perdana untuk penjelasan lebih detail.<br>' ;
+      $data=[
+        'title' => 'Penolakan CMO Oleh Yasa',
+        'message' => 'File CMO period #'.$cmo_distributor->period.' ditolak',
+        'id' => $cmo_distributor->id,
+        'href' => route('files.readnotif'),
+        'mail' => [
+          'greeting'=>'File CMO period #'.$cmo_distributor->period.' ditolak',
+          'content' =>$content,
+        ]
+      ];
       if($userdistributor)
       {
-          $userdistributor->notify(new RejectCmo($cmo_distributor));
+        $data['email'] = $userdistributor->email;
+          //$userdistributor->notify(new RejectCmo($cmo_distributor));
+          $userdistributor->notify(new PushNotif($data));
       }
     }
 

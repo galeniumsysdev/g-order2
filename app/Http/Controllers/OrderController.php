@@ -881,7 +881,7 @@ class OrderController extends Controller
                               , DB::raw("concat(gdc.display_name,'-',sdc.display_name) as channel")
                               , 'sh.tgl_approve','sh.id'
                             );
-          //dd($datalist->get())     ;
+
           if(isset($request->dist_id))
           {
             $datalist=$datalist->where('sh.distributor_id','=',$request->dist_id);
@@ -912,7 +912,7 @@ class OrderController extends Controller
           {
             $datalist=$datalist->where('sh.province_id','=',$request->propinsi);
           }
-
+          //dd($datalist->get())     ;
           $datalist =$datalist->get();
           foreach($datalist as $d)
           {
@@ -933,8 +933,8 @@ class OrderController extends Controller
             $excel->sheet('order', function($sheet) use($datalist,$request) {
                 $sheet->loadView('admin.report.orderview',array('datalist'=>$datalist,'request'=>$request));
             });
-
         })->export('xlsx');
+
       }
     }
 

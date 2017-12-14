@@ -181,7 +181,7 @@ class BackgroundController extends Controller
                     if ($sl->qty_shipping != $jmlkirim)
                     {
                       $sl->qty_shipping = $jmlkirim;
-                      $sl->save();
+                      $sl->save();                      
                       $berubah=true;
                     }
 
@@ -192,8 +192,15 @@ class BackgroundController extends Controller
                 //notif to customer jika berubah
                 if($berubah)
                 {
-                  $soline_notsend = SoLine::where([['header_id','=',$h->id],['qty_confirm','!=','qty_shipping']])->get();
-                  if($soline_notsend->count()>0){
+                  $soline_notsend = DB::table('so_lines_sum_v')
+                                    ->where('header_id','=',$h->id)
+                                    //->where('qty_confirm_primary','<>','qty_shipping_primary')
+                                    ;
+                  $soline_notsend = $soline_notsend->first();
+                  //dd($soline_notsend);
+                  //echo "count: ".$soline_notsend->qty_confirm_primary()."<br>";
+                  //if($soline_notsend->count()>0){
+                  if($soline_notsend->qty_confirm_primary<>$soline_notsend->qty_shipping_primary){
                     $h->status=2;
                   }else{
                     $h->status=3;

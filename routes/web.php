@@ -290,20 +290,20 @@ Route::get('/test',function () {
 });*/
 
 
-Route::group(['middleware' => ['permission:UploadCMO','prevent-back-history']], function () {
+Route::group(['middleware' => ['permission:UploadCMO']], function () {
     Route::get('uploadCMO', 'FilesController@upload')->name('files.uploadcmo');
     Route::post('/handleUpload', 'FilesController@handleUpload');
     Route::get('/downloadCMO/{file}', function ($file='') {
         return response()->download(storage_path('app/uploads/'.$file));
     });
 });
-Route::group(['middleware' => ['permission:DownloadCMO','prevent-back-history']], function () {
+Route::group(['middleware' => ['permission:DownloadCMO']], function () {
   Route::get('viewAlldownloadfile', 'FilesController@downfunc')->name('files.viewfile');
   Route::get('/downloadCMO/{file}', function ($file='') {
       return response()->download(storage_path('app/uploads/'.$file));
   });
   Route::post('/viewAlldownloadfile', 'FilesController@search')->name('files.postviewfile');
-  route::get('notifrejectcmo/{notifid}/{id}','FilesController@readNotif')->name('files.readnotif');
+  route::get('notifrejectcmo/{notifid?}/{id?}','FilesController@readNotif')->name('files.readnotif');
 });
 Route::group(['middleware' => ['role:Principal','prevent-back-history']], function () {
   Route::put('/approvecmo/{id}', 'FilesController@approvecmo')->name('files.approvecmo');
