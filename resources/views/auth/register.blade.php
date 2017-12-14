@@ -190,9 +190,9 @@
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                                   <li style="font-size:18px;">V-Mina</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Bellsoap</li>
+                                                  <li style="font-size:18px;">Belsoap</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">JFSulfur</li>
+                                                  <li style="font-size:18px;">JF</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                               </ul>
                                               <button class="md-close">Close</button>
@@ -208,7 +208,7 @@
                                       </div>
                                   </div>
                                   <div class="md-overlay"></div>
-                                  <div style="font-size:8pt; margin-top:5px;">(Caladine, Oilum, v-mina, Bellsoap, JFSulfur)</div></label>
+                                  <div style="font-size:8pt; margin-top:5px;">(Caladine, Oilum, v-mina, Belsoap, JF)</div></label>
                                </div>
 
                                <!---->
@@ -232,25 +232,25 @@
                                           <h3><strong>Produk Pharma ( NON PSC )</strong></h3>
                                           <div>
                                               <ul>
-                                                  <li style="font-size:18px;">Scabimite CReam</li>
+                                                  <li style="font-size:18px;">Scabimite</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Laxadine Emulsi</li>
+                                                  <li style="font-size:18px;">Laxadine</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Haemocaine Ointment</li>
+                                                  <li style="font-size:18px;">Haemocaine</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                                   <li style="font-size:18px;">Mycorine</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Acne Feldine Lotion</li>
+                                                  <li style="font-size:18px;">Acne Feldine</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Pyravit Syrup</li>
+                                                  <li style="font-size:18px;">Pyravit</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Laxarec Rektal Tube</li>
+                                                  <li style="font-size:18px;">Laxarec</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                                   <li style="font-size:18px;">Solare</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Soft U Derm Cream</li>
+                                                  <li style="font-size:18px;">Soft U Derm</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Topsy Cream</li>
+                                                  <li style="font-size:18px;">Topsy</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                               </ul>
                                               <button class="md-close">Close</button>
