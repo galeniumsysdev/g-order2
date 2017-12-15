@@ -88,5 +88,7 @@ return [
     'donthaveaccount' => "Don't have an account?",
     'shipping' => 'Shipping',
 	'channel' => 'Channel',
-	'distributor' => 'Distributor'
+	'distributor' => 'Distributor',
+	'download' => 'Download Excel',
+	'province' => 'Province'
 ];
