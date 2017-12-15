@@ -43,7 +43,10 @@ class Handler extends ExceptionHandler
      * @return \Illuminate\Http\Response
      */
     public function render($request, Exception $exception)
-    {      
+    {
+        if(!$request->isXmlHttpRequest() && $exception instanceof TokenMismatchException){
+            return redirect(route('login'))->with('status', 'session expired');
+        }
         return parent::render($request, $exception);
     }
 

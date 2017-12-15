@@ -845,8 +845,38 @@ class OrderController extends Controller
       ]);
       if($request->btnterima == "confirm")
       {
-          $updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
-                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);
+          /*$updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
+                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);*/
+          $nosj=$request->nosj;
+          $soheaders = SoHeader::whereExists(function ($query) use($nosj){
+                $query->select(DB::raw(1))
+                      ->from('so_shipping as ss')
+                      ->whereRaw("ss.header_id = so_headers.id  and ss.deliveryno = '".$nosj."'");
+            })->get();
+            //dd($soheaders);
+            foreach($soheaders as $sh)
+            {
+                $content ='SJ #'.$nosj.' telah selesai diantar oleh '.Auth::user()->name.' pada tanggal:'.Carbon::now();
+                $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                $data = [
+                 'title' => 'Konfirmasi Pengiriman oleh Kurir',
+                 'message' => 'SJ #'.$nosj.' telah selesai dikirim.',
+                 'id' => $sh->id,
+                 'href' => route('order.notifnewpo'),
+                 'mail' => [
+                   'greeting'=>'Konfirmasi Pengiriman #'.$sh->notrx.' oleh Kurir',
+                   'content' =>$content,
+                 ]
+               ];
+               $users = User::where('customer_id','=',$sh->distributor_id)->get();
+               foreach($users as $u)
+               {
+                $data['email']= $u->email;
+                 $u->notify(new PushNotif($data));
+               }
+            }
+
+
           return redirect()->route('order.shippingSO')->withMessage(trans('pesan.update'));
       }else return redirect()->back();
 
