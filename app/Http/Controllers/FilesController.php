@@ -180,8 +180,8 @@ class FilesController extends Controller
     //return redirect()->route('files.postviewfile', ['request'=>$request]);
   }
 
-  public function readNotif($notifid,$id)
-  {
+  public function readNotif($id,$notifid)
+  {    
     Auth::User()->notifications()
                ->where('id','=',$notifid)
                  ->update(['read_at' => Carbon::now()]);

@@ -632,7 +632,7 @@ class BackgroundController extends Controller
       if($connoracle){
         if(is_null($bucket))
         {
-          return $connoracle->select("select pricing_group_sequence,sum(adjusted_amount) as adjusted_amount, sum(operand) as operand
+          return $connoracle->select("select pricing_group_sequence,sum(adjusted_amount*inv_convert.inv_um_convert(ola.inventory_item_id,'".$line->uom."',ola.ORDER_QUANTITY_UOM)) as adjusted_amount, sum(operand) as operand
                                 from oe_price_adjustments opa
                                     , oe_order_lines_all ola
                                     , oe_order_headers_all oha
@@ -652,7 +652,7 @@ class BackgroundController extends Controller
                                 order by pricing_group_sequence");
 
         }else{
-          return $connoracle->selectone("select pricing_group_sequence,sum(adjusted_amount) as adjusted_amount, sum(operand) as operand
+          return $connoracle->selectone("select pricing_group_sequence,,sum(adjusted_amount*inv_convert.inv_um_convert(ola.inventory_item_id,'".$line->uom."',ola.ORDER_QUANTITY_UOM)) as adjusted_amount, sum(operand) as operand
                                 from oe_price_adjustments opa
                                     , oe_order_lines_all ola
                                     , oe_order_headers_all oha

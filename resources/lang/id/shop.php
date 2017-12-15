@@ -21,7 +21,8 @@ return [
     'qtyavailable' => 'Jml Tersedia',
     'qtyship' => 'Jml Kirim',
     'qtyreceive' => 'Jml Terima',
-    'SubTotal' => 'Subtotal',
+    'AmountPO' => 'Nilai PO',
+    'SubTotal' => 'Amount',
     'ContinueShopping' => 'Pilih Barang Lagi',
     'CreateOrder' => 'Buat Order',
     'Total' => 'Total',
@@ -56,4 +57,5 @@ return [
     'finish_shipping'=>'Selesai Kirim',
     'date_confirm' => 'Tanggal Confirm',
     'select'=>'Pilih',
+    'amountreceive'=>'Nilai Terima/Kirim'
 ];

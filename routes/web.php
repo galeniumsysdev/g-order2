@@ -303,7 +303,7 @@ Route::group(['middleware' => ['permission:DownloadCMO']], function () {
       return response()->download(storage_path('app/uploads/'.$file));
   });
   Route::post('/viewAlldownloadfile', 'FilesController@search')->name('files.postviewfile');
-  route::get('notifrejectcmo/{notifid?}/{id?}','FilesController@readNotif')->name('files.readnotif');
+  route::get('notifrejectcmo/{id?}/{notifid?}','FilesController@readNotif')->name('files.readnotif');
 });
 Route::group(['middleware' => ['role:Principal','prevent-back-history']], function () {
   Route::put('/approvecmo/{id}', 'FilesController@approvecmo')->name('files.approvecmo');

@@ -50,6 +50,7 @@ class OrderController extends Controller
       $lines =DB::table('so_lines_v')->where('header_id','=',$id)->get();
       $deliveryno = SoShipping::where('header_id','=',$id)->get();
       $deliveryno = $deliveryno->groupBy('deliveryno','tgl_kirim');
+
       $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
 
       if ($user_dist->hasRole('Principal') )    {
@@ -629,11 +630,11 @@ class OrderController extends Controller
           }else{ $header->status = 2;}
           $header->save();
           $dist=Customer::where('id','=',$header->distributor_id)->first();
-          $content = 'Pesanan Anda dengan PO nomor: <strong>'.$header->customer_po.'</strong> dan SJ: '.$request->deliveryno.' telah diterime customer.<br>';
+          $content = 'Pesanan Anda dengan PO nomor: <strong>'.$header->customer_po.'</strong> dan SJ: '.$request->deliveryno.' telah diterime customer pada tanggal: '.Carbon::now().'.<br>';
           $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
           $data=[
             'title' => 'PO diterima customer',
-            'message' => 'SJ #'.$request->deliveryno.' telah diterima customer',
+            'message' => 'SJ #'.$request->deliveryno.' telah diterima customer ,tgl:'.Carbon::now(),
             'id' => $header->id,
             'href' => route('order.notifnewpo'),
             'mail' => [
