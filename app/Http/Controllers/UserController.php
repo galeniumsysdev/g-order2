@@ -206,9 +206,6 @@ class UserController extends Controller
 
     public function oracleUpdate(Request $request,$id)
     {
-      $this->validate($request, [
-          'email' => 'required|email|unique:users,email,'
-      ]);
         $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
                     ->where('id','=',$id)
                     ->orderBy('customer_name','asc')->first();

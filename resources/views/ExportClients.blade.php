@@ -1,6 +1,6 @@
 <center><h2>Report NOO</h2></center>
 <table>
-  <tr><td colspan="3">Parameter</td></tr>
+  <tr><td colspan="11" style="text-align:center"><strong>Parameter</strong></td></tr>
   @if($request->distributor)
   <tr>
     <td colspan="2">Distributor</td>

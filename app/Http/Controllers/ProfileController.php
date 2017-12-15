@@ -150,13 +150,26 @@ class ProfileController extends Controller
       $site->langitude =$site->customer->langitude;
       $site->longitude =$site->customer->longitude;
     }
-    $provinces = $provinces = DB::table('provinces')->get();
+    $provinces  = DB::table('provinces')->get();
     if($request->isMethod('patch'))
     {
+	$kota = DB::table('regencies')->where('id','=',$request->city)->first();
+	if($kota) $site->city = $kota->name; 
+	$kecamatan = DB::table('districts')->where('id','=',$request->district)->first();
+	if($kecamatan) $site->district = $kecamatan->name; 
+	$kabupaten = DB::table('villages')->where('id','=',$request->state)->first();
+	if($kabupaten ) $site->district = $kabupaten->name; 
+	$propinsi = DB::table('provinces')->where('id','=',$request->province)->first();
+	if($propinsi) $site->state = $propinsi->name; 
+
       $site->site_use_code = $request->fungsi;
       $site->address1 = strtoupper($request->address);
-      $site->state = strtoupper($request->state);
-      $site->city = strtoupper($request->city);
+      //$site->state = strtoupper($request->state);
+      //$site->city = strtoupper($request->city);
+	$site->province_id = strtoupper($request->province);
+       $site->city_id = strtoupper($request->city);
+	$site->district_id = strtoupper($request->district);
+	$site->state_id = strtoupper($request->state);
       $site->postalcode = $request->postalcode;
       $site->Country = 'ID';
       $site->save();
@@ -199,5 +212,11 @@ class ProfileController extends Controller
       //$id = Input::get('id');
       $city = DB::table('regencies')->where('name','like',$request->input('query')."%")->get();
       return response()->json($city);
+  }
+
+  public function addaddressview()
+  {
+      $provinces = $provinces = DB::table('provinces')->get();
+      return view('auth.profile.add_address',compact('provinces'));
   }
 }

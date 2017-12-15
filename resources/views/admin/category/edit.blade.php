@@ -11,8 +11,7 @@
       {{$errors->first()}}
   </div>
 @endif
-<form action="{{route('CategoryOutlet.update',$category->id)}}" method="post" role="form">
-  {{method_field('PATCH')}}
+<form action="{{route('CategoryOutlet.update',$category->id)}}" method="post" role="form">  
   {{csrf_field()}}
 
   <div class="form-group">

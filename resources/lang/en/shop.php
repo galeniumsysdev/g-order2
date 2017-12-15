@@ -21,6 +21,7 @@ return [
     'qtyavailable' => 'Qty Available',
     'qtyship' => 'Qty Shipping',
     'qtyreceive' => 'Qty Receive',
+    'AmountPO' => 'Amount PO',
     'SubTotal' => 'Subtotal',
     'ContinueShopping' => 'Continue Shopping',
     'CreateOrder' => 'Create Order',
@@ -57,4 +58,5 @@ return [
     'finish_shipping'=>'Shipping Successfully',
     'date_confirm'=> 'Date Confirm',
     'select'=>'Select',
+    'amountreceive'=>'Amount Receive'
 ];

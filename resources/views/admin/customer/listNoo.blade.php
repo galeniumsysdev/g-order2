@@ -1,4 +1,3 @@
-
 @extends('layouts.navbar_product')
 
 @section('content')

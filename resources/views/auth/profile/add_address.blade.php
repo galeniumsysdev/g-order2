@@ -43,21 +43,66 @@
             </div>
           </div>
 				</div>
+				<div class="container">
+					<div class="form-group">
+						<label for="province" class="col-sm-2 control-label">@lang('label.province')</label>
+
+						<div class="col-sm-10">
+								<select name="province" class="form-control" id="province" onchange="getListCity(this.value,{{old('city')}})" required>
+									<option value="">--</option>
+									@foreach($provinces as $province)
+										@if(old('province')==$province->id)
+											<option selected='selected' value="{{$province->id}}">{{$province->name}}</option>
+										@else
+											<option value="{{$province->id}}">{{$province->name}}</option>
+										@endif
+									@endforeach
+								</select>
+						</div>
+					</div>
+			</div>
 
 				<div class="container">
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">@lang('label.city')</label>
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.city_regency')</label>
             <div class="col-sm-10">
-              <input type="text" name="city" value="{{ old('city') }}" placeholder="@lang('label.city')" class="form-control">
+              <!--<input type="text" name="city" value="{{ old('city') }}" placeholder="@lang('label.city')" class="form-control">-->
+							<select name="city" class="form-control" id="city" onchange="getListDistrict(this.value,{{old('district')}})" required>
+								<option value="">--</option>
+							</select>
             </div>
           </div>
 				</div>
-
 				<div class="container">
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">@lang('label.state')</label>
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.subdistrict')</label>
             <div class="col-sm-10">
-              <input type="text" name="state" placeholder="@lang('label.state')" class="form-control" value="{{ old('state') }}">
+							<select name="district" class="form-control" id="district" onchange="getListSubdistrict(this.value,{{old('subdistricts')}})" required>
+								<option value="">--</option>
+							</select>
+
+							@if ($errors->has('district'))
+									<span class="help-block">
+											<strong>{{ $errors->first('district') }}</strong>
+									</span>
+							@endif
+            </div>
+          </div>
+				</div>
+				<div class="container">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.urban_village')</label>
+            <div class="col-sm-10">
+              <!--<input type="text" name="state" placeholder="@lang('label.state')" class="form-control" value="{{ old('state') }}">-->
+							<select name="state" class="form-control" id="subdistricts">
+								<option value="">--</option>
+							</select>
+
+								@if ($errors->has('subdistricts'))
+										<span class="help-block">
+												<strong>{{ $errors->first('subdistricts') }}</strong>
+										</span>
+								@endif
             </div>
           </div>
 				</div>
@@ -95,4 +140,14 @@
 </div>
 </div>
 
+@endsection
+@section('js')
+<script src="{{ asset('js/register.js') }}"></script>
+<script>
+    $(document).ready(function() {
+			getListCity({{is_null(old('province'))?0:old('province')}},{{is_null(old('city'))?0:old('city')}});
+      getListDistrict({{is_null(old('city'))?0:old('city')}},{{is_null(old('district'))?0:old('district')}});
+      getListSubdistrict({{is_null(old('district'))?0:old('district')}},{{is_null(old('subdistricts'))?0:old('subdistricts')}});
+    });
+</script>
 @endsection
