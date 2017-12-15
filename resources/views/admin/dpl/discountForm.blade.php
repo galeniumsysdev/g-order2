@@ -193,6 +193,22 @@
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="note">Note</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">
+                          {{ Form::textarea('note',$dpl->note,array('class'=>'form-control','id'=>'note','rows'=>5)) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
                         &nbsp;
                       </div>
                       <div class="col-md-10">

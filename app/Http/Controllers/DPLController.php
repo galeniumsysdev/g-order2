@@ -157,6 +157,7 @@ class DPLController extends Controller {
 			'dpl_suggest_no.suggest_no',
 			'outlet_id',
 			'notrx',
+			'note',
 			'fill_in',
 			'approver.name as approver_name',
 			'dpl_no.dpl_no')
@@ -212,9 +213,13 @@ class DPLController extends Controller {
 		$suggest_no = $request->suggest_no;
 		$distributor = $request->distributor;
 		$notrx = $request->notrx;
+		$note = $request->note;
 
 		$so_header = SoHeader::where('notrx', $notrx)
 			->update(array('distributor_id' => $distributor));
+
+		$input_note = dplSuggestNo::where('suggest_no',$suggest_no)
+									->update(array('note'=>$note));
 
 		foreach ($discount as $key => $disc) {
 			$so_line = SoLine::where('line_id', $key)
@@ -278,6 +283,7 @@ class DPLController extends Controller {
 			'outlet.customer_name as dpl_outlet_name',
 			'suggest_no',
 			'notrx',
+			'note',
 			'fill_in',
 			'approved_by',
 			'next_approver',
@@ -408,8 +414,6 @@ class DPLController extends Controller {
 			$reason = $request->reason_reject;
 			$this->dplLog($suggest_no, $action, $reason);
 		}
-
-		return redirect('/dpl/list');
 	}
 
 	public function getArrayNotifiedEmail($suggest_no, $curr_pos = ''){
@@ -572,6 +576,7 @@ class DPLController extends Controller {
 			'sh.distributor_id as dpl_distributor_id',
 			'distributor.customer_name as dpl_distributor_name',
 			'dpl_suggest_no.suggest_no',
+			'dpl_suggest_no.note',
 			'dpl_no.dpl_no')
 			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')

@@ -14,4 +14,18 @@ $(document).ready(function(){
 			e.preventDefault();
 		}
 	})
+
+	$('.discount-form').submit(function (e){
+		e.preventDefault();
+		document.getElementById("loader").style.display = "block";
+		document.getElementById("myDiv").style.display = "none";
+		$.post($(this).attr('action'),{
+			action: $(this).find('#action').val(),
+			suggest_no: $(this).find('#suggest-no').val(),
+			reason_reject: ($(this).find('#reason-reject')) ? $(this).find('#reason-reject').val() : '',
+			note: $('#note').val()
+		}).done(function (result){
+			window.location.href = window.Laravel.url + '/dpl/list';
+		})
+	})
 })
