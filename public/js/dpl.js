@@ -29,7 +29,7 @@ $(document).ready(function(){
 		})
 	})
 
-	$.get('/dpl/list/outlet',
+	$.get(window.Laravel.url+'/dpl/list/outlet',
 		function (data){
 			$('#outlet').typeahead('destroy');
 			$('#outlet').typeahead({

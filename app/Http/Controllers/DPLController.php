@@ -260,8 +260,12 @@ class DPLController extends Controller {
 									'approved_by' => Auth::user()->id,
 									'next_approver' => $key
 									));
-				foreach ($email as $key => $mail) {
+				foreach ($email as $key2 => $mail) {
 					$data['email'] = $mail;
+					if($key == 'FSM_HSM')
+						$data['sendmail'] = 0;
+					else
+						$data['sendmail'] = 1;
 					$apps_user = User::where('email',$mail)->first();
 					$apps_user->notify(new PushNotif($data));
 				}
@@ -376,8 +380,16 @@ class DPLController extends Controller {
 						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 							->update(array('approved_by' => Auth::user()->id, 'next_approver' => ''));
 					}
-					foreach ($email as $key => $mail) {
+					foreach ($email as $key2 => $mail) {
 						$data['email'] = $mail;
+						if($key == 'FSM_HSM'){
+							if($user_role[0]->name == 'Admin DPL')
+								$data['sendmail'] = 1;
+							else
+								$data['sendmail'] = 0;
+						}
+						else
+							$data['sendmail'] = 1;
 						$apps_user = User::where('email',$mail)->first();
 						if(!empty($apps_user))
 							$apps_user->notify(new PushNotif($data));
@@ -402,8 +414,12 @@ class DPLController extends Controller {
 				foreach ($notified_users as $key => $email) {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 						->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
-					foreach ($email as $key => $mail) {
+					foreach ($email as $key2 => $mail) {
 						$data['email'] = $mail;
+						if($key == 'FSM_HSM')
+							$data['sendmail'] = 0;
+						else
+							$data['sendmail'] = 1;
 						$apps_user = User::where('email',$mail)->first();
 						if(!empty($apps_user))
 							$apps_user->notify(new PushNotif($data));
