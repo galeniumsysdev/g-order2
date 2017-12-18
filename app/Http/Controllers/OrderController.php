@@ -897,12 +897,16 @@ class OrderController extends Controller
         return view('admin.report.order',compact('provinces','request','channels'));
       }else{
         //echo ("tglaw:".$request->tglaw."tgl_akhir:".$request->tglak);
+        $namapropinsi=null;
+        $nmchannel=null;
         $datalist = DB::table('so_header_v as sh')
                     ->join('customers as c','sh.customer_id','c.id')
                     ->leftjoin('subgroup_datacenters as sdc','c.subgroup_dc_id','sdc.id')
                     ->leftjoin('group_datacenters as gdc','sdc.group_id','gdc.id')
-                    ->where('sh.tgl_order','>=',$request->tglaw)
-                    ->where('sh.tgl_order','<=',$request->tglak)
+                    ->leftjoin('so_lines_v as sl','sh.id','sl.header_id')
+                    ->leftjoin('so_shipping as ss','sl.line_id','ss.line_id')
+                    ->wheredate('sh.tgl_order','>=',$request->tglaw)
+                    ->wheredate('sh.tgl_order','<=',$request->tglak)
                     ->select('sh.notrx','sh.customer_name','sh.tgl_order','sh.distributor_name','ship_to_addr as alamat','status_name'
                               , DB::raw("case
                                         		when c.psc_flag='1' and c.pharma_flag='1' then 'PSC/PHARMA'
@@ -911,6 +915,10 @@ class OrderController extends Controller
                                         	end as divisi")
                               , DB::raw("concat(gdc.display_name,'-',sdc.display_name) as channel")
                               , 'sh.tgl_approve','sh.id'
+                              , 'sl.line_id','sl.product_id', 'sl.title','sl.amount'
+                              ,'sl.qty_request_primary',DB::raw("sl.unit_price/sl.conversion_qty as unit_price_primary")
+                              , DB::raw("sum(ss.qty_shipping) as qty_shipping")
+                              ,'ss.deliveryno','ss.tgl_terima','ss.tgl_kirim'
                             );
 
           if(isset($request->dist_id))
@@ -937,21 +945,42 @@ class OrderController extends Controller
           if($request->channel)
           {
             $datalist=$datalist->where('subgroup_dc_id','=',$request->channel);
+            $nmchannel=DB::table('subgroup_datacenters as sdc')
+                      ->join('group_datacenters as gd','sdc.group_id','gd.id')
+                      ->select(DB::raw("concat(gd.display_name,'-',sdc.display_name) as channel"))
+                      ->where('sdc.id','=',$request->channel)
+                      ->first();
+            $nmchannel = $nmchannel->channel;
           }
 
           if(isset($request->propinsi))
           {
             $datalist=$datalist->where('sh.province_id','=',$request->propinsi);
+            $namapropinsi = DB::table('provinces')->where('id','=',$request->propinsi)->first();
+            $namapropinsi = $namapropinsi->name;
           }
           //dd($datalist->get())     ;
+          $datalist =$datalist->groupBy('notrx', 'customer_name', 'tgl_order', 'distributor_name', 'alamat', 'status_name', 'divisi', 'channel', 'tgl_approve'
+	, 'id', 'line_id', 'product_id', 'title', 'amount', 'qty_request_primary', 'unit_price_primary', 'deliveryno', 'tgl_terima', 'tgl_kirim');
           $datalist =$datalist->get();
-          foreach($datalist as $d)
+
+          /*foreach($datalist as $d)
           {
             $lines = DB::table('so_lines_v')
                   ->where('header_id','=',$d->id)
                   ->get();
             $d->lines = $lines;
-          }
+            foreach($lines as $l)
+            {
+              $shippings = DB::table('so_shipping')
+                ->where('header_id','=',$l->header_id)
+                ->where('line_id','=',$l->line_id)
+                ->select('tgl_kirim','deliveryno','tgl_terima','qty_shipping','qty_accept','keterangan')
+                ->orderBy('tgl_kirim')
+                ->get();
+              $l->shippings=$shippings;
+            }
+          }*/
 
           //dd($datalist);
 
@@ -960,9 +989,9 @@ class OrderController extends Controller
                     ->setTitle('Order'.Carbon::now())->sheet('Order');
 
         $template =$template->export('xls');*/
-        Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request) {
-            $excel->sheet('order', function($sheet) use($datalist,$request) {
-                $sheet->loadView('admin.report.orderview',array('datalist'=>$datalist,'request'=>$request));
+        Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request,$namapropinsi,$nmchannel) {
+            $excel->sheet('order', function($sheet) use($datalist,$request,$namapropinsi,$nmchannel) {
+                $sheet->loadView('admin.report.orderview',array('datalist'=>$datalist,'request'=>$request,'namapropinsi'=>$namapropinsi,'nmchannel'=>$nmchannel));
             });
         })->export('xlsx');
 
