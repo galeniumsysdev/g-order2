@@ -139,10 +139,10 @@
                             </div>
                           </div>
                         </td>
-                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price,2) }}</td>
-                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
+                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price/$line->conversion_qty,2) }}</td>
+                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom_primary }}</td>
                         <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
-                            {{ $line->qty_request }}
+                            {{ $line->qty_request_primary }}
                         </td>
                         <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
                             {{  number_format($line->amount,2) }}
@@ -213,17 +213,17 @@
     </div>
   </div>
 
-  <div class="modal fade" id="reasonReject" 
-       tabindex="-1" role="dialog" 
+  <div class="modal fade" id="reasonReject"
+       tabindex="-1" role="dialog"
        aria-labelledby="reasonRejectModalLabel">
     <div class="modal-dialog" id="modal-dialog-reason-reject" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" 
-            data-dismiss="modal" 
+          <button type="button" class="close"
+            data-dismiss="modal"
             aria-label="Close">
             <span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title" 
+          <h4 class="modal-title"
           id="authenticationModalLabel">Reason Reject</h4>
         </div>
         <div class="modal-body text-center">

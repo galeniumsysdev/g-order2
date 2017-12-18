@@ -106,10 +106,10 @@
                             </div>
                           </div>
                         </td>
-                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price,2) }}</td>
-                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
+                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price/$line->conversion_qty,2) }}</td>
+                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom_primary }}</td>
                         <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
-                            {{ (int)$line->qty_request }}
+                            {{ (int)$line->qty_request_primary }}
                         </td>
                         <td data-th="@lang('shop.qtyavailable')" class="text-center xs-only-text-left">
                             {{ (int)$line->qty_confirm }}
