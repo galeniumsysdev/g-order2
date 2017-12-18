@@ -160,9 +160,9 @@
                           </div>
                         </td>
                         <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price,2) }}</td>
-                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
+                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom_primary }}</td>
                         <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
-                            {{ $line->qty_request }}
+                            {{ $line->qty_request_primary }}
                         </td>
                         <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">                          
                             {{  number_format($line->amount,2) }}
