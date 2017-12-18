@@ -317,6 +317,7 @@ Route::group(['middleware' => ['role:Principal','prevent-back-history']], functi
 * created by WK Productions
 */
 Route::get('/dpl/list/','DPLController@dplList')->name('dpl.list');
+Route::get('/dpl/list/outlet','DPLController@getOutletDPL')->name('dpl.listOutlet');
 Route::get('/dpl/suggestno/form','DPLController@generateSuggestNoForm')->name('dpl.generateForm');
 Route::post('/dpl/suggestno/generate','DPLController@generateExec')->name('dpl.generateExec');
 Route::get('/dpl/suggestno/success','DPLController@generateSuccess')->name('dpl.generateSuccess');

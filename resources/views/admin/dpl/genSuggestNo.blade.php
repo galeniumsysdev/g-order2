@@ -31,7 +31,8 @@
                         </div>
                       </div>
                       <div class="col-md-10">
-                        {{ Form::select('outlet',$outlet_list,0,array('class'=>'form-control','id'=>'outlet')) }}
+                        {{ Form::text('outlet','',array('class'=>'form-control','id'=>'outlet')) }}
+                        {{ Form::hidden('outlet_id','',array('class'=>'form-control','id'=>'outlet-id')) }}
                       </div>
                     </div>
                   </div>
@@ -59,6 +60,7 @@
 @endsection
 @section('js')
 
+<script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
 <script src="{{ asset('js/dpl.js') }}"></script>
 
 @endsection

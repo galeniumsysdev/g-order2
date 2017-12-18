@@ -28,8 +28,12 @@ class DPLController extends Controller {
 	}
 
 	public function generateSuggestNoForm() {
-		$user = Auth::User();
-		$outlets = OutletDistributor::join('customers', 'customers.id', 'outlet_distributor.outlet_id')
+		return view('admin.dpl.genSuggestNo');
+	}
+
+	public function getOutletDPL(){
+		$outlets = OutletDistributor::select('customers.id','customers.customer_name')
+			->join('customers', 'customers.id', 'outlet_distributor.outlet_id')
 			->join('users as u','customers.id','u.customer_id')
 			->join('role_user as ru','ru.user_id','u.id')
 			->join('roles as r','ru.role_id','r.id')
@@ -37,18 +41,11 @@ class DPLController extends Controller {
 			->whereIn('r.name',['Outlet','Apotik/Klinik'])
 			->where('customers.status','=','A')
 			->where('u.register_flag','=',1)
-			->select('customers.id','customers.customer_name')
+			->groupBy('customers.id','customers.customer_name')
+			->orderBy('customers.customer_name')
 			->get();
 
-		$outlet_list = array('---Pilih---');
-
-		foreach ($outlets as $key => $outlet) {
-			$outlet_list[$outlet->id] = $outlet->customer_name;
-		}
-
-		return view('admin.dpl.genSuggestNo', array(
-			'outlet_list' => $outlet_list,
-		));
+		return response()->json($outlets);
 	}
 
 	public function generateExec(Request $request) {
@@ -68,9 +65,11 @@ class DPLController extends Controller {
 
 		$dplSuggestNo = new DPLSuggestNo;
 		$dplSuggestNo->mr_id = Auth::User()->id;
-		$dplSuggestNo->outlet_id = $request->outlet;
+		$dplSuggestNo->outlet_id = $request->outlet_id;
 		$dplSuggestNo->suggest_no = $token;
 		$dplSuggestNo->save();
+
+		$this->dplLog($token, 'Create DPL Suggest No.');
 
 		\Session::flash('suggest_no', $token);
 

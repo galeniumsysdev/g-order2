@@ -9,8 +9,8 @@ $(document).ready(function(){
     }
 
 	$('#generate-sugg-no-form').submit(function (e){
-		if($('#outlet').val() == 0){
-			alert('Silakan pilih outlet.');
+		if($('#outlet-id').val() == 0){
+			alert('Silakan masukkan outlet yang sesuai.');
 			e.preventDefault();
 		}
 	})
@@ -28,4 +28,21 @@ $(document).ready(function(){
 			window.location.href = window.Laravel.url + '/dpl/list';
 		})
 	})
+
+	$.get('/dpl/list/outlet',
+		function (data){
+			$('#outlet').typeahead('destroy');
+			$('#outlet').typeahead({
+				source: data,
+				items: 'all',
+				showHintOnFocus: 'all',
+				displayText: function (item){
+					return item.customer_name;
+				},
+				afterSelect: function (item){
+					$('#outlet-id').val(item.id);
+				}
+			})
+		}
+	)
 })
