@@ -39,8 +39,8 @@
     <div id="loader"></div><!-- ini loadingnya-->
     <div style="display:none;" id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
       <div id="app">
-          <nav class="navbar navbar-default navbar-static-top header">
-              <div class="container">
+          <nav class="navbar navbar-default navbar-static-top header" style="overflow:hidden; width:100%; margin-bottom:5px;">
+              <div class="header">
                   <div class="navbar-header">
 
                       <!-- Collapsed Hamburger -->
@@ -59,7 +59,7 @@
                       @else
                           <a class="navbar-brand" href="{{ url('/home') }}" style="color:#fff">
                       @endif
-                          <img class="img-header" src="{{ URL::to('img/logoe1.png') }}"/>
+                          <img class="img-header" style="margin-left:30px;" src="{{ URL::to('img/logoe1.png') }}"/>
                         </a>
                       @if(Auth::user())
                         @if(Auth::user()->can('Create PO'))
@@ -100,7 +100,7 @@
                       <!-- Left Side Of Navbar -->
 
                       <!-- Right Side Of Navbar -->
-                      <ul class="nav navbar-nav navbar-right" >
+                      <ul class="nav navbar-nav navbar-right" style="margin-right:60px;">
                           <!-- Authentication Links -->
 
                         @if (Auth::guest())

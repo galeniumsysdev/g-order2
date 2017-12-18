@@ -2,8 +2,8 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
-<div class="container">
 @include('shop.carausel')
+<div class="container">
 </div>
 <div class="container">
      {{csrf_field()}}
