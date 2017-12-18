@@ -686,4 +686,22 @@ class CustomerController extends Controller
               ->get();
       return response()->json($data);
     }
+
+    public function searchOutletDistributor(Request $request)
+    {
+      $data = DB::table('customers as c')
+              ->join('users as u','c.id','=','u.customer_id')
+              ->join('role_user as ru','u.id','=','ru.user_id')
+              ->join('roles as r','ru.role_id','=','r.id')
+              ->join('permission_role as pr','pr.role_id','=','r.id')
+              ->join('permissions as p','p.id','=','pr.permission_id')
+              ->select('c.id','c.customer_name')
+              ->where([
+                ['u.register_flag','=',true],
+                ['c.status','=','A'],
+              ])->where('p.name','=','Create PO')
+              ->orderBy('c.customer_name','asc')
+              ->get();
+      return response()->json($data);
+    }
 }
