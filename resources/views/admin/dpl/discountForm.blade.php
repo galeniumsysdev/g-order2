@@ -159,23 +159,23 @@
                             </div>
                           </div>
                         </td>
-                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price,2) }}</td>
+                        <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price/$line->conversion_qty,2) }}</td>
                         <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom_primary }}</td>
                         <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
                             {{ $line->qty_request_primary }}
                         </td>
-                        <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">                          
+                        <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
                             {{  number_format($line->amount,2) }}
                         </td>
                         <td data-th="Discount Distributor" class="xs-only-text-left text-center">
                           <div class="input-prepend input-group">
-                            <input type="number" step="any" name="discount[{{$id}}]" id="discount-{{$id}}" class="form-control text-center" value="{{ $line->discount }}" style="min-width:80px;">
+                            <input type="number" step="any" min="0" max="100" name="discount[{{$id}}]" id="discount-{{$id}}" class="form-control text-center" value="{{ $line->discount }}" style="min-width:80px;">
                             <span class="add-on input-group-addon">%</span>
                           </div>
                         </td>
                         <td data-th="Discount" class="xs-only-text-left text-center">
                           <div class="input-prepend input-group">
-                            <input type="number" step="any" name="discount_gpl[{{$id}}]" id="discount-gpl-{{$id}}" class="form-control text-center" value="{{ $line->discount_gpl }}" style="min-width:80px;">
+                            <input type="number" step="any" min="0" max="100" name="discount_gpl[{{$id}}]" id="discount-gpl-{{$id}}" class="form-control text-center" value="{{ $line->discount_gpl }}" style="min-width:80px;">
                             <span class="add-on input-group-addon">%</span>
                           </div>
                         </td>
