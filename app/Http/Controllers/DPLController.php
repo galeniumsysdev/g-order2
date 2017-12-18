@@ -341,7 +341,6 @@ class DPLController extends Controller {
 	}
 
 	public function discountApprovalSet(Request $request) {
-		dd($request->all());
 		$suggest_no = $request->suggest_no;
 		$action = $request->action;
 		if ($action == 'Approve') {
