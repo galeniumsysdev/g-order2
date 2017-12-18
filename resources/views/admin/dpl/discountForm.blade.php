@@ -169,13 +169,13 @@
                         </td>
                         <td data-th="Discount Distributor" class="xs-only-text-left text-center">
                           <div class="input-prepend input-group">
-                            <input type="number" name="discount[{{$id}}]" id="discount-{{$id}}" class="form-control text-center" value="{{ $line->discount }}" style="min-width:80px;">
+                            <input type="number" step="any" name="discount[{{$id}}]" id="discount-{{$id}}" class="form-control text-center" value="{{ $line->discount }}" style="min-width:80px;">
                             <span class="add-on input-group-addon">%</span>
                           </div>
                         </td>
                         <td data-th="Discount" class="xs-only-text-left text-center">
                           <div class="input-prepend input-group">
-                            <input type="number" name="discount_gpl[{{$id}}]" id="discount-gpl-{{$id}}" class="form-control text-center" value="{{ $line->discount_gpl }}" style="min-width:80px;">
+                            <input type="number" step="any" name="discount_gpl[{{$id}}]" id="discount-gpl-{{$id}}" class="form-control text-center" value="{{ $line->discount_gpl }}" style="min-width:80px;">
                             <span class="add-on input-group-addon">%</span>
                           </div>
                         </td>
