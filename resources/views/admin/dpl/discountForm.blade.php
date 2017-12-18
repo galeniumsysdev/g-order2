@@ -160,9 +160,9 @@
                           </div>
                         </td>
                         <td data-th="@lang('shop.Price')" class="xs-only-text-left text-center" >{{ number_format($line->list_price,2) }}</td>
-                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom }}</td>
+                        <td data-th="@lang('shop.uom')" class="xs-only-text-left text-center" >{{ $line->uom_primary }}</td>
                         <td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
-                            {{ $line->qty_request }}
+                            {{ $line->qty_request_primary }}
                         </td>
                         <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">                          
                             {{  number_format($line->amount,2) }}
@@ -188,6 +188,22 @@
                     <tfoot>
                     </tfoot>
                   </table>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="note">Note</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">
+                          {{ Form::textarea('note',$dpl->note,array('class'=>'form-control','id'=>'note','rows'=>5)) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="form-group">
                   <div class="container-fluid">

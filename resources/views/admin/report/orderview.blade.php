@@ -5,44 +5,6 @@
     <td>Period</td>
     <td>{{date_format(date_create($request->tglaw),'d-M-Y') }} s.d {{date_format(date_create($request->tglak),'d-M-Y')}}</td>
   </tr>
-  @if($request->dist_id)
-  <tr>
-    <td>Distributor</td>
-    <td>{{$request->distributor}}</td>
-  </tr>
-  @endif
-  @if($request->outlet_id)
-  <tr>
-    <td>Outlet</td>
-    <td>{{$request->outlet}}</td>
-  </tr>
-  @endif
-  @if($request->propinsi)
-  <tr>
-    <td>Propinsi</td>
-    <td>{{$request->propinsi}}</td>
-  </tr>
-  @endif
-  @if($request->channel)
-  <tr>
-    <td>Channel</td>
-    <td>{{$request->channel}}</td>
-  </tr>
-  @endif
-  @if($request->psc_flag=="1" or $pharma_flag=="1")
-  <tr>
-    <td>Divisi</td>
-    <td>
-      @if($request->psc_flag=="1" and $request->pharma_flag=="1")
-        PSC/PHARMA
-      @elseif($request->psc_flag=="1")
-        PSC
-      @elseif($request->pharma_flag=="1")
-        PHARMA
-      @endif
-    </td>
-  </tr>
-  @endif
 </table>
 <table>
   <thead>

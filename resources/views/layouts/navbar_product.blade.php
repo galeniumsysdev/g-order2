@@ -35,9 +35,9 @@
                 }
     </script>
 </head>
-<body onload="myFunction()" style="margin:0;">
-    <div id="loader"></div><!-- ini loadingnya-->
-    <div style="display:none;" id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
+<body  style="margin:0;">
+    <!--<div id="loader"></div>--><!-- ini loadingnya-->
+    <div  id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
       <div id="app">
           <nav class="navbar navbar-default navbar-static-top header" style="overflow:hidden; width:100%; margin-bottom:5px;">
               <div class="header">

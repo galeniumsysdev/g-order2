@@ -13,6 +13,7 @@ class Cart
   public $totalTax = 0;
   public $totalDiscount = 0;
   public $totalAmount = 0;
+  public $tipe=null;
 
 
   public function __construct($oldCart)

@@ -139,13 +139,13 @@
 
           </div>
 				</div>
-				<div class="form-group">
+				<!--<div class="form-group">
 					<div class="row justify-content-md-center">
 						<div class="col-md-6 col-md-offset-4" id ="map"></div>
 						<input type="hidden" name="langitude" value="" id="langitude_txt">
 						<input type="hidden" name="longitude" value="" id="longitude_txt">
 					</div>
-				</div>
+				</div>-->
 
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

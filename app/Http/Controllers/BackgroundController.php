@@ -124,31 +124,39 @@ class BackgroundController extends Controller
                 //
                 //$oraheader = $connoracle->selectone('select min(booked_date)');
                 $newline =$this->getadjustmentHeaderSO($h->notrx,$h->id);
-                $h->status=1;
-                $h->interface_flag="Y";
-                $h->status_oracle ="BOOKED";
-                $h->save();
-                //notification to user
-                 $customer = Customer::where('id','=',$h->customer_id)->first();
-                 $content ='PO Anda nomor '.$h->notrx.' telah dikonfirmasi oleh '.$h->distributor->customer_name.'. Silahkan check PO anda kembali.<br>';
-                 $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
-                 $data = [
-         					'title' => 'Konfirmasi PO',
-         					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-         					'id' => $h->id,
-         					'href' => route('order.notifnewpo'),
-         					'mail' => [
-         						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-                    'content' =>$content,
-         					]
-         				];
-                 foreach($customer->users as $u)
-                 {
-                  $data['email']= $u->email;
-                   //$u->notify(new BookOrderOracle($h,$customer->customer_name));
-                  // event(new PusherBroadcaster($data, $u->email));
-                   $u->notify(new PushNotif($data));
-                 }
+                $oraheader = $connoracle->selectone("select min(booked_date) as booked_date from oe_order_headers_all oha
+                              where  oha.flow_status_code ='BOOKED' and exists (select 1 from oe_ordeR_lines_all ola
+                                          where ola.headeR_id =oha.headeR_id
+                                            and nvl(ola.attribute1,oha.orig_sys_document_ref)='".$h->notrx."')");
+                //dd($oraheader);
+                if(!is_null($oraheader->booked_date))
+                {
+                  $h->status=1;
+                  $h->interface_flag="Y";
+                  $h->status_oracle ="BOOKED";
+                  $h->save();
+                  //notification to user
+                   $customer = Customer::where('id','=',$h->customer_id)->first();
+                   $content ='PO Anda nomor '.$h->notrx.' telah dikonfirmasi oleh '.$h->distributor->customer_name.'. Silahkan check PO anda kembali.<br>';
+                   $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                   $data = [
+           					'title' => 'Konfirmasi PO',
+           					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
+           					'id' => $h->id,
+           					'href' => route('order.notifnewpo'),
+           					'mail' => [
+           						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
+                      'content' =>$content,
+           					]
+           				];
+                   foreach($customer->users as $u)
+                   {
+                    $data['email']= $u->email;
+                     //$u->notify(new BookOrderOracle($h,$customer->customer_name));
+                    // event(new PusherBroadcaster($data, $u->email));
+                     $u->notify(new PushNotif($data));
+                   }
+                }
 
 
               }//endif status==0 (belum di booked)
@@ -184,8 +192,15 @@ class BackgroundController extends Controller
                 //notif to customer jika berubah
                 if($berubah)
                 {
-                  $soline_notsend = SoLine::where([['header_id','=',$h->id],['qty_confirm','!=','qty_shipping']])->get();
-                  if($soline_notsend->count()>0){
+                  $soline_notsend = DB::table('so_lines_sum_v')
+                                    ->where('header_id','=',$h->id)
+                                    //->where('qty_confirm_primary','<>','qty_shipping_primary')
+                                    ;
+                  $soline_notsend = $soline_notsend->first();
+                  //dd($soline_notsend);
+                  //echo "count: ".$soline_notsend->qty_confirm_primary()."<br>";
+                  //if($soline_notsend->count()>0){
+                  if($soline_notsend->qty_confirm_primary<>$soline_notsend->qty_shipping_primary){
                     $h->status=2;
                   }else{
                     $h->status=3;
@@ -583,11 +598,11 @@ class BackgroundController extends Controller
 
     public function getSalesOrder($notrx, SoLine $line)
     {
-      echo "notrx:".$notrx.", uom:".$line->uom;
+      echo "notrx:".$notrx.", uom:".$line->uom."<br>";
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $oraSO=$connoracle->selectone("select sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) as ordered_quantity
-                  , sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,'".$line->uom."', '".$line->uom_primary."')) as ordered_quantity_primary
+                  , sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom_primary."')) as ordered_quantity_primary
                   , sum(ordered_quantity*unit_selling_price) as amount
                   , sum(ordered_quantity*unit_list_price) as unit_list_price
                   , sum(tax_value) tax_value
@@ -617,7 +632,7 @@ class BackgroundController extends Controller
       if($connoracle){
         if(is_null($bucket))
         {
-          return $connoracle->select("select pricing_group_sequence,sum(adjusted_amount) as adjusted_amount, sum(operand) as operand
+          return $connoracle->select("select pricing_group_sequence,sum(adjusted_amount*inv_convert.inv_um_convert(ola.inventory_item_id,'".$line->uom."',ola.ORDER_QUANTITY_UOM)) as adjusted_amount, sum(operand) as operand
                                 from oe_price_adjustments opa
                                     , oe_order_lines_all ola
                                     , oe_order_headers_all oha
@@ -637,7 +652,7 @@ class BackgroundController extends Controller
                                 order by pricing_group_sequence");
 
         }else{
-          return $connoracle->selectone("select pricing_group_sequence,sum(adjusted_amount) as adjusted_amount, sum(operand) as operand
+          return $connoracle->selectone("select pricing_group_sequence,,sum(adjusted_amount*inv_convert.inv_um_convert(ola.inventory_item_id,'".$line->uom."',ola.ORDER_QUANTITY_UOM)) as adjusted_amount, sum(operand) as operand
                                 from oe_price_adjustments opa
                                     , oe_order_lines_all ola
                                     , oe_order_headers_all oha

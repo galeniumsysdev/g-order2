@@ -167,14 +167,30 @@
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="note">Note</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">
+                          {{ Form::textarea('note',$dpl->note,array('class'=>'form-control','id'=>'note','rows'=>5)) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
                         &nbsp;
                       </div>
                       <div class="col-md-10">
                       <!-- Form Approve -->
                         <div class="button-wrapper">
-                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'discount-approve-form']) !!}
-                            {{ Form::hidden('action','Approve') }}
-                            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
+                          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'class'=>'discount-form', 'id'=>'discount-approve-form']) !!}
+                            {{ Form::hidden('action','Approve',array('id'=>'action')) }}
+                            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest-no')) }}
                             {{ Form::submit('Approve',array('class'=>'btn btn-primary')) }}
                           {{ Form::close() }}
                         </div>
@@ -211,10 +227,10 @@
           id="authenticationModalLabel">Reason Reject</h4>
         </div>
         <div class="modal-body text-center">
-          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'id'=>'discount-reject-form']) !!}
-            {{ Form::hidden('action','Reject') }}
-            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
-            {{ Form::textarea('reason_reject','',array('class'=>'form-control','required'=>'required')) }}
+          {!! Form::open(['url' => route('dpl.discountApprovalSet'), 'class'=>'discount-form', 'id'=>'discount-reject-form']) !!}
+            {{ Form::hidden('action','Reject',array('id'=>'action')) }}
+            {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest-no')) }}
+            {{ Form::textarea('reason_reject','',array('class'=>'form-control','id'=>'reason-reject','required'=>'required')) }}
             <br/>
             {{ Form::submit('Reject',array('class'=>'btn btn-danger')) }}
           {{ Form::close() }}

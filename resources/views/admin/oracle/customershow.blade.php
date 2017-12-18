@@ -65,7 +65,7 @@
                           <div class="form-group">
                             <label class="control-label col-sm-2" for="npwp">Classification :</label>
                             <div class="col-sm-4">
-                              <input type="text" name="customer_clas_code" class="form-control" value="{{$customer->customer_clas_code}}" readonly>
+                              <input type="text" name="customer_class_code" class="form-control" value="{{$customer->customer_class_code}}" readonly>
                             </div>
                           </div>
                           <div class="form-group">

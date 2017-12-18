@@ -282,7 +282,7 @@ class ProductController extends Controller
       $dp->uom=$uom;
     }
 
-    $products = collect($dataproduct);    
+    $products = collect($dataproduct);
 
     /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
     $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
@@ -556,7 +556,7 @@ class ProductController extends Controller
         $product->uom=$uom;
         $oldCart = Session::has('cart')?Session::get('cart'):null;
         if(!is_null($oldCart))
-        {
+        { /*check product barang yang sama ada di keranjang belanja*/
           if(array_key_exists($id.'-'.$request->satuan, $oldCart->items)){
             return response()->json([
                             'result' => 'exist',
@@ -698,6 +698,7 @@ class ProductController extends Controller
       $shipid=null;
       $orgid=null;
       $warehouseid=null;
+      $ordertypeid=null;
       $check_dpl =null;
       $statusso=0;
       if(isset($request->coupon_no))
@@ -742,10 +743,11 @@ class ProductController extends Controller
               'alamat' => 'required|numeric',
               'billto' => 'required|numeric',
            ])->validate();
-          $oracleshipid = CustomerSite::where('id','=',$request->alamat)->select('site_use_id','org_id','warehouse')->first();
+          $oracleshipid = CustomerSite::where('id','=',$request->alamat)->select('site_use_id','org_id','warehouse','order_type_id')->first();
           if($oracleshipid)
           {
             $shipid = $oracleshipid->site_use_id;
+            $ordertypeid = $oracleshipid->order_type_id;
             if(is_null($oracleshipid->org_id))
             {
               $orgid = config('constant.org_id');
@@ -832,7 +834,7 @@ class ProductController extends Controller
           'currency'=> $currency,
           'payment_term_id'=> null,
           'price_list_id'=> $customer->price_list_id,
-          'order_type_id'=> $customer->order_type_id,
+          'order_type_id'=> $ordertypeid,
           'oracle_ship_to'=> $shipid,
           'oracle_bill_to'=> $billid,
           'oracle_customer_id' =>$customer->oracle_customer_id,

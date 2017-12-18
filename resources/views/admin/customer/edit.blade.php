@@ -204,8 +204,8 @@
               												@forelse($customer_sites as $customer_site)
               													<tr>
               														<td data-title="@lang('label.address')">{{$customer_site->address1}}</td>
-              														<td data-title="@lang('label.city')">{{$customer_site->city." "}}</td>
-              														<td data-title="@lang('label.state')">{{$customer_site->state." "}}</td>
+              														<td data-title="@lang('label.city_regency')">{{$customer_site->city." "}}</td>
+              														<td data-title="@lang('label.urban_village')">{{$customer_site->state." "}}</td>
               														<td data-title="@lang('label.postalcode')">{{$customer_site->postalcode." "}}</td>
                                           <td data-title="@lang('label.action')">
                                             <a class="btn btn-info btn-sm" href="{{route('profile.edit_address',$customer_site->id)}}"><span class="glyphicon glyphicon-pencil"></span></a>
