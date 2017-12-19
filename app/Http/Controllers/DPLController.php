@@ -509,9 +509,12 @@ class DPLController extends Controller {
 	}
 
 	public function dplLogHistory($suggest_no) {
-		$dpl = DPLLog::select('users.name', 'dpl_log.*')
+		$dpl = DPLLog::select('users.name','r.display_name as role','dpl_log.*')
 			->join('users', 'users.id', 'dpl_log.done_by')
+			->join('role_user as ru','ru.user_id','users.id')
+			->join('roles as r','ru.role_id','r.id')
 			->where('suggest_no', $suggest_no)
+			->orderBy('created_at','desc')
 			->get();
 
 		return view('admin.dpl.dplHistory', array('dpl' => $dpl));

@@ -8,6 +8,19 @@ $(document).ready(function(){
         },2000);
     }
 
+    if($('#dpl-history').length){
+    	$('#dpl-history').DataTable({
+    		'order': [],
+    		columnDefs: [
+	            { responsivePriority: 1, targets: 0 },
+	            { responsivePriority: 2, targets: 3 }
+	        ]
+    	});
+        window.setTimeout(function(){
+            $(window).resize();
+        },2000);
+    }
+
 	$('#generate-sugg-no-form').submit(function (e){
 		if($('#outlet-id').val() == 0){
 			alert('Silakan masukkan outlet yang sesuai.');
