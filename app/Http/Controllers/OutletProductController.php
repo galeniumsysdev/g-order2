@@ -33,7 +33,9 @@ class OutletProductController extends Controller
 
 	    $data = Excel::load($file, function($reader){})->get();
       foreach ($data as $key => $prod) {
-        $check = OutletProducts::where('title', strtoupper($prod['nama_barang']))->count();
+        $check = OutletProducts::where('title', strtoupper($prod['nama_barang']))
+                                ->where('outlet_products.outlet_id',Auth::user()->customer_id)
+                                ->count();
         if($check)
           $data[$key]['exist'] = '<span class="text-danger duplicate">Duplicate</span>';
         else
@@ -291,7 +293,9 @@ class OutletProductController extends Controller
     $unit = strtoupper($request->product_unit);
     $price = $request->product_price;
 
-    $check = OutletProducts::where('title',$product_name)->count();
+    $check = OutletProducts::where('title',$product_name)
+                            ->where('outlet_products.outlet_id',Auth::user()->customer_id)
+                            ->count();
 
     if($check)
       return redirect()->back()->withInput()->with('msg','<span class="text-danger">Product is already exist.</span>');
