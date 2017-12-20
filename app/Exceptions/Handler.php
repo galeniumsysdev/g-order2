@@ -50,6 +50,7 @@ class Handler extends ExceptionHandler
                   ->withInput($request->except('_token'))
                   ->withMessage('Oops!We could not verify your request. Please try again');
         }
+
         return parent::render($request, $exception);
     }
 
