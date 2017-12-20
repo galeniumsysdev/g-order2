@@ -200,7 +200,7 @@ Route::group(['middleware' => ['permission:Outlet_Distributor']], function () {
   Route::get('/tambahDistributor/{id}/{outletid}','CustomerController@addlist');
   Route::patch('/saveOutlet/{customer}', 'CustomerController@update')->name('customer.update');
   Route::post('/rejectbyGPL','CustomerController@rejectGPL')->name('customer.rejectGPL');
-  Route::post('/customer/inactiveDistributor','CustomerController@inactiveDistributor')->name('customer.inactiveDistributor');
+  Route::patch('/customer/inactiveDistributor','CustomerController@inactiveDistributor')->name('customer.inactiveDistributor');
 });
 
 /*distributor or principal*/

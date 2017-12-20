@@ -170,7 +170,20 @@ $('#reject-customer').on('click',function(){
   return false;
 });
 
+function activedist(id)
+{
+  $('#distributor_id').val(id);
+  $('#action').val('active');
+  $( "#formcustomer" ).attr('action',baseurl+ "/customer/inactiveDistributor");
+  $( "#formcustomer" ).submit();
+}
 
+function inactivedist(id){
+  $('#distributor_id').val(id);
+  $('#action').val('inactive');
+   $( "#formcustomer" ).attr('action',baseurl+ "/customer/inactiveDistributor");
+   $( "#formcustomer" ).submit();
+}
 
 
 /*$('#edit-customer').on('click',function(){

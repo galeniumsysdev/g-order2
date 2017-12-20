@@ -234,7 +234,7 @@ class CustomerController extends Controller
   {//approve outlet by gpl
     $pesan = "";
 
-    if($request->save=="save" or $request->save=="approve")
+    if($request->save=="save")
     {
       $user = User::find($id);
       if($request->hasFile('avatar')) {
@@ -300,85 +300,17 @@ class CustomerController extends Controller
           }
         }
       }
-    }
-  /*  if($request->save=="approve")
-    {
-      if((Auth::User()->hasRole('Marketing PSC') and $request->psc_flag=="1") or (Auth::User()->hasRole('Marketing Pharma') and $request->pharma_flag=="1"))
-      {
-        if($customer->psc_flag <>  $request->psc_flag and $request->psc_flag==1) {
-          //jika sebelumnya psc belum dipilih maka buat notification ke marketing psc
-          $marketings_psc = User::whereHas('roles', function($q){
-              $q->where('name','Marketing PSC');
-          })->get();
-          foreach ($marketings_psc as $mpsc)
-          {
-              $mpsc->notify(new MarketingGaleniumNotif($user));
-          }
-        }
-        if($customer->pharma_flag <>  $request->pharma_flag and $request->pharma_flag==1) {
-          //jika sebelumnya pharma belum dipilih maka buat notification ke marketing pharma
-          $marketings_pharma = User::whereHas('roles', function($q){
-              $q->where('name','Marketing Pharma');
-          })->get();
-          //$marketings_pharma = Role::with('users')->where('name', 'Marketing Pharma')->get();
-          //dd($marketings_pharma);
-          foreach ($marketings_pharma as $mpharma)
-          {
-              $mpharma->notify(new MarketingGaleniumNotif($user));
-          }
-        }
-          $customer->status = 'A';
-          if(Auth::User()->hasRole('Marketing PSC'))
-          {
-            $customer->id_approval_psc = Auth::User()->id;
-            $customer->date_approval_psc =Carbon::now();
-          }
-          if(Auth::User()->hasRole('Marketing Pharma'))
-          {
-            $customer->id_approval_pharma = Auth::User()->id;
-            $customer->date_approval_pharma =Carbon::now();
-          }
-      }else{
-        return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.cantapprove"));
-      }
-    }*/
-
-    $customer->psc_flag =$request->psc_flag;
-    $customer->pharma_flag =$request->pharma_flag;
-    $customer->save();
-    if($customer->hasDistributor->count()==0)
-    {
-      $pesan = " ".trans("pesan.adddistributor");
-    }
-
-  /*  if($request->save=="approve")
-    {
-      $userlogin = Auth::user();
-      $notifications = $userlogin->notifications()
-                      ->where([
-                        ['id','=',$request->notif_id]
-                        ])
-                        ->whereNull('read_at')
-                        ->get();
-      //dd($notifications);
-      foreach ($notifications as $notification) {
-        if (empty($notification->read_at))
-        {
-            $notification->markAsRead();
-        }
-      }
-      if ($user->can( 'Create PO'))
+      $customer->psc_flag =$request->psc_flag;
+      $customer->pharma_flag =$request->pharma_flag;
+      $customer->save();
+      if($customer->hasDistributor->count()==0)
       {
         $pesan = " ".trans("pesan.adddistributor");
-      }else{
-        //mark as read notification for user login and outlet
-        $pesan = "";
       }
-    }*/
-      //dd($request->notif_id."aaaa");
-      //return response()->json(['message'=>'success']);
-      return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.update").$pesan);
 
+        return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.update").$pesan);
+
+    }
   }
 
   public function addlist($id, $outletid)
@@ -739,7 +671,7 @@ class CustomerController extends Controller
     }
 
     public function inactiveDistributor(Request $request)
-    {
+    {            
       if($request->inactive=="inactive")
       {
         DB::table('outlet_distributor')
@@ -751,7 +683,7 @@ class CustomerController extends Controller
         $distributor=DB::table('customers')->where('id','=',$request->distributor_id)->select('customer_name')->first();
         $customer =DB::table('customers')->where('id','=',$request->customer_id)->select('customer_name')->first();
         return redirect()->route('customer.show',['id'=>$request->user_id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.inactive",["dist"=>$distributor->customer_name,"cust"=>$customer->customer_name]));
-      }else{
+      }elseif($request->inactive=="active"){
         DB::table('outlet_distributor')
             ->where([
               ['outlet_id','=',$request->customer_id],

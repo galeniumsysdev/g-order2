@@ -14,12 +14,13 @@
         <div class="panel panel-primary">
 			       <div class="panel-heading"><strong>CUSTOMER</strong></div>
                 <div class="panel-body">
-						            <form action="{{route('customer.update',$user->id)}}" class="form-horizontal" enctype="multipart/form-data" method="post" role="form">
+						            <form action="{{route('customer.update',$user->id)}}" class="form-horizontal" enctype="multipart/form-data" method="post" role="form" id="formcustomer">
             							{{csrf_field()}}
                           {{method_field('PATCH')}}
-            							<input type="hidden" value="{{$user->id}}" id="user_id">
+            							<input type="hidden" value="{{$user->id}}" id="user_id" name="user_id">
             							<input type="hidden" value="{{$notif_id}}" name="notif_id" id="notif_id">
             							<input type="hidden" value="{{url('/')}}" id="baseurl">
+                          <input type="hidden" value="{{$customer->id}}" name="customer_id">
             							<input type="hidden" value="{{app()->getLocale()}}" id="language">
                           <div class="col-sm-1">
                             <a href="javascript:changeProfile()" style="text-decoration: none;" title="@lang('label.changeimage')">
@@ -258,8 +259,10 @@
 
                                 <div role="tabpanel" class="tab-pane" id="distributor">
 									                 <div class="form-group">
-										                <div class="col-sm-12">
-                											<table id="listdistributor" class="table table-striped">
+										                <div class="table" style="padding:0px 20px 0px 20px;">
+                                      {{ Form::hidden('distributor_id', '',array('id'=>'distributor_id')) }}
+                                      {{ Form::hidden('inactive', '',array('id'=>'action')) }}
+                											<table id="listdistributor" class="display responsive" cellspacing="0" width="100%">
                 													<thead>
                 														<tr>
                 															<th width="50%">@lang('label.distributor')</th>
@@ -285,17 +288,14 @@
                                                 @endif
                                               </td>
                 															<td>
-                                                {!! Form::open(['url' => route('customer.inactiveDistributor'), 'class'=>'form-distributor']) !!}
-                                                {{ Form::hidden('user_id', $user->id) }}
-                                                {{ Form::hidden('notif_id', $notif_id) }}
-                                                {{ Form::hidden('distributor_id', $dist->distributor_id) }}
-                                                {{ Form::hidden('customer_id', $customer->id) }}
+
+
                                                 @if($dist->inactive)
-                                                <button type="submit" id="active-dist" class="btn btn-primary btn-sm" title="@lang('label.change_to_active')" value="active" name="inactive"><i class="fa fa-check" aria-hidden="true"></i>&nbsp; Active</button>
+                                                <button type="button" onclick="activedist(this.id)" id="{{$dist->distributor_id}}" class="btn btn-primary btn-sm" title="@lang('label.change_to_active')" value="active" name="inactive"><i class="fa fa-check" aria-hidden="true"></i>&nbsp; Active</button>
                                                 @else
-                                                <button type="submit" id="inactive-dist" class="btn btn-warning btn-sm" title="@lang('label.change_to_inactive')" value="inactive" name="inactive"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp; Inactive</button>
+                                                <button type="button" onclick="inactivedist(this.id)" id="{{$dist->distributor_id}}" class="btn btn-warning btn-sm" title="@lang('label.change_to_inactive')" value="inactive" name="inactive"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp; Inactive</button>
                                                 @endif
-                                                {!! Form::close() !!}
+
                                               </td>
                 														</tr>
                 													@endforeach
@@ -317,7 +317,7 @@
                                 </div>
                             </div>
                           </div>
-                      </form>
+                        </form>
                 </div>
             </div>
         </div>
