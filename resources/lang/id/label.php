@@ -12,10 +12,10 @@ return [
     |
     */
 
-    'login' => 'Silahkan Masuk',
+    'login' => 'SILAHKAN MASUK',
     'logout' => 'KELUAR',
     'home' => 'Beranda',
-    'register' => 'Daftar',
+    'register' => 'DAFTAR',
     'email'=>'Alamat Email',
     'outlet' => 'Nama Outlet',
     'address' => 'Alamat',
