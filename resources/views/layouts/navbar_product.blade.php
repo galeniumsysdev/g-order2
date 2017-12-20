@@ -36,7 +36,7 @@
     </script>
 </head>
 <body  style="margin:0;">
-    <!--<div id="loader"></div>--><!-- ini loadingnya-->
+    <div id="loader"></div><!-- ini loadingnya-->
     <div  id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
       <div id="app">
           <nav class="navbar navbar-default navbar-static-top header">

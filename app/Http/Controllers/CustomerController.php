@@ -264,8 +264,14 @@ class CustomerController extends Controller
       if($request->psc_flag=="1"){
       //if(Auth::User()->hasRole('Marketing PSC')){
         $customer->subgroup_dc_id =$request->subgroupdc;
+        $sub=DB::table('subgroup_datacenters as sdc')
+                  ->where('id','=',$request->subgroupdc)
+                  ->select('group_id')->first();
+        if($sub) $groupdc = $sub->group_id;
+
       }else{
         $customer->subgroup_dc_id =null;
+        $groupdc=null;
       }
     }
   /*  if($request->save=="approve")
@@ -309,7 +315,36 @@ class CustomerController extends Controller
         return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.cantapprove"));
       }
     }*/
+    $sites = $customer->sites()->where('primary_flag','=','Y')->first();
+    if($sites)
+    {
+      $city = $sites->city_id;
+    }else{
+      $city = null;
+    }
 
+    if($customer->psc_flag !=$request->psc_flag)
+    {
+      if($request->psc_flag=="1") //adddistributor psc
+      {
+        $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
+        if($distributor)
+        {
+          $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+        }
+      }
+    }
+    if($customer->pharma_flag !=$request->pharma_flag)
+    {
+      if($request->phamra_flag=="1")//adddistributor pharma
+      {
+        $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
+        if($distributor)
+        {
+          $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+        }
+      }
+    }
     $customer->psc_flag =$request->psc_flag;
     $customer->pharma_flag =$request->pharma_flag;
     $customer->save();

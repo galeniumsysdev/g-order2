@@ -90,7 +90,7 @@
                       <td>{{$outlet->customer_name}}</td>
                       <td>{{$outlet->category_name}}</td>
                       <td>
-                        @if($outlet->psc_flag=="1" and $outlet->psc_flag=="1")
+                        @if($outlet->psc_flag=="1" and $outlet->pharma_flag=="1")
                           PSC, Pharma
                         @elseif($outlet->psc_flag=="1")
                             PSC

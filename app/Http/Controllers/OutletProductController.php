@@ -263,7 +263,7 @@ class OutletProductController extends Controller
 
   	return view('admin.outlet.detailProductStock', array('title'=>$title, 'last_stock'=>$last_stock, 'stock'=>$trx));
   }
-  
+
   public function formProduct($id = '')
   {
     if($id)
@@ -286,7 +286,10 @@ class OutletProductController extends Controller
     $unit = strtoupper($request->product_unit);
     $price = $request->product_price;
 
-    $check = OutletProducts::where('title',$product_name)->count();
+    $check = OutletProducts::where('title',$product_name)
+            ->where('id','!=',$id)
+            //->('outlet_id','=',Auth::user()->customer_id)
+            ->count();
 
     if($check)
       return redirect()->back()->withInput()->with('msg','<span class="text-danger">Product is already exist.</span>');
@@ -421,7 +424,7 @@ class OutletProductController extends Controller
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
                                   ->groupby('os_id','title','product_id','outlet_name');
-              
+
               if($data['outlet_name'])
                 $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
 

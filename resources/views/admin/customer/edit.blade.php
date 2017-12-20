@@ -93,7 +93,7 @@
                                   </div>
 
                                   <div class="form-group">
-                                      <label for="role" class="control-label col-sm-2"><strong>Role :</strong></label>
+                                      <label for="role" class="control-label col-sm-2"><strong>Role 123:</strong></label>
                                       <div class="col-sm-10">
                                           <select class="form-control" name="role" id="role" required>
                                             <option value="">--</option>
@@ -132,7 +132,7 @@
                     											@endif
                     									</div>
                                   </div>
-                                    @if($customer->psc_flag=="1")
+
                                       <div class="form-group" id="divkategoridc">
                                         <label for="kategori" class="control-label col-sm-2"><strong>@lang('label.categorydc') :</strong></label>
                                         <div class="col-sm-4">
@@ -164,8 +164,8 @@
                       												</span>
                       											@endif
                                         </div>
-                                    </div>
-                                    @endif
+                                      </div>
+
 
 
                                     @if($customer->Status=="R")
@@ -263,10 +263,8 @@
                 													<thead>
                 														<tr>
                 															<th width="50%">@lang('label.distributor')</th>
-                                              <th width="50%">Status</th>
-                															<!--<th width="10%">@lang('label.address')</th>
-                															<th width="10%">@lang('label.city')</th>
-                															<th width="5%">@lang('label.state')</th>-->
+                                              <th width="10%">Status</th>
+                															<th width="30%">Action</th>
                 														</tr>
                 													</thead>
                 												<tbody>
@@ -284,8 +282,9 @@
                                                   @endif
                                                 @endif
                                               </td>
-                															<!--<td></td>
-                															<td></td>-->
+                															<td>
+                                                <button type="button" id="inactive-dist" class="btn btn-warning btn-sm" value="inactive" name="inactive"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp; Inactive</button>
+                                              </td>
                 														</tr>
                 													@endforeach
                 												</tbody>
