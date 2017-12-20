@@ -293,6 +293,9 @@
 
     <script>
     var myVar;
+    $( window ).load(function() {
+      showPage();
+    });
 
     function myFunction() {
         myVar = setTimeout(showPage, 500);
