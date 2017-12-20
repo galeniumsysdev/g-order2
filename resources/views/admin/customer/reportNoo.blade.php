@@ -2,45 +2,54 @@
 
 @section('content')
 <link rel="stylesheet"
-  href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
+href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
 <div class="container">
   <div class="row">
     <div class="col-sm-12">
       <div class="panel panel-default">
-        <div class="panel-heading"><strong>Report NOO</strong></div>
+        <div class="panel-heading"><strong>REPORT NOO</strong></div>
           <div class="panel-body">
             <div id="frmsearch" class="panel panel-default">
               <br>
               <form action="{{route('ExportClients')}}" class="form-horizontal" method="post" role="form">
                 {{csrf_field()}}
+				<!--DISTRIBUTOR-->
                 <div class="form-group">
-                  <label class="control-label col-sm-3" for="email"><strong>@lang('label.distributor') :</strong></label>
-                    <div class="col-sm-8">
-                      <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="name" id="name" value="{{ $request->name }}" >
+                  <label class="control-label col-sm-2" for="distributor" style="margin-left:15px;"><strong>@lang('label.distributor') :</strong></label>
+                    <div class="col-sm-8" style="margin-left:15px; margin-right:15px;">
+                        <input type="text" class="form-control mb-8 mr-sm-8 mb-sm-4" name="distributor" id="distributor" value="" >
                     </div>
                 </div>
-				<div class="form-group">
-                  <label class="control-label col-sm-3" for="email"><strong>@lang('label.city_regency') :</strong></label>
-                    <div class="col-sm-8">
-                      <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="name" id="name" value="{{ $request->name }}" >
-                    </div>
-                </div>
-				<div class="form-group">
-                  <label class="control-label col-sm-3" for="email"><strong>@lang('label.province') :</strong></label>
-                    <div class="col-sm-8">
-                      <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="name" id="name" value="{{ $request->name }}" >
-                    </div>
-                </div>
+				
+				<!--CITY-->
                 <div class="form-group">
-                    <label class="control-label col-sm-3" for="needproduct"><strong>Divisi :</strong></label>
-                    <div class="col-sm-9" style="margin-top:7px;">
+                  <label class="control-label col-sm-2" for="city" style="margin-left:15px;"><strong>City :</strong></label>
+                    <div class="col-sm-8" style="margin-left:15px; margin-right:15px;">
+                        <input type="text" class="form-control mb-8 mr-sm-8 mb-sm-4" name="city" id="city" value="" >
+                    </div>
+                </div>
+				
+				<!--CITY-->
+                <div class="form-group">
+                  <label class="control-label col-sm-2" for="province" style="margin-left:15px;"><strong>Provinsi :</strong></label>
+                    <div class="col-sm-8" style="margin-left:15px; margin-right:15px;">
+                        <input type="text" class="form-control mb-8 mr-sm-8 mb-sm-4" name="province" id="province" value="" >
+                    </div>
+                </div>
+				
+				<!--DIVISI-->
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="needproduct" style="margin-left: 15px;"><strong>Divisi :</strong></label>
+                    <div class="col-sm-6" style="margin-left:15px; margin-right:15px; margin-top:6px;">
                       <input type="checkbox" class="form-check-input" name="psc_flag" id="psc_flag" value="1" {{$request->psc_flag=="1"?"checked":""}}> PSC &nbsp;
                       <input type="checkbox" class="form-check-input" name="pharma_flag" id="pharma_flag" value="1" {{$request->pharma_flag=="1"?"checked":""}}> Pharma (Non PSC)
                     </div>
                 </div>
+				
+				<!--CHANNEL-->
                 <div class="form-group">
-                    <label class="control-label col-sm-3" for="subcategorydc"><strong>@lang('label.channel') :</strong></label>
-                    <div class="col-sm-8">
+                    <label class="control-label col-sm-2" for="subcategorydc" style="margin-left:15px;"><strong>@lang('label.channel') :</strong></label>
+                    <div class="col-sm-8" style="margin-left:15px; margin-right:15px;">
                         <select multiple class="form-control" name="subgroupdc[]" >
                           @foreach($subgroupdc as $sub)
                           @if($request->subgroupdc)
@@ -52,54 +61,17 @@
                         </select>
                     </div>
                 </div>
+				
+				<!--BUTTON DOWNLOAD-->
                 <div class="form-group">
-                    <div class="col-sm-9 col-sm-offset-3">
+                    <div class="col-sm-9 col-sm-offset-2">
                         <button type="submit" id="btn-search" class="btn btn-primary">
-                            @lang('label.download')
+                          Download Excel
                         </button>
                     </div>
                 </div>
               </form>
             </div>
-            @if($outlets)
-            <div class="row">
-			  <div class="col-md-12 table-responsive">
-                <table class="table" id="table">
-                  <thead>
-                  <tr>
-                    <th width="40%">@lang('label.outlet')</th>
-                    <th width="5%">@lang('label.category')</th>
-                    <th width="5%">Divisi</th>
-                    <th width="5%">@lang('label.categorydc')</th>
-                    <th width="5%">@lang('label.action')</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach($outlets as $outlet)
-                    <tr>
-                      <td>{{$outlet->customer_name}}</td>
-                      <td>{{$outlet->category_name}}</td>
-                      <td>
-                        @if($outlet->psc_flag=="1" and $outlet->psc_flag=="1")
-                          PSC, Pharma
-                        @elseif($outlet->psc_flag=="1")
-                            PSC
-                        @elseif($outlet->pharma_flag=="1")
-                            Pharma
-                        @endif
-                        </ul>
-                      </td>
-                      <td>{{$outlet->subdc}}</td>
-                      <td>
-                        <a href="{{route('customer.show',[$outlet->users->first()->id,0])}}"><button type="button" class="btn btn-sm btn-primary" name="edit"><span class="glyphicon glyphicon-pencil"></span> Edit</button></a>
-                      </td>
-                    </tr>
-                  @endforeach
-                </tbody>
-              </table>
-              </div>
-            </div>
-            @endif
           </div>
       </div>
     </div>
@@ -107,42 +79,61 @@
 </div>
 @endsection
 @section('js')
+@section('js')
 <script src="{{ asset('js/moment-with-locales.js') }}"></script>
 <script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
 <script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
-<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
-
-
-  <script>
-    $(document).ready(function() {
-      var path = "{{ route('customer.searchoutlet') }}";
+<script>
+  $(document).ready(function() {
+    $('#change-dist').hide();
+    $('#change-city').hide();
+    /*typeahead distributor*/
+    var path2 = "{{ route('customer.searchDistributor') }}";
+    $.get(path2,
+        function (data) {
+            $('#distributor').typeahead({
+                source: data,
+                items: 10,
+                showHintOnFocus: 'all',
+                displayText: function (item) {
+                    return item.customer_name;
+                },
+                afterSelect: function (item) {
+                  $('#distributor').val(item.customer_name);
+                  $('#dist_id').val(item.id);
+                  $('#change-dist').show();
+                  $('#distributor').attr('readonly','readonly');
+                }
+            });
+          }, 'json');
+      $('#change-dist').click(function(){
+          $(this).hide();
+          $('#distributor').removeAttr('readonly').val('');
+          $('#dist_id').val('');
+      });
+      var path = window.Laravel.url+"/ajax/typeaheadCity";
       $.get(path,
           function (data) {
-              $('#name').typeahead({
+              $('#city').typeahead({
                   source: data,
                   items: 10,
                   showHintOnFocus: 'all',
                   displayText: function (item) {
-                      return item.customer_name;
+                      return item.name;
                   },
                   afterSelect: function (item) {
-                    $('#name').val(item.customer_name);
+                    $('#city').val(item.name);
+                    $('#city_id').val(item.id);
+                    $('#change-city').show();
+                    $('#city').attr('readonly','readonly');
                   }
               });
             }, 'json');
-      $('#table').DataTable({
-        "searching": false,
-      }
-      );
-      /*$('#name').typeahead({
-          source:  function (query, process) {
-          return $.get(path, { query: query }, function (data) {
-                  return process(data);
-              });
-          }
-
-      });*/
-    });
-  </script>
+            $('#change-city').click(function(){
+                $(this).hide();
+                $('#city').removeAttr('readonly').val('');
+                $('#city_id').val('');
+            });
+  });
+</script>
 @endsection

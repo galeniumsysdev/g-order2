@@ -11,7 +11,7 @@
      @if(isset($nama_kategori))
       <h4>Category Product: {{$nama_kategori}}</h4><hr>
      @elseif(Auth::guest())
-      <h4><strong>Top Product</strong></h4>
+      <h4 class="title-home"><strong>TOP PRODUCT</strong></h4>
       <hr>
      @endif
   @forelse($products->chunk(6) as $productChunk)

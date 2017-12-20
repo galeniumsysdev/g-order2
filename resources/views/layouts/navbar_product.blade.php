@@ -35,13 +35,13 @@
                 }
     </script>
 </head>
-<body  style="margin:0;">
-    <!--<div id="loader"></div>--><!-- ini loadingnya-->
-    <div  id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
+<body onload="myFunction()" style="margin:0;">
+    <div id="loader"></div><!-- ini loadingnya-->
+    <div style="display:none;" id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
       <div id="app">
-          <nav class="navbar navbar-default navbar-static-top header" style="overflow:hidden; width:100%; margin-bottom:5px;">
+          <nav class="navbar navbar-default navbar-static-top header" style="width:100%; margin-bottom:3px;">
               <div class="header">
-                  <div class="navbar-header">
+                  <div class="navbar-header" style="margin-left:50px;">
 
                       <!-- Collapsed Hamburger -->
                       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
@@ -59,7 +59,7 @@
                       @else
                           <a class="navbar-brand" href="{{ url('/home') }}" style="color:#fff">
                       @endif
-                          <img class="img-header" style="margin-left:30px;" src="{{ URL::to('img/logoe1.png') }}"/>
+                          <img class="img-header" src="{{ URL::to('img/logoe1.png') }}"/>
                         </a>
                       @if(Auth::user())
                         @if(Auth::user()->can('Create PO'))
@@ -100,7 +100,7 @@
                       <!-- Left Side Of Navbar -->
 
                       <!-- Right Side Of Navbar -->
-                      <ul class="nav navbar-nav navbar-right" style="margin-right:60px;">
+                      <ul class="nav navbar-nav navbar-right" style="margin-right:50px; margin-top:5px;" >
                           <!-- Authentication Links -->
 
                         @if (Auth::guest())
@@ -116,10 +116,10 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp; <strong>{{ app()->getLocale() }}</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                             <ul class="dropdown-menu">
                               <li id="LI_201">
-                                  <a href="#" id="idLang" onclick="changeLanguage('id');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/indonesia.png" alt="" width="20" height="20" id="IMG_203" /><span id="SPAN_204"><span id="SPAN_205">&nbsp; Indonesia (id)</span></span></a>
+                                  <a href="#" id="idLang" onclick="changeLanguage('id');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/indonesia.png" alt="" width="20" height="20" id="IMG_203" /><span id="SPAN_204"><span id="SPAN_205">&nbsp; INDONESIA (ID)</span></span></a>
                               </li>
                               <li id="LI_489">
-                                <a href="#" id="enLang" onclick="changeLanguage('en');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/united_kingdom.png" alt="" width="20" height="20" id="IMG_491" /><span id="SPAN_492"><span id="SPAN_493">&nbsp; English (en)</span></span></a>
+                                <a href="#" id="enLang" onclick="changeLanguage('en');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/united_kingdom.png" alt="" width="20" height="20" id="IMG_491" /><span id="SPAN_492"><span id="SPAN_493">&nbsp; ENGLISH (EN)</span></span></a>
                               </li>
                             </ul>
                           </li>
@@ -131,8 +131,8 @@
 						   <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">NOO &nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                             <ul class="dropdown-menu">
-              								<li><a href="{{ route('customer.listNoo') }}">List NOO</a></li>
-              								<li><a href="{{ route('customer.reportNoo') }}">Report NOO</a></li>
+								<li><a href="{{ route('customer.listNoo') }}"><strong>List NOO</strong></a></li>
+								<li><a href="{{ route('customer.reportNoo') }}"><strong>Report NOO</strong></a></li>
                             </ul>
                           </li>
                           @endif
