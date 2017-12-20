@@ -17,6 +17,8 @@ return [
     'delete' => 'Data has been removed.',
     'adddistributor' => "Don't forget to add Distributor!",
     'approve'=>"Outlet has been approved",
+    'inactive'=>"Distributor :dist has been inactive to customer :cust",
+    'distributoractive'=>"Distributor :dist has been active to customer :cust",
     'reject'=>"Outlet has been rejected",
     'successaddaddress' => 'Add address has been success',
     'successaddcontact' => 'Add contact has been success',

@@ -90,5 +90,7 @@ return [
 	'channel' => 'Channel',
 	'distributor' => 'Distributor',
 	'download' => 'Download Excel',
-	'province' => 'Province'
+	'province' => 'Province',
+  'change_to_active'=>'Change to active',
+  'change_to_inactive'=>'Change to inactive',
 ];

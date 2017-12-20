@@ -93,7 +93,7 @@
                                   </div>
 
                                   <div class="form-group">
-                                      <label for="role" class="control-label col-sm-2"><strong>Role 123:</strong></label>
+                                      <label for="role" class="control-label col-sm-2"><strong>Role :</strong></label>
                                       <div class="col-sm-10">
                                           <select class="form-control" name="role" id="role" required>
                                             <option value="">--</option>
@@ -263,7 +263,7 @@
                 													<thead>
                 														<tr>
                 															<th width="50%">@lang('label.distributor')</th>
-                                              <th width="10%">Status</th>
+                                              <th width="20%">Status</th>
                 															<th width="30%">Action</th>
                 														</tr>
                 													</thead>
@@ -277,13 +277,25 @@
                                                 @else
                                                   @if($dist->approval)
                                                     @lang("label.approve")
+                                                  @elseif($dist->inactive)
+                                                    Inactive ({{$dist->end_date_active}})
                                                   @else
                                                     @lang("label.reject") : {{$dist->keterangan}}
                                                   @endif
                                                 @endif
                                               </td>
                 															<td>
-                                                <button type="button" id="inactive-dist" class="btn btn-warning btn-sm" value="inactive" name="inactive"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp; Inactive</button>
+                                                {!! Form::open(['url' => route('customer.inactiveDistributor'), 'class'=>'form-distributor']) !!}
+                                                {{ Form::hidden('user_id', $user->id) }}
+                                                {{ Form::hidden('notif_id', $notif_id) }}
+                                                {{ Form::hidden('distributor_id', $dist->distributor_id) }}
+                                                {{ Form::hidden('customer_id', $customer->id) }}
+                                                @if($dist->inactive)
+                                                <button type="submit" id="active-dist" class="btn btn-primary btn-sm" title="@lang('label.change_to_active')" value="active" name="inactive"><i class="fa fa-check" aria-hidden="true"></i>&nbsp; Active</button>
+                                                @else
+                                                <button type="submit" id="inactive-dist" class="btn btn-warning btn-sm" title="@lang('label.change_to_inactive')" value="inactive" name="inactive"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp; Inactive</button>
+                                                @endif
+                                                {!! Form::close() !!}
                                               </td>
                 														</tr>
                 													@endforeach
@@ -295,7 +307,7 @@
                                    <div class="form-group" id="divdistributor">
                                       <label for="distributor" class="control-label col-sm-2">@lang('label.distributor') :</label>
                     									<div class="col-sm-10">
-                    										<input type="text" name="searchdistributor" id="search_text" class="form-control mb-8 mr-sm-8 mb-sm-4" placeholder="Search distributor">
+                    										<input type="text" name="searchdistributor" id="search_text" class="form-control mb-8 mr-sm-8 mb-sm-4" placeholder="@lang('label.search') distributor">
                     									</div>
                                    </div>
                                    <div class="form-group">
@@ -318,6 +330,12 @@ window.Laravel = {
                role: '{{Auth::user()->roles->first()->name}}',
             }
 </script>-->
+<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css">
+
 <script src="{{ asset('js/customer.js') }}"></script>
 <script>
     $(document).ready(function() {

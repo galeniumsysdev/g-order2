@@ -83,7 +83,7 @@ class CustomerController extends Controller
                         ->join('outlet_distributor as b','a.id','=','b.outlet_id')
                         ->join('customers as c','b.distributor_id','=','c.id')
                         ->join('Users as d','a.id','=','d.customer_id')
-                        ->select ('c.id as distributor_id','c.customer_name as distributor_name','b.approval','b.keterangan')
+                        ->select ('c.id as distributor_id','c.customer_name as distributor_name','b.approval','b.keterangan','b.inactive','b.end_date_active')
                         ->where('d.id','=',$id)
                         ->get();
           return view('admin.customer.edit',compact('user','customer','customer_contacts','customer_email','customer_sites','categories','roles','groupdcs','groupdcid','roleid','distributors','notif_id'));
@@ -232,7 +232,6 @@ class CustomerController extends Controller
 
   public function update(Request $request, $id)
   {//approve outlet by gpl
-    //dd($request->all());
     $pesan = "";
 
     if($request->save=="save" or $request->save=="approve")
@@ -261,6 +260,13 @@ class CustomerController extends Controller
       $customer->tax_reference = $request->npwp;
       $customer->customer_name = $request->name;
       $customer->outlet_type_id =$request->category;
+      $sites = $customer->sites()->where('primary_flag','=','Y')->first();
+      if($sites)
+      {
+        $city = $sites->city_id;
+      }else{
+        $city = null;
+      }
       if($request->psc_flag=="1"){
       //if(Auth::User()->hasRole('Marketing PSC')){
         $customer->subgroup_dc_id =$request->subgroupdc;
@@ -268,10 +274,31 @@ class CustomerController extends Controller
                   ->where('id','=',$request->subgroupdc)
                   ->select('group_id')->first();
         if($sub) $groupdc = $sub->group_id;
+        if($customer->psc_flag !=$request->psc_flag)
+        {
+            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
+          //  dd($distributor);
+            if($distributor)
+            {
+              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+            }
+        }
 
       }else{
         $customer->subgroup_dc_id =null;
         $groupdc=null;
+      }
+
+      if($customer->pharma_flag !=$request->pharma_flag)
+      {
+        if($request->phamra_flag=="1")//adddistributor pharma
+        {
+          $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
+          if($distributor)
+          {
+            $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+          }
+        }
       }
     }
   /*  if($request->save=="approve")
@@ -315,36 +342,7 @@ class CustomerController extends Controller
         return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.cantapprove"));
       }
     }*/
-    $sites = $customer->sites()->where('primary_flag','=','Y')->first();
-    if($sites)
-    {
-      $city = $sites->city_id;
-    }else{
-      $city = null;
-    }
 
-    if($customer->psc_flag !=$request->psc_flag)
-    {
-      if($request->psc_flag=="1") //adddistributor psc
-      {
-        $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
-        if($distributor)
-        {
-          $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
-        }
-      }
-    }
-    if($customer->pharma_flag !=$request->pharma_flag)
-    {
-      if($request->phamra_flag=="1")//adddistributor pharma
-      {
-        $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
-        if($distributor)
-        {
-          $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
-        }
-      }
-    }
     $customer->psc_flag =$request->psc_flag;
     $customer->pharma_flag =$request->pharma_flag;
     $customer->save();
@@ -419,7 +417,7 @@ class CustomerController extends Controller
   }
 
     public function approve(Request $request)
-    {
+    {/*tidak digunakan karena perubahan alur*/
       if (Auth::User()->can('ApproveOutlet')){
         DB::table('outlet_distributor')
             ->where([
@@ -738,5 +736,32 @@ class CustomerController extends Controller
               ->orderBy('c.customer_name','asc')
               ->get();
       return response()->json($data);
+    }
+
+    public function inactiveDistributor(Request $request)
+    {
+      if($request->inactive=="inactive")
+      {
+        DB::table('outlet_distributor')
+            ->where([
+              ['outlet_id','=',$request->customer_id],
+              ['distributor_id','=',$request->distributor_id],
+              ])
+            ->update(['inactive' => true,'end_date_active'=>Carbon::now(),'approval'=>false]);
+        $distributor=DB::table('customers')->where('id','=',$request->distributor_id)->select('customer_name')->first();
+        $customer =DB::table('customers')->where('id','=',$request->customer_id)->select('customer_name')->first();
+        return redirect()->route('customer.show',['id'=>$request->user_id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.inactive",["dist"=>$distributor->customer_name,"cust"=>$customer->customer_name]));
+      }else{
+        DB::table('outlet_distributor')
+            ->where([
+              ['outlet_id','=',$request->customer_id],
+              ['distributor_id','=',$request->distributor_id],
+              ])
+            ->update(['inactive' => false,'end_date_active'=>null,'approval'=>true]);
+        $distributor=DB::table('customers')->where('id','=',$request->distributor_id)->select('customer_name')->first();
+        $customer =DB::table('customers')->where('id','=',$request->customer_id)->select('customer_name')->first();
+        return redirect()->route('customer.show',['id'=>$request->user_id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.distributoractive",["dist"=>$distributor->customer_name,"cust"=>$customer->customer_name]));
+      }
+
     }
 }

@@ -35,7 +35,7 @@
                 }
     </script>
 </head>
-<body  style="margin:0;">
+<body  onload="myFunction()" style="margin:0;">
     <div id="loader"></div><!-- ini loadingnya-->
     <div  id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
       <div id="app">
@@ -293,12 +293,8 @@
 
     <script>
     var myVar;
-    $( window ).load(function() {
-      showPage();
-    });
-
     function myFunction() {
-        myVar = setTimeout(showPage, 500);
+        myVar = setTimeout(showPage, 100);
     }
 
     function showPage() {

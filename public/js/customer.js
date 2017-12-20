@@ -105,6 +105,12 @@ function load_data(query,id)
 
   $(document).ready(function() {
     checkrole();
+    if($('#listdistributor').length){
+      	$('#listdistributor').DataTable();
+          window.setTimeout(function(){
+              $(window).resize();
+          },2000);
+      }
     $('#search_text').keyup(function(){
       var search = $(this).val();
       var id = $('#user_id').val();
@@ -163,6 +169,9 @@ $('#reject-customer').on('click',function(){
   }
   return false;
 });
+
+
+
 
 /*$('#edit-customer').on('click',function(){
   $.ajax({

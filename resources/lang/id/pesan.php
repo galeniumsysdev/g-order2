@@ -17,6 +17,8 @@ return [
     'delete' => 'Data telah dihapus.',
     'adddistributor' => 'Jangan lupa tambahkan distributor.',
     'approve'=>"Outlet diterima",
+    'inactive'=>"Distributor :dist telah di inactive dari customer :cust",
+    'distributoractive'=>"Distributor :dist diaktifkan kembali ke customer :cust",
     'reject'=>"Outlet ditolak",
     'successaddaddress' => 'Alamat berhasil ditambahkan',
     'notfound'=> 'Data tidak ditemukan',

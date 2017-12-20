@@ -30,8 +30,8 @@ $(document).ready(function(){
 
 	$('.discount-form').submit(function (e){
 		e.preventDefault();
-		//document.getElementById("loader").style.display = "block";
-		//document.getElementById("myDiv").style.display = "none";
+		document.getElementById("loader").style.display = "block";
+		document.getElementById("myDiv").style.display = "none";
 		$.post($(this).attr('action'),{
 			action: $(this).find('#action').val(),
 			suggest_no: $(this).find('#suggest-no').val(),
