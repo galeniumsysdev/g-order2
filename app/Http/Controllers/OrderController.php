@@ -552,7 +552,7 @@ class OrderController extends Controller
         $this->validate($request, [
         'deliveryno' => 'required',
         ]);
-        //dd($request->qtyreceive);
+        //dd($request->all());
         $header = SoHeader::where([
           ['id','=',$request->header_id],
           ['customer_id','=',Auth::user()->customer_id]
@@ -594,9 +594,9 @@ class OrderController extends Controller
 
               }
             }else{
-              $insshipping =SoShipping::Create(
-                ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno
-                  ,'qty_accept'=>$request->qtyreceive[$soline->line_id],'product_id'=>$soline->product_id
+              $insshipping =SoShipping::updateorCreate(
+                ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno]
+                  ,['qty_accept'=>$request->qtyreceive[$soline->line_id],'product_id'=>$soline->product_id
                   ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
                   ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
                   ,'tgl_terima'=>Carbon::now()
@@ -900,7 +900,7 @@ class OrderController extends Controller
         $namapropinsi=null;
         $nmchannel=null;
         $datalist = DB::table('so_header_v as sh')
-                    ->join('customers as c','sh.customer_id','c.id')
+                      ->join('customers as c','sh.customer_id','c.id')
                     ->leftjoin('subgroup_datacenters as sdc','c.subgroup_dc_id','sdc.id')
                     ->leftjoin('group_datacenters as gdc','sdc.group_id','gdc.id')
                     ->leftjoin('so_lines_v as sl','sh.id','sl.header_id')
@@ -919,6 +919,8 @@ class OrderController extends Controller
                               ,'sl.qty_request_primary',DB::raw("sl.unit_price/sl.conversion_qty as unit_price_primary")
                               , DB::raw("sum(ss.qty_shipping) as qty_shipping")
                               ,'ss.deliveryno','ss.tgl_terima','ss.tgl_kirim'
+                              ,DB::raw("datediff(ss.tgl_kirim,sh.tgl_order) as service_level")
+														  , DB::raw("datediff(ss.tgl_terima,sh.tgl_order) as lead_time")
                             );
 
           if(isset($request->dist_id))
@@ -992,6 +994,15 @@ class OrderController extends Controller
         Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request,$namapropinsi,$nmchannel) {
             $excel->sheet('order', function($sheet) use($datalist,$request,$namapropinsi,$nmchannel) {
                 $sheet->loadView('admin.report.orderview',array('datalist'=>$datalist,'request'=>$request,'namapropinsi'=>$namapropinsi,'nmchannel'=>$nmchannel));
+                 $sheet->setWidth(array(
+                                    'I'     =>  50,
+                                    'K'     =>  10,
+                                    'L'     =>  10,
+                                    'Q'     =>  10,
+                                    'S'     =>  10,
+                                    'T'     =>  10,
+                                ));
+                $sheet->getStyle('U')->getAlignment()->setWrapText(true);
             });
         })->export('xlsx');
 
