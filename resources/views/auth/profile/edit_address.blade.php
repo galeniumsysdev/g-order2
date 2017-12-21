@@ -1,10 +1,4 @@
 @extends('layouts.navbar_product')
-<style>
-  #map {
-    height: 400px;
-    width: 100%;
-   }
-</style>
 
 @section('content')
 <div class="container">
@@ -60,67 +54,37 @@
 						<label for="province" class="col-sm-2 control-label">@lang('label.province')</label>
 
 						<div class="col-sm-10">
-								<!--<input type="text" data-provide="typeahead"  id = "province-typeahead" name="province" value="{{ $site->province }}" class="form-control">
-								<input type="hidden" id="province-id" value="">-->
-								<select name="province" class="form-control" id="province" onchange="getListCity(this.value,{{old('city')}})" required>
-									<option value="">--</option>
-									@foreach($provinces as $province)
-										@if($site->province_id==$province->id or $site->province ==$province->name)
-											<option selected='selected' value="{{$province->id}}">{{$province->name}}</option>
-										@else
-											<option value="{{$province->id}}">{{$province->name}}</option>
-										@endif
-									@endforeach
-								</select>
+								<input type="text" data-provide="typeahead"  id = "province-typeahead" name="province" value="{{ $site->province }}" class="form-control">
+								<input type="hidden" id="province-id" value="">
 						</div>
 					</div>
 			</div>
 
 				<div class="container">
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">@lang('label.city_regency')</label>
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.city')</label>
             <div class="col-sm-10">
-              <!--<input type="text" data-provide="typeahead" id="city-name" name="city" value="{{ $site->city }}" placeholder="@lang('label.city')" class="form-control">-->
-							<select name="city" class="form-control" id="city" onchange="getListDistrict(this.value,{{old('district')}})" required>
-								<option value="">--</option>
-							</select>
+
+              <input type="text" data-provide="typeahead" id="city-name" name="city" value="{{ $site->city }}" placeholder="@lang('label.city')" class="form-control">
             </div>
           </div>
 				</div>
 
 				<div class="container">
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">@lang('label.subdistrict')</label>
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.regency')</label>
             <div class="col-sm-10">
 
-              <!--<input type="text" name="district" value="{{ $site->district }}" placeholder="@lang('label.subdistrict')" class="form-control">-->
-							<select name="district" class="form-control" id="district" onchange="getListSubdistrict(this.value,{{old('subdistricts')}})" required>
-								<option value="">--</option>
-							</select>
-
-							@if ($errors->has('district'))
-									<span class="help-block">
-											<strong>{{ $errors->first('district') }}</strong>
-									</span>
-							@endif
+              <input type="text" name="district" value="{{ $site->district }}" placeholder="@lang('label.regency')" class="form-control">
             </div>
           </div>
 				</div>
 
 				<div class="container">
           <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">@lang('label.urban_village')</label>
+            <label class="col-sm-2 control-label" for="textinput">@lang('label.state')</label>
             <div class="col-sm-10">
-              <!--<input type="text" name="state" placeholder="@lang('label.urban_village')" class="form-control" value="{{ $site->state }}">-->
-							<select name="state" class="form-control" id="subdistricts">
-								<option value="">--</option>
-							</select>
-
-								@if ($errors->has('subdistricts'))
-										<span class="help-block">
-												<strong>{{ $errors->first('subdistricts') }}</strong>
-										</span>
-								@endif
+              <input type="text" name="state" placeholder="@lang('label.state')" class="form-control" value="{{ $site->state }}">
             </div>
           </div>
 				</div>
@@ -138,13 +102,6 @@
             </div>
 
           </div>
-				</div>
-				<div class="form-group">
-					<div class="row justify-content-md-center">
-						<div class="col-md-6 col-md-offset-4" id ="map"></div>
-						<input type="hidden" name="langitude" value="" id="langitude_txt">
-						<input type="hidden" name="longitude" value="" id="longitude_txt">
-					</div>
 				</div>
 
           <div class="form-group">
@@ -168,33 +125,7 @@
 
 @endsection
 @section('js')
-<!--
 <script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
 <script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
-<script src="{{ asset('js/address.js') }}"></script>-->
-<script src="{{ asset('js/register.js') }}"></script>
-<script>
-    $(document).ready(function() {
-      getListCity({{is_null($site->province_id)?0:$site->province_id}},{{is_null($site->city_id)?0:$site->city_id}});
-      getListDistrict({{is_null($site->city_id)?0:$site->city_id}},{{is_null($site->district_id)?0:$site->district_id}});
-      getListSubdistrict({{is_null($site->district_id)?0:$site->district_id}},{{is_null($site->state_id)?0:$site->state_id}});
-    });
-</script>
-<script>
-      function initMap() {
-        var uluru = {lat: {{$site->langitude}}, lng: {{$site->longitude}}};
-        var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 18,
-          center: uluru
-        });
-        var marker = new google.maps.Marker({
-          position: uluru,
-          map: map
-        });
-      }
-    </script>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDly0OgyK4YurXSn9i19uQukfrfpnSzR7o&callback=initMap">
-    </script>
-
+<script src="{{ asset('js/address.js') }}"></script>
 @endsection

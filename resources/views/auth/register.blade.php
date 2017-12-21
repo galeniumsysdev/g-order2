@@ -190,9 +190,9 @@
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                                   <li style="font-size:18px;">V-Mina</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Belsoap</li>
+                                                  <li style="font-size:18px;">Bellsoap</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">JF</li>
+                                                  <li style="font-size:18px;">JFSulfur</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                               </ul>
                                               <button class="md-close">Close</button>
@@ -208,22 +208,22 @@
                                       </div>
                                   </div>
                                   <div class="md-overlay"></div>
-                                  <div style="font-size:8pt; margin-top:5px;">(Caladine, Oilum, v-mina, Belsoap, JF)</div></label>
+                                  <div style="font-size:8pt; margin-top:5px;">(Caladine, Oilum, v-mina, Bellsoap, JFSulfur)</div></label>
                                </div>
 
                                <!---->
 
                                <div class="checkbox">
                                  <label>
-                                   @if( old('pharma')=="1")
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma" checked="checked">
+                                   @if( old('psc')=="1")
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc" checked="checked">
                                    @else
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma">
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc">
                                    @endif
 
-                                   @if ($errors->has('pharma'))
+                                   @if ($errors->has('psc'))
                                    <span class="help-block">
-                                       <strong>{{ $errors->first('pharma') }}</strong>
+                                       <strong>{{ $errors->first('psc') }}</strong>
                                    </span>
                                    @endif
 
@@ -232,25 +232,25 @@
                                           <h3><strong>Produk Pharma ( NON PSC )</strong></h3>
                                           <div>
                                               <ul>
-                                                  <li style="font-size:18px;">Scabimite</li>
+                                                  <li style="font-size:18px;">Scabimite CReam</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Laxadine</li>
+                                                  <li style="font-size:18px;">Laxadine Emulsi</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Haemocaine</li>
+                                                  <li style="font-size:18px;">Haemocaine Ointment</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                                   <li style="font-size:18px;">Mycorine</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Acne Feldine</li>
+                                                  <li style="font-size:18px;">Acne Feldine Lotion</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Pyravit</li>
+                                                  <li style="font-size:18px;">Pyravit Syrup</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Laxarec</li>
+                                                  <li style="font-size:18px;">Laxarec Rektal Tube</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                                   <li style="font-size:18px;">Solare</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Soft U Derm</li>
+                                                  <li style="font-size:18px;">Soft U Derm Cream</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Topsy</li>
+                                                  <li style="font-size:18px;">Topsy Cream</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
                                               </ul>
                                               <button class="md-close">Close</button>
@@ -286,6 +286,11 @@
 
                                 @endforeach
                               </select>
+                              @if ($errors->has('groupdc'))
+                                <span class="help-block">
+                                  <strong>{{ $errors->first('groupdc') }}</strong>
+                                </span>
+                              @endif
                           </div>
 
                           <div class="col-sm-5">
@@ -297,13 +302,6 @@
                                   <strong>{{ $errors->first('subgroupdc') }}</strong>
                                 </span>
                               @endif
-                          </div>
-                          <div class="col-sm-8">
-                            @if ($errors->has('groupdc'))
-                              <span class="help-block">
-                                <strong>{{ $errors->first('groupdc') }}</strong>
-                              </span>
-                            @endif
                           </div>
                          </div>
 

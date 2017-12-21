@@ -88,7 +88,5 @@ return [
     'donthaveaccount' => "Belum punya akun?",
     'shipping' => 'Pengiriman',
 	'channel' => 'Channel',
-	'distributor' => 'Distributor',
-	'download' => 'Unduh Excel',
-	'province' => 'Provinsi'
+	'distributor' => 'Distributor'
 ];
