@@ -109,7 +109,7 @@
                 @endif
                     {{ csrf_field() }}
                     <input type="hidden" name="header_id" value="{{$header->id}}">
-                    @if (($deliveryno->count()==0 and ($header->status>=1 and $header->distributor_id == Auth::user()->customer_id))
+                    @if (($deliveryno->count()<=1 and ($header->status>=1 and $header->distributor_id == Auth::user()->customer_id))
                     or ($deliveryno->count()<=1 and $header->status!= 2 and $header->status>= 0 and $header->status<= 4 and $header->customer_id == Auth::user()->customer_id))
                       <div class="form-group {{ $errors->has('deliveryno') ? ' has-error' : '' }}">
                         <label for="subject" class="col-md-2 control-label">@lang('shop.deliveryno')</label>
@@ -141,9 +141,7 @@
                           <th style="width:5%" class="text-center">Bonus GPL</th>
                           @endif
                           @if($header->status>=0)
-                              @if(Auth::user()->customer_id==$header->distributor_id or
-                               (Auth::user()->customer_id==$header->customer_id and $header->status>=1)
-                               )
+                              @if(Auth::user()->customer_id==$header->distributor_id and ($header->dpl_no) and $header->status==0)
                                 <th style="width:7%" class="text-center">@lang('shop.qtyavailable')</th>
                               @endif
                               @if($header->status>1 or ($header->status==1 and Auth::user()->customer_id==$header->distributor_id))
@@ -156,7 +154,10 @@
                               @endif
                           @endif
 
-                					<th style="width:15%" class="text-center">@lang('shop.SubTotal')</th>
+                					<th style="width:15%" class="text-center">@lang('shop.AmountPO')</th>
+                          @if($header->status>1 and ($header->qty_accept!=0 or $header->qty_shipping!=0))
+                            <th style="width:15%" class="text-center">@lang('shop.amountreceive')</th>
+                          @endif
                 				</tr>
                 			</thead>
                 			<tbody>
@@ -188,16 +189,12 @@
                           <td data-th="Bonus GPL" class="xs-only-text-left text-center">{{(int)$line->bonus_gpl." ".$line->uom_primary}}</td>
                           @endif
                           @if($header->status>=0)
-                              @if(Auth::user()->customer_id==$header->distributor_id or
-                               (Auth::user()->customer_id==$header->customer_id and $header->status>=1)
-                               )
+                              @if(Auth::user()->customer_id==$header->distributor_id and $header->status==0 and ($header->dpl_no) )
                                 <td data-th="@lang('shop.qtyavailable')"  class="text-center xs-only-text-left" id="avl-{{$id}}">
-                                  @if($header->status>=1)
-                                  {{number_format($line->qty_confirm_primary,2)}}
-                                  @else
-                                    <input type="number" name="qtyshipping[{{$id}}]" class="form-control" value="{{(float)$line->qty_request_primary+$line->bonus_gpl}}">
-                                  @endif
+                                    <input type="text" name="qtyshipping[{{$id}}]" class="form-control" value="{{(float)$line->qty_request_primary+$line->bonus_gpl}}">
                                 </td>
+                              @elseif(Auth::user()->customer_id==$header->distributor_id and $header->status==0)
+                               <input type="hidden" name="qtyshipping[{{$id}}]" class="form-control" value="{{(float)$line->qty_request_primary+$line->bonus_gpl}}">
                               @endif
                               @if($header->status>1 or ($header->status==1 and Auth::user()->customer_id==$header->distributor_id))
                                 <td data-th="@lang('shop.qtyship')"  class="text-center xs-only-text-left">
@@ -210,10 +207,9 @@
                               @endif
                               @if(Auth::user()->customer_id==$header->distributor_id and $header->status>1)
                               <td  data-th="@lang('shop.qtyreceive')"  class="text-center xs-only-text-left">
-                                  {{number_format($line->qty_accept,2)}}
+                                  {{number_format($line->qty_accept_primary,2)}}
                               </td>
-                              @endif
-                              @if(Auth::user()->customer_id==$header->customer_id)
+                              @elseif(Auth::user()->customer_id==$header->customer_id)
                                 <td  data-th="@lang('shop.qtyreceive')"  class="text-center xs-only-text-left">
 
                                   @if (($header->status>=2  or $deliveryno->count()>1 )
@@ -234,6 +230,11 @@
                 					<td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
                             {{number_format($line->amount_confirm,2)}}
                           </td>
+                          @if($header->status>1 and ($header->qty_accept!=0 or $header->qty_shipping!=0))
+                            <td data-th="@lang('shop.amountreceive')" class="xs-only-text-left text-right">
+                              {{number_format($line->amount_accept,2)}}
+                            </td>
+                          @endif
                 				</tr>
                         @endforeach
                 			</tbody>
@@ -245,33 +246,62 @@
                         @endif
                         @if($header->status< 0)
                              @php($colgab=4)
+                        @elseif($header->status==0 and isset($header->dpl_no) and $header->distributor_id==Auth::user()->customer_id)
+                                  @php($colgab=5)
+                        @elseif($header->status==0 and is_null($header->dpl_no) and $header->distributor_id==Auth::user()->customer_id)
+                              @php($colgab=4)
                         @elseif($header->status==0)
                              @php($colgab=5)
                         @elseif($header->status==1)
-                             @php($colgab=6)
+                             @php($colgab=5)
                         @elseif($header->status>1)
-                             @php($colgab=7)
+                             @php($colgab=6)
                         @endif
                         @if($header->dpl_no)
                           @php($colgab=$colgab+3)
                         @endif
 
                 				<tr>
-                					<td colspan="{{$colgab}}" class="hidden-xs text-right">SubTotal: </td>
-                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">SubTotal:</label>
+                					<td colspan="{{$colgab}}" class="hidden-xs text-right">@lang('shop.AmountPO') </td>
+                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">@lang('shop.AmountPO'):</label>
                             {{ $curr." ".number_format($header->amount_confirm,2) }}</strong></td>
+                          @if($header->status>1 and ($header->qty_accept!=0 or $header->qty_shipping!=0))
+                          <td class="text-right xs-only-text-center hidden-xs"><strong id="totprice2">
+                            <label class="visible-xs-inline">SubTotal Terima/Kirim:</label>
+                            {{ $curr." ".number_format($header->amount_accept,2) }}</strong>
+                          </td>
+                          @endif
                 				</tr>
                         <tr>
-                          <td colspan="{{$colgab}}" class="hidden-xs text-right">Tax </td>
-                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">Tax:</label>
+                          <td colspan="{{$colgab}}" class="hidden-xs text-right">@lang('shop.Tax') </td>
+                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">@lang('shop.Tax'):</label>
                             {{ $curr." ".number_format($header->tax_amount,2) }}</strong>
                           </td>
+                          @if($header->status>1 and ($header->qty_accept!=0 or $header->qty_shipping!=0))
+                          <td class="text-right xs-only-text-center hidden-xs"><strong id="totprice2">
+                            <label class="visible-xs-inline">@lang('shop.Tax') Terima/Kirim:</label>
+                            @if($header->tax_amount==0)
+                            @php($taxkirim=0)
+                            @else
+                            @php($taxkirim=$header->amount_accept*0.1)
+                            @endif
+                            {{ $curr." ".number_format($taxkirim,2) }}
+                            </strong>
+                          </td>
+                          @endif
                 				</tr>
                         <tr>
-                          <td colspan="{{$colgab}}" class="hidden-xs text-right">Total </td>
-                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">Total:</label>
+                          <td colspan="{{$colgab}}" class="hidden-xs text-right">@lang('shop.Total') </td>
+                					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">@lang('shop.Total'):</label>
                             {{ $curr." ".number_format(($header->amount_confirm+$header->tax_amount),2) }}</strong>
                           </td>
+                          @if($header->status>1 and ($header->qty_accept!=0 or $header->qty_shipping!=0))
+                          <td class="text-right xs-only-text-center hidden-xs"><strong id="totprice2">
+                            <label class="visible-xs-inline">@lang('shop.Total') Terima/Kirim:</label>
+                            {{ $curr." ".number_format($header->amount_accept+$taxkirim,2) }}
+                            </strong>
+                          </td>
+                          @endif
                 				</tr>
 
                 			</tfoot>
@@ -396,7 +426,7 @@
                                   <tbody>
                                     @foreach($lines as $newdelivery)
                                     @if((floatval($newdelivery->qty_shipping_primary) < floatval($newdelivery->qty_confirm_primary) and Auth::user()->customer_id ==$header->distributor_id)
-                                      or (floatval($newdelivery->qty_accept_primary) < floatval($newdelivery->qty_request_primary) and Auth::user()->customer_id ==$header->customer_id)
+                                      or (floatval($newdelivery->qty_accept_primary) < floatval($newdelivery->qty_request_primary) and floatval($newdelivery->qty_shipping_primary) < floatval($newdelivery->qty_request_primary) and Auth::user()->customer_id ==$header->customer_id)
                                        )
                                     <tr>
                                       <td>{{$newdelivery->title}}</td>
@@ -413,8 +443,10 @@
                                         @if(Auth::user()->customer_id ==$header->customer_id)
                                           @if(is_null($newdelivery->qty_confirm_primary))
                                             <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_request_primary - floatval($newdelivery->qty_accept_primary)}}" class="form-control input-sm">
-                                          @else
+                                          @elseif(is_null($newdelivery->qty_shipping_primary))
                                             <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_accept_primary)}}" class="form-control input-sm">
+                                          @elseif($newdelivery->qty_shipping_primary<$newdelivery->qty_confirm_primary)
+                                            <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_shipping_primary)}}" class="form-control input-sm">
                                           @endif
                                         @endif
 

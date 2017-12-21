@@ -13,7 +13,7 @@ return [
     */
 
     'Product' => 'Produk',
-    'Quantity' => 'Jumlah',
+    'Quantity' => 'Qty',
     'Price' => 'Harga Gross',
     'listprice' => 'Harga Standard',
     'uom' => 'Satuan',
@@ -22,7 +22,7 @@ return [
     'qtyship' => 'Qty Kirim',
     'qtyreceive' => 'Qty Terima',
     'AmountPO' => 'Nilai PO',
-    'SubTotal' => 'Amount',
+    'SubTotal' => 'Subtotal',
     'ContinueShopping' => 'Pilih Barang Lagi',
     'CreateOrder' => 'Buat Order',
     'Total' => 'Total',

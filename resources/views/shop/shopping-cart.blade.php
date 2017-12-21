@@ -55,7 +55,7 @@
             <td data-th="@lang('shop.listprice')" id="disc-{{$id}}">{{ number_format($product['price'],2) }}</td>
   					<td data-th="@lang('shop.Quantity')">
               <div class="input-group">
-                <input type="number" name="qty-{{$id}}" id="qty-{{$id}}" class="form-control text-center" value="{{ $product['qty'] }}" style="min-width:80px;">
+                <input type="number" min="0" name="qty-{{$id}}" id="qty-{{$id}}" class="form-control text-center" value="{{ $product['qty'] }}" style="min-width:80px;">
 
                 <span class="input-group-btn">
                   <select class="form-control" name="stn-{{$id}}" id="stn-{{$id}}" style="width:80px;">
@@ -89,7 +89,7 @@
             <td class="hidden-xs"></td>
   				</tr>
           <tr style="border-top-style:hidden;">
-            <td colspan="4" class="text-right hidden-xs"><strong>Tax</strong></td>
+            <td colspan="4" class="text-right hidden-xs"><strong>@lang('shop.Tax')</strong></td>
   					<td class="text-right xs-only-text-center" ><strong class="totprice" id="tottax"><label class="visible-xs-inline">Tax: </label>{{number_format($tax,2)}}</strong></td>
             <td class="hidden-xs"></td>
   				</tr>

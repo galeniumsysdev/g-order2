@@ -35,9 +35,9 @@
                 }
     </script>
 </head>
-<body  onload="myFunction()" style="margin:0;">
+<body style="margin:0;">
     <div id="loader"></div><!-- ini loadingnya-->
-    <div  id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
+    <div style="display:none;" id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
       <div id="app">
           <nav class="navbar navbar-default navbar-static-top header">
               <div class="container">
@@ -312,5 +312,13 @@
 <script src="{{ asset('js/customlang.js') }}"></script>
 <script src="{{ asset('js/index.js') }}"></script>
 @yield('js')
+<script type="text/javascript">
+$(window).on('load', function () {
+      //$("#loader").fadeOut(500);
+      //$("#myDiv").fadeIn(500);
+      myFunction();
+ });
+
+</script>
 </body>
 </html>

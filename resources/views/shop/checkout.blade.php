@@ -191,5 +191,10 @@ $(function()
 window.Laravel = {
                customerid : '{{auth()->user()->customer_id}}',
             }
+$(".form-horizontal").submit(function() {
+        $('#loader').show();
+        $("#myDiv").hide();
+        return true;
+    });
 </script>
 @endsection
