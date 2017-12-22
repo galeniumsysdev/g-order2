@@ -26,23 +26,25 @@
               <table id="trx-list" class="display responsive nowrap" width="100%">
                 <thead>
                   <tr>
-                    <th>No</th>
+                    <th>Tgl. Trx</th>
                     <th>Product Name</th>
+                    <th>Generik (Zat Aktif)</th>
                     <th>Type</th>
                     <th>Qty</th>
                     <th>Batch No.</th>
-                    <th>Tgl. Trx</th>
+                    <th>Delivery Order No.</th>
                   </tr>
                 </thead>
                 <tbody>
                   @foreach ($data as $key=>$trx)
                     <tr class="{{ $trx['class'] }}">
-                      <td>{{ $key+1 }}</td>
+                      <td align="center">{{ $trx['trx_date'] }}</td>
                       <td>{{ $trx['title'] }}</td>
+                      <td>{!! nl2br($trx['generic']) !!}</td>
                       <td align="center">{!! $trx['event'] !!}</td>
                       <td align="center">{!! $trx['qty'] !!}</td>
                       <td align="center">{{ $trx['batch'] }}</td>
-                      <td align="center">{{ $trx['trx_date'] }}</td>
+                      <td align="center">{{ $trx['deliveryorder_no'] }}</td>
                     </tr>
                   @endforeach
                 </tbody>

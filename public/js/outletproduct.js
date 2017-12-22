@@ -24,7 +24,14 @@ $(document).ready(function() {
         },2000);
     }
     if($('#trx-list').length){
-        $('#trx-list').DataTable();
+        $('#trx-list').DataTable({
+            'order': [],
+            columnDefs: [
+                { responsivePriority: 1, targets: 0 },
+                { responsivePriority: 2, targets: 1 },
+                { responsivePriority: 3, targets: 3 }
+            ]
+        });
         window.setTimeout(function(){
             $(window).resize();
         },2000);

@@ -345,12 +345,12 @@ class OutletProductController extends Controller
 
   public function outletTrxList()
   {
-  	$stockOutlet = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date')
+  	$stockOutlet = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date','outlet_products.generic as generic')
   											->leftjoin('outlet_products','outlet_products.id','outlet_stock.product_id')
                         ->where('outlet_products.enabled_flag','Y')
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id);
 
-    $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date')
+    $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date',DB::raw('"" as generic'))
                         ->leftjoin('products','products.id','outlet_stock.product_id')
                         ->join('category_products as cp','cp.product_id','products.id')
                         ->join('categories as c','c.flex_value','cp.flex_value')
@@ -377,8 +377,10 @@ class OutletProductController extends Controller
 	  			$trx[$count]['event'] = 'Adjustment';
 	  		}
 	  		$trx[$count]['title'] = $list->title;
+        $trx[$count]['generic'] = $list->generic;
 	  		$trx[$count]['qty'] = $list->qty.' '.$list->unit;
 	  		$trx[$count]['batch'] = $list->batch;
+        $trx[$count]['deliveryorder_no'] = $list->deliveryorder_no;
 	  		$trx[$count]['trx_date'] = $list->trx_date;
 	  		$count++;
 	  	}
@@ -394,6 +396,7 @@ class OutletProductController extends Controller
   	$instock->event = 'trx_in';
   	$instock->qty = $request->qty_in;
     $instock->batch = $request->batch_no_in;
+    $instock->deliveryorder_no = $request->delivery_no_in;
   	$instock->save();
 
   	return redirect()->back()->with('msg','Transaction In has been done successfully.');
