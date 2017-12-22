@@ -296,18 +296,18 @@ class OutletProductController extends Controller
     $unit = strtoupper($request->product_unit);
     $price = $request->product_price;
 
-    $check = OutletProducts::where('title',$product_name)
-                            ->where('outlet_products.outlet_id',Auth::user()->customer_id)
-                            ->count();
-
-    if($check)
-      return redirect()->back()->withInput()->with('msg','<span class="text-danger">Product is already exist.</span>');
-
     if(!$id){
-      $product = new OutletProducts;
-      $product->id = Uuid::generate();
-      $product->outlet_id = Auth::user()->customer_id;
-      $product->enabled_flag = 'Y';
+      $check = OutletProducts::where('title',$product_name)
+                              ->where('outlet_products.outlet_id',Auth::user()->customer_id)
+                              ->count();
+
+      if($check)
+        return redirect()->back()->withInput()->with('msg','<span class="text-danger">Product is already exist.</span>');
+      else
+        $product = new OutletProducts;
+        $product->id = Uuid::generate();
+        $product->outlet_id = Auth::user()->customer_id;
+        $product->enabled_flag = 'Y';
     }
     else{
       $product = OutletProducts::find($id);
@@ -389,6 +389,7 @@ class OutletProductController extends Controller
     $instock->outlet_id = Auth::user()->customer_id;
   	$instock->event = 'trx_in';
   	$instock->qty = $request->qty_in;
+    $instock->batch = $request->batch_no_in;
   	$instock->save();
 
   	return redirect()->back()->with('msg','Transaction In has been done successfully.');
@@ -401,6 +402,7 @@ class OutletProductController extends Controller
     $outstock->outlet_id = Auth::user()->customer_id;
   	$outstock->event = 'trx_out';
   	$outstock->qty = '-'.$request->qty_out;
+    $outstock->batch = $request->batch_no_out;
   	$outstock->save();
 
   	return redirect('/outlet/transaction#trx-out')->with('msg','Transaction Out has been done successfully.');

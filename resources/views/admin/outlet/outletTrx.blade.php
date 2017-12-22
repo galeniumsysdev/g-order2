@@ -82,6 +82,20 @@
                       <div class="container-fluid">
                         <div class="row">
                           <div class="col-md-2">
+                            <div class="form-label">
+                              <label for="qty-in">Batch No.</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            {{ Form::text('batch_no_in', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-in')) }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-md-2">
                             &nbsp;
                           </div>
                           <div class="col-md-4">
@@ -140,6 +154,20 @@
                               {{ Form::number('qty_out', '', array('class'=>'form-control qty', 'autocomplete'=>'off', 'id'=>'qty-out', 'min'=>1, 'required'=>'required')) }}
                               <span class="add-on input-group-addon unit-sell" id="unit-sell-out"></span>
                             </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-md-2">
+                            <div class="form-label">
+                              <label for="qty-in">Batch No.</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            {{ Form::text('batch_no_out', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-out')) }}
                           </div>
                         </div>
                       </div>
