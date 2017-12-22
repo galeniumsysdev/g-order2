@@ -1,14 +1,15 @@
+
 <!DOCTYPE html>
-<html lang="{{ config('app.locale') }}">
+<html lang="id">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="EBCjee8uUaNJBdbnMBCACpMyMrhEWyyXNBn3XXdK">
 
-    <title>{{ config('app.name', 'g-Order') }}</title>
+    <title>Laravel</title>
 
     <!-- Styles -->
 	<!--<link rel="stylesheet" href="product.css">-->
@@ -17,24 +18,25 @@
 	<link href="https://fonts.googleapis.com/css?family=Pacifico&subset=latin-ext,vietnamese" rel="stylesheet">
 	<link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
 
-	<link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">
+	<link rel="stylesheet" href="http://localhost/gOrder/font-awesome-4.7.0/css/font-awesome.min.css">
 
-	<link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
-	<!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
-	<link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
-	<link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
+	<link rel="stylesheet" href="http://localhost:8000/css/bootstrap.min.css">
+	<!--<link href="http://localhost:8000/css/app20170913.css" rel="stylesheet">-->
+	<link rel="stylesheet" href="http://localhost:8000/css/mystyle.css">
+	<link rel="stylesheet" href="http://localhost:8000/css/loading.css">
 
     <!-- Scripts -->
     <script>
     window.Laravel = {
-                   csrfToken: '{{csrf_token()}}',
-                   url: "{{url('/')}}",
+                   csrfToken: 'EBCjee8uUaNJBdbnMBCACpMyMrhEWyyXNBn3XXdK',
+                   url: "http://localhost:8000",
                    auth: {
-                       user: '{{auth()->user()}}'
+                       user: ''
                    }
                 }
     </script>
 </head>
+
 <body onload="myFunction()" style="margin:0;">
     <div id="loader"></div><!-- ini loadingnya-->
     <div style="display:none;" id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
@@ -44,7 +46,7 @@
                   <div class="navbar-header">
 
                       <!-- Collapsed Hamburger -->
-                      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+                      <button type="button" data-toggle="collapse" data-target="#app-navbar-collapse" class="navbar-toggle collapsed" aria-expanded="false">
                           <span class="sr-only">Toggle Navigation</span>
                           <span class="icon-bar"></span>
                           <span class="icon-bar"></span>

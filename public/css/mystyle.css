@@ -156,9 +156,9 @@ body {
     background-color: transparent;
 }
 .navbar-default .navbar-toggle {
-    border-color: rgb(0,118,192);
+  border-color: rgb(0,118,192);
   float: left;
-  margin-left: -40px;
+  margin-left: 5px;
 }
 .navbar-default .navbar-toggle:hover,
 .navbar-default .navbar-toggle:focus {
