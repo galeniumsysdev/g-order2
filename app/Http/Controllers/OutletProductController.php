@@ -424,13 +424,13 @@ class OutletProductController extends Controller
               $sheet->mergeCells('B3:B4');
               $sheet->mergeCells('C3:C4');
 
-              $stockOutlet = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.product_id','outlet.customer_name as outlet_name')
+              $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                                  ->groupby('os_id','title','product_id','outlet_name');
+                                  ->groupby('title','product_id','outlet_name');
 
               if($data['outlet_name'])
                 $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
@@ -441,13 +441,13 @@ class OutletProductController extends Controller
               if($data['area'])
                 $stockOutlet = $stockOutlet->where('city',$data['area']);
 
-              $stockAll = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.product_id','outlet.customer_name as outlet_name')
+              $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('products','products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('products.Enabled_Flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                                  ->groupby('os_id','title','product_id','outlet_name');
+                                  ->groupby('title','product_id','outlet_name');
 
               if($data['outlet_name'])
                 $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
