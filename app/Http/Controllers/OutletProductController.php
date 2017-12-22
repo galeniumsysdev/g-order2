@@ -425,12 +425,13 @@ class OutletProductController extends Controller
             ->setCreator(Auth::user()->name)
             ->sheet('Report Stock', function($sheet) use($data){
               $sheet->row(1, array('STOCK OUTLET'));
-              $sheet->row(3, array('NAMA OUTLET','PRODUK','BATCH','QUANTITY'));
-              $sheet->row(4, array('','','','Beg','In','Out','End'));
-              $sheet->mergeCells('D3:G3');
-              $sheet->mergeCells('A3:A4');
-              $sheet->mergeCells('B3:B4');
-              $sheet->mergeCells('C3:C4');
+              $sheet->row(2, array(date('d F Y',strtotime($data['start_date'])).' - '.date('d F Y',strtotime($data['end_date']))));
+              $sheet->row(4, array('NAMA OUTLET','PRODUK','BATCH','QUANTITY'));
+              $sheet->row(5, array('','','','Beg','In','Out','End'));
+              $sheet->mergeCells('D4:G4');
+              $sheet->mergeCells('A4:A5');
+              $sheet->mergeCells('B4:B5');
+              $sheet->mergeCells('C4:C5');
 
               $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
@@ -491,7 +492,7 @@ class OutletProductController extends Controller
                                         ->where('qty','<',0)
                                         ->sum('qty');
 
-                $sheet->row($key+5, array($prod->outlet_name,
+                $sheet->row($key+6, array($prod->outlet_name,
                                           $prod->title,
                                           $prod->batch,
                                           $begin,
