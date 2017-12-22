@@ -75,6 +75,20 @@
                     <div class="container-fluid">
                       <div class="row">
                         <div class="col-md-2">
+                          <div class="form-label">
+                            <label for="product-name-in">Generik (Zat Aktif)</label>
+                          </div>
+                        </div>
+                        <div class="col-md-4 product-container">
+                          {{ Form::textarea('product_generic', $product->generic, array('class'=>'form-control','id'=>'product-generic','rows'=>5)) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-md-2">
                           &nbsp;
                         </div>
                         <div class="col-md-4">

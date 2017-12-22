@@ -78,7 +78,7 @@
                             <table id="import-stock" class="display responsive nowrap" width="100%">
                               <thead>
                                 <tr>
-                                  <th>Title</th>
+                                  <th>Nama Barang</th>
                                   <th>Stok Terakhir</th>
                                   <th>Stok Baru</th>
                                   <th>Satuan</th>

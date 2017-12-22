@@ -57,6 +57,7 @@ class OutletProductController extends Controller
   		$product[$key]['title'] = strtoupper($new->nama_barang);
   		$product[$key]['unit'] = strtoupper($new->satuan);
   		$product[$key]['price'] = (intval($new->price)) ? intval($new->price) : 0;
+      $product[$key]['generic'] = $new->generik;
   		$product[$key]['enabled_flag'] = 'Y';
   		$product[$key]['created_at'] = date('Y-m-d H:i:s', time());
   		$product[$key]['updated_at'] = date('Y-m-d H:i:s', time());
@@ -284,6 +285,7 @@ class OutletProductController extends Controller
       $product->title = '';
       $product->unit = '';
       $product->price = 0;
+      $product->generic = '';
     }
 
     return view('admin.outlet.outletProductForm', array('product'=>$product));
@@ -295,6 +297,7 @@ class OutletProductController extends Controller
     $product_name = strtoupper($request->product_name);
     $unit = strtoupper($request->product_unit);
     $price = $request->product_price;
+    $generic = $request->product_generic;
 
     if(!$id){
       $check = OutletProducts::where('title',$product_name)
@@ -315,6 +318,7 @@ class OutletProductController extends Controller
     $product->title = $product_name;
     $product->unit = $unit;
     $product->price = $price;
+    $product->generic = $generic;
     $save = $product->save();
 
     if($save){

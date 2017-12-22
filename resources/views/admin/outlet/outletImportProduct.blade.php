@@ -77,9 +77,10 @@
                             <table id="import-product" class="table table-striped table-hover table-center-header">
                               <thead>
                                 <tr>
-                                  <th>Title</th>
+                                  <th>Nama Barang</th>
                                   <th>Satuan</th>
                                   <th>Harga</th>
+                                  <th>Generik (Zat Aktif)</th>
                                   <th></th>
                                 </tr>
                               </thead>
@@ -89,6 +90,7 @@
                                   <td>{{ strtoupper($cell['nama_barang']) }}</td>
                                   <td>{{ strtoupper($cell['satuan']) }}</td>
                                   <td align="right">{{ number_format(floatval($cell['price']),0,',','.') }}</td>
+                                  <td>{!! nl2br($cell['generik']) !!}</td>
                                   <td align="center">{!! $cell['exist'] !!}
                                 </tr>
                               @endforeach
