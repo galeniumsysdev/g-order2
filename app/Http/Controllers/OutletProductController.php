@@ -226,6 +226,9 @@ class OutletProductController extends Controller
     else{
       $header = Product::select('products.satuan_primary as unit','products.id as p_id','title',DB::raw('sum(qty) as product_qty'))
                               ->leftjoin('outlet_stock as os','os.product_id','products.id')
+                              ->join('category_products as cp','cp.product_id','products.id')
+                              ->join('categories as c','c.flex_value','cp.flex_value')
+                              ->where('c.parent','PHARMA')
                               ->where('products.id',$product_id)
                               ->where('os.outlet_id',Auth::user()->customer_id)
                               ->groupBy('unit','p_id','title')
@@ -345,6 +348,9 @@ class OutletProductController extends Controller
 
     $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date')
                         ->leftjoin('products','products.id','outlet_stock.product_id')
+                        ->join('category_products as cp','cp.product_id','products.id')
+                        ->join('categories as c','c.flex_value','cp.flex_value')
+                        ->where('c.parent','PHARMA')
                         ->where('products.Enabled_Flag','Y')
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
                         ->union($stockOutlet)
@@ -445,6 +451,9 @@ class OutletProductController extends Controller
                                   ->join('products','products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
+                                  ->join('category_products as cp','cp.product_id','products.id')
+                                  ->join('categories as c','c.flex_value','cp.flex_value')
+                                  ->where('c.parent','PHARMA')
                                   ->where('products.Enabled_Flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
                                   ->groupby('title','product_id','outlet_name');
