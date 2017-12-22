@@ -1,15 +1,14 @@
-
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ config('app.locale') }}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- CSRF Token -->
-    <meta name="csrf-token" content="EBCjee8uUaNJBdbnMBCACpMyMrhEWyyXNBn3XXdK">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Laravel</title>
+    <title>{{ config('app.name', 'g-Order') }}</title>
 
     <!-- Styles -->
 	<!--<link rel="stylesheet" href="product.css">-->
@@ -18,25 +17,24 @@
 	<link href="https://fonts.googleapis.com/css?family=Pacifico&subset=latin-ext,vietnamese" rel="stylesheet">
 	<link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
 
-	<link rel="stylesheet" href="http://localhost/gOrder/font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">
 
-	<link rel="stylesheet" href="http://localhost:8000/css/bootstrap.min.css">
-	<!--<link href="http://localhost:8000/css/app20170913.css" rel="stylesheet">-->
-	<link rel="stylesheet" href="http://localhost:8000/css/mystyle.css">
-	<link rel="stylesheet" href="http://localhost:8000/css/loading.css">
+	<link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
+	<!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
+	<link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
+	<link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
 
     <!-- Scripts -->
     <script>
     window.Laravel = {
-                   csrfToken: 'EBCjee8uUaNJBdbnMBCACpMyMrhEWyyXNBn3XXdK',
-                   url: "http://localhost:8000",
+                   csrfToken: '{{csrf_token()}}',
+                   url: "{{url('/')}}",
                    auth: {
-                       user: ''
+                       user: '{{auth()->user()}}'
                    }
                 }
     </script>
 </head>
-
 <body onload="myFunction()" style="margin:0;">
     <div id="loader"></div><!-- ini loadingnya-->
     <div style="display:none;" id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
@@ -46,7 +44,7 @@
                   <div class="navbar-header">
 
                       <!-- Collapsed Hamburger -->
-                      <button type="button" data-toggle="collapse" data-target="#app-navbar-collapse" class="navbar-toggle collapsed" aria-expanded="false">
+                      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
                           <span class="sr-only">Toggle Navigation</span>
                           <span class="icon-bar"></span>
                           <span class="icon-bar"></span>
@@ -102,7 +100,6 @@
                       <!-- Left Side Of Navbar -->
 
                       <!-- Right Side Of Navbar -->
-
                       <ul class="nav navbar-nav navbar-right" >
                           <!-- Authentication Links -->
 
@@ -119,10 +116,10 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp; <strong>{{ app()->getLocale() }}</strong>&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                             <ul class="dropdown-menu">
                               <li id="LI_201">
-                                  <a href="#" id="idLang" onclick="changeLanguage('id');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/indonesia.png" alt="" width="20" height="20" id="IMG_203" /><span id="SPAN_204"><span id="SPAN_205">&nbsp; INDONESIA (ID)</span></span></a>
+                                  <a href="#" id="idLang" onclick="changeLanguage('id');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/indonesia.png" alt="" width="20" height="20" id="IMG_203" /><span id="SPAN_204"><span id="SPAN_205">&nbsp; Indonesia (id)</span></span></a>
                               </li>
                               <li id="LI_489">
-                                <a href="#" id="enLang" onclick="changeLanguage('en');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/united_kingdom.png" alt="" width="20" height="20" id="IMG_491" /><span id="SPAN_492"><span id="SPAN_493">&nbsp; ENGLISH (EN)</span></span></a>
+                                <a href="#" id="enLang" onclick="changeLanguage('en');return false;"><img src="https://images.apple.com/support/assets/images/layout/icons/flags/country/united_kingdom.png" alt="" width="20" height="20" id="IMG_491" /><span id="SPAN_492"><span id="SPAN_493">&nbsp; English (en)</span></span></a>
                               </li>
                             </ul>
                           </li>
@@ -296,6 +293,7 @@
 
     <script>
     var myVar;
+
     function myFunction() {
         myVar = setTimeout(showPage, 500);
     }
