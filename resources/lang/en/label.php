@@ -12,10 +12,10 @@ return [
     |
     */
 
-    'login' => 'Login',
+    'login' => 'LOGIN',
     'logout' => 'LOGOUT',
     'home' => 'Home',
-    'register' => 'Register',
+    'register' => 'REGISTER',
     'outlet' => 'Outlet Name',
     'email'=>'Email Address',
     'address' => 'Address',
