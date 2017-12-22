@@ -17,8 +17,20 @@
     <td>{{$request->outlet}}</td>
   </tr>
   @endif
+  @if(isset($request->propinsi))
+  <tr>
+    <td>Propinsi</td>
+    <td>{{$namapropinsi}}</td>
+  </tr>
+  @endif
+  @if(isset($request->channel))
+  <tr>
+    <td>Channel</td>
+    <td>{{$nmchannel}}</td>
+  </tr>
+  @endif
 </table>
-<table>
+<table border="1">
   <thead>
     <tr>
       <th rowspan="2">#</th>
@@ -32,7 +44,7 @@
       <th colspan="4">Order</th>
       <th rowspan="2">Tgl Confirm Distributor</th>
       <th rowspan="2">Tgl Confirm Outlet Terima</th>
-      <th colspan="3">DO (Release PO)</th>
+      <th colspan="4">DO (Release PO)</th>
       <th rowspan="2">Service Level</th>
       <th rowspan="2">Lead Time</th>
       <th rowspan="2">Status</th>
@@ -55,39 +67,36 @@
       <th>No SJ</th>
       <th>Qty</th>
       <th>Value</th>
+      <th>Tgl Kirim</th>
+      <th></th>
+      <th></th>
       <th></th>
     </tr>
   </thead>
   <tbody>
+    @php($no=0)
+    @php($tmpheader=null)
+    @foreach($datalist->groupBy('id') as $key => $data)
+    @php($no+=1)
+    @php($groupheader=$data->count())
+      <tr>
+        @if($key<>$tmpheader)
+        @php($tmpheader=$key)
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$no}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->notrx}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->customer_name}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->channel}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->alamat}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->distributor_name}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->divisi}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->tgl_order}}</td>
 
-      @php($no=0)
-      @foreach($datalist as $header)
-      @php($no+=1)
-        <tr>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$no}}</td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->notrx}}</td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->customer_name}}</td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->channel}}</td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->alamat}}</td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->distributor_name}}</td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->divisi}}</td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->tgl_order}}</td>
-          <td>{{$header->lines->first()->title}}</td>
-          <td>{{$header->lines->first()->qty_request_primary}}</td>
-          <td>{{$header->lines->first()->unit_price/$header->lines->first()->conversion_qty}}</td>
-          <td>{{$header->lines->first()->amount}}</td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->tgl_approve}}</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td rowspan="{{$header->lines->count()}}" style="vertical-align:middle">{{$header->status_name}}</td>
-        </tr>
+        @endif
         @php($lineno=0)
-        @foreach($header->lines as $line)
-        @if($lineno!=0)
+        @foreach($data->groupBy('line_id') as $key2 =>  $detail)
+        @php($groupline=$detail->count())
+        @php($tmpline=$key2)
+        @if($lineno>0)
           <tr>
             <td></td>
             <td></td>
@@ -97,32 +106,47 @@
             <td></td>
             <td></td>
             <td></td>
-          <td>{{$line->title}}</td>
-          <td>{{$line->qty_request_primary}}</td>
-          <td>{{$line->unit_price/$line->conversion_qty}}</td>
-          <td>{{$line->amount}}</td>
-          <td></td>
-          @if($line->shippings->count()>0)
-          <td>{{$line->shippings->first()->tgl_terima}}</td>
-          <!--DO release po-->
-          <td>{{$line->shippings->first()->deliveryno}}</td>
-          <td>{{$line->shippings->first()->qty_shipping}}</td>
-          <td></td>
-          @else
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
           @endif
+        @if($key2<>$tmpline)
+        <td rowspan="{{$groupline}}" style="vertical-align:middle">{{$detail->title}}</td>
+        <td rowspan="{{$groupline}}" style="vertical-align:middle" align="right">{{$detail->qty_request_primary}}</td>
+        <td rowspan="{{$groupline}}" style="vertical-align:middle" align="right">{{number_format($detail->unit_price_primary,2)}}</td>
+        <td rowspan="{{$groupline}}" style="vertical-align:middle" align="right">{{number_format($detail->amount,2)}}</td>
+        <td rowspan="{{$groupline}}" style="vertical-align:middle">{{$detail->tgl_approve}}</td>
+        @else
           <td></td>
           <td></td>
           <td></td>
-          </tr>
+          <td></td>
+          <td></td>
+        @endif
+        <td>{{$detail->tgl_terima}}</td>
+        <td>{{$detail->deliveryno}}</td>
+        <td align="right">{{$detail->qty_shipping}}</td>
+        <td align="right">{{number_format($detail->qty_shipping*$detail->unit_price_primary,2)}}</td>
+        <td>{{$detail->tgl_kirim}}</td>
+        <td>@if(isset($detail->tgl_kirim))
+          {{$detail->service_level}}
+          @endif
+        </td>
+        <td>@if(isset($detail->tgl_terima))
+              {{$detail->lead_time}}
+            @endif
+        </td>
+
+        @if($lineno>0) </tr>@endif
+
+        @if($lineno==0)
+        <td rowspan="{{$groupheader}}">{{$detail->status_name}}</td>
         @endif
         @php($lineno+=1)
         @endforeach
+      </tr>
 
-      @endforeach
+
+
+    @endforeach
+
 
   </tbody>
 </table>

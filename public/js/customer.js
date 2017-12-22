@@ -106,7 +106,13 @@ function load_data(query,id)
   $(document).ready(function() {
     checkrole();
     if($('#listdistributor').length){
-      	$('#listdistributor').DataTable();
+      	$('#listdistributor').DataTable({
+                  "fnDrawCallback": function(oSettings) {
+                      if (oSettings._iDisplayLength > oSettings.fnRecordsDisplay()) {
+                          $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                      }
+                  }
+              });
           window.setTimeout(function(){
               $(window).resize();
           },2000);

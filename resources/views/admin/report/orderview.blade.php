@@ -26,7 +26,21 @@
   @if(isset($request->channel))
   <tr>
     <td>Channel</td>
-    <td>{{$nmchannel}}</td>
+    <td>{{$request->channel}}</td>
+  </tr>
+  @endif
+  @if($request->divisi)
+  <tr>
+    <td>Divisi</td>
+    <td>{{$request->divisi}}
+      @if($request->psc_flag=="1" and $request->pharma_flag=="1")
+        PSC/PHARMA
+      @elseif($request->psc_flag=="1")
+        PSC
+      @elseif($request->pharma_flag=="1")
+        PHARMA
+      @endif
+    </td>
   </tr>
   @endif
 </table>
@@ -90,49 +104,60 @@
         <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->distributor_name}}</td>
         <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->divisi}}</td>
         <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->tgl_order}}</td>
+
         @endif
         @php($lineno=0)
+        @php($tmpline=null)
         @foreach($data as $detail)
-        @if($lineno>0)
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+          @if($lineno>0)
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+          @endif
+          @if($detail->line_id<>$tmpline)
+            @php($tmpline=$detail->line_id)
+            @php($groupline=$data->where('line_id',$tmpline)->count())
+            <td rowspan="{{$groupline}}" style="vertical-align:middle">{{$detail->title}}</td>
+            <td rowspan="{{$groupline}}" style="vertical-align:middle" align="right">{{$detail->qty_request_primary}}</td>
+            <td rowspan="{{$groupline}}" style="vertical-align:middle" align="right">{{number_format($detail->unit_price_primary,2)}}</td>
+            <td rowspan="{{$groupline}}" style="vertical-align:middle" align="right">{{number_format($detail->amount,2)}}</td>
+          @else
             <td></td>
             <td></td>
             <td></td>
             <td></td>
           @endif
-        <td>{{$detail->title}}</td>
-        <td align="right">{{$detail->qty_request_primary}}</td>
-        <td align="right">{{number_format($detail->unit_price_primary,2)}}</td>
-        <td align="right">{{number_format($detail->amount,2)}}</td>
-        <td>{{$detail->tgl_approve}}</td>
-        @if($lineno==0)
-        <td rowspan="{{$groupheader}}">{{$detail->tgl_terima}}</td>
-        @else
-        <td></td>
-        @endif
-        <td>{{$detail->deliveryno}}</td>
-        <td align="right">{{$detail->qty_shipping}}</td>
-        <td align="right">{{number_format($detail->qty_shipping*$detail->unit_price_primary,2)}}</td>
-        <td>{{$detail->tgl_kirim}}</td>
-        <td>@if(isset($detail->tgl_kirim))
-          {{$detail->tgl_kirim-$detail->tgl_order}}
+          @if($lineno==0)
+            <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$detail->tgl_approve}}</td>
+          @else
+            <td></td>
           @endif
-        </td>
-        <td>@if(isset($detail->tgl_terima))
-            {{$detail->tgl_terima-$detail->tgl_order}}
+
+          <td>{{$detail->tgl_terima}}</td>
+          <td>{{$detail->deliveryno}}</td>
+          <td align="right">{{$detail->qty_shipping}}</td>
+          <td align="right">{{number_format($detail->qty_shipping*$detail->unit_price_primary,2)}}</td>
+          <td>{{$detail->tgl_kirim}}</td>
+          <td>@if(isset($detail->tgl_kirim))
+            {{$detail->service_level}}
             @endif
-        </td>
+          </td>
+          <td>@if(isset($detail->tgl_terima))
+                {{$detail->lead_time}}
+              @endif
+          </td>
+          @if($lineno>0) </tr>@endif
 
-        @if($lineno>0) </tr>@endif
-
-        @if($lineno==0)
-        <td rowspan="{{$groupheader}}">{{$detail->status_name}}</td>
-        @endif
-        @php($lineno+=1)
+          @if($lineno==0)
+          <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$detail->status_name}}</td>
+          @endif
+          @php($lineno+=1)
         @endforeach
       </tr>
 

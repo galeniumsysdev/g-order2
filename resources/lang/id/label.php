@@ -91,6 +91,6 @@ return [
 	'distributor' => 'Distributor',
 	'download' => 'Unduh Excel',
 	'province' => 'Provinsi',
-  'change_to_active'=>'Klik untuk aktifkan',
-  'change_to_inactive'=>'Klik untuk menonaktifkan',
+    'change_to_active'=>'Klik untuk aktifkan',
+    'change_to_inactive'=>'Klik untuk menonaktifkan',
 ];
