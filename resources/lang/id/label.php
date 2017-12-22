@@ -12,10 +12,10 @@ return [
     |
     */
 
-    'login' => 'Silahkan Masuk',
+    'login' => 'SILAHKAN MASUK',
     'logout' => 'KELUAR',
     'home' => 'Beranda',
-    'register' => 'Daftar',
+    'register' => 'DAFTAR',
     'email'=>'Alamat Email',
     'outlet' => 'Nama Outlet',
     'address' => 'Alamat',
@@ -88,5 +88,9 @@ return [
     'donthaveaccount' => "Belum punya akun?",
     'shipping' => 'Pengiriman',
 	'channel' => 'Channel',
-	'distributor' => 'Distributor'
+	'distributor' => 'Distributor',
+	'download' => 'Unduh Excel',
+	'province' => 'Provinsi',
+    'change_to_active'=>'Klik untuk aktifkan',
+    'change_to_inactive'=>'Klik untuk menonaktifkan',
 ];

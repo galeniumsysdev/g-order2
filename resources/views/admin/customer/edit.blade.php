@@ -14,12 +14,13 @@
         <div class="panel panel-primary">
 			       <div class="panel-heading"><strong>CUSTOMER</strong></div>
                 <div class="panel-body">
-						            <form action="{{route('customer.update',$user->id)}}" class="form-horizontal" enctype="multipart/form-data" method="post" role="form">
+						            <form action="{{route('customer.update',$user->id)}}" class="form-horizontal" enctype="multipart/form-data" method="post" role="form" id="formcustomer">
             							{{csrf_field()}}
                           {{method_field('PATCH')}}
-            							<input type="hidden" value="{{$user->id}}" id="user_id">
+            							<input type="hidden" value="{{$user->id}}" id="user_id" name="user_id">
             							<input type="hidden" value="{{$notif_id}}" name="notif_id" id="notif_id">
             							<input type="hidden" value="{{url('/')}}" id="baseurl">
+                          <input type="hidden" value="{{$customer->id}}" name="customer_id">
             							<input type="hidden" value="{{app()->getLocale()}}" id="language">
                           <div class="col-sm-1">
                             <a href="javascript:changeProfile()" style="text-decoration: none;" title="@lang('label.changeimage')">
@@ -132,7 +133,7 @@
                     											@endif
                     									</div>
                                   </div>
-                                    @if($customer->psc_flag=="1")
+
                                       <div class="form-group" id="divkategoridc">
                                         <label for="kategori" class="control-label col-sm-2"><strong>@lang('label.categorydc') :</strong></label>
                                         <div class="col-sm-4">
@@ -164,8 +165,8 @@
                       												</span>
                       											@endif
                                         </div>
-                                    </div>
-                                    @endif
+                                      </div>
+
 
 
                                     @if($customer->Status=="R")
@@ -204,8 +205,8 @@
               												@forelse($customer_sites as $customer_site)
               													<tr>
               														<td data-title="@lang('label.address')">{{$customer_site->address1}}</td>
-              														<td data-title="@lang('label.city')">{{$customer_site->city." "}}</td>
-              														<td data-title="@lang('label.state')">{{$customer_site->state." "}}</td>
+              														<td data-title="@lang('label.city_regency')">{{$customer_site->city." "}}</td>
+              														<td data-title="@lang('label.urban_village')">{{$customer_site->state." "}}</td>
               														<td data-title="@lang('label.postalcode')">{{$customer_site->postalcode." "}}</td>
                                           <td data-title="@lang('label.action')">
                                             <a class="btn btn-info btn-sm" href="{{route('profile.edit_address',$customer_site->id)}}"><span class="glyphicon glyphicon-pencil"></span></a>
@@ -258,15 +259,15 @@
 
                                 <div role="tabpanel" class="tab-pane" id="distributor">
 									                 <div class="form-group">
-										                <div class="col-sm-12">
-                											<table id="listdistributor" class="table table-striped">
+										                <div class="table" style="padding:0px 20px 0px 20px;">
+                                      {{ Form::hidden('distributor_id', '',array('id'=>'distributor_id')) }}
+                                      {{ Form::hidden('inactive', '',array('id'=>'action')) }}
+                											<table id="listdistributor" class="display responsive" cellspacing="0" width="100%">
                 													<thead>
                 														<tr>
                 															<th width="50%">@lang('label.distributor')</th>
-                                              <th width="50%">Status</th>
-                															<!--<th width="10%">@lang('label.address')</th>
-                															<th width="10%">@lang('label.city')</th>
-                															<th width="5%">@lang('label.state')</th>-->
+                                              <th width="20%">Status</th>
+                															<th width="30%">Action</th>
                 														</tr>
                 													</thead>
                 												<tbody>
@@ -279,13 +280,23 @@
                                                 @else
                                                   @if($dist->approval)
                                                     @lang("label.approve")
+                                                  @elseif($dist->inactive)
+                                                    Inactive ({{$dist->end_date_active}})
                                                   @else
                                                     @lang("label.reject") : {{$dist->keterangan}}
                                                   @endif
                                                 @endif
                                               </td>
-                															<!--<td></td>
-                															<td></td>-->
+                															<td>
+
+
+                                                @if($dist->inactive)
+                                                <button type="button" onclick="activedist(this.id)" id="{{$dist->distributor_id}}" class="btn btn-primary btn-sm" title="@lang('label.change_to_active')" value="active" name="inactive"><i class="fa fa-check" aria-hidden="true"></i>&nbsp; Active</button>
+                                                @else
+                                                <button type="button" onclick="inactivedist(this.id)" id="{{$dist->distributor_id}}" class="btn btn-warning btn-sm" title="@lang('label.change_to_inactive')" value="inactive" name="inactive"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp; Inactive</button>
+                                                @endif
+
+                                              </td>
                 														</tr>
                 													@endforeach
                 												</tbody>
@@ -296,7 +307,7 @@
                                    <div class="form-group" id="divdistributor">
                                       <label for="distributor" class="control-label col-sm-2">@lang('label.distributor') :</label>
                     									<div class="col-sm-10">
-                    										<input type="text" name="searchdistributor" id="search_text" class="form-control mb-8 mr-sm-8 mb-sm-4" placeholder="Search distributor">
+                    										<input type="text" name="searchdistributor" id="search_text" class="form-control mb-8 mr-sm-8 mb-sm-4" placeholder="@lang('label.search') distributor">
                     									</div>
                                    </div>
                                    <div class="form-group">
@@ -306,7 +317,7 @@
                                 </div>
                             </div>
                           </div>
-                      </form>
+                        </form>
                 </div>
             </div>
         </div>
@@ -319,6 +330,12 @@ window.Laravel = {
                role: '{{Auth::user()->roles->first()->name}}',
             }
 </script>-->
+<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css">
+
 <script src="{{ asset('js/customer.js') }}"></script>
 <script>
     $(document).ready(function() {

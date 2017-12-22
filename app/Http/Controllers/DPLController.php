@@ -28,8 +28,12 @@ class DPLController extends Controller {
 	}
 
 	public function generateSuggestNoForm() {
-		$user = Auth::User();
-		$outlets = OutletDistributor::join('customers', 'customers.id', 'outlet_distributor.outlet_id')
+		return view('admin.dpl.genSuggestNo');
+	}
+
+	public function getOutletDPL(){
+		$outlets = OutletDistributor::select('customers.id','customers.customer_name')
+			->join('customers', 'customers.id', 'outlet_distributor.outlet_id')
 			->join('users as u','customers.id','u.customer_id')
 			->join('role_user as ru','ru.user_id','u.id')
 			->join('roles as r','ru.role_id','r.id')
@@ -37,18 +41,11 @@ class DPLController extends Controller {
 			->whereIn('r.name',['Outlet','Apotik/Klinik'])
 			->where('customers.status','=','A')
 			->where('u.register_flag','=',1)
-			->select('customers.id','customers.customer_name')
+			->groupBy('customers.id','customers.customer_name')
+			->orderBy('customers.customer_name')
 			->get();
 
-		$outlet_list = array('---Pilih---');
-
-		foreach ($outlets as $key => $outlet) {
-			$outlet_list[$outlet->id] = $outlet->customer_name;
-		}
-
-		return view('admin.dpl.genSuggestNo', array(
-			'outlet_list' => $outlet_list,
-		));
+		return response()->json($outlets);
 	}
 
 	public function generateExec(Request $request) {
@@ -68,9 +65,11 @@ class DPLController extends Controller {
 
 		$dplSuggestNo = new DPLSuggestNo;
 		$dplSuggestNo->mr_id = Auth::User()->id;
-		$dplSuggestNo->outlet_id = $request->outlet;
+		$dplSuggestNo->outlet_id = $request->outlet_id;
 		$dplSuggestNo->suggest_no = $token;
 		$dplSuggestNo->save();
+
+		$this->dplLog($token, 'Create DPL Suggest No.');
 
 		\Session::flash('suggest_no', $token);
 
@@ -157,6 +156,7 @@ class DPLController extends Controller {
 			'dpl_suggest_no.suggest_no',
 			'outlet_id',
 			'notrx',
+			'note',
 			'fill_in',
 			'approver.name as approver_name',
 			'dpl_no.dpl_no')
@@ -212,9 +212,13 @@ class DPLController extends Controller {
 		$suggest_no = $request->suggest_no;
 		$distributor = $request->distributor;
 		$notrx = $request->notrx;
+		$note = $request->note;
 
 		$so_header = SoHeader::where('notrx', $notrx)
 			->update(array('distributor_id' => $distributor));
+
+		$input_note = dplSuggestNo::where('suggest_no',$suggest_no)
+									->update(array('note'=>$note));
 
 		foreach ($discount as $key => $disc) {
 			$so_line = SoLine::where('line_id', $key)
@@ -242,7 +246,7 @@ class DPLController extends Controller {
 		if(!empty($notified_users)){
 			$data = [
 				'title' => 'Permohonan Approval',
-				'message' => 'Permohonan Approval DPL #'.$suggest_no,
+				'message' => 'Permohonan Approval #'.$suggest_no,
 				'id' => $suggest_no,
 				'href' => route('dpl.readNotifDiscount'),
 				'mail' => [
@@ -256,8 +260,12 @@ class DPLController extends Controller {
 									'approved_by' => Auth::user()->id,
 									'next_approver' => $key
 									));
-				foreach ($email as $key => $mail) {
+				foreach ($email as $key2 => $mail) {
 					$data['email'] = $mail;
+					if($key == 'FSM_HSM')
+						$data['sendmail'] = 0;
+					else
+						$data['sendmail'] = 1;
 					$apps_user = User::where('email',$mail)->first();
 					$apps_user->notify(new PushNotif($data));
 				}
@@ -278,6 +286,7 @@ class DPLController extends Controller {
 			'outlet.customer_name as dpl_outlet_name',
 			'suggest_no',
 			'notrx',
+			'note',
 			'fill_in',
 			'approved_by',
 			'next_approver',
@@ -371,8 +380,16 @@ class DPLController extends Controller {
 						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 							->update(array('approved_by' => Auth::user()->id, 'next_approver' => ''));
 					}
-					foreach ($email as $key => $mail) {
+					foreach ($email as $key2 => $mail) {
 						$data['email'] = $mail;
+						if($key == 'FSM_HSM'){
+							if($user_role[0]->name == 'Admin DPL')
+								$data['sendmail'] = 1;
+							else
+								$data['sendmail'] = 0;
+						}
+						else
+							$data['sendmail'] = 1;
 						$apps_user = User::where('email',$mail)->first();
 						if(!empty($apps_user))
 							$apps_user->notify(new PushNotif($data));
@@ -397,8 +414,12 @@ class DPLController extends Controller {
 				foreach ($notified_users as $key => $email) {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 						->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
-					foreach ($email as $key => $mail) {
+					foreach ($email as $key2 => $mail) {
 						$data['email'] = $mail;
+						if($key == 'FSM_HSM')
+							$data['sendmail'] = 0;
+						else
+							$data['sendmail'] = 1;
 						$apps_user = User::where('email',$mail)->first();
 						if(!empty($apps_user))
 							$apps_user->notify(new PushNotif($data));
@@ -408,8 +429,6 @@ class DPLController extends Controller {
 			$reason = $request->reason_reject;
 			$this->dplLog($suggest_no, $action, $reason);
 		}
-
-		return redirect('/dpl/list');
 	}
 
 	public function getArrayNotifiedEmail($suggest_no, $curr_pos = ''){
@@ -490,9 +509,12 @@ class DPLController extends Controller {
 	}
 
 	public function dplLogHistory($suggest_no) {
-		$dpl = DPLLog::select('users.name', 'dpl_log.*')
+		$dpl = DPLLog::select('users.name','r.display_name as role','dpl_log.*')
 			->join('users', 'users.id', 'dpl_log.done_by')
+			->join('role_user as ru','ru.user_id','users.id')
+			->join('roles as r','ru.role_id','r.id')
 			->where('suggest_no', $suggest_no)
+			->orderBy('created_at','desc')
 			->get();
 
 		return view('admin.dpl.dplHistory', array('dpl' => $dpl));
@@ -572,6 +594,7 @@ class DPLController extends Controller {
 			'sh.distributor_id as dpl_distributor_id',
 			'distributor.customer_name as dpl_distributor_name',
 			'dpl_suggest_no.suggest_no',
+			'dpl_suggest_no.note',
 			'dpl_no.dpl_no')
 			->join('users', 'users.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')

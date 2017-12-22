@@ -56,9 +56,7 @@ Route::group(['middleware'=>['auth','prevent-back-history']],function(){
   Route::post('profile', 'ProfileController@update_avatar')->name('profile.update');
   Route::post('add-address', 'ProfileController@addaddress')->name('profile.address');
   Route::post('add-contact', 'ProfileController@addcontact')->name('profile.contact');
-  Route::get('/add_address', function () {
-    return view('auth.profile.add_address');
-  });
+  Route::get('/add_address', 'profileController@addaddressview');
   Route::match(['patch','get'],'/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   //Route::get('/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   Route::get('/add_contact', function () {
@@ -191,6 +189,7 @@ Route::get('/manageOutlet/{id}/{notif_id}', 'CustomerController@show')->name('cu
 //Route::get('/searchNoo', 'CustomerController@searchNoo')->name('customer.searchNoo');
 Route::get('customer/searchOutlet', 'CustomerController@searchOutlet')->name('customer.searchoutlet');
 Route::get('customer/searchDistributor', 'CustomerController@searchDistributor')->name('customer.searchDistributor');
+Route::get('customer/searchOutletDistributor', 'CustomerController@searchOutletDistributor')->name('customer.searchOutletDistributor');
 
 
 
@@ -201,6 +200,7 @@ Route::group(['middleware' => ['permission:Outlet_Distributor']], function () {
   Route::get('/tambahDistributor/{id}/{outletid}','CustomerController@addlist');
   Route::patch('/saveOutlet/{customer}', 'CustomerController@update')->name('customer.update');
   Route::post('/rejectbyGPL','CustomerController@rejectGPL')->name('customer.rejectGPL');
+  Route::patch('/customer/inactiveDistributor','CustomerController@inactiveDistributor')->name('customer.inactiveDistributor');
 });
 
 /*distributor or principal*/
@@ -292,20 +292,20 @@ Route::get('/test',function () {
 });*/
 
 
-Route::group(['middleware' => ['permission:UploadCMO','prevent-back-history']], function () {
+Route::group(['middleware' => ['permission:UploadCMO']], function () {
     Route::get('uploadCMO', 'FilesController@upload')->name('files.uploadcmo');
     Route::post('/handleUpload', 'FilesController@handleUpload');
     Route::get('/downloadCMO/{file}', function ($file='') {
         return response()->download(storage_path('app/uploads/'.$file));
     });
 });
-Route::group(['middleware' => ['permission:DownloadCMO','prevent-back-history']], function () {
+Route::group(['middleware' => ['permission:DownloadCMO']], function () {
   Route::get('viewAlldownloadfile', 'FilesController@downfunc')->name('files.viewfile');
   Route::get('/downloadCMO/{file}', function ($file='') {
       return response()->download(storage_path('app/uploads/'.$file));
   });
   Route::post('/viewAlldownloadfile', 'FilesController@search')->name('files.postviewfile');
-  route::get('notifrejectcmo/{notifid}/{id}','FilesController@readNotif')->name('files.readnotif');
+  route::get('notifrejectcmo/{id?}/{notifid?}','FilesController@readNotif')->name('files.readnotif');
 });
 Route::group(['middleware' => ['role:Principal','prevent-back-history']], function () {
   Route::put('/approvecmo/{id}', 'FilesController@approvecmo')->name('files.approvecmo');
@@ -319,6 +319,7 @@ Route::group(['middleware' => ['role:Principal','prevent-back-history']], functi
 * created by WK Productions
 */
 Route::get('/dpl/list/','DPLController@dplList')->name('dpl.list');
+Route::get('/dpl/list/outlet','DPLController@getOutletDPL')->name('dpl.listOutlet');
 Route::get('/dpl/suggestno/form','DPLController@generateSuggestNoForm')->name('dpl.generateForm');
 Route::post('/dpl/suggestno/generate','DPLController@generateExec')->name('dpl.generateExec');
 Route::get('/dpl/suggestno/success','DPLController@generateSuccess')->name('dpl.generateSuccess');

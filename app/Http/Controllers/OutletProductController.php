@@ -33,7 +33,9 @@ class OutletProductController extends Controller
 
 	    $data = Excel::load($file, function($reader){})->get();
       foreach ($data as $key => $prod) {
-        $check = OutletProducts::where('title', strtoupper($prod['nama_barang']))->count();
+        $check = OutletProducts::where('title', strtoupper($prod['nama_barang']))
+                                ->where('outlet_products.outlet_id',Auth::user()->customer_id)
+                                ->count();
         if($check)
           $data[$key]['exist'] = '<span class="text-danger duplicate">Duplicate</span>';
         else
@@ -89,6 +91,7 @@ class OutletProductController extends Controller
                                       ->join('category_products as cp','cp.product_id','products.id')
                                       ->join('categories as c','c.flex_value','cp.flex_value')
                                       ->where('c.parent','PHARMA')
+                                      ->where('os.outlet_id',Auth::user()->customer_id)
                                       ->groupBy('unit','op_id','title','flag')
                                       ->union($productsOutlet)
                                       ->orderBy('title')
@@ -170,6 +173,7 @@ class OutletProductController extends Controller
                               ->join('category_products as cp','cp.product_id','products.id')
                               ->join('categories as c','c.flex_value','cp.flex_value')
                               ->where('c.parent','PHARMA')
+                              ->where('os.outlet_id',Auth::user()->customer_id)
                               ->groupBy('unit','op_id','title','flag')
                               ->union($stockOutlet)
                               ->orderBy('title')
@@ -190,6 +194,7 @@ class OutletProductController extends Controller
                             ->join('category_products as cp','cp.product_id','products.id')
                             ->join('categories as c','c.flex_value','cp.flex_value')
                             ->where('c.parent','PHARMA')
+                            ->where('os.outlet_id',Auth::user()->customer_id)
                             ->groupBy('unit','op_id','title','flag')
                             ->union($stockOutlet)
                             ->orderBy('title')
@@ -207,6 +212,7 @@ class OutletProductController extends Controller
       $header = OutletProducts::select('outlet_products.unit','outlet_products.id as p_id','title',DB::raw('sum(qty) as product_qty'))
                               ->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
                               ->where('outlet_products.id',$product_id)
+                              ->where('os.outlet_id',Auth::user()->customer_id)
                               ->groupBy('unit','p_id','title')
                               ->first();
 
@@ -221,6 +227,7 @@ class OutletProductController extends Controller
       $header = Product::select('products.satuan_primary as unit','products.id as p_id','title',DB::raw('sum(qty) as product_qty'))
                               ->leftjoin('outlet_stock as os','os.product_id','products.id')
                               ->where('products.id',$product_id)
+                              ->where('os.outlet_id',Auth::user()->customer_id)
                               ->groupBy('unit','p_id','title')
                               ->first();
 
@@ -263,7 +270,7 @@ class OutletProductController extends Controller
 
   	return view('admin.outlet.detailProductStock', array('title'=>$title, 'last_stock'=>$last_stock, 'stock'=>$trx));
   }
-  
+
   public function formProduct($id = '')
   {
     if($id)
@@ -286,7 +293,9 @@ class OutletProductController extends Controller
     $unit = strtoupper($request->product_unit);
     $price = $request->product_price;
 
-    $check = OutletProducts::where('title',$product_name)->count();
+    $check = OutletProducts::where('title',$product_name)
+                            ->where('outlet_products.outlet_id',Auth::user()->customer_id)
+                            ->count();
 
     if($check)
       return redirect()->back()->withInput()->with('msg','<span class="text-danger">Product is already exist.</span>');
@@ -420,8 +429,9 @@ class OutletProductController extends Controller
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
+                                  ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
                                   ->groupby('os_id','title','product_id','outlet_name');
-              
+
               if($data['outlet_name'])
                 $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
 
@@ -436,6 +446,7 @@ class OutletProductController extends Controller
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('products.Enabled_Flag','Y')
+                                  ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
                                   ->groupby('os_id','title','product_id','outlet_name');
 
               if($data['outlet_name'])

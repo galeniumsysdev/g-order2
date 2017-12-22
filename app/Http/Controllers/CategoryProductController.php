@@ -37,6 +37,7 @@ class CategoryProductController extends Controller
      */
     public function store(Request $request)
     {
+      dd($request->all());
       $this->validate($request, [
          'code' => 'required|unique:categories,flex_value|max:5',
          'name' => 'required|unique:categories,description|max:191',
@@ -90,11 +91,12 @@ class CategoryProductController extends Controller
      */
     public function update(Request $request, $id)
     {
+
       if ($request->status<>'Y')
       {
         $request->status = 'N';
       }
-      //dd($request->all());
+
       try{
         $category=Category::find($id);
         $category->name = $request->name;

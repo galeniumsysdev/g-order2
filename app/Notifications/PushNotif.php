@@ -14,7 +14,17 @@ class PushNotif extends Notification {
 	}
 
 	public function via($notifiable) {
-		return ['broadcast', PusherChannel::class, 'database', 'mail'];
+		if(array_key_exists('sendmail', $this->data)){
+			if($this->data['sendmail']){
+				return ['broadcast', PusherChannel::class, 'database', 'mail'];
+			}
+			else{
+				return ['broadcast', PusherChannel::class, 'database'];
+			}
+		}
+		else{
+			return ['broadcast', PusherChannel::class, 'database', 'mail'];
+		}
 	}
 
 	public function toBroadcast($notifiable) {
@@ -43,9 +53,9 @@ class PushNotif extends Notification {
 		}
 		else{
 			return (new MailMessage)
-													->subject($this->data['title'])
-													->greeting($this->data['mail']['greeting'])
-													->line($this->data['mail']['content']);
+				->subject($this->data['title'])
+				->greeting($this->data['mail']['greeting'])
+				->line($this->data['mail']['content']);
 		}
 	}
 

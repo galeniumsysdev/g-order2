@@ -164,7 +164,7 @@
           $('#distributor').removeAttr('readonly').val('');
           $('#dist_id').val('');
       });
-    var path = "{{ route('customer.searchoutlet') }}";
+    var path = "{{ route('customer.searchOutletDistributor') }}";
     $.get(path,
         function (data) {
             $('#outlet').typeahead({

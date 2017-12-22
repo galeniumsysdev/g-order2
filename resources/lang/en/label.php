@@ -12,10 +12,10 @@ return [
     |
     */
 
-    'login' => 'Login',
+    'login' => 'LOGIN',
     'logout' => 'LOGOUT',
     'home' => 'Home',
-    'register' => 'Register',
+    'register' => 'REGISTER',
     'outlet' => 'Outlet Name',
     'email'=>'Email Address',
     'address' => 'Address',
@@ -88,5 +88,9 @@ return [
     'donthaveaccount' => "Don't have an account?",
     'shipping' => 'Shipping',
 	'channel' => 'Channel',
-	'distributor' => 'Distributor'
+	'distributor' => 'Distributor',
+	'download' => 'Download Excel',
+	'province' => 'Province',
+    'change_to_active'=>'Change to active',
+    'change_to_inactive'=>'Change to inactive',
 ];

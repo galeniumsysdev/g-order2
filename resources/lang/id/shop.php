@@ -14,14 +14,15 @@ return [
 
     'Product' => 'Produk',
     'Quantity' => 'Jumlah',
-    'Price' => 'Harga/Stn',
+    'Price' => 'Harga Gross',
     'listprice' => 'Harga Standard',
     'uom' => 'Satuan',
-    'qtyorder' => 'Jml Pesan',
-    'qtyavailable' => 'Jml Tersedia',
-    'qtyship' => 'Jml Kirim',
-    'qtyreceive' => 'Jml Terima',
-    'SubTotal' => 'Subtotal',
+    'qtyorder' => 'Qty PO',
+    'qtyavailable' => 'Qty Tersedia',
+    'qtyship' => 'Qty Kirim',
+    'qtyreceive' => 'Qty Terima',
+    'AmountPO' => 'Nilai PO',
+    'SubTotal' => 'Amount',
     'ContinueShopping' => 'Pilih Barang Lagi',
     'CreateOrder' => 'Buat Order',
     'Total' => 'Total',
@@ -56,4 +57,5 @@ return [
     'finish_shipping'=>'Selesai Kirim',
     'date_confirm' => 'Tanggal Confirm',
     'select'=>'Pilih',
+    'amountreceive'=>'Nilai Terima/Kirim'
 ];

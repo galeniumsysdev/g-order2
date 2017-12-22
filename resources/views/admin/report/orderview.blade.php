@@ -5,25 +5,25 @@
     <td>Period</td>
     <td>{{date_format(date_create($request->tglaw),'d-M-Y') }} s.d {{date_format(date_create($request->tglak),'d-M-Y')}}</td>
   </tr>
-  @if($request->dist_id)
+  @if(isset($request->distributor))
   <tr>
     <td>Distributor</td>
     <td>{{$request->distributor}}</td>
   </tr>
   @endif
-  @if($request->outlet_id)
+  @if(isset($request->outlet))
   <tr>
     <td>Outlet</td>
     <td>{{$request->outlet}}</td>
   </tr>
   @endif
-  @if($request->propinsi)
+  @if(isset($request->propinsi))
   <tr>
     <td>Propinsi</td>
-    <td>{{$request->propinsi}}</td>
+    <td>{{$namapropinsi}}</td>
   </tr>
   @endif
-  @if($request->channel)
+  @if(isset($request->channel))
   <tr>
     <td>Channel</td>
     <td>{{$request->channel}}</td>
@@ -44,7 +44,7 @@
   </tr>
   @endif
 </table>
-<table>
+<table border="1">
   <thead>
     <tr>
       <th rowspan="2">#</th>
@@ -58,7 +58,7 @@
       <th colspan="4">Order</th>
       <th rowspan="2">Tgl Confirm Distributor</th>
       <th rowspan="2">Tgl Confirm Outlet Terima</th>
-      <th colspan="3">DO (Release PO)</th>
+      <th colspan="4">DO (Release PO)</th>
       <th rowspan="2">Service Level</th>
       <th rowspan="2">Lead Time</th>
       <th rowspan="2">Status</th>
@@ -78,42 +78,36 @@
       <th>Value</th>
       <th></th>
       <th></th>
-      <th>Product</th>
+      <th>No SJ</th>
       <th>Qty</th>
       <th>Value</th>
+      <th>Tgl Kirim</th>
+      <th></th>
+      <th></th>
       <th></th>
     </tr>
   </thead>
   <tbody>
-
-      @php($no=0)
-      @foreach($datalist as $header)
-      @php($no+=1)
-        <tr>
-          <td rowspan="{{$header->lines->count()}}">{{$no}}</td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->notrx}}</td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->customer_name}}</td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->channel}}</td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->alamat}}</td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->distributor_name}}</td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->divisi}}</td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->tgl_order}}</td>
-          <td>{{$header->lines->first()->title}}</td>
-          <td>{{$header->lines->first()->qty_request_primary}}</td>
-          <td>{{$header->lines->first()->unit_price/$header->lines->first()->conversion_qty}}</td>
-          <td>{{$header->lines->first()->amount}}</td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->tgl_approve}}</td>
-          <td rowspan="{{$header->lines->count()}}" ></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td rowspan="{{$header->lines->count()}}">{{$header->status_name}}</td>
-        </tr>
+    @php($no=0)
+    @php($tmpheader=null)
+    @foreach($datalist->groupBy('id') as $key => $data)
+    @php($no+=1)
+    @php($groupheader=$data->count())
+      <tr>
+        @if($key<>$tmpheader)
+        @php($tmpheader=$key)
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$no}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->notrx}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->customer_name}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->channel}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->alamat}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->distributor_name}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->divisi}}</td>
+        <td rowspan="{{$groupheader}}" style="vertical-align:middle">{{$data->first()->tgl_order}}</td>
+        @endif
         @php($lineno=0)
-        @foreach($header->lines as $line)
-        @if($lineno!=0)
+        @foreach($data as $detail)
+        @if($lineno>0)
           <tr>
             <td></td>
             <td></td>
@@ -123,25 +117,43 @@
             <td></td>
             <td></td>
             <td></td>
-          <td>{{$line->title}}</td>
-          <td>{{$line->qty_request_primary}}</td>
-          <td>{{$line->unit_price/$line->conversion_qty}}</td>
-          <td>{{$line->amount}}</td>
-          <td></td>
-          <td></td>
-          <!--DO release po-->
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          </tr>
+          @endif
+        <td>{{$detail->title}}</td>
+        <td align="right">{{$detail->qty_request_primary}}</td>
+        <td align="right">{{number_format($detail->unit_price_primary,2)}}</td>
+        <td align="right">{{number_format($detail->amount,2)}}</td>
+        <td>{{$detail->tgl_approve}}</td>
+        @if($lineno==0)
+        <td rowspan="{{$groupheader}}">{{$detail->tgl_terima}}</td>
+        @else
+        <td></td>
+        @endif
+        <td>{{$detail->deliveryno}}</td>
+        <td align="right">{{$detail->qty_shipping}}</td>
+        <td align="right">{{number_format($detail->qty_shipping*$detail->unit_price_primary,2)}}</td>
+        <td>{{$detail->tgl_kirim}}</td>
+        <td>@if(isset($detail->tgl_kirim))
+          {{$detail->tgl_kirim-$detail->tgl_order}}
+          @endif
+        </td>
+        <td>@if(isset($detail->tgl_terima))
+            {{$detail->tgl_terima-$detail->tgl_order}}
+            @endif
+        </td>
+
+        @if($lineno>0) </tr>@endif
+
+        @if($lineno==0)
+        <td rowspan="{{$groupheader}}">{{$detail->status_name}}</td>
         @endif
         @php($lineno+=1)
         @endforeach
+      </tr>
 
-      @endforeach
+
+
+    @endforeach
+
 
   </tbody>
 </table>

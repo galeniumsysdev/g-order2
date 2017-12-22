@@ -50,6 +50,7 @@ class OrderController extends Controller
       $lines =DB::table('so_lines_v')->where('header_id','=',$id)->get();
       $deliveryno = SoShipping::where('header_id','=',$id)->get();
       $deliveryno = $deliveryno->groupBy('deliveryno','tgl_kirim');
+
       $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
 
       if ($user_dist->hasRole('Principal') )    {
@@ -416,7 +417,7 @@ class OrderController extends Controller
           /*validation qty*/
           foreach($solines as $soline)
           {
-            if($soline->qty_request_primary<intval($soline->qty_shipping)+$request->qtyshipping[$soline->line_id])
+            if($soline->qty_confirm<intval($soline->qty_shipping)+$request->qtyshipping[$soline->line_id])
             {
               return redirect()->back()->withError("Gagal simpan! Qty kirim melebihi order")->withInput();
             }
@@ -457,7 +458,7 @@ class OrderController extends Controller
           $afterheader = DB::table('so_lines_sum_v')->where('header_id','=',$request->header_id)->first();
 
           if($afterheader->qty_shipping_primary==$afterheader->qty_confirm_primary
-          or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary)
+          /*or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary*/)
           {
             $header->status=3; /*full shipping*/
           }else{
@@ -470,11 +471,11 @@ class OrderController extends Controller
           $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
           $data=[
             'title' => 'Pengiriman PO',
-            'message' => 'PO #'.$header->customer_po.' telah dikirim',
+            'message' => 'PO #'.$header->customer_po.' telah dikirim dgn SJ#'.$request->deliveryno,
             'id' => $header->id,
             'href' => route('order.notifnewpo'),
             'mail' => [
-              'greeting'=>'Pengriman Barang PO #'.$header->customer_po.'.',
+              'greeting'=>'Pengiriman Barang PO #'.$header->customer_po.', SJ#'.$request->deliveryno,
               'content' =>$content,
             ]
           ];
@@ -629,11 +630,11 @@ class OrderController extends Controller
           }else{ $header->status = 2;}
           $header->save();
           $dist=Customer::where('id','=',$header->distributor_id)->first();
-          $content = 'Pesanan Anda dengan PO nomor: <strong>'.$header->customer_po.'</strong> dan SJ: '.$request->deliveryno.' telah diterime customer.<br>';
+          $content = 'Pesanan Anda dengan PO nomor: <strong>'.$header->customer_po.'</strong> dan SJ: '.$request->deliveryno.' telah diterime customer pada tanggal: '.Carbon::now().'.<br>';
           $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
           $data=[
             'title' => 'PO diterima customer',
-            'message' => 'SJ #'.$request->deliveryno.' telah diterima customer',
+            'message' => 'SJ #'.$request->deliveryno.' telah diterima customer ,tgl:'.Carbon::now(),
             'id' => $header->id,
             'href' => route('order.notifnewpo'),
             'mail' => [
@@ -680,11 +681,11 @@ class OrderController extends Controller
         }
         if(isset($request->tglaw) )
         {
-          $header =$header->where('tgl_order','>=',$request->tglaw);
+          $header =$header->wheredate('tgl_order','>=',$request->tglaw);
         }
         if(isset($request->tglak) )
         {
-          $header =$header->where('tgl_order','<=',$request->tglak);
+          $header =$header->wheredate('tgl_order','<=',$request->tglak);
         }
         if(isset($id))
         {
@@ -693,9 +694,10 @@ class OrderController extends Controller
         $header =$header->select('c.customer_name','sh.customer_po', DB::raw('date_format(tgl_order,"%d-%b-%Y %H:%i:%s") as tgl_order')
                            , 'sh.oracle_ship_to','sh.currency', 'sh.oracle_bill_to',DB::raw('"ENT" as ent')
                            ,DB::raw('"*NB" as nb'),'sh.id', 'ot.name as transaction_name','ql.name as price_name', 'c.customer_number','sh.warehouse','sh.notrx'
-                         )
-                 ->get();
-      
+                         );
+
+        $header =$header->get();
+
         //$header=$header->toArray();
         //$data= json_decode( json_encode($header), true);
         //$i=0;            //  dd($header->toArray());
@@ -741,17 +743,17 @@ class OrderController extends Controller
                 //$sheet->row($i,json_decode( json_encode($h), true));
                 //$sheet->appendRow(json_decode( json_encode($h), true));
                 $sheet->appendRow(array($h->customer_name,$h->customer_number,$h->transaction_name,$h->customer_po,$h->tgl_order
-                                  ,$h->price_name,$h->oracle_ship_to,config('constant.def_salesperson'),'','',$h->currency,$h->oracle_bill_to
+                                  ,$h->price_name,$h->oracle_ship_to,'','','',$h->currency,$h->oracle_bill_to
                                   ,'','','ENT','','',$warehouse,'*NB'));
                 $line = DB::table('so_lines as sl')
                       ->join('products as p','sl.product_id','=','p.id')
                       ->where([
                         ['sl.header_id','=',$h->id]
-                      ])->select('p.itemcode',DB::raw('sl.qty_confirm/sl.conversion_qty as qty_confirm'),'sl.uom','sl.line_id')
+                      ])->select('p.itemcode',DB::raw('sl.qty_confirm as qty_confirm'),'sl.uom_primary','sl.line_id')
                       ->get();
                 foreach($line as $l)
                 {
-                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom,'','','','',$h->tgl_order,'','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
+                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom_primary,'','','','',$h->tgl_order,'','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
 
                 }
                 $sheet->appendRow(array('*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*PB','*IR'));
@@ -844,8 +846,38 @@ class OrderController extends Controller
       ]);
       if($request->btnterima == "confirm")
       {
-          $updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
-                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);
+          /*$updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
+                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);*/
+          $nosj=$request->nosj;
+          $soheaders = SoHeader::whereExists(function ($query) use($nosj){
+                $query->select(DB::raw(1))
+                      ->from('so_shipping as ss')
+                      ->whereRaw("ss.header_id = so_headers.id  and ss.deliveryno = '".$nosj."'");
+            })->get();
+            //dd($soheaders);
+            foreach($soheaders as $sh)
+            {
+                $content ='SJ #'.$nosj.' telah selesai diantar oleh '.Auth::user()->name.' pada tanggal:'.Carbon::now();
+                $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                $data = [
+                 'title' => 'Konfirmasi Pengiriman oleh Kurir',
+                 'message' => 'SJ #'.$nosj.' telah selesai dikirim.',
+                 'id' => $sh->id,
+                 'href' => route('order.notifnewpo'),
+                 'mail' => [
+                   'greeting'=>'Konfirmasi Pengiriman #'.$sh->notrx.' oleh Kurir',
+                   'content' =>$content,
+                 ]
+               ];
+               $users = User::where('customer_id','=',$sh->distributor_id)->get();
+               foreach($users as $u)
+               {
+                $data['email']= $u->email;
+                 $u->notify(new PushNotif($data));
+               }
+            }
+
+
           return redirect()->route('order.shippingSO')->withMessage(trans('pesan.update'));
       }else return redirect()->back();
 
@@ -865,12 +897,16 @@ class OrderController extends Controller
         return view('admin.report.order',compact('provinces','request','channels'));
       }else{
         //echo ("tglaw:".$request->tglaw."tgl_akhir:".$request->tglak);
+        $namapropinsi=null;
+        $nmchannel=null;
         $datalist = DB::table('so_header_v as sh')
                     ->join('customers as c','sh.customer_id','c.id')
                     ->leftjoin('subgroup_datacenters as sdc','c.subgroup_dc_id','sdc.id')
                     ->leftjoin('group_datacenters as gdc','sdc.group_id','gdc.id')
-                    ->where('sh.tgl_order','>=',$request->tglaw)
-                    ->where('sh.tgl_order','<=',$request->tglak)
+                    ->leftjoin('so_lines_v as sl','sh.id','sl.header_id')
+                    ->leftjoin('so_shipping as ss','sl.line_id','ss.line_id')
+                    ->wheredate('sh.tgl_order','>=',$request->tglaw)
+                    ->wheredate('sh.tgl_order','<=',$request->tglak)
                     ->select('sh.notrx','sh.customer_name','sh.tgl_order','sh.distributor_name','ship_to_addr as alamat','status_name'
                               , DB::raw("case
                                         		when c.psc_flag='1' and c.pharma_flag='1' then 'PSC/PHARMA'
@@ -879,8 +915,12 @@ class OrderController extends Controller
                                         	end as divisi")
                               , DB::raw("concat(gdc.display_name,'-',sdc.display_name) as channel")
                               , 'sh.tgl_approve','sh.id'
+                              , 'sl.line_id','sl.product_id', 'sl.title','sl.amount'
+                              ,'sl.qty_request_primary',DB::raw("sl.unit_price/sl.conversion_qty as unit_price_primary")
+                              , DB::raw("sum(ss.qty_shipping) as qty_shipping")
+                              ,'ss.deliveryno','ss.tgl_terima','ss.tgl_kirim'
                             );
-          //dd($datalist->get())     ;
+
           if(isset($request->dist_id))
           {
             $datalist=$datalist->where('sh.distributor_id','=',$request->dist_id);
@@ -905,21 +945,42 @@ class OrderController extends Controller
           if($request->channel)
           {
             $datalist=$datalist->where('subgroup_dc_id','=',$request->channel);
+            $nmchannel=DB::table('subgroup_datacenters as sdc')
+                      ->join('group_datacenters as gd','sdc.group_id','gd.id')
+                      ->select(DB::raw("concat(gd.display_name,'-',sdc.display_name) as channel"))
+                      ->where('sdc.id','=',$request->channel)
+                      ->first();
+            $nmchannel = $nmchannel->channel;
           }
 
           if(isset($request->propinsi))
           {
             $datalist=$datalist->where('sh.province_id','=',$request->propinsi);
+            $namapropinsi = DB::table('provinces')->where('id','=',$request->propinsi)->first();
+            $namapropinsi = $namapropinsi->name;
           }
-
+          //dd($datalist->get())     ;
+          $datalist =$datalist->groupBy('notrx', 'customer_name', 'tgl_order', 'distributor_name', 'alamat', 'status_name', 'divisi', 'channel', 'tgl_approve'
+	, 'id', 'line_id', 'product_id', 'title', 'amount', 'qty_request_primary', 'unit_price_primary', 'deliveryno', 'tgl_terima', 'tgl_kirim');
           $datalist =$datalist->get();
-          foreach($datalist as $d)
+
+          /*foreach($datalist as $d)
           {
             $lines = DB::table('so_lines_v')
                   ->where('header_id','=',$d->id)
                   ->get();
             $d->lines = $lines;
-          }
+            foreach($lines as $l)
+            {
+              $shippings = DB::table('so_shipping')
+                ->where('header_id','=',$l->header_id)
+                ->where('line_id','=',$l->line_id)
+                ->select('tgl_kirim','deliveryno','tgl_terima','qty_shipping','qty_accept','keterangan')
+                ->orderBy('tgl_kirim')
+                ->get();
+              $l->shippings=$shippings;
+            }
+          }*/
 
           //dd($datalist);
 
@@ -928,12 +989,12 @@ class OrderController extends Controller
                     ->setTitle('Order'.Carbon::now())->sheet('Order');
 
         $template =$template->export('xls');*/
-        Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request) {
-            $excel->sheet('order', function($sheet) use($datalist,$request) {
-                $sheet->loadView('admin.report.orderview',array('datalist'=>$datalist,'request'=>$request));
+        Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request,$namapropinsi,$nmchannel) {
+            $excel->sheet('order', function($sheet) use($datalist,$request,$namapropinsi,$nmchannel) {
+                $sheet->loadView('admin.report.orderview',array('datalist'=>$datalist,'request'=>$request,'namapropinsi'=>$namapropinsi,'nmchannel'=>$nmchannel));
             });
-
         })->export('xlsx');
+
       }
     }
 

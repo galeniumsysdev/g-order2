@@ -86,6 +86,20 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
+                          <label for="note">Note</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">{!! nl2br($dpl['note']) !!}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
                           <label for="dpl-no">No. DPL</label>
                         </div>
                       </div>

@@ -50,7 +50,16 @@ class ExcelController extends Controller
         {
           $customer = $customer->whereraw("upper(cs.city) like upper('".$request->city."')");
         }
-
+		
+		//---//
+		if($request->subgroupdc)
+        {
+          $customer = $customer->whereIn('subgroup_dc_id',$request->subgroupdc);
+        }
+        if($request->province)
+        {
+          $customer = $customer->whereraw("upper(cs.province) like upper('".$request->province."')");
+        }
 
     	$customer = $customer->select('c.id','c.customer_name','cs.province','cs.city','c.longitude','c.langitude','c.created_at','c.Status','c.psc_flag','c.pharma_flag','c.subgroup_dc_id','sd.name as subgroup_name');
     	$customer = $customer->get();

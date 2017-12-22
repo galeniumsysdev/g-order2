@@ -24,10 +24,10 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-      if(Auth::user()->can('Create PO'))
+      /*if(Auth::user()->can('Create PO'))
       {
         return redirect()->route('product.index');
-      }
+      }*/
         $request->status_read="0";
         $notifications = Auth::User()->notifications()->whereNull('read_at')->get();
         $group = array_column(Auth::User()->notifications()->get()->pluck('data')->toArray(),'tipe');

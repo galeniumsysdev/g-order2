@@ -395,14 +395,15 @@
                                   </thead>
                                   <tbody>
                                     @foreach($lines as $newdelivery)
-                                    @if(floatval($newdelivery->qty_shipping_primary) < floatval($newdelivery->qty_confirm_primary)
-                                      or floatval($newdelivery->qty_accept_primary) < floatval($newdelivery->qty_request_primary))
+                                    @if((floatval($newdelivery->qty_shipping_primary) < floatval($newdelivery->qty_confirm_primary) and Auth::user()->customer_id ==$header->distributor_id)
+                                      or (floatval($newdelivery->qty_accept_primary) < floatval($newdelivery->qty_request_primary) and Auth::user()->customer_id ==$header->customer_id)
+                                       )
                                     <tr>
                                       <td>{{$newdelivery->title}}</td>
                                       <td style="text-align:center">{{$newdelivery->uom_primary}}</td>
                                       <td style="text-align:center">
                                         @if(Auth::user()->customer_id ==$header->distributor_id)
-                                          <input type="number" name="qtyshipping[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm - floatval($newdelivery->qty_shipping)}}" class="form-control input-sm">
+                                          <input type="number" name="qtyshipping[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_shipping_primary)}}" class="form-control input-sm">
                                         @else
                                           0
                                         @endif

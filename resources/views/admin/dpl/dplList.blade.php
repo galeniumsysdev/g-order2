@@ -5,6 +5,7 @@
 -->
 @extends('layouts.navbar_product')
 @section('content')
+  <link href="{{ asset('font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
   <link href="{{ asset('css/table.css') }}" rel="stylesheet">
   <link href="{{ asset('css/dpl.css') }}" rel="stylesheet">
   @if($status= Session::get('msg'))
@@ -24,6 +25,7 @@
                 <thead>
                   <tr>
                     <th>Suggest No.</th>
+                    <th></th>
                     <th>No. Trx</th>
                     <th>Last Approver</th>
                     <th>DPL No.</th>
@@ -41,6 +43,11 @@
                         <a href="{{ route('dpl.discountView',$list->suggest_no) }}">{{ $list->suggest_no }}</a>
                       @else
                         {{ $list->suggest_no }}
+                      @endif
+                    </td>
+                    <td class="text-center">
+                      @if($list->notrx)
+                        <a href="{{ route('dpl.dplHistory',$list->suggest_no) }}"><i class="fa fa-history" aria-hidden="true"></i></a>
                       @endif
                     </td>
                     <td>

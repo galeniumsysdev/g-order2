@@ -8,7 +8,7 @@
 @endif
 <form action="{{route('CategoryProduct.update',$category->id)}}" method="post" role="form">
   {{method_field('PATCH')}}
-  {{csrf_field()}}
+  {{csrf_field()}}  
        <div class="form-group">
          <label for="name">Kode</label>
          <input type="text" class="form-control" name="code" id="" placeholder="Kode Kategori Product" value="{{ old('code')?old('code'):$category->flex_value }}">
