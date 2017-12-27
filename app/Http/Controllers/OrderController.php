@@ -588,7 +588,7 @@ class OrderController extends Controller
                     ,['qty_accept'=>$qty,'product_id'=>$soline->product_id
                       ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
                       ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
-                      ,'tgl_terima'=>Carbon::now()
+                      ,'tgl_terima'=>Carbon::now(), 'keterangan'=>$request->note
                      ]
                   )  ;
 
@@ -597,9 +597,11 @@ class OrderController extends Controller
               $insshipping =SoShipping::updateorCreate(
                 ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno]
                   ,['qty_accept'=>$request->qtyreceive[$soline->line_id],'product_id'=>$soline->product_id
+                  ,'qty_shipping'=>DB::raw("if(qty_shipping is null,null,".$request->qtyreceive[$soline->line_id].")")
+                  ,'qty_backorder'=>DB::raw("coalesce(qty_shipping-".$request->qtyreceive[$soline->line_id].",null)")
                   ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
                   ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
-                  ,'tgl_terima'=>Carbon::now()
+                  ,'tgl_terima'=>Carbon::now(), 'keterangan'=>$request->note
                  ]
               )  ;
             }
