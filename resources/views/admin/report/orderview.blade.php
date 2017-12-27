@@ -26,7 +26,21 @@
   @if(isset($request->channel))
   <tr>
     <td>Channel</td>
-    <td>{{$nmchannel}}</td>
+    <td>{{$request->channel}}</td>
+  </tr>
+  @endif
+  @if($request->divisi)
+  <tr>
+    <td>Divisi</td>
+    <td>{{$request->divisi}}
+      @if($request->psc_flag=="1" and $request->pharma_flag=="1")
+        PSC/PHARMA
+      @elseif($request->psc_flag=="1")
+        PSC
+      @elseif($request->pharma_flag=="1")
+        PHARMA
+      @endif
+    </td>
   </tr>
   @endif
 </table>

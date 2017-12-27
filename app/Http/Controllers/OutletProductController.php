@@ -226,6 +226,9 @@ class OutletProductController extends Controller
     else{
       $header = Product::select('products.satuan_primary as unit','products.id as p_id','title',DB::raw('sum(qty) as product_qty'))
                               ->leftjoin('outlet_stock as os','os.product_id','products.id')
+                              ->join('category_products as cp','cp.product_id','products.id')
+                              ->join('categories as c','c.flex_value','cp.flex_value')
+                              ->where('c.parent','PHARMA')
                               ->where('products.id',$product_id)
                               ->where('os.outlet_id',Auth::user()->customer_id)
                               ->groupBy('unit','p_id','title')
@@ -345,6 +348,9 @@ class OutletProductController extends Controller
 
     $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date')
                         ->leftjoin('products','products.id','outlet_stock.product_id')
+                        ->join('category_products as cp','cp.product_id','products.id')
+                        ->join('categories as c','c.flex_value','cp.flex_value')
+                        ->where('c.parent','PHARMA')
                         ->where('products.Enabled_Flag','Y')
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
                         ->union($stockOutlet)
@@ -424,13 +430,13 @@ class OutletProductController extends Controller
               $sheet->mergeCells('B3:B4');
               $sheet->mergeCells('C3:C4');
 
-              $stockOutlet = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.product_id','outlet.customer_name as outlet_name')
+              $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                                  ->groupby('os_id','title','product_id','outlet_name');
+                                  ->groupby('title','product_id','outlet_name');
 
               if($data['outlet_name'])
                 $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
@@ -441,13 +447,16 @@ class OutletProductController extends Controller
               if($data['area'])
                 $stockOutlet = $stockOutlet->where('city',$data['area']);
 
-              $stockAll = OutletStock::select('outlet_stock.id as os_id','title','outlet_stock.product_id','outlet.customer_name as outlet_name')
+              $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name')
                                   ->join('products','products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
+                                  ->join('category_products as cp','cp.product_id','products.id')
+                                  ->join('categories as c','c.flex_value','cp.flex_value')
+                                  ->where('c.parent','PHARMA')
                                   ->where('products.Enabled_Flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                                  ->groupby('os_id','title','product_id','outlet_name');
+                                  ->groupby('title','product_id','outlet_name');
 
               if($data['outlet_name'])
                 $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
