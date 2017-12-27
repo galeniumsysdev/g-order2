@@ -156,7 +156,7 @@
                           @endif
 
                 					<th style="width:15%" class="text-center">@lang('shop.AmountPO')</th>
-                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) ))
+                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) )
                             <th style="width:20%" class="text-center">@lang('shop.amountreceive')</th>
                           @endif
                 				</tr>
@@ -218,11 +218,11 @@
                                      )
                                     {{number_format($line->qty_accept_primary,2)}}
                                   @elseif($header->status == 0 )
-                                    <input type="number" name="qtyreceive[{{$id}}]" value="{{(float)$line->qty_request_primary}}" class="form-control">
+                                    <input type="number" name="qtyreceive[{{$id}}]" value="{{(float)$line->qty_request_primary}}" min="0" class="form-control">
                                   @elseif($header->status==1)
-                                    <input type="number" name="qtyreceive[{{$id}}]" value="{{(float)$line->qty_confirm_primary}}" class="form-control">
+                                    <input type="number" name="qtyreceive[{{$id}}]" value="{{(float)$line->qty_confirm_primary}}" min="0" class="form-control">
                                   @elseif($header->status==3)
-                                    <input type="number" name="qtyreceive[{{$id}}]" value="{{(float)$line->qty_shipping_primary}}" class="form-control">
+                                    <input type="number" name="qtyreceive[{{$id}}]" value="{{(float)$line->qty_shipping_primary}}" min="0" class="form-control">
                                   @endif
                                 </td>
                               @endif
@@ -231,7 +231,7 @@
                 					<td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
                             {{number_format($line->amount_confirm,2)}}
                           </td>
-                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) ))
+                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) )
                             <td data-th="@lang('shop.amountreceive')" class="xs-only-text-left text-right">
                               {{number_format($line->amount_accept,2)}}
                             </td>
@@ -266,7 +266,7 @@
                 					<td colspan="{{$colgab}}" class="hidden-xs text-right">@lang('shop.AmountPO') </td>
                 					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">@lang('shop.AmountPO'):</label>
                             {{ $curr." ".number_format($header->amount_confirm,2) }}</strong></td>
-                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) ))
+                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) )
                           <td class="text-right xs-only-text-center hidden-xs"><strong id="totprice2">
                             <label class="visible-xs-inline">SubTotal Terima/Kirim:</label>
                             {{ $curr." ".number_format($header->amount_accept,2) }}</strong>
@@ -278,7 +278,7 @@
                 					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">@lang('shop.Tax'):</label>
                             {{ $curr." ".number_format($header->tax_amount,2) }}</strong>
                           </td>
-                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) ))
+                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) )
                           <td class="text-right xs-only-text-center hidden-xs"><strong id="totprice2">
                             <label class="visible-xs-inline">@lang('shop.Tax') Terima/Kirim:</label>
                             @if($header->tax_amount==0)
@@ -296,7 +296,7 @@
                 					<td class="text-right xs-only-text-center"><strong id="totprice2"><label class="visible-xs-inline">@lang('shop.Total'):</label>
                             {{ $curr." ".number_format(($header->amount_confirm+$header->tax_amount),2) }}</strong>
                           </td>
-                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) ))
+                          @if($header->status>1 and ($header->qty_accept!=0 and $header->qty_accept<$header->qty_request) or ($header->qty_shipping!=0 and $header->qty_shipping<$header->qty_confirm) )
                           <td class="text-right xs-only-text-center hidden-xs"><strong id="totprice2">
                             <label class="visible-xs-inline">@lang('shop.Total') Terima/Kirim:</label>
                             {{ $curr." ".number_format($header->amount_accept+$taxkirim,2) }}
@@ -360,7 +360,9 @@
                               <h6 class="panel-title kirim-panel">
                                 Delivery No:<a data-toggle="collapse" data-parent="#accordion" href="#{{$key}}">{{$key}}</a>
                                 <input type="hidden" name="deliveryno" value="{{$key}}">
+                                @if($delivery->first()->tgl_kirim)
                                 <p class="pull-right">Date: {{$delivery->first()->tgl_kirim}}</p>
+                                @endif
                               </h6>
                             </div>
                             @if(Auth::user()->customer_id==$header->customer_id and $delivery->sum('qty_accept')==0)
@@ -376,6 +378,7 @@
                                       <th style="width:10%;" class="text-center">@lang('shop.uom')</th>
                                       <th style="width:10%;" class="text-center">@lang('shop.qtyship')</th>
                                       <th style="width:10%;" class="text-center">@lang('shop.qtyreceive')</th>
+                                      <th style="width:10%;" class="text-center">@lang('shop.qtybackorder')</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -386,17 +389,29 @@
                                       <td style="text-align:center">{{(float)$detail->qty_shipping}}</td>
                                       <td style="text-align:center">
                                         @if(Auth::user()->customer_id==$header->customer_id and is_null($detail->qty_accept))
-                                          <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}][{{$detail->id}}]">
+                                          <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}][{{$detail->id}}]" min="0">
                                         @else
                                           {{(float)$detail->qty_accept}}
                                         @endif
+                                      </td>
+                                      <td style="text-align:center">
+                                        {{(float)$detail->qty_backorder}}
                                       </td>
                                     </tr>
                                     @endforeach
                                   </tbody>
                                 </table>
-
-                                @if(Auth::user()->customer_id==$header->customer_id and $delivery->sum('qty_accept')==0)
+                                @if($delivery->first()->keterangan)
+                                <div class="col-md-2 form-label">
+                                    <label for="note">Note</label>
+                                </div>
+                                <div class="col-md-10">
+                                  <span class="default-value">
+                                    {{ Form::textarea('note',$delivery->first()->keterangan,array('class'=>'form-control','rows'=>3,'readonly'=>'readonly')) }}
+                                  </span>
+                                </div>
+                                @endif
+                                @if(Auth::user()->customer_id==$header->customer_id and $delivery->sum('qty_accept')==0 and is_null($delivery->first()->tgl_terima))
                                 <div class="col-md-2 form-label">
                                     <label for="note">Note</label>
                                 </div>
@@ -453,7 +468,7 @@
                                       <td style="text-align:center">{{$newdelivery->uom_primary}}</td>
                                       <td style="text-align:center">
                                         @if(Auth::user()->customer_id ==$header->distributor_id)
-                                          <input type="number" name="qtyshipping[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_shipping_primary)}}" class="form-control input-sm">
+                                          <input type="number" name="qtyshipping[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_shipping_primary)}}" min="0" class="form-control input-sm">
                                         @else
                                           0
                                         @endif
@@ -462,11 +477,11 @@
                                       <td style="text-align:center">
                                         @if(Auth::user()->customer_id ==$header->customer_id)
                                           @if(is_null($newdelivery->qty_confirm_primary))
-                                            <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_request_primary - floatval($newdelivery->qty_accept_primary)}}" class="form-control input-sm">
+                                            <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_request_primary - floatval($newdelivery->qty_accept_primary)}}" min="0" class="form-control input-sm">
                                           @elseif(is_null($newdelivery->qty_shipping_primary))
-                                            <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_accept_primary)}}" class="form-control input-sm">
+                                            <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_accept_primary)}}" min="0" class="form-control input-sm">
                                           @elseif($newdelivery->qty_shipping_primary<$newdelivery->qty_confirm_primary)
-                                            <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_shipping_primary)}}" class="form-control input-sm">
+                                            <input type="number" name="qtyreceive[{{$newdelivery->line_id}}]" value="{{(float)$newdelivery->qty_confirm_primary - floatval($newdelivery->qty_shipping_primary)}}" min="0" class="form-control input-sm">
                                           @endif
                                         @endif
 

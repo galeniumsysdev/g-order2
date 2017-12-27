@@ -109,21 +109,28 @@ class ProductController extends Controller
   public function updatePareto(Request $request)
   {
 
-  /*  if($request->isMethod('post'))
-    {*/
+    DB::beginTransaction();
+    try{
       $product=Product::where('id','=',$request->idpareto)->update(['pareto'=>1]);
+      DB::commit();
       return redirect()->route('product.pareto')->withMessage('Product Updated');
-    /*}elseif($request->isMethod('DELETE')){
-      $product=Product::where('id','=',$id)->update(['pareto'=>0]);
-      return redirect()->route('product.pareto')->withMessage('Product Removed');
-    }*/
-
+    }catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    }
 
   }
   public function destroyPareto($id)
   {
-    $product=Product::where('id','=',$id)->update(['pareto'=>0]);
-    return redirect()->route('product.pareto')->withMessage('Product removed from pareto products');
+    DB::beginTransaction();
+    try{
+      $product=Product::where('id','=',$id)->update(['pareto'=>0]);
+      DB::commit();
+      return redirect()->route('product.pareto')->withMessage('Product removed from pareto products');
+    }catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    }
   }
 
   public function getSqlProduct()
@@ -297,15 +304,7 @@ class ProductController extends Controller
   {
     $perPage = 12; // Item per page
     $currentPage = Input::get('page') - 1;
-  //  $oldDisttributor = $this->getDistributor();
 
-/*    if(!is_null($oldDisttributor))
-    {
-      if(!is_array($oldDisttributor))
-      {
-        return view('shop.sites',['distributors' => $oldDisttributor]);
-      }
-    }*/
     $sqlproduct = $this->getSqlProduct();
 
     if(isset($request->search_product))
@@ -422,6 +421,8 @@ class ProductController extends Controller
 
   public function update(Request $request,$id)
   {
+    DB::beginTransaction();
+    try{
     $product=Product::find($id);
     $image = $request->file('input_img');
     $this->validate($request, [
@@ -473,7 +474,11 @@ class ProductController extends Controller
       $product->categories()->attach($request->category);
       //$product->categories()->sync([$request->category]);
     }
-
+    DB::commit();
+  }catch (\Exception $e) {
+    DB::rollback();
+    throw $e;
+  }
 
 
     return redirect()->route('product.master',$id)->withMessage('Product Updated');
@@ -715,7 +720,8 @@ class ProductController extends Controller
         }
         $statusso = -99;
       }
-
+      DB::beginTransaction();
+      try {
       //dd($check_dpl);
       /*if(!Session::has('distributor_to'))
       {
@@ -956,7 +962,7 @@ class ProductController extends Controller
     					'href' => route('dpl.readNotifApproval'),
     					'mail' => [
     						'greeting'=>'create order',
-    						'content'=> 'test create order'
+    						'content'=> 'Pengajuan DPL #'.$request->coupon_no,
     					]
     				];
     				foreach ($notified_users as $key => $email) {
@@ -995,8 +1001,14 @@ class ProductController extends Controller
 
         Mail::to(Auth::user())->send(new CreateNewPo($header));
       }
-
-
+    } catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    } catch (\Throwable $e) {
+        DB::rollback();
+        throw $e;
+    }
+    DB::commit();
       //foreach($distributor->users as $u)
       //{
 

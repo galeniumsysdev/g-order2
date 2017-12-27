@@ -21,6 +21,7 @@ return [
     'qtyavailable' => 'Qty Available',
     'qtyship' => 'Qty Shipping',
     'qtyreceive' => 'Qty Receive',
+    'qtybackorder' => 'Qty Retur',
     'AmountPO' => 'Amount PO',
     'SubTotal' => 'Subtotal',
     'ContinueShopping' => 'Continue Shopping',

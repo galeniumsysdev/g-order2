@@ -314,5 +314,12 @@
 <script src="{{ asset('js/customlang.js') }}"></script>
 <script src="{{ asset('js/index.js') }}"></script>
 @yield('js')
+<script>
+$(".form-horizontal").submit(function() {
+        $('#loader').show();
+        $("#myDiv").hide();
+        return true;
+    });
+</script>
 </body>
 </html>

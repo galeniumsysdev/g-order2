@@ -205,6 +205,8 @@ class OrderController extends Controller
         return view('errors.403');
       }
       //dd('test');
+      DB::beginTransaction();
+      try{
       if($request->approve=="approve")
       {
         $solines = DB::table('so_lines')->where('header_id','=',$request->header_id)->get();
@@ -305,6 +307,7 @@ class OrderController extends Controller
         					}
         				}
         			}
+              DB::commit();
               return redirect()->route('order.listSO')->withMessage('Qty Konfirmasi tidak full 1 SO. PO menunggu konfirmasi principal Galenium kembali');
             }
         }
@@ -341,7 +344,7 @@ class OrderController extends Controller
       //  $header->status=1;
         $header->tgl_approve=Carbon::now();
         $header->save();
-
+        DB::commit();
         //$this->createExcel(null,$h->id);
         return redirect()->route('order.listSO')->withMessage(trans('pesan.approveSO_msg',['notrx'=>$header->notrx]));
       }elseif($request->approve=="reject"){
@@ -372,6 +375,7 @@ class OrderController extends Controller
               }
             }
           }
+          DB::commit();
           return redirect()->route('order.listSO')->withMessage('PO '.$header->customer_po.' ditolak.');
         }else{
           $update = DB::table('so_lines')
@@ -401,7 +405,7 @@ class OrderController extends Controller
             //event(new PusherBroadcaster($data, $u->email));
             $u->notify(new PushNotif($data));
           }
-
+          DB::commit();
           return redirect()->route('order.listSO')->withMessage(trans('pesan.rejectSO_msg',['notrx'=>$header->notrx]));
         }
       }elseif($request->kirim=="kirim"){
@@ -487,6 +491,7 @@ class OrderController extends Controller
             $u->notify(new PushNotif($data));
           }
           $header->save();
+          DB::commit();
           return redirect()->route('order.listSO')->withMessage(trans('pesan.sendSO_msg',['notrx'=>$header->notrx]));
         }else{
           return view('errors.403');
@@ -496,6 +501,10 @@ class OrderController extends Controller
           $this->createExcel($request, $request->header_id);
         //  return redirect()->route('order.listPO');
       }
+    }catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    }
     }
 
     public function readnotifnewpo($id,$notifid)
@@ -508,7 +517,9 @@ class OrderController extends Controller
 
     public function batalPO(Request $request) /*untuk membatalkan PO atau receive item*/
     {
-
+      DB::beginTransaction();
+      DB::enableQueryLog();
+      try{
       if($request->batal=="batal"){
         $header = SoHeader::where([
           ['id','=',$request->header_id],
@@ -543,6 +554,7 @@ class OrderController extends Controller
             $u->notify(new PushNotif($data));
           }
           $header->save();
+          DB::commit();
           return redirect()->route('order.listPO')->withMessage(trans('pesan.cancelPO_msg',['notrx'=>$header->notrx]));
         }else{
           return redirect()->route('order.checkPO',$request->header_id)->withMessage(trans('pesan.cantcancelPO',['notrx'=>$header->notrx]));
@@ -586,12 +598,14 @@ class OrderController extends Controller
                   $insshipping =SoShipping::updateorCreate(
                     ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno,'id'=>$key]
                     ,['qty_accept'=>$qty,'product_id'=>$soline->product_id
+                      ,'qty_backorder'=>DB::raw("coalesce(qty_shipping-".$qty.",null)")
+                      ,'qty_shipping'=>DB::raw("if(qty_shipping is null,null,".$qty.")")
                       ,'uom'=>$soline->uom,'qty_request'=>$soline->qty_request,'qty_request_primary'=>$soline->qty_request_primary
                       ,'uom_primary'=>$soline->uom_primary,'conversion_qty'=>$soline->conversion_qty
                       ,'tgl_terima'=>Carbon::now(), 'keterangan'=>$request->note
                      ]
                   )  ;
-
+                  //dd(DB::getQueryLog());
               }
             }else{
               $insshipping =SoShipping::updateorCreate(
@@ -605,7 +619,7 @@ class OrderController extends Controller
                  ]
               )  ;
             }
-
+              $soline->qty_shipping = $soline->shippings->sum('qty_shipping');
               $soline->qty_accept = $soline->shippings->sum('qty_accept');
               $soline->save();
               //$qtyterima=$soline->qty_accept+$request->qtyreceive[$soline->line_id];
@@ -632,7 +646,7 @@ class OrderController extends Controller
           }else{ $header->status = 2;}
           $header->save();
           $dist=Customer::where('id','=',$header->distributor_id)->first();
-          $content = 'Pesanan Anda dengan PO nomor: <strong>'.$header->customer_po.'</strong> dan SJ: '.$request->deliveryno.' telah diterime customer pada tanggal: '.Carbon::now().'.<br>';
+          $content = 'Pesanan Anda dengan PO nomor: <strong>'.$header->customer_po.'</strong> dan SJ: '.$request->deliveryno.' telah diterima customer pada tanggal: '.Carbon::now().'.<br>';
           $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
           $data=[
             'title' => 'PO diterima customer',
@@ -651,13 +665,16 @@ class OrderController extends Controller
             //event(new PusherBroadcaster($data, $d->email));
             $d->notify(new PushNotif($data));
           }
-
+          DB::commit();
           return redirect()->route('order.listPO')->withMessage(trans('pesan.receivePO_msg',['notrx'=>$header->notrx]));
         }else{
           return redirect()->route('order.checkPO',$request->header_id)->withMessage(trans('pesan.cantreceivePO',['notrx'=>$header->notrx]));
         }
       }
-
+    }catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    }
     }
 
     public function createExcel(Request $request,$id)
