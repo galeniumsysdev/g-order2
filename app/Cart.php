@@ -13,7 +13,6 @@ class Cart
   public $totalTax = 0;
   public $totalDiscount = 0;
   public $totalAmount = 0;
-  public $tipe=null;
 
 
   public function __construct($oldCart)
@@ -29,7 +28,7 @@ class Cart
   }
 
   public function add($item,$id,$qty,$uom,$price,$disc){
-      $storedItem = ['qty'=>0, 'uom'=>'', 'price'=>$price,'disc'=>$disc, 'amount'=>0, 'item'=>$item];
+      $storedItem = ['qty'=>0, 'uom'=>'', 'price'=>$price,'disc'=>$disc, 'amount'=>0, 'item'=>$item,'jns'=>null];
       if ($this->items){//jika ada array
         if(array_key_exists($id.'-'.$uom, $this->items)){
           $storedItem = $this->items[$id.'-'.$uom];
@@ -40,6 +39,7 @@ class Cart
         $storedItem['uom']= $uom;
         $storedItem['price']=$price;
         $storedItem['disc']=$price-$disc;
+        $storedItem['jns']=$item->jns;
         $storedItem['amount']=$price* $storedItem['qty'];
         $this->items[$id.'-'.$uom] = $storedItem;
         $this->totalQty++;
@@ -106,6 +106,6 @@ class Cart
         }
       }
   }
-
+  
 
 }

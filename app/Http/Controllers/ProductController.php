@@ -69,7 +69,7 @@ class ProductController extends Controller
                   ],200);
   }
 
-  public function getDistributor()
+  /*public function getDistributor()
   {
     if(isset(Auth::user()->customer_id)){
       $customer = Customer::find(Auth::user()->customer_id);
@@ -98,7 +98,31 @@ class ProductController extends Controller
         }
       }
     }
+  }*/
+
+  public function getDistributor($jns)
+  {    
+    $dist = Auth::user()->customer->hasDistributor()->whereRaw("ifnull(inactive,0)!=1")->get();
+
+    if(in_array('PHARMA',$jns))
+    {
+      $dist=$dist->where('pharma_flag','=','1');
+    }
+    if(in_array('PSC',$jns))
+    {
+      $dist=$dist->where('psc_flag','=','1');
+    }
+    if(in_array('INTERNATIONAL',$jns))
+    {
+      $dist=$dist->where('export_flag','=','1');
+    }
+    if(in_array('TollIn',$jns))
+    {
+      $dist=$dist->where('tollin_flag','=','1');
+    }
+    return $dist;
   }
+
   public function getAjaxProduct(Request $request)
   {
     $products =Product::where([['enabled_flag','=','Y'],['title','like',$request->input('query')."%"]]);
@@ -497,12 +521,13 @@ class ProductController extends Controller
         $this->getDistributor();
         dd($oldDisttributor);
       }*/
-      $dist = Auth::user()->customer->hasDistributor;
+
 
       $oldCart = Session::get('cart');
       $cart =  new Cart($oldCart);
 
-      //dd($alamat);
+      $jns = array_unique(array_pluck($cart->items,'jns'));
+      $dist=$this->getDistributor($jns);
       return view('shop.shopping-cart',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'distributor'=>$dist]);
     }
 
@@ -559,6 +584,7 @@ class ProductController extends Controller
         $product = Product::where('id','=',$id)->select('id','title','imagePath','satuan_primary','satuan_secondary','inventory_item_id')->first();
         $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$id)->select('uom_code')->get();
         $product->uom=$uom;
+        $product->jns=$product->categories()->first()->parent;
         $oldCart = Session::has('cart')?Session::get('cart'):null;
         if(!is_null($oldCart))
         { /*check product barang yang sama ada di keranjang belanja*/
@@ -568,12 +594,28 @@ class ProductController extends Controller
                             'totline' => $oldCart->totalQty,
                           ],200);
           }
-        }
+
+          if(!in_array($product->jns,$oldCart->items))
+          {
+            $jns = array_unique(array_pluck($oldCart->items,'jns'));
+            array_push($jns,$product->jns);
+            if($this->getDistributor($jns)->count()==0)
+            {
+              return response()->json([
+                              'result' => 'errdist',
+                              'jns'=>implode(",",$jns)
+                            ],200);
+            }
+
+          }
+        }/*else{
+          $headerpo = PoDraftHeader::firstorCreate(
+                                ['customer_id'=>Auth::user()->customer_id]
+                              );
+        }*/
         $cart = new Cart($oldCart);
         $cart->add($product,$id,$request->qty,$request->satuan,floatval($request->hrg),floatval($request->disc) );
-        /*$headerpo = PoDraftHeader::firstorCreate(
-                              ['customer_id'=>Auth::user()->customer_id]
-                            );
+        /*
         $linepo  = PoDraftLine::where(
                     [['po_header_id','=',$headerpo->id],['product_id','=',$product->id],['uom','=',$request->satuan]])->first();
         if($linepo)

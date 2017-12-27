@@ -132,8 +132,8 @@
 						   <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">NOO &nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                             <ul class="dropdown-menu">
-								<li><a href="{{ route('customer.listNoo') }}"><strong>List NOO</strong></a></li>
-								<li><a href="{{ route('customer.reportNoo') }}"><strong>Report NOO</strong></a></li>
+								<li><a href="{{ route('customer.listNoo') }}">List NOO</a></li>
+								<li><a href="{{ route('customer.reportNoo') }}">Report NOO</a></li>
                             </ul>
                           </li>
                           @endif
