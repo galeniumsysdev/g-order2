@@ -360,6 +360,7 @@ Route::get('/outlet/product/import/stock','OutletProductController@importProduct
 Route::post('/outlet/product/import/stock/view','OutletProductController@importProductStockView')->name('outlet.importProductStockView');
 Route::post('/outlet/product/import/stock/process','OutletProductController@importProductStockProcess')->name('outlet.importProductStockProcess');
 Route::get('/outlet/product/download/stock','OutletProductController@downloadProductStock')->name('outlet.downloadStock');
+Route::post('/outlet/product/download/stock/view','OutletProductController@downloadProductStockView')->name('outlet.downloadStockView');
 Route::post('/outlet/product/download/stock/process','OutletProductController@downloadProductStockProcess')->name('outlet.downloadStockProcess');
 
 Route::get('/outlet/product/list','OutletProductController@listProductStock')->name('outlet.listProductStock');

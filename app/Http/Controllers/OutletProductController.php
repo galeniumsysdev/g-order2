@@ -428,7 +428,96 @@ class OutletProductController extends Controller
 
   public function downloadProductStock()
   {
-    return view('admin.outlet.outletStockDownload');
+    return view('admin.outlet.outletStockDownload',array('data'=>''));
+  }
+
+  public function downloadProductStockView(Request $request)
+  {
+    $data['start_date'] = date('Y-m-d 00:00:00',strtotime($request->start_date));
+    $data['end_date'] = date('Y-m-d 23:59:59',strtotime($request->end_date));
+    $data['outlet_name'] = $request->outlet_name;
+    $data['province'] = $request->province;
+    $data['area'] = $request->area;
+    
+    $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price')
+                        ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
+                        ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
+                        ->join('customer_sites as cs','cs.customer_id','outlet.id')
+                        ->where('outlet_products.enabled_flag','Y')
+                        ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
+                        ->whereBetween('outlet_stock.created_at',array($data['start_date'],$data['end_date']))
+                        ->groupby('title','product_id','outlet_name','price');
+
+    if($data['outlet_name'])
+      $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
+
+    if($data['province'])
+      $stockOutlet = $stockOutlet->where('province',$data['province']);
+
+    if($data['area'])
+      $stockOutlet = $stockOutlet->where('city',$data['area']);
+
+    $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','qp.operand as price')
+                        ->join('products','products.id','outlet_stock.product_id')
+                        ->join('qp_list_lines_v as qp',function($join){
+                          $join->on('qp.product_attr_value','products.inventory_item_id');
+                          $join->where('qp.list_header_id',config('constant.price_hna'));
+                        })
+                        ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
+                        ->join('customer_sites as cs','cs.customer_id','outlet.id')
+                        ->join('category_products as cp','cp.product_id','products.id')
+                        ->join('categories as c','c.flex_value','cp.flex_value')
+                        ->where('c.parent','PHARMA')
+                        ->where('products.Enabled_Flag','Y')
+                        ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
+                        ->whereBetween('outlet_stock.created_at',array($data['start_date'],$data['end_date']))
+                        ->groupby('title','product_id','outlet_name','price');
+
+    if($data['outlet_name'])
+      $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
+
+    if($data['province'])
+      $stockAll = $stockAll->where('province',$data['province']);
+
+    if($data['area'])
+      $stockAll = $stockAll->where('city',$data['area']);
+
+    $stockAll = $stockAll->union($stockOutlet)
+                        ->orderBy('title','asc')
+                        ->get();
+
+    $data['table'] = array();
+
+    foreach ($stockAll as $key => $prod) {
+      $begin = OutletStock::where('product_id',$prod->product_id)
+                              ->whereDate('created_at','<=',$data['start_date'])
+                              ->sum('qty');
+      $end = OutletStock::where('product_id',$prod->product_id)
+                              ->whereDate('created_at','<=',$data['end_date'])
+                              ->sum('qty');
+      $in = OutletStock::where('product_id',$prod->product_id)
+                              ->whereDate('created_at','>=',$data['start_date'])
+                              ->whereDate('created_at','<=',$data['end_date'])
+                              ->where('qty','>',0)
+                              ->sum('qty');
+      $out = OutletStock::where('product_id',$prod->product_id)
+                              ->whereDate('created_at','>=',$data['start_date'])
+                              ->whereDate('created_at','<=',$data['end_date'])
+                              ->where('qty','<',0)
+                              ->sum('qty');
+
+      $data['table'][$key]['outlet_name'] = $prod->outlet_name;
+      $data['table'][$key]['title'] = $prod->title;
+      $data['table'][$key]['batch'] = $prod->batch;
+      $data['table'][$key]['begin'] = $begin;
+      $data['table'][$key]['in'] = $in;
+      $data['table'][$key]['out'] = $out;
+      $data['table'][$key]['end'] = $end;
+      $data['table'][$key]['unit_price'] = $prod->price;
+      $data['table'][$key]['value_price'] = $end*$prod->price;
+    }
+
+    return view('admin.outlet.outletStockDownload',array('data'=>$data));
   }
 
   public function downloadProductStockProcess(Request $request)
@@ -442,22 +531,57 @@ class OutletProductController extends Controller
       $excel->setTitle('Report Stock')
             ->setCreator(Auth::user()->name)
             ->sheet('Report Stock', function($sheet) use($data){
+              $sheet->setWidth(array(
+                'A' => 35,
+                'B' => 45,
+                'C' => 25,
+                'D' => 5,
+                'E' => 5,
+                'F' => 5,
+                'G' => 5,
+                'H' => 10,
+                'I' => 10,
+              ));
+
               $sheet->row(1, array('STOCK OUTLET'));
               $sheet->row(2, array(date('d F Y',strtotime($data['start_date'])).' - '.date('d F Y',strtotime($data['end_date']))));
-              $sheet->row(4, array('NAMA OUTLET','PRODUK','BATCH','QUANTITY'));
+              $sheet->row(4, array('NAMA OUTLET','NAMA BARANG','BATCH','JUMLAH','','','','UNIT PRICE','VALUE'));
               $sheet->row(5, array('','','','Beg','In','Out','End'));
               $sheet->mergeCells('D4:G4');
               $sheet->mergeCells('A4:A5');
               $sheet->mergeCells('B4:B5');
               $sheet->mergeCells('C4:C5');
+              $sheet->mergeCells('H4:H5');
+              $sheet->mergeCells('I4:I5');
 
-              $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name')
+              $sheet->cell('A1', function($cell) {
+                $cell->setFont(array(
+                    'size'       => '20',
+                    'bold'       =>  true
+                ));
+              });
+
+              $sheet->cell('A2', function($cell) {
+                $cell->setFont(array(
+                    'size'       => '16',
+                    'bold'       =>  true
+                ));
+              });
+
+              $sheet->cells('A4:I5', function($cells) {
+                  $cells->setAlignment('center');
+                  $cells->setValignment('center');
+                  $cells->setFontWeight('bold');
+              });
+
+              $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price')
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                                  ->groupby('title','product_id','outlet_name');
+                                  ->whereBetween('outlet_stock.created_at',array($data['start_date'],$data['end_date']))
+                                  ->groupby('title','product_id','outlet_name','price');
 
               if($data['outlet_name'])
                 $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
@@ -468,8 +592,12 @@ class OutletProductController extends Controller
               if($data['area'])
                 $stockOutlet = $stockOutlet->where('city',$data['area']);
 
-              $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name')
+              $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','qp.operand as price')
                                   ->join('products','products.id','outlet_stock.product_id')
+                                  ->join('qp_list_lines_v as qp',function($join){
+                                    $join->on('qp.product_attr_value','products.inventory_item_id');
+                                    $join->where('qp.list_header_id',config('constant.price_hna'));
+                                  })
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->join('category_products as cp','cp.product_id','products.id')
@@ -477,7 +605,8 @@ class OutletProductController extends Controller
                                   ->where('c.parent','PHARMA')
                                   ->where('products.Enabled_Flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                                  ->groupby('title','product_id','outlet_name');
+                                  ->whereBetween('outlet_stock.created_at',array($data['start_date'],$data['end_date']))
+                                  ->groupby('title','product_id','outlet_name','price');
 
               if($data['outlet_name'])
                 $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
@@ -516,7 +645,9 @@ class OutletProductController extends Controller
                                           $begin,
                                           $in,
                                           $out,
-                                          $end
+                                          $end,
+                                          $prod->price,
+                                          $end*$prod->price
                                           ));
               }
             });

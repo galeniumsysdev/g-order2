@@ -9,7 +9,8 @@
   <link href="{{ asset('css/dpl.css') }}" rel="stylesheet">
   <link href="{{ asset('css/outletproduct.css') }}" rel="stylesheet">
   <link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
-  <link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+  <link href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css" rel="stylesheet">
   @if($status= Session::get('msg'))
     <div class="alert alert-info">
         {!!$status!!}
@@ -20,11 +21,11 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Download Report Stock</strong></div>
+          <div class="panel-heading"><strong>Report Stock</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
-            <div id="tabs" class="simple-tabs">
+            <div>
               <div class="form-wrapper">
-                {!! Form::open(['url' => route('outlet.downloadStockProcess')]) !!}
+                {!! Form::open(['url' => route('outlet.downloadStockView')]) !!}
                   <div class="form-group">
                     <div class="container-fluid">
                       <div class="row">
@@ -100,6 +101,53 @@
                 {{ Form::close() }}
               </div>
             </div>
+            @if($data)
+            <div class="table-responsive">
+              <table id="report-list" class="display responsive nowrap" width="100%">
+                <thead>
+                  <tr>
+                    <th rowspan="2" class="text-center">Nama Outlet</th>
+                    <th rowspan="2" class="text-center">Nama Barang</th>
+                    <th rowspan="2" class="text-center">Batch</th>
+                    <th colspan="4" class="text-center">Jumlah</th>
+                    <th rowspan="2" class="text-center">Unit Price</th>
+                    <th rowspan="2" class="text-center">Value</th>
+                  </tr>
+                  <tr>
+                    <th class="text-center">Beg</th>
+                    <th class="text-center">In</th>
+                    <th class="text-center">Out</th>
+                    <th class="text-center">End</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($data['table'] as $result)
+                    <tr>
+                      <td>{{ $result['outlet_name'] }}</td>
+                      <td>{{ $result['title'] }}</td>
+                      <td>{{ $result['batch'] }}</td>
+                      <td align="right">{{ $result['begin'] }}</td>
+                      <td align="right">{{ $result['in'] }}</td>
+                      <td align="right">{{ $result['out'] }}</td>
+                      <td align="right">{{ $result['end'] }}</td>
+                      <td align="right">{{ number_format($result['unit_price'],0,',','.') }}</td>
+                      <td align="right">{{ number_format($result['value_price'],0,',','.') }}</td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+            <div>
+              {!! Form::open(['url' => route('outlet.downloadStockProcess')]) !!}
+              {{ Form::hidden('start_date', $data['start_date']) }}
+              {{ Form::hidden('end_date', $data['end_date']) }}
+              {{ Form::hidden('outlet_name', $data['outlet_name']) }}
+              {{ Form::hidden('province', $data['province']) }}
+              {{ Form::hidden('area', $data['area']) }}
+              {{ Form::submit('Download', array('class'=>'btn btn-primary')) }}
+              {{ Form::close() }}
+            </div>
+            @endif
           </div>
         </div>
       </div>
@@ -108,10 +156,12 @@
 @endsection
 @section('js')
 
+<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
 <script src="{{ asset('js/moment-with-locales.js') }}"></script>
 <script src="{{ asset('js/bootstrap-datetimepicker.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
-<script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
 <script src="{{ asset('js/outletproduct.js') }}"></script>
 
 @endsection

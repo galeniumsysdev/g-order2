@@ -48,6 +48,15 @@ $(document).ready(function() {
             $(window).resize();
         },2000);
     }
+
+    if($('#report-list').length){
+        $('#report-list').DataTable({
+            'order': [],
+        });
+        window.setTimeout(function(){
+            $(window).resize();
+        },2000);
+    }
     // ===============
 
     $('.change-product').hide();
