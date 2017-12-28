@@ -1,4 +1,7 @@
 $(document).ready(function() {
+    // Datatable
+    var trx_list_datatable;
+
 	if($('#product-list').length){
     	$('#product-list').DataTable();
         window.setTimeout(function(){
@@ -24,7 +27,7 @@ $(document).ready(function() {
         },2000);
     }
     if($('#trx-list').length){
-        $('#trx-list').DataTable({
+        trx_list_datatable = $('#trx-list').DataTable({
             'order': [],
             columnDefs: [
                 { responsivePriority: 1, targets: 0 },
@@ -45,6 +48,7 @@ $(document).ready(function() {
             $(window).resize();
         },2000);
     }
+    // ===============
 
     $('.change-product').hide();
 
@@ -171,4 +175,10 @@ $(document).ready(function() {
                 });
             }, 'json');
     }
+
+    // Trx List
+    $('#btn-filter').click(function(){
+        window.location.href = window.Laravel.url+'/outlet/transaction/list?start_date='+$('#start-date-trx').val()+'&end_date='+$('#end-date-trx').val()+'&product_name='+$('#product-name').val()+'&generic='+$('#generic').val();
+    })
+    // ==============
 });

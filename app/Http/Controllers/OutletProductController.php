@@ -345,10 +345,19 @@ class OutletProductController extends Controller
 
   public function outletTrxList()
   {
+    $start_date = ($_GET && $_GET['start_date']) ? date('Y-m-d 00:00:00',strtotime($_GET['start_date'])) : date('Y-m-d 00:00:00',strtotime('-1 month'));
+    $end_date = ($_GET && $_GET['end_date']) ? date('Y-m-d 23:59:59',strtotime($_GET['end_date'])) : date('Y-m-d 23:59:59');
+    $product_name = ($_GET && $_GET['product_name']) ? trim($_GET['product_name']) : '';
+    $generic = ($_GET && $_GET['generic']) ? trim($_GET['generic']) : '';
+    
   	$stockOutlet = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date','outlet_products.generic as generic')
   											->leftjoin('outlet_products','outlet_products.id','outlet_stock.product_id')
                         ->where('outlet_products.enabled_flag','Y')
-                        ->where('outlet_stock.outlet_id',Auth::user()->customer_id);
+                        ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
+                        ->whereBetween('outlet_stock.created_at',array($start_date,$end_date))
+                        ->where('title','LIKE','%'.$product_name.'%');
+    if($generic)
+      $stockOutlet->where('generic','LIKE','%'.$generic.'%');
 
     $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date',DB::raw('"" as generic'))
                         ->leftjoin('products','products.id','outlet_stock.product_id')
@@ -357,6 +366,8 @@ class OutletProductController extends Controller
                         ->where('c.parent','PHARMA')
                         ->where('products.Enabled_Flag','Y')
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
+                        ->whereBetween('outlet_stock.created_at',array($start_date,$end_date))
+                        ->where('title','LIKE','%'.$product_name.'%')
                         ->union($stockOutlet)
                         ->orderBy('trx_date','desc')
   											->get();
