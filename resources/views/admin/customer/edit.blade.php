@@ -195,8 +195,8 @@
               											<thead>
               												<tr>
               													<th width="40%"><strong>@lang('label.address')</strong></th>
-              													<th width="10%"><strong>@lang('label.city')</strong></th>
-              													<th width="10%"><strong>@lang('label.state')</strong></th>
+              													<th width="10%"><strong>@lang('label.city_regency')</strong></th>
+              													<th width="10%"><strong>@lang('label.urban_village')</strong></th>
               													<th width="5%"><strong>@lang('label.postalcode')</strong></th>
                                         <th width="10%"><strong>@lang('label.action')</strong></th>
               												</tr>

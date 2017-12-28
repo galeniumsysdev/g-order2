@@ -193,16 +193,16 @@ class ProfileController extends Controller
         $site->Country = 'ID';
         $site->save();
         DB::commit();
-      $prevpage = $request->prevpage;
+        $prevpage = $request->prevpage;
+        //dd($prevpage);
+        return view('auth.profile.edit_address',compact('site','prevpage','provinces'))->withMessage(trans('pesan.update'));
+      }else{
+          $prevpage = null;
+          return view('auth.profile.edit_address',compact('site','prevpage','provinces'));
+      }
     }catch (\Exception $e) {
       DB::rollback();
       throw $e;
-    }
-      //dd($prevpage);
-      return view('auth.profile.edit_address',compact('site','prevpage','provinces'))->withMessage(trans('pesan.update'));
-    }else{
-        $prevpage = null;
-        return view('auth.profile.edit_address',compact('site','prevpage','provinces'));
     }
 
   }
@@ -231,10 +231,12 @@ class ProfileController extends Controller
       return response()->json($provinces);
   }
 
-  public function getListCity(Request $request)
+  public function getListCity(Request $request,$propid=null)
   {
       //$id = Input::get('id');
-      $city = DB::table('regencies')->where('name','like',$request->input('query')."%")->get();
+      $city = DB::table('regencies')->where('name','like',$request->input('query')."%");
+      if(!is_null($propid)) $city=$city->where('province_id','=',$propid);
+      $city =  $city->get();
       return response()->json($city);
   }
 

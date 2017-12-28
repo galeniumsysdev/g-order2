@@ -26,7 +26,7 @@ Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
 Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
 Route::get('/ajax/typeaheadProvince', 'ProfileController@getListProvince');
-Route::get('/ajax/typeaheadCity', 'ProfileController@getListCity');
+Route::get('/ajax/typeaheadCity/{propid?}', 'ProfileController@getListCity');
 Route::get('/ajax/typeaheadOutlet', 'OutletProductController@getListOutlet');
 Route::get('/ajax-subcat',function () {
     $cat_id = Input::get('cat_id');
