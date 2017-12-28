@@ -171,8 +171,6 @@ class CustomerController extends Controller
                       //->whereIn('role_user.role_id', [8]);
                       ->whereIn('roles.name', ['Principal']);
             });
-    }else {
-      $customers = $customers ->where('user_id','<','0');
     }
 
     if(Auth::user()->hasRole('Marketing PSC'))
