@@ -53,6 +53,7 @@ Route::get('product/category/{id}', [
 
 Route::group(['middleware'=>['auth','prevent-back-history']],function(){
   Route::get('profile', 'ProfileController@profile')->name('profile.index');
+  Route::post('profile/update', 'ProfileController@updateprofile')->name('profile.updateprofile');
   Route::post('profile', 'ProfileController@update_avatar')->name('profile.update');
   Route::post('add-address', 'ProfileController@addaddress')->name('profile.address');
   Route::post('add-contact', 'ProfileController@addcontact')->name('profile.contact');

@@ -291,7 +291,7 @@ class CustomerController extends Controller
 
       if($customer->pharma_flag !=$request->pharma_flag)
       {
-        if($request->phamra_flag=="1")//adddistributor pharma
+        if($request->pharma_flag=="1")//adddistributor pharma
         {
           $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
           if($distributor)
@@ -671,7 +671,7 @@ class CustomerController extends Controller
     }
 
     public function inactiveDistributor(Request $request)
-    {            
+    {
       if($request->inactive=="inactive")
       {
         DB::table('outlet_distributor')

@@ -17,8 +17,8 @@
             <div class="col-md-10">
               <select name="fungsi" class="form-control {{ $errors->has('fungsi') ? ' has-error' : '' }}">
                 <option value="">......</option>
-                <option value="ShipTo" {{old('fungsi')=="ShipTo"?"selected=selected":""}}>@lang('shop.ShipTo')</option>
-                <option value="BillTo" {{old('fungsi')=="BillTo"?"selected=selected":""}}>@lang('shop.BillTo')</option>
+                <option value="SHIP_TO" {{old('fungsi')=="SHIP_TO"?"selected=selected":""}}>@lang('shop.ShipTo')</option>
+                <option value="BILL_TO" {{old('fungsi')=="BILL_TO"?"selected=selected":""}}>@lang('shop.BillTo')</option>
               </select>
 							@if ($errors->has('fungsi'))
 									<span class="help-block with-errors">
@@ -98,7 +98,7 @@
 								<option value="">--</option>
 							</select>
 
-								@if ($errors->has('subdistricts'))
+								@if ($errors->has('state'))
 										<span class="help-block">
 												<strong>{{ $errors->first('subdistricts') }}</strong>
 										</span>

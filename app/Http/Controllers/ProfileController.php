@@ -98,17 +98,34 @@ class ProfileController extends Controller
         'postalcode' => 'required|digits:5',
       ])->validate();
 
-
-      $custsites = new CustomerSite();
-      $custsites->site_use_code = $request->fungsi;
-      $custsites->status = "A";
-      $custsites->address1 = strtoupper($request->address);
-      $custsites->state = strtoupper($request->state);
-      $custsites->city = strtoupper($request->city);
-      $custsites->postalcode = $request->postalcode;
-      $custsites->Country = 'ID';
-      $custsites->customer_id = auth()->user()->customer_id;
-      $custsites->save();
+      DB::beginTransaction();
+      try{
+        $custsites = new CustomerSite();
+        $custsites->site_use_code = $request->fungsi;
+        $custsites->status = "A";
+        $custsites->address1 = strtoupper($request->address);
+        $custsites->province_id = $request->province;
+        $custsites->city_id = $request->city;
+        $custsites->district_id = $request->district;
+        $custsites->state_id = $request->state;
+        $custsites->postalcode = $request->postalcode;
+        $provincename=DB::table('provinces')->where('id','=',$request->province)->select('name')->first();
+        $custsites->province = $provincename->name;
+        $cityname=DB::table('regencies')->where('id','=',$request->city)->where('province_id','=',$request->province)
+                    ->select('name')->first();
+        $custsites->city = $cityname->name;
+        $districtname = DB::table('districts')->where('id','=',$request->district)->where('regency_id','=',$request->city)->select('name')->first();
+        $custsites->district = $districtname->name;
+        $villagename = DB::table('villages')->where('id','=',$request->state)->where('district_id','=',$request->district)->select('name')->first();
+        $custsites->state = $villagename->name;
+        $custsites->Country = 'ID';
+        $custsites->customer_id = auth()->user()->customer_id;
+        $custsites->save();
+        DB::commit();
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
+      }
 
       return redirect(route('profile.index'))->with('message',trans("pesan.successaddaddress"));
     }else{
@@ -144,36 +161,43 @@ class ProfileController extends Controller
 
   public function editAddress(Request $request,$id)
   {
-    $site = CustomerSite::find($id);
-    if(is_null($site->langitude))
-    {
-      $site->langitude =$site->customer->langitude;
-      $site->longitude =$site->customer->longitude;
-    }
-    $provinces  = DB::table('provinces')->get();
-    if($request->isMethod('patch'))
-    {
-	$kota = DB::table('regencies')->where('id','=',$request->city)->first();
-	if($kota) $site->city = $kota->name; 
-	$kecamatan = DB::table('districts')->where('id','=',$request->district)->first();
-	if($kecamatan) $site->district = $kecamatan->name; 
-	$kabupaten = DB::table('villages')->where('id','=',$request->state)->first();
-	if($kabupaten ) $site->district = $kabupaten->name; 
-	$propinsi = DB::table('provinces')->where('id','=',$request->province)->first();
-	if($propinsi) $site->state = $propinsi->name; 
+    DB::beginTransaction();
+    try{
+      $site = CustomerSite::find($id);
+      if(is_null($site->langitude))
+      {
+        $site->langitude =$site->customer->langitude;
+        $site->longitude =$site->customer->longitude;
+      }
+      $provinces  = DB::table('provinces')->get();
+      if($request->isMethod('patch'))
+      {
+      	$kota = DB::table('regencies')->where('id','=',$request->city)->first();
+      	if($kota) $site->city = $kota->name;
+      	$kecamatan = DB::table('districts')->where('id','=',$request->district)->first();
+      	if($kecamatan) $site->district = $kecamatan->name;
+      	$kabupaten = DB::table('villages')->where('id','=',$request->state)->first();
+      	if($kabupaten ) $site->district = $kabupaten->name;
+      	$propinsi = DB::table('provinces')->where('id','=',$request->province)->first();
+      	if($propinsi) $site->state = $propinsi->name;
 
-      $site->site_use_code = $request->fungsi;
-      $site->address1 = strtoupper($request->address);
-      //$site->state = strtoupper($request->state);
-      //$site->city = strtoupper($request->city);
-	$site->province_id = strtoupper($request->province);
-       $site->city_id = strtoupper($request->city);
-	$site->district_id = strtoupper($request->district);
-	$site->state_id = strtoupper($request->state);
-      $site->postalcode = $request->postalcode;
-      $site->Country = 'ID';
-      $site->save();
+        $site->site_use_code = $request->fungsi;
+        $site->address1 = strtoupper($request->address);
+        //$site->state = strtoupper($request->state);
+        //$site->city = strtoupper($request->city);
+  	    $site->province_id = strtoupper($request->province);
+        $site->city_id = strtoupper($request->city);
+      	$site->district_id = strtoupper($request->district);
+      	$site->state_id = strtoupper($request->state);
+        $site->postalcode = $request->postalcode;
+        $site->Country = 'ID';
+        $site->save();
+        DB::commit();
       $prevpage = $request->prevpage;
+    }catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    }
       //dd($prevpage);
       return view('auth.profile.edit_address',compact('site','prevpage','provinces'))->withMessage(trans('pesan.update'));
     }else{
@@ -218,5 +242,53 @@ class ProfileController extends Controller
   {
       $provinces = $provinces = DB::table('provinces')->get();
       return view('auth.profile.add_address',compact('provinces'));
+  }
+
+  public function updateprofile(Request $request)
+  {
+    if($request->Save=="updateprofile")
+    {
+      $customer=Auth::user()->customer;
+      $groupdc=null;
+      $sites = $customer->sites()->where('primary_flag','=','Y')->first();
+      if($sites)
+      {
+        $city = $sites->city_id;
+      }else{
+        $city = null;
+      }
+      if(isset($customer->subgroup_dc_id)){
+        $sub=DB::table('subgroup_datacenters as sdc')
+                  ->where('id','=',  $customer->subgroup_dc_id)
+                  ->select('group_id')->first();
+        if($sub) $groupdc = $sub->group_id;
+      }
+      if($customer->psc_flag !=$request->psc_flag)
+      {
+        if($request->psc_flag=="1")//adddistributor pharma
+        {
+          $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
+          if($distributor)
+          {
+            $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+          }
+        }
+      }
+      if($customer->pharma_flag !=$request->pharma_flag)
+      {
+        if($request->pharma_flag=="1")//adddistributor pharma
+        {
+          $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
+          if($distributor)
+          {
+            $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+          }
+        }
+      }
+      $customer->psc_flag = $request->psc_flag;
+      $customer->pharma_flag = $request->pharma_flag;
+      $customer->save();
+      return redirect(route('profile.index'))->with('message',trans("pesan.update"));
+    }
   }
 }
