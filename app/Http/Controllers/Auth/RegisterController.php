@@ -410,7 +410,9 @@ class RegisterController extends Controller
       $categories = CategoryOutlet::where('enable_flag','Y')->get();
       $provinces = DB::table('provinces')->get();
       $groupdcs = GroupDatacenter::where('enabled_flag','1')->get();
-      return view('auth.register',compact('categories','provinces','groupdcs'));
+      $pscproducts = DB::table('flexvalue')->where('master','=','PSC_PRODUCT')->where('enabled_flag','=','Y')->select('name')->orderBy('id')->get();
+      $pharmaproducts = DB::table('flexvalue')->where('master','=','PHARMA_PRODUCT')->where('enabled_flag','=','Y')->select('name')->orderBy('id')->get();      
+      return view('auth.register',compact('categories','provinces','groupdcs','pscproducts','pharmaproducts'));
     }
 
     /**

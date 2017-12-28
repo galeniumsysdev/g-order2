@@ -26,7 +26,7 @@ Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
 Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
 Route::get('/ajax/typeaheadProvince', 'ProfileController@getListProvince');
-Route::get('/ajax/typeaheadCity', 'ProfileController@getListCity');
+Route::get('/ajax/typeaheadCity/{propid?}', 'ProfileController@getListCity');
 Route::get('/ajax/typeaheadOutlet', 'OutletProductController@getListOutlet');
 Route::get('/ajax-subcat',function () {
     $cat_id = Input::get('cat_id');
@@ -53,6 +53,7 @@ Route::get('product/category/{id}', [
 
 Route::group(['middleware'=>['auth','prevent-back-history']],function(){
   Route::get('profile', 'ProfileController@profile')->name('profile.index');
+  Route::post('profile/update', 'ProfileController@updateprofile')->name('profile.updateprofile');
   Route::post('profile', 'ProfileController@update_avatar')->name('profile.update');
   Route::post('add-address', 'ProfileController@addaddress')->name('profile.address');
   Route::post('add-contact', 'ProfileController@addcontact')->name('profile.contact');

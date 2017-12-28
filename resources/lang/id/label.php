@@ -19,7 +19,7 @@ return [
     'email'=>'Alamat Email',
     'outlet' => 'Nama Outlet',
     'address' => 'Alamat',
-    'province' => 'Propinsi',
+    'province' => 'Provinsi',
     'city_regency' => 'Kota / Kabupaten',
     'subdistrict' => 'Kecamatan',
     'urban_village' => 'Kelurahan',
@@ -90,7 +90,6 @@ return [
 	'channel' => 'Channel',
 	'distributor' => 'Distributor',
 	'download' => 'Unduh Excel',
-	'province' => 'Provinsi',
     'change_to_active'=>'Klik untuk aktifkan',
     'change_to_inactive'=>'Klik untuk menonaktifkan',
 ];

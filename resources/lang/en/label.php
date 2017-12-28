@@ -89,8 +89,7 @@ return [
     'shipping' => 'Shipping',
     'channel' => 'Channel',
     'distributor' => 'Distributor',
-    'download' => 'Download Excel',
-    'province' => 'Province',
+    'download' => 'Download Excel',    
     'change_to_active'=>'Change to active',
     'change_to_inactive'=>'Change to inactive',
 ];
