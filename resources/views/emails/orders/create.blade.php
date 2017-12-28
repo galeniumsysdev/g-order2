@@ -12,7 +12,9 @@ Anda mendapatkan pesanan baru dari {{$customer}} melalui aplikasi {{ config('app
 | Product           | Qty              | Harga Satuan        |Total              |
 | ------------------|:----------------:| -------------------:|------------------:|
 @php($tax=0)
+@php($subtotal=0)
 @foreach($lines as $l)
+@php($subtotal+=$l->amount)
 @php($tax+=$l->tax_amount)
 | {{$l->title}}     | {{$l->qty_request." ".$l->uom}}| {{number_format($l->unit_price,2)}}|   {{number_format($l->amount,2)}}|
 @endforeach

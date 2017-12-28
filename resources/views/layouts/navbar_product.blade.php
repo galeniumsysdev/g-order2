@@ -17,7 +17,8 @@
 	<link href="https://fonts.googleapis.com/css?family=Pacifico&subset=latin-ext,vietnamese" rel="stylesheet">
 	<link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
 
-	<link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">
+	<!--<link rel="stylesheet" href="{{ URL::to('font-awesome-4.7.0/css/font-awesome.min.css') }}">-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 	<link rel="stylesheet" href="{{ URL::to('css/bootstrap.min.css') }}">
 	<!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
@@ -131,8 +132,8 @@
 						   <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">NOO &nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                             <ul class="dropdown-menu">
-								<li><a href="{{ route('customer.listNoo') }}"><strong>List NOO</strong></a></li>
-								<li><a href="{{ route('customer.reportNoo') }}"><strong>Report NOO</strong></a></li>
+								<li><a href="{{ route('customer.listNoo') }}">List NOO</a></li>
+								<li><a href="{{ route('customer.reportNoo') }}">Report NOO</a></li>
                             </ul>
                           </li>
                           @endif
@@ -313,5 +314,12 @@
 <script src="{{ asset('js/customlang.js') }}"></script>
 <script src="{{ asset('js/index.js') }}"></script>
 @yield('js')
+<script>
+$(".form-horizontal").submit(function() {
+        $('#loader').show();
+        $("#myDiv").hide();
+        return true;
+    });
+</script>
 </body>
 </html>

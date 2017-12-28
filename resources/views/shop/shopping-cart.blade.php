@@ -17,7 +17,7 @@
             <div class="col-sm-8">
               <!--<input type="text" id="distributor" name="dist" class="form-control" placeholder="Distributor" required readonly="readonly" value="">-->
               <select class="form-control" id="distributor" name="dist">
-                @foreach (Auth::user()->customer->hasDistributor as $dist)
+                @foreach ($distributor as $dist)
                 <option value="{{$dist->id}}">{{$dist->customer_name}}</option>
                 @endforeach
               </select>

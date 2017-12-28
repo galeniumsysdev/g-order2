@@ -23,6 +23,9 @@ function addCart(id)
                }else if(data.result=="exist"){
                  //alert("Item already exist in shopping cart");
                  swal ( "" ,  "Item already exist in shopping cart" ,  "error" );
+               }else if(data.result=="errdist"){
+                 //alert("Item already exist in shopping cart");
+                 swal ( "" ,  "Distributor not exist for type "+data.jns ,  "error" );
                }
 
              }

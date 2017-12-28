@@ -21,6 +21,7 @@ return [
     'qtyavailable' => 'Qty Tersedia',
     'qtyship' => 'Qty Kirim',
     'qtyreceive' => 'Qty Terima',
+    'qtybackorder' => 'Qty Retur',
     'AmountPO' => 'Nilai PO',
     'SubTotal' => 'Subtotal',
     'ContinueShopping' => 'Pilih Barang Lagi',
