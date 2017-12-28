@@ -42,27 +42,10 @@
     <li {{$menu=='OrgStructure'?'class=active':''}}>
         <a href="{{route('org.list')}}"><i class="fa fa-fw fa-desktop"></i> Organization Structure</a>
     </li>
-  <!--  <li>
-        <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-arrows-v"></i> Dropdown <i class="fa fa-fw fa-caret-down"></i></a>
-        <ul id="demo" class="collapse">
-            <li>
-                <a href="#">Dropdown Item</a>
-            </li>
-            <li>
-                <a href="#">Dropdown Item</a>
-            </li>
-        </ul>
-    </li>
- @if($menu=="blank")
-    <li class="active">
-@else
-	<li>
-@endif
-        <a href="blank-page.html"><i class="fa fa-fw fa-file"></i> Blank Page</a>
-    </li>-->
+
     <li>
         <a href="javascript:;" data-toggle="collapse" data-target="#category"><i class="fa fa-fw fa-arrows-v"></i> Category <i class="fa fa-fw fa-caret-down"></i></a>
-        @if(in_array($menu,array("CategoryOutlet","CategoryProduct","GroupDataCenter","SubgroupDatacenter")) )
+        @if(in_array($menu,array("CategoryOutlet","CategoryProduct","GroupDatacenter","SubgroupDatacenter")) )
         <ul id="category" class="collapse in">
         @else
         <ul id="category" class="collapse">
@@ -73,7 +56,7 @@
             <li {{$menu=='CategoryProduct'?'class=active':''}}>
                 <a href="{{route('CategoryProduct.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Product</a>
             </li>
-            <li {{$menu=='GroupDataCenter'?'class=active':''}}>
+            <li {{$menu=='GroupDatacenter'?'class=active':''}}>
                 <a href="{{route('GroupDataCenter.index')}}"><i class="fa fa-fw fa-desktop"></i> Group Datacenter</a>
             </li>
             <li {{$menu=='SubgroupDatacenter'?'class=active':''}}>
