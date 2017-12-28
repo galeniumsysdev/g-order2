@@ -184,16 +184,10 @@
                                           <h3><strong>Produk Personal Skin Care ( PSC )</strong></h3>
                                           <div>
                                               <ul>
-                                                  <li style="font-size:18px;">Caladine</li>
+                                                @foreach($pscproducts as $psc)
+                                                  <li style="font-size:18px;">{{$psc->name}}</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Oilum</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">V-Mina</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Bellsoap</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">JFSulfur</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                @endforeach
                                               </ul>
                                               <button class="md-close">Close</button>
                                           </div>
@@ -208,7 +202,7 @@
                                       </div>
                                   </div>
                                   <div class="md-overlay"></div>
-                                  <div style="font-size:8pt; margin-top:5px;">(Caladine, Oilum, v-mina, Bellsoap, JFSulfur)</div></label>
+                                  <div style="font-size:8pt; margin-top:5px;">({{implode(",",$pscproducts->pluck('name')->toArray())}})</div></label>
                                </div>
 
                                <!---->
@@ -232,26 +226,10 @@
                                           <h3><strong>Produk Pharma ( NON PSC )</strong></h3>
                                           <div>
                                               <ul>
-                                                  <li style="font-size:18px;">Scabimite CReam</li>
+                                                @foreach($pharmaproducts as $pharma)
+                                                  <li style="font-size:18px;">{{$pharma->name}}</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Laxadine Emulsi</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Haemocaine Ointment</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Mycorine</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Acne Feldine Lotion</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Pyravit Syrup</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Laxarec Rektal Tube</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Solare</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Soft U Derm Cream</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Topsy Cream</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                @endforeach
                                               </ul>
                                               <button class="md-close">Close</button>
                                           </div>
