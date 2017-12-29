@@ -16,6 +16,7 @@ table#cart tbody td .form-control{
 }
 .actions .btn-danger{
   float:right;
+  margin-top: 0px;
 }
 /* .row{
   margin-right:0px;

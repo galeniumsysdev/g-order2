@@ -66,16 +66,17 @@
         @php($rowgab=1)
         @endif
         <tr>
-          <td rowspan="{{$rowgab}}">{{$i}}</td>
-          <td rowspan="{{$rowgab}}">{{ $c->customer_name }}</td>
-          <td rowspan="{{$rowgab}}">{{ $c->province }}</td>
-          <td rowspan="{{$rowgab}}">{{ $c->city }}</td>
-          <td rowspan="{{$rowgab}}">@if(isset ($c->longitude))
+          <td rowspan="{{$rowgab}}" valign="middle">{{$i}}</td>
+          <td>{{ $c->customer_name }}</td>
+          <td>{{ $c->province }}</td>
+          <td>{{ $c->city }}</td>
+          <td>
+            @if(isset ($c->longitude))
             {{ $c->longitude.','.$c->langitude }}
             @endif
           </td>
-          <td rowspan="{{$rowgab}}">{{ $c->subgroup_name }}</td>
-          <td rowspan="{{$rowgab}}">
+          <td>{{ $c->subgroup_name }}</td>
+          <td>
             @if($c->psc_flag=="1" and $c->psc_flag=="1")
               PSC, Pharma
             @elseif($c->psc_flag=="1")
@@ -84,13 +85,13 @@
                 Pharma
             @endif
           </td>
-          <td rowspan="{{$rowgab}}">{{ $c->created_at }}</td>
-          <td rowspan="{{$rowgab}}">{{$c->id}}</td>
+          <td>{{ $c->created_at }}</td>
+          <td>{{$c->id}}</td>
           <td>@if($c->distributor->count())
             {{$c->distributor->first()->customer_name}}
             @endif
           </td>
-          <td rowspan="{{$rowgab}}">{{ $c->Status }}</td>
+          <td>{{ $c->Status }}</td>
         </tr>
         @if($rowgab>1)
           @php($lineno=0)
@@ -98,16 +99,28 @@
             @if($lineno!=0)
             <tr>
               <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{{ $c->customer_name }}</td>
+              <td>{{ $c->province }}</td>
+              <td>{{ $c->city }}</td>
+              <td>
+                @if(isset ($c->longitude))
+                {{ $c->longitude.','.$c->langitude }}
+                @endif
+              </td>
+              <td>{{ $c->subgroup_name }}</td>
+              <td>
+                @if($c->psc_flag=="1" and $c->psc_flag=="1")
+                  PSC, Pharma
+                @elseif($c->psc_flag=="1")
+                    PSC
+                @elseif($c->pharma_flag=="1")
+                    Pharma
+                @endif
+              </td>
+              <td>{{ $c->created_at }}</td>
+              <td>{{$c->id}}</td>
               <td>{{$dist->customer_name}}</td>
-              <td></td>
+              <td>{{ $c->Status }}</td>
             </tr>
             @endif
             @php($lineno+=1)

@@ -59,5 +59,6 @@ return [
     'finish_shipping'=>'Shipping Successfully',
     'date_confirm'=> 'Date Confirm',
     'select'=>'Select',
-    'amountreceive'=>'Amount Receive'
+    'amountreceive'=>'Amount Receive',
+    'AddToCart' => 'Add to cart',
 ];
