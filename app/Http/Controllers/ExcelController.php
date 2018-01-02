@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Excel;
 use DB;
+use File;
 
 class ExcelController extends Controller
 {
@@ -104,6 +105,27 @@ class ExcelController extends Controller
     			$sheet->loadView('ExportClients',array('customers'=>$customer,'request'=>$request));
     		});
     	})->export('xlsx');
-      
+
     }
+
+    /*public function checkImageProduct()
+    {
+      $produk = DB::table('Products')
+                ->whereRaw("ifnull(imagePath,'')!=''")
+                ->get();
+      $create= Excel::create('dataproduk', function($excel) use ($produk ) {
+        $excel->setTitle('Produk Galenium');
+        $excel->setCreator('Shanty')
+          ->setCompany('Solinda');
+        $excel->sheet('produk', function($sheet) use ($produk)
+        {
+          foreach ($produk as $p)
+          {
+            if (!File::exists(public_path('img\\'.$p->imagePath))){
+              $sheet->appendRow(array($p->itemcode,$p->title,$p->imagePath));
+            }
+          }
+        });
+      })->export("xlsx");
+    }*/
 }

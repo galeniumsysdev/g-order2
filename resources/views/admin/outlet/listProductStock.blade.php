@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -34,9 +34,9 @@
               <table id="product-list" class="display responsive nowrap" width="100%">
                 <thead>
                   <tr>
-                    <th>Title</th>
+                    <th>Nama Barang</th>
                     <th>Stok</th>
-                    <th>ID</th>
+                    <th>Generik</th>                    
                     <th></th>
                   </tr>
                 </thead>
@@ -45,7 +45,7 @@
                     <tr>
                       <td>{{ $cell['title'] }}</td>
                       <td>{!! $cell['stock'] !!}</td>
-                      <td>{{ $cell['op_id'] }}</td>
+                      <td>{!! $cell['generic'] !!}</td>
                       <td align="center">
                         @if ($cell['flag'] == 'outlet')
                         <a href="{{ route('outlet.formProduct',$cell['op_id']) }}" class="btn btn-primary">Edit</a>
