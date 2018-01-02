@@ -50,6 +50,9 @@
         <td><strong>KOORDINAT</strong></td>
         <td><strong>CHANNEL</strong></td>
         <td><strong>DIVISI</strong></td>
+        <td><strong>ASPS</strong></td>
+        <td><strong>ASPM</strong></td>
+        <td><strong>RSPM</strong></td>
         <td><strong>TGL. REGISTER</strong></td>
         <td><strong>ID CUSTOMER</strong></td>
         <td><strong>DISTRIBUTOR</strong></td>
@@ -85,6 +88,9 @@
                 Pharma
             @endif
           </td>
+          <td>{{$c->asps_kode}}</td>
+          <td>{{$c->aspm_kode}}</td>
+          <td>{{$c->rspm_kode}}</td>
           <td>{{ $c->created_at }}</td>
           <td>{{$c->id}}</td>
           <td>@if($c->distributor->count())
@@ -117,6 +123,9 @@
                     Pharma
                 @endif
               </td>
+              <td>{{$c->asps_kode}}</td>
+              <td>{{$c->aspm_kode}}</td>
+              <td>{{$c->rspm_kode}}</td>
               <td>{{ $c->created_at }}</td>
               <td>{{$c->id}}</td>
               <td>{{$dist->customer_name}}</td>

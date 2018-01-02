@@ -10,11 +10,30 @@ class ExcelController extends Controller
 {
     public function ExportClients(Request $request)
     {
-      DB::enableQueryLog();
+    //  DB::enableQueryLog();
       $distname=$request->distributor;
     	$customer = DB::table('customers as c')
     				->join('customer_sites as cs','c.id', 'cs.customer_id')
     				->leftjoin('subgroup_datacenters as sd','c.subgroup_dc_id','sd.id')
+            ->leftjoin('asps_regencies as a','cs.city_id','a.regency_id')
+            ->leftjoin('org_structure_psc as osp', function($join)
+                         {
+                             $join->on('a.kode_asps', '=', 'osp.kode')
+                                  ->on('osp.Jabatan','=',DB::raw("'ASPS'"))
+                                  ->on('c.psc_flag','=',DB::raw("'1'"));
+                         })
+           ->leftjoin('org_structure_psc as aspm', function($join)
+                        {
+                            $join->on('osp.parent', '=', 'aspm.kode')
+                                 ->on('aspm.Jabatan','=',DB::raw("'ASPM'"))
+                                 ->on('c.psc_flag','=',DB::raw("'1'"));
+                        })
+            ->leftjoin('org_structure_psc as rsm', function($join)
+                         {
+                             $join->on('aspm.parent', '=', 'rsm.kode')
+                                  ->on('rsm.Jabatan','=',DB::raw("'RSPM'"))
+                                  ->on('c.psc_flag','=',DB::raw("'1'"));
+                         })
     				->whereNull('c.oracle_customer_id')
             ->where('cs.primary_flag','=','Y');
       if($request->distributor)
@@ -63,7 +82,8 @@ class ExcelController extends Controller
           $customer = $customer->whereraw("upper(cs.province) like upper('".$request->province."')");
         }
 
-    	$customer = $customer->select('c.id','c.customer_name','cs.province','cs.city','c.longitude','c.langitude','c.created_at','c.Status','c.psc_flag','c.pharma_flag','c.subgroup_dc_id','sd.name as subgroup_name');
+    	$customer = $customer->select('c.id','c.customer_name','cs.province','cs.city','c.longitude','c.langitude','c.created_at','c.Status','c.psc_flag','c.pharma_flag','c.subgroup_dc_id','sd.name as subgroup_name'
+                                    ,'osp.kode as asps_kode','aspm.kode as aspm_kode','rsm.kode as rspm_kode');
     	$customer = $customer->get();
       //var_dump(DB::getQueryLog());
       //dd($customer);
@@ -84,5 +104,6 @@ class ExcelController extends Controller
     			$sheet->loadView('ExportClients',array('customers'=>$customer,'request'=>$request));
     		});
     	})->export('xlsx');
+      
     }
 }

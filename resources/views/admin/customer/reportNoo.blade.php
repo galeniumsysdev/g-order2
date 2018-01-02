@@ -11,7 +11,7 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
           <div class="panel-body">
             <div id="frmsearch" class="panel panel-default">
               <br>
-              <form action="{{route('ExportClients')}}" class="form-horizontal reportnoo" method="post" role="form">
+              <form action="{{route('ExportClients')}}" class="form-horizontal" method="post" role="form" id="reportNOO">
                 {{csrf_field()}}
 				<!--DISTRIBUTOR-->
                 <div class="form-group">
@@ -180,13 +180,6 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
                   });
 
   });
-  $(".form-horizontal").submit(function() {
-          $('#loader').show();
-          $("#myDiv").hide();
-          return true;
-          $('#loader').hide();
-          $("#myDiv").show();
-      });
 </script>
 
 @endsection
