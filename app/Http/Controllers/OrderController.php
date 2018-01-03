@@ -24,7 +24,7 @@ use Excel;
 use App\Events\PusherBroadcaster;
 use App\Notifications\PushNotif;
 use App\DPLSuggestNo;
-
+use App\OutletStock;
 
 class OrderController extends Controller
 {
@@ -595,6 +595,7 @@ class OrderController extends Controller
             {
               foreach($request->qtyreceive[$soline->line_id] as $key => $qty)
               {
+                  $qtyterima+=$qty;
                   $insshipping =SoShipping::updateorCreate(
                     ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno,'id'=>$key]
                     ,['qty_accept'=>$qty,'product_id'=>$soline->product_id
@@ -608,6 +609,7 @@ class OrderController extends Controller
                   //dd(DB::getQueryLog());
               }
             }else{
+              $qtyterima=$request->qtyreceive[$soline->line_id];
               $insshipping =SoShipping::updateorCreate(
                 ['header_id'=>$request->header_id,'line_id'=>$soline->line_id,'deliveryno'=>$request->deliveryno]
                   ,['qty_accept'=>$request->qtyreceive[$soline->line_id],'product_id'=>$soline->product_id
@@ -619,9 +621,21 @@ class OrderController extends Controller
                  ]
               )  ;
             }
+
+            if (Auth::user()->hasRole('Apotik/Klinik') ){
+              $instock = new OutletStock;
+              $instock->product_id = $soline->product_id;
+              $instock->outlet_id = Auth::user()->customer_id;
+              $instock->event = 'trx_in';
+              $instock->qty = $qtyterima;
+              $instock->deliveryorder_no = $request->deliveryno;
+              $instock->save();
+            }
               $soline->qty_shipping = $soline->shippings->sum('qty_shipping');
               $soline->qty_accept = $soline->shippings->sum('qty_accept');
               $soline->save();
+
+
               //$qtyterima=$soline->qty_accept+$request->qtyreceive[$soline->line_id];
             /*$update = DB::table('so_lines')
               ->where([

@@ -70,7 +70,7 @@
                 <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
                 <input type="hidden" id="disc-{{$product->id}}" value="{{$product->price_diskon}}">
                 <div class ="clearfix" id="addCart-{{$product->id}}">
-                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block" style="margin-top:25px;" role="button">Add to cart</a>
+                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block" style="margin-top:25px;" role="button">@lang('shop.AddToCart')</a>
                 </div>
                 <div class="info-product" id="info-product-{{$product->id}}">
 					@if(Auth::user()->hasRole('Distributor'))

@@ -175,7 +175,7 @@ body {
   margin: 0;
 }
 .nav>li+li{
-  margin: 0 0 0 15px;
+  margin: 0 0 0 10px;
 }
 
 /* Notif */
@@ -632,7 +632,7 @@ border-radius: 0%;
 }
 
 /* Button Styleee
-* 
+*
 */
 .img-responsive{
   display:block;

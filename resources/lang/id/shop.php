@@ -58,5 +58,6 @@ return [
     'finish_shipping'=>'Selesai Kirim',
     'date_confirm' => 'Tanggal Confirm',
     'select'=>'Pilih',
-    'amountreceive'=>'Nilai Terima/Kirim'
+    'amountreceive'=>'Nilai Terima/Kirim',
+    'AddToCart' => 'Beli',
 ];

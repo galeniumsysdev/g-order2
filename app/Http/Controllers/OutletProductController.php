@@ -185,17 +185,17 @@ class OutletProductController extends Controller
 
   public function listProductStock()
   {
-  	$stockOutlet = OutletProducts::select('outlet_products.unit','outlet_products.id as op_id','title',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'))
+  	$stockOutlet = OutletProducts::select('outlet_products.unit','outlet_products.id as op_id','title','generic',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'))
   													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
                             ->where('outlet_products.enabled_flag','Y')
                             ->where('outlet_products.outlet_id',Auth::user()->customer_id)
-  													->groupBy('unit','op_id','title','flag');
-    $stockAll = Product::select('products.satuan_primary as unit','products.id as op_id','title',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
+  													->groupBy('unit','op_id','title','flag','generic');
+    $stockAll = Product::select('products.satuan_primary as unit','products.id as op_id','title',DB::raw('null as generic'),DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
                             ->leftjoin('outlet_stock as os','os.product_id','products.id')
                             ->join('category_products as cp','cp.product_id','products.id')
                             ->join('categories as c','c.flex_value','cp.flex_value')
                             ->where('c.parent','PHARMA')
-                            ->where('os.outlet_id',Auth::user()->customer_id)
+                            ->whereRaw("ifnull(os.outlet_id,'".Auth::user()->customer_id."')='".Auth::user()->customer_id."'")
                             ->groupBy('unit','op_id','title','flag')
                             ->union($stockOutlet)
                             ->orderBy('title')
@@ -349,7 +349,7 @@ class OutletProductController extends Controller
     $end_date = ($_GET && $_GET['end_date']) ? date('Y-m-d 23:59:59',strtotime($_GET['end_date'])) : date('Y-m-d 23:59:59');
     $product_name = ($_GET && $_GET['product_name']) ? trim($_GET['product_name']) : '';
     $generic = ($_GET && $_GET['generic']) ? trim($_GET['generic']) : '';
-    
+
   	$stockOutlet = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date','outlet_products.generic as generic')
   											->leftjoin('outlet_products','outlet_products.id','outlet_stock.product_id')
                         ->where('outlet_products.enabled_flag','Y')
@@ -438,7 +438,7 @@ class OutletProductController extends Controller
     $data['outlet_name'] = $request->outlet_name;
     $data['province'] = $request->province;
     $data['area'] = $request->area;
-    
+
     $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price')
                         ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                         ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')

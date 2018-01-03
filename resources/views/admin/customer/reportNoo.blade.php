@@ -11,7 +11,7 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
           <div class="panel-body">
             <div id="frmsearch" class="panel panel-default">
               <br>
-              <form action="{{route('ExportClients')}}" class="form-horizontal" method="post" role="form">
+              <form action="{{route('ExportClients')}}" class="form-horizontal" method="post" role="form" id="reportNOO">
                 {{csrf_field()}}
 				<!--DISTRIBUTOR-->
                 <div class="form-group">
@@ -45,9 +45,11 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
                   <label class="control-label col-sm-2" for="city" style="margin-left:15px;"><strong>@lang('label.city_regency') :</strong></label>
                     <div class="col-sm-8" style="margin-left:15px; margin-right:15px;">
                       <div class="input-group col-sm-12">
-                        <input type="text" class="form-control mb-8 mr-sm-8 mb-sm-4" name="city" id="city" value="" >
-                        {{ Form::button('X', array('class'=>'btn btn-link btn-remove text-danger','id'=>'change-city')) }}
-                        {{ Form::hidden('city_id', '', array('class'=>'form-control', 'id'=>'city_id', 'readonly'=>'readonly')) }}
+                        <input type="text" class="form-control mb-8 mr-sm-8 mb-sm-4" name="city" id="city" value="" autocomplete="off">
+                        <span class="input-group-addon" id="change-city">
+                          <i class="fa fa-times" aria-hidden="true"></i>
+                        </span>
+                        <input type="hidden" name="city_id" id="city_id">
                       </div>
                     </div>
                 </div>
@@ -127,29 +129,6 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
           $('#distributor').removeAttr('readonly').val('');
           $('#dist_id').val('');
       });
-      var path = window.Laravel.url+"/ajax/typeaheadCity";
-      $.get(path,
-          function (data) {
-              $('#city').typeahead({
-                  source: data,
-                  items: 10,
-                  showHintOnFocus: 'all',
-                  displayText: function (item) {
-                      return item.name;
-                  },
-                  afterSelect: function (item) {
-                    $('#city').val(item.name);
-                    $('#city_id').val(item.id);
-                    $('#change-city').show();
-                    $('#city').attr('readonly','readonly');
-                  }
-              });
-            }, 'json');
-            $('#change-city').click(function(){
-                $(this).hide();
-                $('#city').removeAttr('readonly').val('');
-                $('#city_id').val('');
-            });
       var pathprovince = window.Laravel.url+"/ajax/typeaheadProvince";
       $.get(pathprovince,
           function (data) {
@@ -173,6 +152,34 @@ href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
                 $('#province').removeAttr('readonly').val('');
                 $('#province_id').val('');
             });
+            var path = window.Laravel.url+"/ajax/typeaheadCity";
+            if($('#province_id').val()){
+              path += "/"+$('#province_id').val();
+            }
+            $.get(path,
+                function (data) {
+                    $('#city').typeahead({
+                        source: data,
+                        items: 10,
+                        showHintOnFocus: 'all',
+                        displayText: function (item) {
+                            return item.name;
+                        },
+                        afterSelect: function (item) {
+                          $('#city').val(item.name);
+                          $('#city_id').val(item.id);
+                          $('#change-city').show();
+                          $('#city').attr('readonly','readonly');
+                        }
+                    });
+                  }, 'json');
+                  $('#change-city').click(function(){
+                      $(this).hide();
+                      $('#city').removeAttr('readonly').val('');
+                      $('#city_id').val('');
+                  });
+
   });
 </script>
+
 @endsection

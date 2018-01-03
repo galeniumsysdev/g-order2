@@ -316,9 +316,12 @@
 @yield('js')
 <script>
 $(".form-horizontal").submit(function() {
+  var id = $(this).closest("form").attr("id");
+     if(id!="reportNOO") {
         $('#loader').show();
         $("#myDiv").hide();
         return true;
+      }
     });
 </script>
 </body>

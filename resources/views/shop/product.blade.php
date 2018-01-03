@@ -1,5 +1,5 @@
 	@extends('layouts.navbar_product')
-	
+
 	@section('content')
 		<link rel="stylesheet" href="{{ URL::to('css/bootstrap_ms.css') }}">
 		<link rel="stylesheet" href="{{ URL::to('css/displayproduct.css') }}">
@@ -97,7 +97,7 @@
 							<div class="productboxCart">
 								<div class ="clearfix" id="addCart-{{$product->id}}">
 									<!--<a href="{{ route('product.addToCart',['id'=>$product->id])}}" class="btn btn-sm btn-success center-block" role="button">Add to cart</a>-->
-									<a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button">Add to cart</a>
+									<a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button">@lang('shop.AddToCart')</a>
 								</div>
 							</div>
 
