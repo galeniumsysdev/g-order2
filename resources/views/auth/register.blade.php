@@ -210,9 +210,9 @@
                                <div class="checkbox">
                                  <label>
                                    @if( old('psc')=="1")
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc" checked="checked">
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma" checked="checked">
                                    @else
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc">
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma">
                                    @endif
 
                                    @if ($errors->has('psc'))
