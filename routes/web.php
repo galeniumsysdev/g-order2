@@ -378,7 +378,4 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 */
 
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
-Route::get('/test', function () {
-    return view('testtable');
-});
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');
