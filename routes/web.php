@@ -233,9 +233,7 @@ Route::get('/csv/user', function()
     return \App\User::all();
 });
 
-Route::get('/test', function () {
-    return view('testtable');
-});
+
 Route::get('/csv/cabang', function()
 {
     if (($handle = fopen(public_path() . '/uploads/outlet.csv','r')) !== FALSE)
@@ -380,4 +378,7 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 */
 
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
+Route::get('/test', function () {
+    return view('testtable');
+});
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');
