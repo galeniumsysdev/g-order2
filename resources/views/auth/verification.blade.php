@@ -62,7 +62,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="password-confirm" class="col-md-4 control-label">* Lokasi Outlet Anda:</label>
+                            <label for="password-confirm" class="col-md-4 control-label">* @lang('label.outlet_position'):</label>
                             <div class="col-md-6">
                               &nbsp;
                             </div>
