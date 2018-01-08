@@ -135,7 +135,7 @@ tryGeolocation();
         bounds.extend(place.geometry.location);
         marker.setPosition(place.geometry.location);
         document.getElementById("langitude_txt").value=place.geometry.location.lat();
-           document.getElementById("longitude_txt").value=place.geometry.location.lng();
+        document.getElementById("longitude_txt").value=place.geometry.location.lng();
       }
       /*places.forEach(function(place) {
         if (!place.geometry) {
@@ -180,6 +180,7 @@ tryGeolocation();
     google.maps.event.addListener(marker, 'dragend', function (event) {
   	  document.getElementById("langitude_txt").value=this.getPosition().lat();
          document.getElementById("longitude_txt").value=this.getPosition().lng();
+         //document.getElementById("pac-input").value=this.formatted_address;
     });
 
   }
