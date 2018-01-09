@@ -3,7 +3,6 @@ var myLatLng;
 
 $(document).ready(function() {
 var apiGeolocationSuccess = function(position) {
-    document.getElementById("btnlogin").disabled =false;
     success(position);
     //alert("API geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
 };
@@ -19,7 +18,8 @@ var tryAPIGeolocation = function() {
 };
 
 var browserGeolocationSuccess = function(position) {
-    alert("Browser geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
+    //alert("Browser geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
+    success(position);
 };
 
 var browserGeolocationFail = function(error) {
@@ -28,13 +28,15 @@ var browserGeolocationFail = function(error) {
       alert("Browser geolocation error !\n\nTimeout.");
       break;
     case error.PERMISSION_DENIED:
-      if(error.message.indexOf("Only secure origins are allowed") == 0) {
+      if(error.message.indexOf("Only secure origins are allowed") == 0 || error.message.indexOf("User denied geolocation") == 0) {
         tryAPIGeolocation();
       }
       break;
     case error.POSITION_UNAVAILABLE:
       alert("Browser geolocation error !\n\nPosition unavailable.");
       break;
+    default:
+        alert("failed! "+error.message);
   }
 };
 
@@ -47,8 +49,8 @@ var tryGeolocation = function() {
   }
 };
 
-
-  geoLocationInit();
+tryGeolocation();
+  /*geoLocationInit();
   function geoLocationInit()
   {
     if (navigator.geolocation){
@@ -64,11 +66,12 @@ var tryGeolocation = function() {
                           'Error: The Geolocation service failed.' :
                           'Error: Your browser doesn\'t support geolocation.');
     infoWindow.open(map);
-  }
+  }*/
 
 
   function success(position) {
        console.log(position);
+       document.getElementById("btnlogin").disabled =false;
        var latval = position.coords.latitude;
        var lngval = position.coords.longitude;
        document.getElementById("langitude_txt").value=latval;
@@ -98,11 +101,87 @@ var tryGeolocation = function() {
             draggable:true,
             label:"Posisi outlet"
         });
+
+    var input = document.getElementById('pac-input');
+    var searchBox = new google.maps.places.SearchBox(input);
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+    // Bias the SearchBox results towards current map's viewport.
+    map.addListener('bounds_changed', function() {
+      searchBox.setBounds(map.getBounds());
+    });
+    var markers = [];
+    // Listen for the event fired when the user selects a prediction and retrieve
+    // more details for that place.
+    searchBox.addListener('places_changed', function() {
+      var places = searchBox.getPlaces();
+
+      if (places.length == 0) {
+        return;
+      }
+
+      // Clear out the old markers.
+      markers.forEach(function(marker) {
+        marker.setMap(null);
+      });
+      markers = [];
+
+      // For each place, get the icon, name and location.
+      var bounds = new google.maps.LatLngBounds();
+      var i, place;
+
+      for (i=0;place=places[i];i++)
+      {
+        bounds.extend(place.geometry.location);
+        marker.setPosition(place.geometry.location);
+        document.getElementById("langitude_txt").value=place.geometry.location.lat();
+           document.getElementById("longitude_txt").value=place.geometry.location.lng();
+      }
+      /*places.forEach(function(place) {
+        if (!place.geometry) {
+          console.log("Returned place contains no geometry");
+          return;
+        }
+        var icon = {
+          url: place.icon,
+          size: new google.maps.Size(71, 71),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(17, 34),
+          scaledSize: new google.maps.Size(25, 25)
+        };
+
+        // Create a marker for each place.
+        markers.push(new google.maps.Marker({
+          map: map,
+          icon: icon,
+          title: place.name,
+          position: place.geometry.location,
+          draggable:true,
+        }));
+
+        if(place.geometry.location)
+        {
+          document.getElementById("langitude_txt").value=place.geometry.location.lat();
+             document.getElementById("longitude_txt").value=place.geometry.location.lng();
+        }
+
+        if (place.geometry.viewport) {
+          // Only geocodes have viewport.
+          bounds.union(place.geometry.viewport);
+        } else {
+          bounds.extend(place.geometry.location);
+        }
+      });*/
+      map.fitBounds(bounds);
+      map.setZoom(18);
+    });
+
     //infoWindow = new google.maps.InfoWindow;
     google.maps.event.addListener(marker, 'dragend', function (event) {
   	  document.getElementById("langitude_txt").value=this.getPosition().lat();
          document.getElementById("longitude_txt").value=this.getPosition().lng();
     });
+
   }
 
 //this is marker
@@ -111,7 +190,8 @@ var tryGeolocation = function() {
               position: latlng,
               map: map,
               icon:icn,
-              label: name
+              label: name,
+              draggable:true,
             });
   }
 

@@ -233,9 +233,7 @@ Route::get('/csv/user', function()
     return \App\User::all();
 });
 
-Route::get('/test', function () {
-    return view('testtable');
-});
+
 Route::get('/csv/cabang', function()
 {
     if (($handle = fopen(public_path() . '/uploads/outlet.csv','r')) !== FALSE)

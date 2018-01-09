@@ -177,9 +177,9 @@ class ProfileController extends Controller
       	$kecamatan = DB::table('districts')->where('id','=',$request->district)->first();
       	if($kecamatan) $site->district = $kecamatan->name;
       	$kabupaten = DB::table('villages')->where('id','=',$request->state)->first();
-      	if($kabupaten ) $site->district = $kabupaten->name;
+      	if($kabupaten ) $site->state = $kabupaten->name;
       	$propinsi = DB::table('provinces')->where('id','=',$request->province)->first();
-      	if($propinsi) $site->state = $propinsi->name;
+      	if($propinsi) $site->province = $propinsi->name;
 
         $site->site_use_code = $request->fungsi;
         $site->address1 = strtoupper($request->address);
