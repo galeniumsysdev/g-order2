@@ -677,8 +677,8 @@ class DPLController extends Controller {
 													,'qty_request_primary'=>$soline->bonus_gpl
 												]);
 				}else*/
-				if(intval($soline->discount)+intval($soline->discount_gpl)!=0){
-						$discount = intval($soline->discount)+intval($soline->discount_gpl);
+				if(floatval($soline->discount)+floatval($soline->discount_gpl)!=0){
+						$discount = floatval($soline->discount)+floatval($soline->discount_gpl);
 						$unitprice = $soline->list_price * (100-$discount)/100;
 						$soline->unit_price = $unitprice;
 						$soline->amount=$soline->qty_request*$unitprice;
@@ -723,12 +723,19 @@ class DPLController extends Controller {
 		{
 			if($so_header->distributor_id!=$request->distributor)
 			{
-				SoLine::where('header_id','=',$so_header->id)
-				->update(['qty_confirm'=>null,'unit_price'=>'list_price']);
-				$updateDPL = DPLNo::where('dpl_no',$so_header->dpl_no)
-																		->update(array('suggest_no'=>null));
-				$so_header->dpl_no=null;
-				$so_header->save();
+				DB::beginTransaction();
+	      try{
+					SoLine::where('header_id','=',$so_header->id)
+					->update(['qty_confirm'=>null,'unit_price'=>'list_price']);
+					$updateDPL = DPLNo::where('dpl_no',$so_header->dpl_no)
+																			->update(array('suggest_no'=>null));
+					$so_header->dpl_no=null;
+					$so_header->save();
+					DB::commit();
+				}catch (\Exception $e) {
+		      DB::rollback();
+		      throw $e;
+		    }
 			}
 			$this->discountSet($request);
 			return redirect('/dpl/list');
@@ -747,6 +754,8 @@ class DPLController extends Controller {
 				 if($so_lines->isEmpty())	{
 					 return redirect()->back()->withError(trans('pesan.errsplitall'))->withInput();
 				 }else{
+					 DB::beginTransaction();
+	 	      try{
 					 $this->generateExec($request);
 					 $suggest_no = \Session::get('suggest_no');
 					 if($suggest_no){
@@ -821,8 +830,8 @@ class DPLController extends Controller {
 			    					'id' => $suggest_no,
 			    					'href' => route('dpl.readNotifApproval'),
 			    					'mail' => [
-			    						'greeting'=>'create order',
-			    						'content'=> 'test create order'
+			    						'greeting'=>'Split From Trx #' . $notrx,
+			    						'content'=> 'Bersama ini kami informasikan pengajuan DPL baru dari nomor trx #'.$notrx
 			    					]
 			    				];
 			    				foreach ($notified_users as $key => $email) {
@@ -834,9 +843,13 @@ class DPLController extends Controller {
 			    					}
 			    				}
 			    			}
+								DB::commit();
 								return redirect('/dpl/list');
 					 }
-
+					}catch (\Exception $e) {
+						 DB::rollback();
+						 throw $e;
+					}
 				 }
 			}
 
