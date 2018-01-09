@@ -92,4 +92,5 @@ return [
 	'download' => 'Unduh Excel',
     'change_to_active'=>'Klik untuk aktifkan',
     'change_to_inactive'=>'Klik untuk menonaktifkan',
+    'outlet_position' =>'Lokasi Outlet'
 ];

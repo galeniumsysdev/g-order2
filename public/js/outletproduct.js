@@ -76,7 +76,7 @@ $(document).ready(function() {
     }
 
     if($('#product-name-in, #product-name-out').length){
-        $.get(window.Laravel.url+'/outlet/product/getList/',
+        $.get(window.Laravel.url+'/outlet/product/getList',
             function (data) {
                 $('#product-name-in').typeahead({
                     name: 'product-in-list-'+data.length,
