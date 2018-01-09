@@ -88,11 +88,15 @@ class OutletProductController extends Controller
                             ->where('outlet_products.outlet_id',Auth::user()->customer_id)
   													->groupBy('op_id','unit','title','flag');
               $productsAll = Product::select('products.id as op_id','title','products.satuan_primary as unit',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
-                                      ->leftjoin('outlet_stock as os','os.product_id','products.id')
+                                      ->leftjoin('outlet_stock as os',function($join)
+                                        {
+                                          $join->on('os.product_id','=','products.id');
+                                          $join->on('os.outlet_id','=',DB::raw("'".Auth::user()->customer_id."'"));
+                                        })
                                       ->join('category_products as cp','cp.product_id','products.id')
                                       ->join('categories as c','c.flex_value','cp.flex_value')
                                       ->where('c.parent','PHARMA')
-                                      ->where('os.outlet_id',Auth::user()->customer_id)
+                                      //->where('os.outlet_id',Auth::user()->customer_id)
                                       ->groupBy('unit','op_id','title','flag')
                                       ->union($productsOutlet)
                                       ->orderBy('title')
@@ -170,11 +174,15 @@ class OutletProductController extends Controller
                             ->where('outlet_products.outlet_id',Auth::user()->customer_id)
   													->groupBy('op_id','unit','title','flag');
     $stockAll = Product::select('products.id as op_id','products.satuan_primary as unit','title',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
-                              ->leftjoin('outlet_stock as os','os.product_id','products.id')
+                              ->leftjoin('outlet_stock as os',function($join)
+                                {
+                                  $join->on('os.product_id','=','products.id');
+                                  $join->on('os.outlet_id','=',DB::raw("'".Auth::user()->customer_id."'"));
+                                })
                               ->join('category_products as cp','cp.product_id','products.id')
                               ->join('categories as c','c.flex_value','cp.flex_value')
                               ->where('c.parent','PHARMA')
-                              ->where('os.outlet_id',Auth::user()->customer_id)
+                            //  ->where('os.outlet_id',Auth::user()->customer_id)
                               ->groupBy('unit','op_id','title','flag')
                               ->union($stockOutlet)
                               ->orderBy('title')
@@ -190,16 +198,20 @@ class OutletProductController extends Controller
                             ->where('outlet_products.enabled_flag','Y')
                             ->where('outlet_products.outlet_id',Auth::user()->customer_id)
   													->groupBy('unit','op_id','title','flag','generic');
-    $stockAll = Product::select('products.satuan_primary as unit','products.id as op_id','title',DB::raw('null as generic'),DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
-                            ->leftjoin('outlet_stock as os','os.product_id','products.id')
+    $stockAll = Product::select('products.satuan_primary as unit','products.id as op_id','title','products.long_description as generic',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
+                            ->leftjoin('outlet_stock as os',function($join)
+                              {
+                                $join->on('os.product_id','=','products.id');
+                                $join->on('os.outlet_id','=',DB::raw("'".Auth::user()->customer_id."'"));
+                              })
                             ->join('category_products as cp','cp.product_id','products.id')
                             ->join('categories as c','c.flex_value','cp.flex_value')
                             ->where('c.parent','PHARMA')
-                            ->whereRaw("ifnull(os.outlet_id,'".Auth::user()->customer_id."')='".Auth::user()->customer_id."'")
-                            ->groupBy('unit','op_id','title','flag')
+                            ->groupBy('unit','op_id','title','flag','long_description')
                             ->union($stockOutlet)
                             ->orderBy('title')
   													->get();
+
   	foreach ($stockAll as $key => $prod) {
       $flag = ($prod->flag == 'galenium') ? 'g' : '';
   		$stockAll[$key]->stock = '<a href="'.route('outlet.detailProductStock',array('product_id'=>$prod->op_id,'flag'=>$flag)).'">'.floatval($prod->product_qty).' '.$prod->unit.'</a>';
@@ -359,7 +371,7 @@ class OutletProductController extends Controller
     if($generic)
       $stockOutlet->where('generic','LIKE','%'.$generic.'%');
 
-    $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date',DB::raw('"" as generic'))
+    $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date','long_description as generic')
                         ->leftjoin('products','products.id','outlet_stock.product_id')
                         ->join('category_products as cp','cp.product_id','products.id')
                         ->join('categories as c','c.flex_value','cp.flex_value')
