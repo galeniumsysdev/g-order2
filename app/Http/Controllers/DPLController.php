@@ -267,7 +267,8 @@ class DPLController extends Controller {
 					else
 						$data['sendmail'] = 1;
 					$apps_user = User::where('email',$mail)->first();
-					$apps_user->notify(new PushNotif($data));
+					if(!empty($apps_user))
+						$apps_user->notify(new PushNotif($data));
 				}
 			}
 		}
@@ -707,7 +708,8 @@ class DPLController extends Controller {
 			];
 
 			$apps_user = User::where('email',$distributor->user->email)->first();
-			$apps_user->notify(new PushNotif($data));
+			if(!empty($apps_user))
+				$apps_user->notify(new PushNotif($data));
 
 			return redirect()->route('dpl.list');
 
