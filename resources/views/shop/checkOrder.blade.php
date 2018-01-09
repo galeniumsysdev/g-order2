@@ -50,7 +50,11 @@
               <div class="form-group">
                 <label for="subject" class="col-md-2 control-label">Status</label>
                 <div class="col-md-10">
+                    @if($header->status==-2 and !is_null($header->alasan_tolak))
+                    <input type="text" class="form-control" value="{{$header->status_name. ' (alasan: '.$header->alasan_tolak.')'}}" readonly>
+                    @else
                     <input type="text" class="form-control" value="{{$header->status_name}}" readonly>
+                    @endif
                 </div>
               </div>
               @if($header->suggest_no)
