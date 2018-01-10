@@ -21,6 +21,17 @@
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
+                @if(!$dpl->active)
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-12 bg-danger text-danger">
+                        No. Usulan DPL telah dibatalkan.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endif
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
@@ -179,6 +190,7 @@
                     </div>
                   </div>
                 </div>
+                @if($dpl->active)
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
@@ -205,6 +217,20 @@
                     </div>
                   </div>
                 </div>
+                @else
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        &nbsp;
+                      </div>
+                      <div class="col-md-10">
+                        <a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endif
               </div>
             </div>
           </div>

@@ -15,7 +15,8 @@
 
   {!! Form::open(['url' => route('dpl.discountSet'), 'id'=>'generate-sugg-no-form']) !!}
   {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
-  {{ Form::hidden('notrx',$dpl['notrx'],array('id'=>'suggest_no')) }}
+  {{ Form::hidden('notrx',$dpl['notrx'],array('id'=>'notrx')) }}
+  {{ Form::hidden('customer_po',$header->customer_po,array('id'=>'customer-po')) }}
   <div class="container">
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
@@ -24,6 +25,17 @@
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
+                @if(!$dpl->active)
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-12 bg-danger text-danger">
+                        No. Usulan DPL telah dibatalkan.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endif
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
@@ -205,6 +217,7 @@
                     </div>
                   </div>
                 </div>
+                @if($dpl->active)
                 <div class="form-group">
                   <div class="container-fluid">
                     <div class="row">
@@ -214,10 +227,25 @@
                       <div class="col-md-10">
                         {{ Form::submit('Save',array('class'=>'btn btn-primary')) }}
                         <a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
+                        <a href="#" id="btn-dpl-cancel" class="btn btn-danger pull-right">Batalkan No. Usulan</a>
                       </div>
                     </div>
                   </div>
                 </div>
+                @else
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        &nbsp;
+                      </div>
+                      <div class="col-md-10">
+                        <a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endif
               </div>
             </div>
           </div>

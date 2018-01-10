@@ -159,13 +159,14 @@ class DPLController extends Controller {
 			'note',
 			'fill_in',
 			'approver.name as approver_name',
-			'dpl_no.dpl_no')
+			'dpl_no.dpl_no',
+			'dpl_suggest_no.active')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->leftjoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->where('dpl_suggest_no.suggest_no', $suggest_no)
-			->where('active', 1)
+			//->where('active', 1)
 			->first();
 
 		if (!$dpl['fill_in']) {
@@ -251,7 +252,7 @@ class DPLController extends Controller {
 				'href' => route('dpl.readNotifDiscount'),
 				'mail' => [
 					'greeting'=>'Yang terhormat FSM/HSM Galenium',
-					'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.<br>Untuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.\nTerima kasih.'
+					'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.<br>Untuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.<br>Terima kasih.'
 				]
 			];
 			foreach ($notified_users as $key => $email) {
@@ -295,12 +296,13 @@ class DPLController extends Controller {
 			'fill_in',
 			'approved_by',
 			'next_approver',
-			'approver.name as approver_name')
+			'approver.name as approver_name',
+			'dpl_suggest_no.active')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->where('suggest_no', $suggest_no)
-			->where('active', 1)
+			//->where('active', 1)
 			->first();
 
 		if ($dpl['fill_in']) {
@@ -360,7 +362,7 @@ class DPLController extends Controller {
 						'href' => route('dpl.readNotifApproval'),
 						'mail' => [
 							'greeting'=>'Yang terhormat FSM/HSM Galenium',
-							'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.\n\nUntuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.\nTerima kasih.'
+							'content'=> "Bersama ini kami informasikan No. Pengajuan DPL #".$suggest_no." membutuhkan approval Anda.\n\nUntuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.\nTerima kasih."
 						]
 					];
 				}
@@ -511,6 +513,22 @@ class DPLController extends Controller {
 								->wherenull('read_at')
 		            ->update(['read_at' => Carbon::now()]);
 		return redirect()->route('dpl.dplNoForm',$suggest_no);
+	}
+
+	public function readNotifDPLCancel($suggest_no, $notifid){
+		Auth::User()->notifications()
+		           	->where('id','=',$notifid)
+		            ->update(['read_at' => Carbon::now()]);
+
+		return redirect()->route('dpl.discountForm',$suggest_no);
+	}
+
+	public function readNotifDPLCancelOutlet($suggest_no, $notifid){
+		Auth::User()->notifications()
+		           	->where('id','=',$notifid)
+		            ->update(['read_at' => Carbon::now()]);
+
+		return redirect()->route('order.listPO');
 	}
 
 	public function dplLog($suggest_no, $type, $reason = "") {
@@ -738,6 +756,62 @@ class DPLController extends Controller {
 
 			return redirect()->route('dpl.list');
 
+	}
+
+	public function suggestNoCancel(Request $request){
+		$suggest_no = $request->suggest_no;
+		$customer_po = $request->customer_po;
+		$note = $request->note;
+		$update = DPLSuggestNo::where('suggest_no',$suggest_no)
+							->update(array('note'=>$note,'active'=>0));
+
+		// Notif to outlet
+		$dpl = DPLSuggestNo::select('users.email','note')
+							->join('users','users.customer_id','dpl_suggest_no.outlet_id')
+							->where('suggest_no',$suggest_no)
+							->first();
+
+		$data = [
+			'title' => 'Pembatalan Pengajuan DPL',
+			'message' => 'Pembatalan Pengajuan DPL #'.$suggest_no,
+			'id' => $suggest_no,
+			'href' => route('dpl.readNotifDPLCancelOutlet'),
+			'mail' => [
+				'greeting'=>'Pembatalan Pengajuan DPL #'.$suggest_no,
+				'content'=> "Pengajuan no DPL #".$suggest_no." untuk PO #".$customer_po." anda telah dibatalkan oleh marketing PT.Galenium Pharmasaia Laboratories dengan alasan\n\n".$note
+			],
+			'sendmail' => 1,
+			'email' => $dpl['email']
+		];
+		$apps_user = User::where('email',$dpl['email'])->first();
+		if(!empty($apps_user))
+			$apps_user->notify(new PushNotif($data));
+
+		// Notif to Galenium
+		$notified_users = $this->getArrayNotifiedEmail($suggest_no);
+		if(!empty($notified_users)){
+			$data = [
+				'title' => 'Pembatalan Pengajuan DPL',
+				'message' => 'Pembatalan Pengajuan DPL #'.$suggest_no,
+				'id' => $suggest_no,
+				'href' => route('dpl.readNotifDPLCancel'),
+				'mail' => [
+					'greeting'=>'',
+					'content'=> ''
+				],
+				'sendmail' => 0
+			];
+			foreach ($notified_users as $key => $email) {
+				foreach ($email as $key2 => $mail) {
+					$data['email'] = $mail;
+					$apps_user = User::where('email',$mail)->first();
+					if(!empty($apps_user))
+						$apps_user->notify(new PushNotif($data));
+				}
+			}
+		}
+
+		return redirect()->route('dpl.list');
 	}
 
 	public function dplDiscountSplit(Request $request){
