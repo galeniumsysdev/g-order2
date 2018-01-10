@@ -30,7 +30,9 @@
                 @endif
               </div>
             </div>
-            @if(Auth::user()->customer->pharma_flag=="1" and (Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet')))
+            @if(Auth::user()->customer->pharma_flag=="1" and (Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))
+              and $pharma
+            )
             <div class="form-group {{ $errors->has('coupon_no') ? ' has-error' : '' }}">
               <label class="control-label col-sm-3" for="dplno">@lang('shop.suggestiondpl') :</label>
               <div class="col-sm-8">
