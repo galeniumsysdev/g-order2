@@ -101,7 +101,7 @@ class ProductController extends Controller
   }*/
 
   public function getDistributor($jns)
-  {    
+  {
     $dist = Auth::user()->customer->hasDistributor()->whereRaw("ifnull(inactive,0)!=1")->get();
 
     if(in_array('PHARMA',$jns))
@@ -540,8 +540,13 @@ class ProductController extends Controller
       //$dist = Session::get('distributor_to','');
       $dist = Customer::where('id','=',$distributorid)->first();
       //dd($oldCart);
-
+      $pharma=false;
       $cart =  new Cart($oldCart);
+      $jns = array_unique(array_pluck($cart->items,'jns'));
+      if(in_array('PHARMA',$jns))
+      {
+        $pharma=true;
+      }
       $alamat = DB::table("customer_sites as c")
           ->select("id", DB::raw("concat(c.address1,
 												IF(c.state IS NULL, '', concat(',',c.state)),
@@ -574,7 +579,7 @@ class ProductController extends Controller
       }
 
       //dd($alamat);
-      return view('shop.checkout',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'addresses'=> $alamat,'billto'=>$billto,'distributor'=>$dist]);
+      return view('shop.checkout',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'addresses'=> $alamat,'billto'=>$billto,'distributor'=>$dist,'pharma'=>$pharma]);
 
     }
 
