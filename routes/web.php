@@ -323,6 +323,7 @@ Route::get('/dpl/suggestno/form','DPLController@generateSuggestNoForm')->name('d
 Route::post('/dpl/suggestno/generate','DPLController@generateExec')->name('dpl.generateExec');
 Route::get('/dpl/suggestno/success','DPLController@generateSuccess')->name('dpl.generateSuccess');
 Route::get('/dpl/suggestno/validation/{outlet_id}/{suggest_no}','DPLController@suggestNoValidation')->name('dpl.suggestNoValidation');
+Route::post('/dpl/suggestno/cancel','DPLController@suggestNoCancel')->name('dpl.suggestNoCancel');
 Route::get('/dpl/distlist/{outlet_id}','DPLController@getDistributorList')->name('dpl.distributorList');
 
 Route::get('/dpl/discount/form/{suggest_no?}','DPLController@inputDiscount')->name('dpl.discountForm');
@@ -341,6 +342,8 @@ Route::post('/dpl/input/set','DPLController@dplNoInputSet')->name('dpl.dplNoSet'
 Route::get('/dpl/discount/{suggest_no?}/{notifid?}','DPLController@readNotifDiscount')->name('dpl.readNotifDiscount');
 Route::get('/dpl/approval/{suggest_no?}/{notifid?}','DPLController@readNotifApproval')->name('dpl.readNotifApproval');
 Route::get('/dpl/input/{suggest_no?}/{notifid?}','DPLController@readNotifDPLInput')->name('dpl.readNotifDPLInput');
+Route::get('/dpl/cancel/{suggest_no?}/{notifid?}','DPLController@readNotifDPLCancel')->name('dpl.readNotifDPLCancel');
+Route::get('/dpl/cancel/outlet/{suggest_no?}/{notifid?}','DPLController@readNotifDPLCancelOutlet')->name('dpl.readNotifDPLCancelOutlet');
 
 //Organization Structure
 Route::get('/Organization','OrgStructureController@index')->name('org.list');

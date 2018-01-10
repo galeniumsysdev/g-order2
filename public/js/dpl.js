@@ -63,4 +63,17 @@ $(document).ready(function(){
 			})
 		}
 	)
+
+	$('#btn-dpl-cancel').click(function(e){
+		e.preventDefault();
+		document.getElementById("loader").style.display = "block";
+		document.getElementById("myDiv").style.display = "none";
+		$.post(window.Laravel.url+'/dpl/suggestno/cancel/',{
+			suggest_no : $('#suggest_no').val(),
+			customer_po : $('#customer-po').val(),
+			note : $('#note').val()
+		}).done(function (result){
+			window.location.href = window.Laravel.url + '/dpl/list';
+		})
+	})
 })
