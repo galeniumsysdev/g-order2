@@ -53,7 +53,7 @@
                         </div>
                       </div>
                       <div class="col-md-10">
-                        {{ Form::hidden('outlet',$dpl['dpl_outlet_id'],array('id'=>'outlet')) }}
+                        {{ Form::hidden('outlet_id',$dpl['dpl_outlet_id'],array('id'=>'outlet')) }}
                         <span class="default-value">{{ $dpl['dpl_outlet_name'] }}</span>
                       </div>
                     </div>
