@@ -225,8 +225,7 @@
       </div>
     </div>
   </div>
-  {{ Form::close() }}
-
+  {{ Form::close() }}  
 @endsection
 @section('js')
 

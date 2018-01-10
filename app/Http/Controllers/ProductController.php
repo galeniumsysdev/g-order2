@@ -492,6 +492,7 @@ class ProductController extends Controller
     $product->enabled_flag = $request->enabledflag;
     $product->description =$request->id_descr;
     $product->description_en =$request->en_descr;
+    $product->long_description = $request->generik;
     $product->save();
     if($request->category){
       $product->categories()->detach();
@@ -1008,7 +1009,7 @@ class ProductController extends Controller
     					'id' => $suggest_no,
     					'href' => route('dpl.readNotifApproval'),
     					'mail' => [
-    						'greeting'=>'create order',
+    						'greeting'=>'Pengajuan DPL #'.$request->coupon_no,
     						'content'=> 'Pengajuan DPL #'.$request->coupon_no,
     					]
     				];

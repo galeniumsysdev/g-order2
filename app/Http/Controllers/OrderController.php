@@ -651,11 +651,11 @@ class OrderController extends Controller
           $afterheader = DB::table('so_lines_sum_v')->where('header_id','=',$request->header_id)->first();
 
           if($afterheader->qty_accept_primary==$afterheader->qty_confirm_primary
-          or $afterheader->qty_accept_primary==$afterheader->qty_request_primary)
+          or ($afterheader->qty_confirm_primary==0 and $afterheader->qty_accept_primary==$afterheader->qty_request_primary))
           {
               $header->status = 4;
           }elseif(($afterheader->qty_shipping_primary==$afterheader->qty_confirm_primary and $afterheader->qty_shipping_primary!=0)
-          or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary){
+          or ($afterheader->qty_confirm_primary==0 and $afterheader->qty_shipping_primary==$afterheader->qty_request_primary)){
               $header->status = 3;
           }else{ $header->status = 2;}
           $header->save();

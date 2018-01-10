@@ -251,7 +251,7 @@ class DPLController extends Controller {
 				'href' => route('dpl.readNotifDiscount'),
 				'mail' => [
 					'greeting'=>'Yang terhormat FSM/HSM Galenium',
-					'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.\n\nUntuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.\nTerima kasih.'
+					'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.<br>Untuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.\nTerima kasih.'
 				]
 			];
 			foreach ($notified_users as $key => $email) {
@@ -483,13 +483,20 @@ class DPLController extends Controller {
 		Auth::User()->notifications()
 		           	->where('id','=',$notifid)
 		            ->update(['read_at' => Carbon::now()]);
-
+		Auth::User()->notifications()
+		           	->whereraw("data like '%\"id\":\"".$suggest_no."\"%'")
+								->wherenull('read_at')
+		            ->update(['read_at' => Carbon::now()]);
 		return redirect()->route('dpl.discountApproval',$suggest_no);
 	}
 
 	public function readNotifApproval($suggest_no, $notifid){
 		Auth::User()->notifications()
 		           	->where('id','=',$notifid)
+		            ->update(['read_at' => Carbon::now()]);
+		Auth::User()->notifications()
+		           	->whereraw("data like '%\"id\":\"".$suggest_no."\"%'")
+								->wherenull('read_at')
 		            ->update(['read_at' => Carbon::now()]);
 
 		return redirect()->route('dpl.discountForm',$suggest_no);
@@ -499,7 +506,10 @@ class DPLController extends Controller {
 		Auth::User()->notifications()
 		           	->where('id','=',$notifid)
 		            ->update(['read_at' => Carbon::now()]);
-
+		Auth::User()->notifications()
+		           	->whereraw("data like '%\"id\":\"".$suggest_no."\"%'")
+								->wherenull('read_at')
+		            ->update(['read_at' => Carbon::now()]);
 		return redirect()->route('dpl.dplNoForm',$suggest_no);
 	}
 
@@ -546,13 +556,23 @@ class DPLController extends Controller {
 			->leftJoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->leftJoin('so_headers', 'so_headers.notrx', 'dpl_suggest_no.notrx')
 			->leftjoin('customers as distributor', 'distributor.id', 'so_headers.distributor_id')
-			->where('active', 1)
-			->orderby('dpl_suggest_no.created_at','desc')
-			->get();
+			->where('active', 1);
+
 
 		$user_role = Auth::user()->roles;
 		$role = $user_role[0]->name;
-
+		if($role=="SPV" or $role=="ASM")
+		{
+				$dpl =$dpl->where(function($query){
+						$query->where('dpl_suggest_no.mr_id','=',Auth::user()->id)
+									->orWhereExists(function($query2){
+											$query2->select(DB::raw(1))
+			                      ->from('org_structure as os')
+			                      ->whereRaw("os.user_id = dpl_suggest_no.mr_id and directsup_user_id = '".Auth::user()->id."'");
+									});
+				});
+		}
+		$dpl =$dpl->orderby('dpl_suggest_no.created_at','desc')->get();
 		$dpl_show = array();
 		foreach ($dpl as $key => $list) {
 			$allowed = DB::select('SELECT privilegeSuggestNo(?,?) AS allowed', [$list->suggest_no, Auth::user()->id]);

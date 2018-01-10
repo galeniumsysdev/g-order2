@@ -45,6 +45,10 @@
        <textarea class="form-control" id="id_descr" name="id_descr">{{old('id_descr')?old('id_descr'):$product->description}}</textarea>
      </div>
      <div class="form-group">
+       <label for="messageArea">Nama Generik</label>
+       <textarea class="form-control" id="generik" name="generik">{{old('generik')?old('generik'):$product->long_description}}</textarea>
+     </div>
+     <div class="form-group">
          <label for="imageInput">File Image</label>
          <input data-preview="#preview" name="input_img" type="file" id="imageInput">
          @if ($errors->has('input_img'))

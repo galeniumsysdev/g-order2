@@ -355,14 +355,15 @@
                 @if(isset($deliveryno))
                   <div role="tabpanel" class="tab-pane" id="shipping">
                     <div class="panel-group" id="accordion">
-                      @foreach($deliveryno as $key => $delivery)
+                      @php($karakter_ubah = array("(", ")"))
+                      @foreach($deliveryno as $key => $delivery)                      
                         <div class="panel panel-default">
                           <form action="{{route('order.cancelPO')}}" method="post">
                             {{ csrf_field() }}
                             <input type="hidden" name="header_id" value="{{$header->id}}">
                             <div class="panel-heading">
                               <h6 class="panel-title kirim-panel">
-                                Delivery No:<a data-toggle="collapse" data-parent="#accordion" href="#{{$key}}">{{$key}}</a>
+                                Delivery No:<a data-toggle="collapse" data-parent="#accordion" href="#{{str_replace($karakter_ubah,"",$key)}}">{{$key}}</a>
                                 <input type="hidden" name="deliveryno" value="{{$key}}">
                                 @if($delivery->first()->tgl_kirim)
                                 <p class="pull-right">Date: {{$delivery->first()->tgl_kirim}}</p>
@@ -370,9 +371,9 @@
                               </h6>
                             </div>
                             @if(Auth::user()->customer_id==$header->customer_id and $delivery->sum('qty_accept')==0)
-                            <div id="{{$key}}" class="panel-collapse collapse in">
+                            <div id="{{str_replace($karakter_ubah,"",$key)}}" class="panel-collapse collapse in">
                             @else
-                            <div id="{{$key}}" class="panel-collapse collapse">
+                            <div id="{{str_replace($karakter_ubah,"",$key)}}" class="panel-collapse collapse">
                             @endif
                               <div class="panel-body">
                                 <table class="table">
@@ -465,7 +466,7 @@
                                   <tbody>
                                     @foreach($lines as $newdelivery)
                                     @if((floatval($newdelivery->qty_shipping_primary) < floatval($newdelivery->qty_confirm_primary) and Auth::user()->customer_id ==$header->distributor_id)
-                                      or (floatval($newdelivery->qty_accept_primary) < floatval($newdelivery->qty_request_primary) and floatval($newdelivery->qty_shipping_primary) < floatval($newdelivery->qty_request_primary) and Auth::user()->customer_id ==$header->customer_id)
+                                      or (floatval($newdelivery->qty_accept_primary) < (floatval($newdelivery->qty_request_primary)+intval($newdelivery->bonus_gpl)) and floatval($newdelivery->qty_shipping_primary) < (floatval($newdelivery->qty_request_primary)+intval($newdelivery->bonus_gpl)) and Auth::user()->customer_id ==$header->customer_id)
                                        )
                                     <tr>
                                       <td>{{$newdelivery->title}}</td>
