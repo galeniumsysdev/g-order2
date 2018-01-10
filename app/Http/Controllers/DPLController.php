@@ -250,8 +250,8 @@ class DPLController extends Controller {
 				'id' => $suggest_no,
 				'href' => route('dpl.readNotifDiscount'),
 				'mail' => [
-					'greeting'=>'',
-					'content'=> ''
+					'greeting'=>'Yang terhormat FSM/HSM Galenium',
+					'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.\n\nUntuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.\nTerima kasih.'
 				]
 			];
 			foreach ($notified_users as $key => $email) {
@@ -262,10 +262,14 @@ class DPLController extends Controller {
 									));
 				foreach ($email as $key2 => $mail) {
 					$data['email'] = $mail;
-					if($key == 'FSM_HSM')
-						$data['sendmail'] = 0;
+					if($key == 'FSM_HSM'){
+						if($user_role[0]->name == 'Admin DPL')
+							$data['sendmail'] = 1;
+						else
+							$data['sendmail'] = 0;
+					}
 					else
-						$data['sendmail'] = 1;
+						$data['sendmail'] = 0;
 					$apps_user = User::where('email',$mail)->first();
 					if(!empty($apps_user))
 						$apps_user->notify(new PushNotif($data));
@@ -355,8 +359,8 @@ class DPLController extends Controller {
 						'id' => $suggest_no,
 						'href' => route('dpl.readNotifApproval'),
 						'mail' => [
-							'greeting'=>'',
-							'content'=> ''
+							'greeting'=>'Yang terhormat FSM/HSM Galenium',
+							'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.\n\nUntuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.\nTerima kasih.'
 						]
 					];
 				}
@@ -390,7 +394,7 @@ class DPLController extends Controller {
 								$data['sendmail'] = 0;
 						}
 						else
-							$data['sendmail'] = 1;
+							$data['sendmail'] = 0;
 						$apps_user = User::where('email',$mail)->first();
 						if(!empty($apps_user))
 							$apps_user->notify(new PushNotif($data));
@@ -420,7 +424,7 @@ class DPLController extends Controller {
 						if($key == 'FSM_HSM')
 							$data['sendmail'] = 0;
 						else
-							$data['sendmail'] = 1;
+							$data['sendmail'] = 0;
 						$apps_user = User::where('email',$mail)->first();
 						if(!empty($apps_user))
 							$apps_user->notify(new PushNotif($data));
@@ -704,6 +708,7 @@ class DPLController extends Controller {
 					'greeting'=>'',
 					'content'=> ''
 				],
+				'sendmail' => 0,
 				'email'=> $distributor->user->email
 			];
 
@@ -823,7 +828,8 @@ class DPLController extends Controller {
 			    					'mail' => [
 			    						'greeting'=>'create order',
 			    						'content'=> 'test create order'
-			    					]
+			    					],
+			    					'sendmail' => 0
 			    				];
 			    				foreach ($notified_users as $key => $email) {
 			    					foreach ($email as $key2 => $mail) {
