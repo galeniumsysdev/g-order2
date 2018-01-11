@@ -567,14 +567,15 @@ class DPLController extends Controller {
 			'dpl_suggest_no.notrx',
 			'fill_in',
 			'approved_by',
-			'next_approver')
+			'next_approver','active')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->leftJoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->leftJoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->leftJoin('so_headers', 'so_headers.notrx', 'dpl_suggest_no.notrx')
 			->leftjoin('customers as distributor', 'distributor.id', 'so_headers.distributor_id')
-			->where('active', 1);
+			->where('active', 1)
+			;
 
 
 		$user_role = Auth::user()->roles;
@@ -598,7 +599,7 @@ class DPLController extends Controller {
 			if(!$allowed)
 				continue;
 
-			$dpl[$key]->btn_discount = ($list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
+			$dpl[$key]->btn_discount = ($list->active && $list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
 
 			$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
 									->where('role_user.user_id',$list->approved_by)
@@ -610,13 +611,13 @@ class DPLController extends Controller {
 			if(!empty($notified_users)){
 				foreach ($notified_users as $ind => $email) {
 					if(strpos($ind, $role) !== false){
-						$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+						$dpl[$key]->btn_confirm = ($list->active && !$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 						break;
 					}
 				}
 			}
 
-			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
+			$dpl[$key]->btn_dpl_no = ($list->active && !$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
 
 			array_push($dpl_show, $dpl[$key]);
 		}
@@ -764,7 +765,10 @@ class DPLController extends Controller {
 		$note = $request->note;
 		$update = DPLSuggestNo::where('suggest_no',$suggest_no)
 							->update(array('note'=>$note,'active'=>0));
-
+		$soheader = SoHeader::where('suggest_no',$suggest_no)->first();
+		$soheader->status=-98;
+		$soheader->save();
+		$this->dplLog($suggest_no, 'Batalkan Pengajuan DPL #' . $suggest_no,$note);
 		// Notif to outlet
 		$dpl = DPLSuggestNo::select('users.email','note')
 							->join('users','users.customer_id','dpl_suggest_no.outlet_id')
@@ -774,8 +778,8 @@ class DPLController extends Controller {
 		$data = [
 			'title' => 'Pembatalan Pengajuan DPL',
 			'message' => 'Pembatalan Pengajuan DPL #'.$suggest_no,
-			'id' => $suggest_no,
-			'href' => route('dpl.readNotifDPLCancelOutlet'),
+			'id' => $soheader->id,
+			'href' => route('order.notifnewpo'),
 			'mail' => [
 				'greeting'=>'Pembatalan Pengajuan DPL #'.$suggest_no,
 				'content'=> "Pengajuan no DPL #".$suggest_no." untuk PO #".$customer_po." anda telah dibatalkan oleh marketing PT.Galenium Pharmasaia Laboratories dengan alasan\n\n".$note

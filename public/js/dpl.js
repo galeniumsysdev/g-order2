@@ -68,7 +68,7 @@ $(document).ready(function(){
 		e.preventDefault();
 		document.getElementById("loader").style.display = "block";
 		document.getElementById("myDiv").style.display = "none";
-		$.post(window.Laravel.url+'/dpl/suggestno/cancel/',{
+		$.post(window.Laravel.url+'/dpl/suggestno/cancel',{
 			suggest_no : $('#suggest_no').val(),
 			customer_po : $('#customer-po').val(),
 			note : $('#note').val()
