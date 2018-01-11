@@ -26,7 +26,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="outlet">MR</label>
+                          <label for="outlet">SPV</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -133,7 +133,11 @@
                         </div>
                       </div>
                       <div class="col-md-10">
-                        <span class="default-value">{{ $header->dpl_no }}</span>
+                        <span class="default-value">
+                          @if($header->dpl_no)
+                          {{ 'G'.$header->dpl_no }}
+                          @endif
+                        </span>
                       </div>
                     </div>
                   </div>
