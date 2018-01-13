@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -30,9 +30,38 @@
                           <label for="outlet">Outlet</label>
                         </div>
                       </div>
-                      <div class="col-md-10">
-                        {{ Form::text('outlet','',array('class'=>'form-control','id'=>'outlet')) }}
+                      <div class="col-md-10  product-container">
+                        {{ Form::text('outlet','',array('class'=>'form-control','id'=>'outlet','autocomplete'=>'off')) }}
+                        {{ Form::button('X', array('class'=>'btn btn-link btn-remove text-danger change-outlet','id'=>'change-outlet')) }}
                         {{ Form::hidden('outlet_id','',array('class'=>'form-control','id'=>'outlet-id')) }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group" id="block-alamat" >
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="outlet">Alamat</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        {{ Form::text('alamat','',array('class'=>'form-control','id'=>'alamat')) }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="outlet">Kowil MR</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        {{ Form::text('kowil_mr','',array('class'=>'form-control','id'=>'kowil_mr','required'=>'required')) }}
                       </div>
                     </div>
                   </div>

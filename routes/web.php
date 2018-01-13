@@ -266,6 +266,7 @@ Route::group(['middleware' => ['auth','prevent-back-history']], function () {
   Route::post('/SO/approval','OrderController@approvalSO')->name('order.approvalSO');
   Route::get('/notif/newpo/{id?}/{notifid?}','OrderController@readnotifnewpo')->name('order.notifnewpo');
   Route::post('/PO/batal','OrderController@batalPO')->name('order.cancelPO');
+  Route::post('/PO/update','OrderController@updatePO')->name('order.updatePO');
   //Route::post('/PO/Receive','OrderController@receivePO')->name('order.receivePO');
   Route::get('/download/PO/{file}', function ($file='') {
       return response()->download(storage_path('app/PO/'.$file));

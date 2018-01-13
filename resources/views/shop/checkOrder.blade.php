@@ -89,7 +89,7 @@
                 <div class="form-group">
                   <label for="name" class="col-md-2 control-label">DPL No</label>
                     <div class="col-md-10" >
-                      <input type="text" class="form-control" name="dpl_no" value="{{$header->dpl_no}}" readonly>
+                      <input type="text" class="form-control" name="dpl_no" value="{{'G'.$header->dpl_no}}" readonly>
                     </div>
                 </div>
               @endif
@@ -140,7 +140,7 @@
                 					<th style="width:10%" class="text-center">@lang('shop.Price')</th>
                           <th style="width:7%" class="text-center">@lang('shop.uom')</th>
                 					<th class="text-center">@lang('shop.qtyorder')</th>
-                          @if($header->dpl_no)
+                          @if($header->dpl_no and $header->status>=-2)
                           <th style="width:5%" class="text-center">Disc Distributor(%)</th>
                           <th style="width:5%" class="text-center">Disc GPL(%)</th>
                           <th style="width:5%" class="text-center">Bonus GPL</th>
@@ -356,7 +356,7 @@
                   <div role="tabpanel" class="tab-pane" id="shipping">
                     <div class="panel-group" id="accordion">
                       @php($karakter_ubah = array("(", ")"))
-                      @foreach($deliveryno as $key => $delivery)                      
+                      @foreach($deliveryno as $key => $delivery)
                         <div class="panel panel-default">
                           <form action="{{route('order.cancelPO')}}" method="post">
                             {{ csrf_field() }}

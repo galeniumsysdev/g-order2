@@ -1,11 +1,14 @@
 $(document).ready(function(){
+	$('#block-alamat').hide();
+	$('#change-outlet').hide();
 	if($('#dpl-list').length){
     	$('#dpl-list').DataTable({
     		'order': [],
     		columnDefs: [
 	            { responsivePriority: 1, targets: 0 },
 	            { responsivePriority: 2, targets: 1 },
-	            { responsivePriority: 3, targets: 8 }
+	            { responsivePriority: 3, targets: 9 },
+							{ width: 10, targets: 1 }
 	        ]
     	});
         window.setTimeout(function(){
@@ -59,10 +62,21 @@ $(document).ready(function(){
 				},
 				afterSelect: function (item){
 					$('#outlet-id').val(item.id);
+					$('#alamat').val(item.address1+","+item.city+","+item.province);
+					$('#change-outlet').show();
+					$('#block-alamat').show();
+					$('#outlet').attr('readonly','readonly');
 				}
 			})
 		}
 	)
+
+	$('.change-outlet').click(function(){
+			$(this).hide();
+			$('#block-alamat').hide();
+			$('#alamat').val('');
+			$('#outlet').removeAttr('readonly').val('');
+	})
 
 	$('#btn-dpl-cancel').click(function(e){
 		e.preventDefault();
