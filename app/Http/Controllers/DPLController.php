@@ -288,11 +288,19 @@ class DPLController extends Controller {
 				];
 			}
 			foreach ($notified_users as $key => $email) {
-				$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-					->update(array('fill_in' => 0,
-									'approved_by' => Auth::user()->id,
-									'next_approver' => $key
-									));
+				if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+						->update(array('fill_in' => 0,
+										'approved_by' => Auth::user()->id,
+										'next_approver' => $key
+										));
+				}else{
+					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+						->update(array('fill_in' => 0,
+										'approved_by' => Auth::user()->id,
+										'next_approver' => null
+										));
+				}
 				foreach ($email as $key2 => $mail) {
 					$data['email'] = $mail;
 					if($key == 'FSM_HSM'){
@@ -364,7 +372,7 @@ class DPLController extends Controller {
 					break;
 				}
 			}
-			
+
 			if($check_count == 0)
 				return redirect()->route('dpl.discountView',$suggest_no);
 		}
