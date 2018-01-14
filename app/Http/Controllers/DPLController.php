@@ -668,7 +668,7 @@ class DPLController extends Controller {
 			if(!empty($notified_users)){
 				foreach ($notified_users as $ind => $email) {
 					if(strpos($ind, $role) !== false){
-						$dpl[$key]->btn_confirm = ($list->active && !$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+						$dpl[$key]->btn_confirm = ($list->active && !$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) ) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 						break;
 					}
 				}
@@ -958,11 +958,11 @@ class DPLController extends Controller {
 						 /*Update soline with new header_id*/
 						 if($so_header->distributor_id!=$request->distributor){
 							 $newlines = SoLine::where('header_id','=',$so_header->id)
- 	 	 						->whereNotIn('line_id',$request->lineid)
+ 	 	 						->whereIn('line_id',$request->lineid)
  								->update(['header_id'=>$newheader->id,'qty_confirm'=>null]);
 						 }else{
 							 $newlines = SoLine::where('header_id','=',$so_header->id)
- 	 	 						->whereNotIn('line_id',$request->lineid)
+ 	 	 						->whereIn('line_id',$request->lineid)
  								->update(['header_id'=>$newheader->id]);
 						 }
 						 //dd("suggestno:" $suggest_no);
