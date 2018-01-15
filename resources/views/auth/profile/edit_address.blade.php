@@ -75,7 +75,11 @@
             <label class="col-sm-2 control-label" for="textinput">@lang('label.city_regency')</label>
             <div class="col-sm-10">
 							<select name="city" class="form-control" id="city" onchange="getListDistrict(this.value,{{$site->district_id}})" required>
+								@forelse ($listcity as $city)
+								<option value="{{$city->id}}" {{$site->city_id==$city->id?"selected=selected":''}}>{{$city->name}}</option>								
+								@empty
 								<option value="">--</option>
+								@endforelse
 							</select>
 							@if ($errors->has('district'))
 									<span class="help-block">
@@ -92,7 +96,11 @@
             <label class="col-sm-2 control-label" for="textinput">@lang('label.subdistrict')</label>
             <div class="col-sm-10">
 							<select name="district" class="form-control" id="district" onchange="getListSubdistrict(this.value,{{$site->state_id}})" required>
+								@forelse ($listdistrict as $district)
+								<option value="{{$district->id}}" {{$site->district_id==$district->id?"selected=selected":''}}>{{$district->name}}</option>
+								@empty
 								<option value="">--</option>
+								@endforelse
 							</select>
 							@if ($errors->has('district'))
 									<span class="help-block">
@@ -110,7 +118,11 @@
             <div class="col-sm-10">
               <!--<input type="text" name="state" placeholder="@lang('label.state')" class="form-control" value="{{ $site->state }}">-->
 							<select name="state" class="form-control" id="subdistricts">
+								@forelse ($listvillage as $village)
+								<option value="{{$village->id}}" {{$site->state_id==$village->id?"selected=selected":''}}>{{$village->name}}</option>
+								@empty
 								<option value="">--</option>
+								@endforelse
 							</select>
 							@if ($errors->has('state'))
 									<span class="help-block">
@@ -135,6 +147,17 @@
 
           </div>
 				</div>
+				<div class="container">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="textinput">Lokasi</label>
+						<div class="row" align="center">
+							<input id="pac-input" class="controls" type="text" placeholder="Search Box">
+							<div class="col-md-8 col-md-offset-1" id ="map"></div>
+							<input type="text" name="langitude" value="{{$site->langitude}}" id="langitude_txt">
+							<input type="text" name="longitude" value="{{$site->longitude}}" id="longitude_txt">
+						</div>
+					</div>
+				</div>
 
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -157,12 +180,12 @@
 
 @endsection
 @section('js')
-<script src="{{ asset('js/register.js') }}"></script>
-<script>
-    $(document).ready(function() {
-			getListCity({{is_null($site->province_id)?0:$site->province_id}},{{is_null($site->city_id)?0:$site->city_id}});
-      getListDistrict({{is_null($site->city_id)?0:$site->city_id}},{{is_null($site->district_id)?0:$site->district_id}});
-      getListSubdistrict({{is_null($site->district_id)?0:$site->district_id}},{{is_null($site->state_id)?0:$site->state_id}});
-    });
+<script crossorigin="anonymous" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" src="https://code.jquery.com/jquery-3.1.0.min.js">
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDh9yEKw9W4sFrlTFFw_cZjvnAYSeMSa2w&language=id&libraries=places"
+  async="" defer=""></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="{{ asset('js/edit_address.js') }}"></script>
+<script src="{{ asset('js/register.js') }}"></script>
+
 @endsection
