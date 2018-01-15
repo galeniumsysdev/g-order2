@@ -297,6 +297,7 @@ class RegisterController extends Controller
 
     public function mappingDistributor($groupdc,$city,$tipe)
     {
+      DB::enableQueryLog();
       $distributor = DB::table('customers as c')
               ->join('users as u','c.id','=','u.customer_id')
               ->join('role_user as ru','u.id','=','ru.user_id')
@@ -320,9 +321,9 @@ class RegisterController extends Controller
         $distributor = $distributor->where([
           ['c.pharma_flag','=',"1"]
         ])->whereNull('dg.group_id')
+          ->where('r.name','!=','Principal')
           ->whereRaw("exists (select 1 from distributor_regency as dr where c.id = dr.distributor_id and dr.regency_id = '".$city."')");
-      }
-
+      }      
       return $distributor;
     }
 
@@ -411,7 +412,7 @@ class RegisterController extends Controller
       $provinces = DB::table('provinces')->get();
       $groupdcs = GroupDatacenter::where('enabled_flag','1')->get();
       $pscproducts = DB::table('flexvalue')->where('master','=','PSC_PRODUCT')->where('enabled_flag','=','Y')->select('name')->orderBy('id')->get();
-      $pharmaproducts = DB::table('flexvalue')->where('master','=','PHARMA_PRODUCT')->where('enabled_flag','=','Y')->select('name')->orderBy('id')->get();      
+      $pharmaproducts = DB::table('flexvalue')->where('master','=','PHARMA_PRODUCT')->where('enabled_flag','=','Y')->select('name')->orderBy('id')->get();
       return view('auth.register',compact('categories','provinces','groupdcs','pscproducts','pharmaproducts'));
     }
 
