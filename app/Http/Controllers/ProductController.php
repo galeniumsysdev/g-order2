@@ -294,7 +294,7 @@ class ProductController extends Controller
       }
     */
 
-    $sqlproduct = $this->getSqlProduct();
+    /*$sqlproduct = $this->getSqlProduct();
     $sqlproduct .= " order by pareto desc, title asc";
     //var_dump($sqlproduct);
 
@@ -334,8 +334,8 @@ class ProductController extends Controller
 
   //  dd($products);
     $products ->setPath(url()->current());*/
-
-    return view('shop.product',['products' => $products]);
+    return view('swipe');
+    //return view('shop.product',['products' => $products]);
   }
 
   public function search(Request $request)

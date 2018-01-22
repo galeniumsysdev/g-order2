@@ -17,14 +17,18 @@
 .thumbnail .caption{
   min-height:70px;
 }
+.owl-carousel .owl-item img{
+  display:block;
+  width: auto!important;
+}
 </style>
 @endsection
 @section('content')
 
 
     <!-- Owl Stylesheets -->
-    <link rel="stylesheet" href="assets/owlcarousel/assets/owl.carousel.min.css">
-    <link rel="stylesheet" href="assets/owlcarousel/assets/owl.theme.default.min.css">
+    <link rel="stylesheet" href="{{asset('assets/owlcarousel/assets/owl.carousel.min.css')}}">
+    <link rel="stylesheet" href="{{asset('assets/owlcarousel/assets/owl.theme.default.min.css')}}">
 
 
     <div class="container">
@@ -48,9 +52,9 @@
             <div class="item">
               <div class="thumbnail">
                 @if($product->imagePath)
-                  <img data-src="holder.js/100%x180" alt="No Image"  class="img product" style="height:80px;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
+                  <img data-src="holder.js/100%x180" alt="No Image"  class="img product" style="height:100px;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
                 @else
-                  <img data-src="holder.js/100%x180" alt="No Image" class="img product" style="height:80px;" src="" data-holder-rendered="true">
+                  <img data-src="holder.js/100%x180" alt="No Image" class="img product" style="height:100px;" src="" data-holder-rendered="true">
                 @endif
                 <legend></legend>
                 <div class="caption">
@@ -129,8 +133,8 @@
     @endforeach
 @endsection
 @section('js')
-<script src="assets/vendors/jquery.min.js"></script>
-<script src="assets/owlcarousel/owl.carousel.js"></script>
+<script src="{{asset('assets/vendors/jquery.min.js')}}"></script>
+<script src="{{asset('assets/owlcarousel/owl.carousel.js')}}"></script>
 <script src="{{ asset('js/myproduct.js') }}"></script>
     <script>
       var owl = $('.owl-carousel');
