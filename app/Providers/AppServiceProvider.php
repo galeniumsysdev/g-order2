@@ -20,14 +20,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-      view()->composer(['layouts.navbar_product','shop.product'], function($view)
+      view()->composer(['layouts.navbar_product','shop.product','swipe'], function($view)
      {
         $product_flexfields = Category::where([//ProductFlexfield::where([
                                         ['enabled_flag','=','Y']
                                         ,['summary_flag','=','N']
                                         //,['flex_value_set_id','=',config('constant.flex_value_set_id')]
                               ]);
-        if(isset(Auth::user()->customer_id)){        
+        if(isset(Auth::user()->customer_id)){
           $customer = Customer::find(Auth::user()->customer_id);
 
             if($customer->psc_flag!="1" )
