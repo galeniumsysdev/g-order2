@@ -7,7 +7,7 @@
 		<div class="container">
 			@include('shop.carausel')
 		</div>
-	<a href="{{route('swipe')}}">swipe link</a>
+	
 	@foreach($product_flexfields as $flexfield)
 		<div class="container container-product">
 			<!--JUDUL KATEGORI-->

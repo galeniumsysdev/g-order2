@@ -86,6 +86,24 @@ class Product extends Model
       return $diskon;
     }
 
+    public function getPromo()
+    {
+      $prg=null;
+      if(Auth::user()->customer->oracle_customer_id){
+      $prg =DB::table('qp_pricing_discount as qpd')
+          ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
+          ->where('qpd.list_line_type_code', '=','PRG')
+          ->where('customer_id','=',Auth::user()->customer->oracle_customer_id)
+          ->where('item_id','=',$this->inventory_item_id)
+          ->whereraw("current_date between ifnull(start_date_active,date('2017-01-01')) and ifnull(end_date_active,DATE_ADD(CURRENT_DATE,INTERVAL 1 day))")
+          ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
+          ->orderBy('pricing_group_sequence','asc')
+          ->first();
+      }
+      return $prg;
+
+    }
+
 
 
 }
