@@ -1081,33 +1081,42 @@ class ProductController extends Controller
             $qtyprimary=$product['qty'];
           }*/
           $tmpprice = $product->list_price;
-          $operand_reg =$item->getRateDiskon()->where('pricing_group_sequence','=',1)->first();
-          if($operand_reg)
-          {
-            $disc1 =$operand_reg->operand;
-            $amountdisc1=$tmpprice*$disc1/100;
-            $tmpprice =$tmpprice-$amountdisc1;
+          if(isset(Auth::user()->customer->oracle_customer_id)){
+            $operand_reg =$item->getRateDiskon()->where('pricing_group_sequence','=',1)->first();
+            if($operand_reg)
+            {
+              $disc1 =$operand_reg->operand;
+              $amountdisc1=$tmpprice*$disc1/100;
+              $tmpprice =$tmpprice-$amountdisc1;
+              echo "tempprice".$tmpprice."<br>";
+            }else{
+              $disc1 = 0;
+              $amountdisc1=0;
+            }
+            $operand_product = $item->getRateDiskon()->where('pricing_group_sequence','=',2)->first();
+            if($operand_product)
+            {
+              $disc2 =$operand_product->operand;
+              $amountdisc2=$tmpprice*$disc2/100;
+              $tmpprice =$tmpprice-$amountdisc2;
+              echo "tempprice2".$tmpprice."<br>";
+            }else{
+              $disc2 =0;
+              $amountdisc2=0;
+            }
+
+            if($tmpprice!=$product->unit_price)
+            {
+              DB::rollback();
+              return redirect()->back()
+                           ->with('msg','Please check price again!');
+            }
           }else{
-            $disc1 = 0;
+            $disc1=0;
+            $disc2=0;
             $amountdisc1=0;
-          }
-          $operand_product = $item->getRateDiskon()->where('pricing_group_sequence','=',2)->first();
-          if($operand_product)
-          {
-            $disc2 =$operand_product->operand;
-            $amountdisc2=$tmpprice*$disc2/100;
-            $tmpprice =$tmpprice-$amountdisc2;
-          }else{
-            $disc2 =0;
             $amountdisc2=0;
           }
-          if($tmpprice!=$product->unit_price)
-          {
-            DB::rollback();
-            return redirect()->route('product.shoppingCart')
-                         ->withMessage('Please check price again!');
-          }
-
           $amount = ($product->amount - $product->discount);
           $total += ($amount+$product->tax_amount);
 
