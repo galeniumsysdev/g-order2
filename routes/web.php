@@ -387,6 +387,12 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
 Route::get('/swipe', function(){
+<<<<<<< HEAD
+return view('swipe');
+})->name('swipe');
+
+=======
 return view('testtable');
 });
+>>>>>>> shanty_dev
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');
