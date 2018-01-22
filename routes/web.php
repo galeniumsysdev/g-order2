@@ -382,4 +382,8 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 */
 
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
+Route::get('/swipe', function(){
+return view('swipe');
+})->name('swipe');
+
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');

@@ -7,7 +7,7 @@
 		<div class="container">
 			@include('shop.carausel')
 		</div>
-
+	<a href="{{route('swipe')}}">swipe link</a>
 	@foreach($product_flexfields as $flexfield)
 		<div class="container container-product">
 			<!--JUDUL KATEGORI-->
@@ -124,33 +124,7 @@
 
 	@endsection
 	@section('js')
-	<script>
-	$(document).ready(function() {
-	$('.carousel-container').owlCarousel({
-	loop: true,
-	margin: 10,
-	responsiveClass: true,
-	responsive: {
-	0: {
-	items: 2,
-	nav: true,
-	loop: false,
-	},
-	600: {
-	items: 3,
-	nav: false,
-	loop: false,
-	},
-	1000: {
-	items: 5,
-	nav: true,
-	loop: false,
-	margin: 20
-	}
-	}
-	})
-	})
-	</script>
+
 	<script src="{{ asset('js/myproduct.js') }}"></script>
 	<script src="{{ asset('assets/vendors/highlight.js') }}"></script>
 	@endsection
