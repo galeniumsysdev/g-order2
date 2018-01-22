@@ -335,7 +335,7 @@ class ProductController extends Controller
   //  dd($products);
     $products ->setPath(url()->current());*/
 
-    return view('shop.product',['products' => $products]);
+    return view('swipe',['products' => $products]);
   }
 
   public function search(Request $request)
@@ -419,6 +419,7 @@ class ProductController extends Controller
       {
         $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$dp->id)->select('uom_code')->get();
         $dp->uom=$uom;
+        $prg=null;
         if(Auth::user()->customer->oracle_customer_id){
         $prg =DB::table('qp_pricing_discount as qpd')
             ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
@@ -1112,10 +1113,10 @@ class ProductController extends Controller
                            ->with('msg','Please check price again!');
             }
           }else{
-            $disc1=0;
-            $disc2=0;
-            $amountdisc1=0;
-            $amountdisc2=0;
+            $disc1=null;
+            $disc2=null;
+            $amountdisc1=null;
+            $amountdisc2=null;
           }
           $amount = ($product->amount - $product->discount);
           $total += ($amount+$product->tax_amount);

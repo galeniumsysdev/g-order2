@@ -24,7 +24,7 @@
 	<!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
 	<link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
 	<link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
-
+@yield('css')
     <!-- Scripts -->
     <script>
     window.Laravel = {
