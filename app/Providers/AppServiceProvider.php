@@ -10,6 +10,7 @@ use Session;
 use App\Banner;
 use DB;
 
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -26,11 +27,9 @@ class AppServiceProvider extends ServiceProvider
                                         ,['summary_flag','=','N']
                                         //,['flex_value_set_id','=',config('constant.flex_value_set_id')]
                               ]);
-        if(isset(Auth::user()->customer_id)){
-          $oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
+        if(isset(Auth::user()->customer_id)){        
           $customer = Customer::find(Auth::user()->customer_id);
-          if(is_null($oldDisttributor))
-          {
+
             if($customer->psc_flag!="1" )
             {
               $product_flexfields =$product_flexfields->where('parent','not like','PSC');
@@ -43,21 +42,7 @@ class AppServiceProvider extends ServiceProvider
             {
               $product_flexfields =$product_flexfields->where('parent','not like','INTERNATIONAL');
             }
-          }else{
-            if($customer->psc_flag!="1" or $oldDisttributor['psc_flag']!="1")
-            {
-              $product_flexfields =$product_flexfields->where('flex_value','not like','1%');
-            }
-            if($customer->pharma_flag!="1" or $oldDisttributor['pharma_flag']!="1")
-            {
-              $product_flexfields =$product_flexfields->where('flex_value','not like','2%');
-            }
-            if($customer->export_flag!="1" or $oldDisttributor['export_flag']!="1")
-            {
-              $product_flexfields =$product_flexfields->where('flex_value','not like','3%');
-            }
 
-          }
           if($customer->tollin_flag==1)
           {
             $product_flexfields =$product_flexfields->whereRaw("parent='TollIn'
@@ -78,9 +63,27 @@ class AppServiceProvider extends ServiceProvider
         }
         //dd($product_flexfields->toSQL());
         $product_flexfields =$product_flexfields->orderBy('flex_value')->get() ;
+        $countbrg=null;
+        if(Auth::check()){
+          if(Auth::user()->can('Create PO'))
+          {
+
+            DB::table('po_draft_lines')->whereraw("exists (select 1
+                      from po_draft_headers
+                      where po_draft_headers.id = po_draft_lines.po_header_id
+                      and date_format(created_at,'%Y-%m-%d') < date_format(now(),'%Y-%m-%d'))"
+                    )->delete();
+            DB::table('po_draft_headers')->whereraw("date_format(created_at,'%Y-%m-%d') < date_format(now(),'%Y-%m-%d')")->delete();
+            $jmlbrg = DB::table('po_draft_lines')
+                    ->join('po_draft_headers as pdh', 'po_draft_lines.po_header_id','=','pdh.id')
+                    ->where('pdh.customer_id','=',Auth::user()->customer_id)
+                    ->count();
+            $countbrg = $jmlbrg;
+          }
+        }
         //dd(DB::getQueryLog());
         //View::share('product_flexfields', $product_flexfields);
-        $view->with('product_flexfields', $product_flexfields);
+        $view->with(['product_flexfields'=> $product_flexfields,'countbrg'=>$countbrg]);
       });
      view()->composer('shop.carausel', function($view)
      {

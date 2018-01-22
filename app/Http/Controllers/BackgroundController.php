@@ -718,11 +718,19 @@ class BackgroundController extends Controller
           foreach($adjustmentso as $soline)
           {
             echo $soline->line_id;
+            $adj_price = $connoracle->table('oe_price_adjustments as opa')
+                        ->where('opa.header_id','=',$soline->header_id)
+                        ->where('opa.line_id','=',$soline->line_id)
+                        ->where('applied_flag','=','Y')
+                        ->select('list_line_id')
+                        ->first();
+            if($adj_price) $list_line_id = $adj_price->list_line_id;else $list_line_id = -1;
+
             $product = DB::table('products')->where('inventory_item_id','=',$soline->inventory_item_id)->select('id')->first();
-            $newline = SoLine::updateOrCreate(['oracle_line_id'=>$soline->line_id],
+            $newline = SoLine::updateOrCreate(['bonus_list_line_id'=>$list_line_id
+                                                ,'product_id'=>$product->id],
                         ['header_id'=>$headerid
-                        ,'product_id'=>$product->id
-                        ,'uom'=> $soline->order_quantity_uom
+                        , 'uom'=> $soline->order_quantity_uom
                         ,'qty_request'=>$soline->ordered_quantity
                         ,'qty_confirm'=>$soline->ordered_quantity*$soline->conversion
                         ,'list_price'=>$soline->unit_list_price
@@ -734,6 +742,7 @@ class BackgroundController extends Controller
                         ,'inventory_item_id'=>$soline->inventory_item_id
                         ,'uom_primary'=>$soline->primary_uom_code
                         ,'qty_request_primary'=>$soline->ordered_quantity*$soline->conversion
+                        ,'oracle_line_id'=>$soline->line_id
                         ]
                         );
             $updateoraline = $connoracle->table('oe_order_lines_all as ola')

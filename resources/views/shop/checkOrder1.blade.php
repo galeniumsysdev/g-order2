@@ -219,7 +219,7 @@
                               <strong>SubTotal: {{$curr}}</strong>
                             </td>
                   					<td style="text-align:right"><strong id="totprice2">
-                              {{ number_format($header->amount,2) }}</strong>
+                              {{ number_format($header->amount_confirm,2) }}</strong>
                             </td>
                             @if($header->status>1)
                             <td style="text-align:right"><strong>
@@ -316,6 +316,9 @@
                                 <th style="width:10%;" class="text-center">@lang('shop.uom')</th>
                                 <th style="width:10%;" class="text-center">@lang('shop.qtyship')</th>
                                 <th style="width:10%;" class="text-center">@lang('shop.qtyreceive')</th>
+                                @if($delivery->sum('qty_backorder')>0)
+                                <th style="width:10%;" class="text-center">@lang('shop.qtybackorder')</th>
+                                @endif
                               </tr>
                             </thead>
                             <tbody>
@@ -323,7 +326,7 @@
                               <tr>
                                 <td>{{$detail->product->title}}</td>
                                 <td style="text-align:center">{{$detail->uom_primary}}</td>
-                                <td style="text-align:center">{{(float)$detail->qty_shipping}}</td>
+                                <td style="text-align:center">{{(float)$detail->qty_shipping+$detail->qty_backorder}}</td>
                                 <td style="text-align:center">
                                   @if(Auth::user()->customer_id==$header->customer_id and (int)$detail->qty_accept==0)
                                     <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}][{{$detail->id}}]">
@@ -331,6 +334,11 @@
                                     {{(float)$detail->qty_accept}}
                                   @endif
                                 </td>
+                                @if($delivery->sum('qty_backorder')>0)
+                                  <td style="text-align:center">
+                                    {{(float)$detail->qty_backorder}}
+                                  </td>
+                                @endif
                               </tr>
                               @endforeach
                             </tbody>

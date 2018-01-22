@@ -191,14 +191,27 @@ class ProfileController extends Controller
       	$site->state_id = strtoupper($request->state);
         $site->postalcode = $request->postalcode;
         $site->Country = 'ID';
+        $site->langitude = $request->langitude;
+        $site->longitude = $request->longitude;
+        if($site->primary_flag=="Y" and isset($request->langitude) and isset($request->longitude))
+        {
+          $updatecustomer =customer::where('id','=',$site->customer_id)
+          ->update(['langitude'=>$request->langitude,'longitude'=> $request->longitude]);
+        }
         $site->save();
+        if($site->province_id) $listcity = DB::table('regencies')->where('province_id','=',$site->province_id)->get();
+        if($site->city_id) $listdistrict = DB::table('districts')->where('regency_id','=',$site->city_id)->get();
+        if($site->district_id) $listvillage = DB::table('villages')->where('district_id','=',$site->district_id)->get();
         DB::commit();
         $prevpage = $request->prevpage;
         //dd($prevpage);
-        return view('auth.profile.edit_address',compact('site','prevpage','provinces'))->withMessage(trans('pesan.update'));
+        return view('auth.profile.edit_address',compact('site','prevpage','provinces','listcity','listdistrict','listvillage'))->withMessage(trans('pesan.update'));
       }else{
           $prevpage = null;
-          return view('auth.profile.edit_address',compact('site','prevpage','provinces'));
+          if($site->province_id) $listcity = DB::table('regencies')->where('province_id','=',$site->province_id)->get();
+          if($site->city_id) $listdistrict = DB::table('districts')->where('regency_id','=',$site->city_id)->get();
+          if($site->district_id) $listvillage = DB::table('villages')->where('district_id','=',$site->district_id)->get();
+          return view('auth.profile.edit_address',compact('site','prevpage','provinces','listcity','listdistrict','listvillage'));
       }
     }catch (\Exception $e) {
       DB::rollback();

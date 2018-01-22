@@ -62,7 +62,9 @@
             <li {{$menu=='SubgroupDatacenter'?'class=active':''}}>
                 <a href="{{route('SubgroupDatacenter.index')}}"><i class="fa fa-fw fa-desktop"></i> Subgroup Datacenter</a>
             </li>
-
+            <li {{$menu=='flexvalue'?'class=active':''}}>
+                <a href="{{route('flexvalue.index')}}"><i class="fa fa-fw fa-desktop"></i> Cth Product</a>
+            </li>
         </ul>
     </li>
 </ul>

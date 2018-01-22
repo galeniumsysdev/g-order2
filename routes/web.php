@@ -182,8 +182,12 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::resource('GroupDataCenter','DataCenterController');
   Route::resource('SubgroupDatacenter','SubgroupDCController');
 
-
-
+  Route::get('/admin/flexvalue','FlexvalueController@index')->name('flexvalue.index');
+  Route::get('/admin/flexvalue/show/{master?}/{id?}','FlexvalueController@show')->name('flexvalue.show');
+  Route::get('/admin/flexvalue/create','FlexvalueController@create')->name('flexvalue.create');
+  Route::post('/admin/flexvalue/create','FlexvalueController@store')->name('flexvalue.store');
+  Route::patch('/admin/flexvalue/edit/{master?}/{id?}','FlexvalueController@update')->name('flexvalue.edit');
+  Route::delete('/admin/flexvalue/delete/{master?}/{id?}','FlexvalueController@destroy')->name('flexvalue.destroy');
 });
 
 Route::get('/manageOutlet/{id}/{notif_id}', 'CustomerController@show')->name('customer.show');
@@ -383,7 +387,12 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
 Route::get('/swipe', function(){
+<<<<<<< HEAD
 return view('swipe');
 })->name('swipe');
 
+=======
+return view('testtable');
+});
+>>>>>>> shanty_dev
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');

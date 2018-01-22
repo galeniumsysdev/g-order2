@@ -18,7 +18,7 @@ class OrgStructureController extends Controller
   {
   	$menu = 'OrgStructure';
   	$users = User::select('users.*','org_structure.*','sup.name as sup_name','users.id as user_id')
-  								->leftjoin('org_structure','org_structure.user_id','users.id')
+  								->join('org_structure','org_structure.user_id','users.id')
   								->leftjoin('users as sup','sup.id','org_structure.directsup_user_id')
   								->whereNull('users.customer_id')
   								->get();

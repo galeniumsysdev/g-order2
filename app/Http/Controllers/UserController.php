@@ -187,13 +187,15 @@ class UserController extends Controller
 
     public function oracleShow($id)
     {
+      $groupid=null;
         $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
                     ->where('id','=',$id)
                     ->orderBy('customer_name','asc')->first();
-
+        if(isset($customer->subgroup_dc_id)) $groupid =  $customer->subgroupdc->group_id;
         $customer_sites = CustomerSite::where('customer_id','=',$id)->get();
         $customer_contacts = CustomerContact::where('customer_id','=',$id)->get();
         $roles = Role::whereIn('name',['Distributor','Distributor Cabang','Principal','Outlet','Apotik/Klinik'])->get();
+        $group = DB::table('Group_DataCenters')->where('enabled_flag','1')->get();
         $principals = DB::table('users as u')->join('role_user as ru','ru.user_id','=','u.id')
                       ->join('roles as r','r.id','=','ru.role_id')
                       ->where('r.name','=','Principal')
@@ -201,15 +203,24 @@ class UserController extends Controller
                       ->get();
         return view('admin.oracle.customershow',['customer'=>$customer,'customer_sites'=>$customer_sites
                                                 ,'customer_contacts'=>$customer_contacts,'roles'=>$roles
-                                                ,'principals'=>$principals,'menu'=>'customer-oracle']);
+                                                ,'principals'=>$principals,'menu'=>'customer-oracle','groups'=>$group,'groupid'=>$groupid]);
     }
 
     public function oracleUpdate(Request $request,$id)
     {
+      DB::beginTransaction();
+      try{
         $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
                     ->where('id','=',$id)
                     ->orderBy('customer_name','asc')->first();
         //dd($customer);
+        if($customer->customer_class_code=="OUTLET" and $request->psc_flag=="1")
+        {
+          $this->validate($request, [
+              'subgroupdc' => 'required',
+          ]);
+          $customer->subgroup_dc_id = $request->subgroupdc;
+        }
         $customer->psc_flag = $request->psc_flag;
         $customer->pharma_flag = $request->pharma_flag;
         $customer->export_flag = $request->export_flag;
@@ -221,14 +232,18 @@ class UserController extends Controller
         }
 
         $usercustomer = User::where('customer_id','=',$customer->id)->first();
-        $this->validate($request, [
-            'email' => 'required|email|unique:users,email,'.$usercustomer->id
-        ]);
+
         if($usercustomer)
         {
+            $this->validate($request, [
+                'email' => 'required|email|unique:users,email,'.$usercustomer->id
+            ]);
             $usercustomer->email = $request->email;
             $usercustomer->save();
         }else{
+          $this->validate($request, [
+              'email' => 'required|email|unique:users'
+          ]);
           $usercustomer = User::firstorCreate(
                             ['customer_id'=>$customer->id],
                             ['email'=>$request->email,'name'=>$request->customer_name
@@ -241,16 +256,22 @@ class UserController extends Controller
         {
           $usercustomer->roles()->sync($request->role);
         }
-        if(isset($request->send_customer))
+        DB::commit();
+        if($request->save_customer=="Send")
         {
+          $usercustomer->validate_flag=1;
+          $usercustomer->save();
           $usercustomer->notify(new InvitationUser($usercustomer));
           return redirect()->route('useroracle.show',$id)
                           ->with('success','Successfully Send Email');
-        }else{
+        }elseif($request->save_customer=="Save"){
           return redirect()->route('useroracle.show',$id)
                           ->with('success','Customer Oracle updated successfully');
         }
-
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
+      }
 
     }
     public function cabangCreate($parent_id)

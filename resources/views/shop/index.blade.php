@@ -58,26 +58,33 @@
                   @endif
 
                 </div>
-                  <div class="price coret" id="hrgcoret-{{$product->id}}">
+                <div class="price coret" id="hrgcoret-{{$product->id}}">
                     @if($product->harga!=$product->price_diskon)
                       {{$currency.number_format($product->harga,2)}}
                     @endif
                 </div>
-
               @endif
             </div>
               @if(Auth::check())
                 <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
                 <input type="hidden" id="disc-{{$product->id}}" value="{{$product->price_diskon}}">
                 <div class ="clearfix" id="addCart-{{$product->id}}">
-                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block" style="margin-top:25px;" role="button">@lang('shop.AddToCart')</a>
+                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block"  role="button">@lang('shop.AddToCart')</a>
                 </div>
                 <div class="info-product" id="info-product-{{$product->id}}">
 					@if(Auth::user()->hasRole('Distributor'))
 						@php ($uom= $product->satuan_secondary)
 						1{{$product->satuan_secondary." = ".(float)$product->rate."/".$product->satuan_primary}}<br>
 					@endif
+
 				</div>
+          <div class="info-product" id="info-product2-{{$product->id}}" style="color:blue;font-weight:bold;text-align:center">
+            @if($product->promo)
+            @if($product->promo->product_attr_value==$product->promo->item_id)
+            {{"Buy ".$product->promo->pricing_attr_value_from."+".$product->promo->benefit_qty." ".$product->promo->benefit_uom_code}}
+            @endif
+            @endif
+          </div>
               @endif
           </div>
         </div>

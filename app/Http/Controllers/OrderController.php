@@ -786,6 +786,7 @@ class OrderController extends Controller
                                   ,'','','ENT','','',$warehouse,'*NB'));
                 $line = DB::table('so_lines as sl')
                       ->join('products as p','sl.product_id','=','p.id')
+                      ->wherenull('bonus_list_line_id')
                       ->where([
                         ['sl.header_id','=',$h->id]
                       ])->select('p.itemcode',DB::raw('sl.qty_confirm as qty_confirm'),'sl.uom_primary','sl.line_id')
@@ -885,8 +886,8 @@ class OrderController extends Controller
       ]);
       if($request->btnterima == "confirm")
       {
-          /*$updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
-                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);*/
+          $updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
+                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);
           $nosj=$request->nosj;
           $soheaders = SoHeader::whereExists(function ($query) use($nosj){
                 $query->select(DB::raw(1))
