@@ -117,14 +117,10 @@
 				</div>
 			</div>
 		</div>
-
-
 	@endforeach
-
-
 	@endsection
 	@section('js')
-	
+
 	<script src="{{ asset('js/myproduct.js') }}"></script>
 	<script src="{{ asset('assets/vendors/highlight.js') }}"></script>
 	@endsection
