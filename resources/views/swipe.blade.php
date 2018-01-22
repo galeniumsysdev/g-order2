@@ -14,14 +14,12 @@
   margin-left: 0px;
   margin-right: 0px;
 }
-.thumbnail.caption{
-  min-height:80px;
-  margin-bottom: 10px;
+.thumbnail .caption{
+  min-height:70px;
 }
 </style>
 @endsection
 @section('content')
-    <link href='https://fonts.googleapis.com/css?family=Lato:300,400,700,400italic,300italic' rel='stylesheet' type='text/css'>
 
 
     <!-- Owl Stylesheets -->
@@ -46,7 +44,7 @@
       <div class="row">
         <div class="large-12 columns">
           <div class="owl-carousel owl-theme owl-loaded owl-drag">
-            @foreach($flexfield->products->take(10) as $product)
+            @foreach($flexfield->products->sortByDesc('pareto')->take(10) as $product)
             <div class="item">
               <div class="thumbnail">
                 @if($product->imagePath)
@@ -56,7 +54,7 @@
                 @endif
                 <legend></legend>
                 <div class="caption">
-                  <h4 style="text-align: center; margin-top: -2px; margin-bottom: -5px;">
+                  <h4 style="text-align: center; margin-top: -2px;">
                     <a href="{{ route('product.detail',['id'=>$product->id])}}">{{$product->title}}</a>
                   </h4>
                 </div>
@@ -75,41 +73,47 @@
                     </select>
                   </div>
                   <div  id="lblhrg-{{$product->id}}" class="clearfix price">
-                    @if($product->item=="43")
-                      @php ($currency="$ ")
-                    @else
-                      @php ($currency="Rp. ")
-                    @endif
-                    @if(Auth::user()->hasRole('Distributor'))
-                      {{$currency.number_format($product->price_diskon,2)}}/{{$product->satuan_secondary}}
-                    @else
-                      {{$currency.number_format($product->price_diskon,2)}}/{{$product->satuan_primary}}
-                    @endif
+                    @if(substr($product->itemcode,0,2)=="43")
+											@php ($currency="$")
+										@else
+											@php ($currency="Rp.")
+										@endif
+										@if(Auth::user()->hasRole('Distributor'))
+											@php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_secondary))
+											@php ($uom = $product->satuan_secondary)
+										@else
+											@php ($disc = $product->getPrice(Auth()->user()->id,$product->satuan_primary))
+											@php ($uom = $product->satuan_primary)
+										@endif
+										{{$currency." ".number_format($disc,2)."/".$uom}}
                   </div>
                   <div class="price coret" id="hrgcoret-{{$product->id}}">
-                      @if($product->harga!=$product->price_diskon)
-                        {{$currency.number_format($product->harga,2)}}
-                      @endif
+                    @php ($price = $product->getRealPrice(Auth()->user()->id,$uom))
+
+										@if($price!=$disc)
+											{{$currency." ".number_format($price,2)}}/{{$uom}}
+
+										@endif
                   </div>
                 @endif
                 </div>
                   @if(Auth::check())
-                  <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
-                  <input type="hidden" id="disc-{{$product->id}}" value="{{$product->price_diskon}}">
+                  <input type="hidden" id="hrg-{{$product->id}}" value="{{$price}}">
+                  <input type="hidden" id="disc-{{$product->id}}" value="{{$disc}}">
                   <div class ="clearfix" id="addCart-{{$product->id}}">
-                    <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block"  role="button">@lang('shop.AddToCart')</a>
+                    <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block"  role="button" id="addCart2-{{$product->id}}">@lang('shop.AddToCart')</a>
                   </div>
                   <div class="info-product" id="info-product-{{$product->id}}">
-          					@if(Auth::user()->hasRole('Distributor'))
-          						@php ($uom= $product->satuan_secondary)
-          						1{{$product->satuan_secondary." = ".(float)$product->rate."/".$product->satuan_primary}}<br>
-          					@endif
+                    @if(Auth::user()->hasRole('Distributor'))
+  										@php ($vrate = $satuan->rate)
+  										1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}<br>
+  									@endif
           				</div>
                   <div class="info-product" id="info-product2-{{$product->id}}" style="color:blue;font-weight:bold;text-align:center">
-                    @if($product->promo)
-                    @if($product->promo->product_attr_value==$product->promo->item_id)
-                    {{"Buy ".$product->promo->pricing_attr_value_from."+".$product->promo->benefit_qty." ".$product->promo->benefit_uom_code}}
-                    @endif
+                    @if($product->getPromo())
+                      @if($product->getPromo()->product_attr_value==$product->getPromo()->item_id)
+                      {{"Buy ".$product->getPromo()->pricing_attr_value_from."+".$product->getPromo()->benefit_qty." ".$product->getPromo()->benefit_uom_code}}
+                      @endif
                     @endif
                   </div>
                   @endif
@@ -133,7 +137,8 @@
       owl.owlCarousel({
         margin: 10,
         loop: false,
-        nav: false,
+        nav: true,
+        dots:false,
         responsive: {
           0: {
             items: 1

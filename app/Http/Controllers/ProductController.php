@@ -335,7 +335,7 @@ class ProductController extends Controller
   //  dd($products);
     $products ->setPath(url()->current());*/
 
-    return view('swipe',['products' => $products]);
+    return view('shop.product',['products' => $products]);
   }
 
   public function search(Request $request)
