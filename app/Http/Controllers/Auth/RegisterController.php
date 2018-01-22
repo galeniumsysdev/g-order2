@@ -137,23 +137,24 @@ class RegisterController extends Controller
             $customer->langitude = $data['langitude'];
             $customer->save();
             /*getdistributor*/
+            if(is_null($customer->oracle_customer_id)){
+              if($customer->psc_flag=="1" and $customer->pharma_flag=="1")
+              {
+                  $distributorpsc = $this->mappingDistributor($groupdc,$city,'PSC');
+                  $distributorpharma = $this->mappingDistributor($groupdc,$city,'PHARMA');
+                  $distributor = $distributorpsc->union($distributorpharma);
+              }elseif($customer->psc_flag=="1"){
+                $distributor = $this->mappingDistributor($groupdc,$city,'PSC');
+              }elseif($customer->pharma_flag=="1"){
+                $distributor = $this->mappingDistributor($groupdc,$city,'PHARMA');
+              }
 
-            if($customer->psc_flag=="1" and $customer->pharma_flag=="1")
-            {
-                $distributorpsc = $this->mappingDistributor($groupdc,$city,'PSC');
-                $distributorpharma = $this->mappingDistributor($groupdc,$city,'PHARMA');
-                $distributor = $distributorpsc->union($distributorpharma);
-            }elseif($customer->psc_flag=="1"){
-              $distributor = $this->mappingDistributor($groupdc,$city,'PSC');
-            }elseif($customer->pharma_flag=="1"){
-              $distributor = $this->mappingDistributor($groupdc,$city,'PHARMA');
-            }
+              $distributor = $distributor->get();
 
-            $distributor = $distributor->get();
-
-            if($distributor)
-            {
-              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+              if($distributor)
+              {
+                $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+              }
             }
          }
          $user_check->password = bcrypt($data['password']);
@@ -323,7 +324,7 @@ class RegisterController extends Controller
         ])->whereNull('dg.group_id')
           ->where('r.name','!=','Principal')
           ->whereRaw("exists (select 1 from distributor_regency as dr where c.id = dr.distributor_id and dr.regency_id = '".$city."')");
-      }      
+      }
       return $distributor;
     }
 

@@ -26,6 +26,7 @@ var browserGeolocationFail = function(error) {
   switch (error.code) {
     case error.TIMEOUT:
       alert("Browser geolocation error !\n\nTimeout.");
+      defaultmap();
       break;
     case error.PERMISSION_DENIED:
       if(error.message.indexOf("Only secure origins are allowed") == 0 || error.message.indexOf("User denied geolocation") == 0) {
@@ -34,6 +35,7 @@ var browserGeolocationFail = function(error) {
       break;
     case error.POSITION_UNAVAILABLE:
       alert("Browser geolocation error !\n\nPosition unavailable.");
+      defaultmap();
       break;
     default:
         alert("failed! "+error.message);
@@ -80,6 +82,16 @@ tryGeolocation();
        createMap(myLatLng);
       //  nearbySearch(myLatLng, "school");
        //searchGirls(latval,lngval);
+   }
+
+   function defaultmap()
+   {
+     var latval = -6.242292;
+     var lngval = 106.804220;
+     document.getElementById("langitude_txt").value=latval;
+     document.getElementById("longitude_txt").value=lngval;
+     myLatLng = new google.maps.LatLng(latval, lngval);
+     createMap(myLatLng);
    }
 
    function fail() {

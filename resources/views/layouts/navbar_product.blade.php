@@ -67,7 +67,7 @@
                           <ul class="nav navbar-right-xs pull-right visible-xs">
                             <li>
                               <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart fa-lg" aria-hidden="true"></i>
-                              <span class="badge" id="shopcart2">{{ Session::has('cart')?Session::get('cart')->totalQty:"" }}</span></a>
+                              <span class="badge" id="shopcart2">{{ isset($countbrg)?$countbrg:"" }}</span></a>
                             </li>
                           </ul>
                         @endif
@@ -212,7 +212,7 @@
                               </li>
                               <li class="hidden-xs">
                                 <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart" aria-hidden="true"></i>&nbsp;@lang('label.shopcart')
-                                  <span class="badge" id="shopcart">{{ Session::has('cart')?Session::get('cart')->totalQty:"" }}</span>
+                                  <span class="badge" id="shopcart">{{ isset($countbrg)?$countbrg:"" }}</span>
                                 </a>
                               </li>
                           @endif

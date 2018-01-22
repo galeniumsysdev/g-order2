@@ -19,6 +19,8 @@
   			<th>Customer Name</th>
   			<th>Email</th>
   			<th>Roles</th>
+				<th>Register</th>
+				<th>Invite Email</th>
   			<th>Action</th>
   		</tr>
     </thead>
@@ -34,10 +36,27 @@
     					<label class="label label-success">{{ $v->display_name }}</label>
     				@endforeach
     			@endif</td>
+					<td>
+						@if($cust->user->register_flag)
+							Y
+						@else
+							N
+				 		@endif
+			    </td>
+					<td>
+						@if($cust->user->validate_flag)
+							Y
+						@else
+							N
+						@endif
+					</td>
         @else
           <td>-</td>
           <td>-</td>
+					<td>-</td>
+					<td>-</td>
         @endif
+
     		<td>
     			<a class="btn btn-info" href="{{route('useroracle.show',$cust->id)}}">Show</a>
     		</td>
