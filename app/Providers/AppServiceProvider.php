@@ -66,8 +66,7 @@ class AppServiceProvider extends ServiceProvider
         $countbrg=null;
         if(Auth::check()){
           if(Auth::user()->can('Create PO'))
-          {
-
+          {		
             DB::table('po_draft_lines')->whereraw("exists (select 1
                       from po_draft_headers
                       where po_draft_headers.id = po_draft_lines.po_header_id
@@ -81,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
             $countbrg = $jmlbrg;
           }
         }
-        //dd(DB::getQueryLog());
+       // dd(DB::getQueryLog());
         //View::share('product_flexfields', $product_flexfields);
         $view->with(['product_flexfields'=> $product_flexfields,'countbrg'=>$countbrg]);
       });

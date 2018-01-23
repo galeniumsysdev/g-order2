@@ -122,7 +122,7 @@ class RegisterController extends Controller
          if (isset($user_check->customer_id)){
             $customer = Customer::find($user_check->customer_id);
             if($customer->subgroupdc){
-                $groupdc =$customer->subgroupdc->groupdatacenter;
+                $groupdc =$customer->subgroupdc->groupdatacenter->id;
             }else $groupdc = null;
 
 
@@ -150,8 +150,7 @@ class RegisterController extends Controller
               }
 
               $distributor = $distributor->get();
-
-              if($distributor)
+		if($distributor)
               {
                 $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
               }
@@ -228,7 +227,9 @@ class RegisterController extends Controller
        $custsites->province = $province->name;
        $custsites->city = $city->name;
        $custsites->district = $district->name;
-       $custsites->state = $state->name;
+	if($state){
+       	$custsites->state = $state->name;
+       }
        $custsites->postalcode = $request->postal_code;
        $custsites->Country = 'ID';
        $custsites->customer_id = $customer->id;
