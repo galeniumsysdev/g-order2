@@ -605,8 +605,7 @@ class ProductController extends Controller
       if(in_array('PHARMA',$jns))
       {
         $pharma=true;
-      }
-	$pharma=true;
+      }	
       $alamat = DB::table("customer_sites as c")
           ->select("id", DB::raw("concat(c.address1,
 												IF(c.state IS NULL, '', concat(',',c.state)),
