@@ -570,10 +570,10 @@ class ProductController extends Controller
         //Session::forget('cart');
         return view('shop.shopping-cart',['products'=>null]);
       }*/
-
+	DB::enableQueryLog();
       /*$oldCart = Session::get('cart');
       $cart =  new Cart($oldCart);*/
-      $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id]);      
+      $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id]);
       $linepo = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
       $jns = PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
       $jns=$jns->toArray();
