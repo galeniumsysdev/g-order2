@@ -57,11 +57,7 @@ Route::group(['middleware'=>['auth','prevent-back-history']],function(){
   Route::post('profile', 'ProfileController@update_avatar')->name('profile.update');
   Route::post('add-address', 'ProfileController@addaddress')->name('profile.address');
   Route::post('add-contact', 'ProfileController@addcontact')->name('profile.contact');
-<<<<<<< HEAD
-  Route::get('add_address', 'profileController@addaddressview');
-=======
   Route::get('add_address', 'ProfileController@addaddressview');
->>>>>>> master
   Route::match(['patch','get'],'/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   //Route::get('/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   Route::get('/add_contact', function () {
@@ -276,10 +272,6 @@ Route::group(['middleware' => ['auth','prevent-back-history']], function () {
   Route::post('/PO/batal','OrderController@batalPO')->name('order.cancelPO');
   Route::post('/PO/update','OrderController@updatePO')->name('order.updatePO');
   //Route::post('/PO/Receive','OrderController@receivePO')->name('order.receivePO');
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 });
 
 Route::group(['middleware' => ['auth']], function () {

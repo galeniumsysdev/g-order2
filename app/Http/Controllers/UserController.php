@@ -318,7 +318,7 @@ class UserController extends Controller
           $newsite = CustomerSite::create(['site_use_code'=>'SHIP_TO'
                                           ,'primary_flag'=>'P'
                                           ,'status'=>'A'
-                                          ,'address1'=>$request->address
+                                          ,'address1'=>strtoupper($request->address)
                                           ,'state'=>$state->name
                                           ,'district'=>$district->name
                                           ,'city'=>$city->name
@@ -385,7 +385,7 @@ class UserController extends Controller
                         ,'city_id'=>$request->city
                         ,'district_id'=>$request->district
                         ,'state_id'=>$request->state
-                        ,'address1'=>$request->address
+                        ,'address1'=>strtoupper($request->address)
                         ,'state'=>$state->name
                         ,'district'=>$district->name
                         ,'city'=>$city->name
