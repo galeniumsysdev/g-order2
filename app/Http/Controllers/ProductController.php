@@ -573,7 +573,7 @@ class ProductController extends Controller
 
       /*$oldCart = Session::get('cart');
       $cart =  new Cart($oldCart);*/
-      $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id])->first();
+      $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id]);      
       $linepo = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
       $jns = PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
       $jns=$jns->toArray();
