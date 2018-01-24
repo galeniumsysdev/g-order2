@@ -220,6 +220,7 @@ class RegisterController extends Controller
        $district=DB::table('districts')->where('id','=',$request->district)->first();
        $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
 
+
        $custsites = new CustomerSite();
        $custsites->site_use_code = "SHIP_TO";
        $custsites->status = "A";
@@ -227,8 +228,8 @@ class RegisterController extends Controller
        $custsites->province = $province->name;
        $custsites->city = $city->name;
        $custsites->district = $district->name;
-	if($state){
-       	$custsites->state = $state->name;
+       if($state){
+         $custsites->state = $state->name;
        }
        $custsites->postalcode = $request->postal_code;
        $custsites->Country = 'ID';

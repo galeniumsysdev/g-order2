@@ -298,7 +298,7 @@
                           <label for="outlet" class="col-sm-4 control-label">*@lang('label.address')</label>
 
                           <div class="col-sm-8">
-                              <textarea id="address" rows="3" class="form-control" name="address" required>{{ old('address') }}</textarea>
+                              <textarea id="address" rows="3" class="form-control" name="address" id="address" required>{{ old('address') }}</textarea>
 
                               @if ($errors->has('address'))
                                   <span class="help-block">
@@ -437,6 +437,9 @@
     $(document).ready(function() {
         $('#name').keyup(function(){
           $("#name").val(($("#name").val()).toUpperCase());
+        });
+        $('#address').keyup(function(){
+          $("#address").val(($("#address").val()).toUpperCase());
         });
 
       getListCity({{is_null(old('province'))?0:old('province')}},{{is_null(old('city'))?0:old('city')}});

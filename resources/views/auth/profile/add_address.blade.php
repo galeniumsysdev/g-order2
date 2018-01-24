@@ -34,7 +34,7 @@
           <div class="form-group {{ $errors->has('address') ? ' has-error' : '' }}">
             <label class="col-sm-2 control-label" for="textinput">@lang('label.address')</label>
             <div class="col-sm-10">
-              <textarea id="address" rows="3" placeholder="@lang('label.address')" class="form-control" name="address" value="#" required>{{ old('address') }}</textarea>
+              <textarea id="address" rows="3" placeholder="@lang('label.address')" class="form-control" name="address" id="address" value="#" required>{{ old('address') }}</textarea>
 							@if ($errors->has('address'))
 									<span class="help-block with-errors">
 											<strong>{{ $errors->first('address') }}</strong>
@@ -145,6 +145,9 @@
 <script src="{{ asset('js/register.js') }}"></script>
 <script>
     $(document).ready(function() {
+			$('#address').keyup(function(){
+				$("#address").val(($("#address").val()).toUpperCase());
+			});
 			getListCity({{is_null(old('province'))?0:old('province')}},{{is_null(old('city'))?0:old('city')}});
       getListDistrict({{is_null(old('city'))?0:old('city')}},{{is_null(old('district'))?0:old('district')}});
       getListSubdistrict({{is_null(old('district'))?0:old('district')}},{{is_null(old('subdistricts'))?0:old('subdistricts')}});

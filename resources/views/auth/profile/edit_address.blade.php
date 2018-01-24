@@ -40,7 +40,7 @@
           <div class="form-group {{ $errors->has('address') ? ' has-error' : '' }}">
             <label class="col-sm-2 control-label" for="textinput">@lang('label.address')</label>
             <div class="col-sm-10">
-              <textarea id="address" rows="3" placeholder="@lang('label.address')" class="form-control" name="address" value="#" required>{{$site->address1}}</textarea>
+              <textarea id="address" rows="3" placeholder="@lang('label.address')" class="form-control" name="address" value="#" required id="address">{{$site->address1}}</textarea>
 							@if ($errors->has('address'))
 									<span class="help-block with-errors">
 											<strong>{{ $errors->first('address') }}</strong>
@@ -180,6 +180,13 @@
 
 @endsection
 @section('js')
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#address').keyup(function(){
+		$("#address").val(($("#address").val()).toUpperCase());
+	});
+});
+</script>
 <script crossorigin="anonymous" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" src="https://code.jquery.com/jquery-3.1.0.min.js">
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDh9yEKw9W4sFrlTFFw_cZjvnAYSeMSa2w&language=id&libraries=places"
