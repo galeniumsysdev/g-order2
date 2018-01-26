@@ -13,7 +13,7 @@
   <div class="row">
         <div class="col-sm-8 col-md-8 col-md-offset-2 col-sm-offset-2">
           <div class="form-group{{ $errors->has('dist') ? ' has-error' : '' }}">
-            <label class="control-label col-sm-3" for="no_order">Distributor :</label>
+            <label class="control-label col-sm-3" for="no_order">@lang('shop.supplier') :</label>
             <div class="col-sm-8">
               <input type="text" id="distributor" name="dist" class="form-control" placeholder="Distributor" required readonly="readonly" value="{{$distributor->customer_name}}">
               <input type="hidden" name="dist_id" class="form-control" required value="{{$distributor->id}}">

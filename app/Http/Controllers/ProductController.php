@@ -570,7 +570,6 @@ class ProductController extends Controller
         //Session::forget('cart');
         return view('shop.shopping-cart',['products'=>null]);
       }*/
-	DB::enableQueryLog();
       /*$oldCart = Session::get('cart');
       $cart =  new Cart($oldCart);*/
       $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id]);
