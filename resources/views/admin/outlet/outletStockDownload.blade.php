@@ -125,7 +125,7 @@
                     <tr>
                       <td>{{ $result['outlet_name'] }}</td>
                       <td>{{ $result['title'] }}</td>
-                      <td>{{ $result['batch'] }}</td>
+                      <td>{!! $result['batch'] !!}</td>
                       <td align="right">{{ $result['begin'] }}</td>
                       <td align="right">{{ $result['in'] }}</td>
                       <td align="right">{{ $result['out'] }}</td>

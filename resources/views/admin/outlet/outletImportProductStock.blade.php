@@ -57,7 +57,7 @@
                         </div>
                         <div class="col-md-10">
                           {{ Form::submit('Submit', array('class'=>'btn btn-info', 'id'=>'btn-import')) }}
-                          <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">Back</a>
+                          <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">@lang('label.back')</a>
                         </div>
                       </div>
                     </div>
@@ -102,7 +102,7 @@
                           </div>
                           {!! Form::open(['url' => route('outlet.importProductStockProcess')]) !!}
                           {{ Form::hidden('data',$data) }}
-                          {{ Form::submit(Lang::get('outlet.batchNo'), array('class'=>'btn btn-primary')) }}
+                          {{ Form::submit(Lang::get('outlet.execute'), array('class'=>'btn btn-primary')) }}
                           {{ Form::close() }}
                         </span>
                       </div>

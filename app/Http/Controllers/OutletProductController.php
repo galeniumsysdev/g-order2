@@ -517,10 +517,20 @@ class OutletProductController extends Controller
                               ->whereDate('created_at','<=',$data['end_date'])
                               ->where('qty','<',0)
                               ->sum('qty');
+      $batch = OutletStock::select('batch')
+                              ->whereDate('created_at','>=',$data['start_date'])
+                              ->whereDate('created_at','<=',$data['end_date'])
+                              ->where('product_id',$prod->product_id)
+                              ->get();
+      $batch_no = '';
+      foreach ($batch as $key2 => $bat) {
+        if($bat->batch)
+          $batch_no .= $bat->batch."<br/>";
+      }
 
       $data['table'][$key]['outlet_name'] = $prod->outlet_name;
       $data['table'][$key]['title'] = $prod->title;
-      $data['table'][$key]['batch'] = $prod->batch;
+      $data['table'][$key]['batch'] = $batch_no;
       $data['table'][$key]['begin'] = $begin;
       $data['table'][$key]['in'] = $in;
       $data['table'][$key]['out'] = $out;
@@ -650,10 +660,20 @@ class OutletProductController extends Controller
                                         ->whereDate('created_at','<=',$data['end_date'])
                                         ->where('qty','<',0)
                                         ->sum('qty');
+                $batch = OutletStock::select('batch')
+                                        ->whereDate('created_at','>=',$data['start_date'])
+                                        ->whereDate('created_at','<=',$data['end_date'])
+                                        ->where('product_id',$prod->product_id)
+                                        ->get();
+                $batch_no = '';
+                foreach ($batch as $key2 => $bat) {
+                  if($bat->batch)
+                    $batch_no .= $bat->batch."\n";
+                }
 
                 $sheet->row($key+6, array($prod->outlet_name,
                                           $prod->title,
-                                          $prod->batch,
+                                          $batch_no,
                                           $begin,
                                           $in,
                                           $out,
