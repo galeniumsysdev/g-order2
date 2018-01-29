@@ -18,7 +18,7 @@
       <div class="col-md-6 col-sm-offset-3">
         <div class="panel panel-default">
           <div class="panel-body">
-            <p>No. Usulan Anda adalah</p>
+            <p>@lang('dpl.yourSuggestNo')</p>
             <h1>{{ $suggest_no }}</h1>
           </div>
         </div>

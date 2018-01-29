@@ -18,7 +18,7 @@
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>DPL No. Form</strong></div>
+          <div class="panel-heading"><strong>@lang('dpl.dplNoForm')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
@@ -72,7 +72,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="suggest-no">No. Usulan</label>
+                          <label for="suggest-no">@lang('dpl.suggestNo')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -86,7 +86,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="note">Note</label>
+                          <label for="note">@lang('dpl.note')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -100,7 +100,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="dpl-no">No. DPL</label>
+                          <label for="dpl-no">@lang('dpl.dplNo')</label>
                         </div>
                       </div>
                       <div class="input-group col-md-10">

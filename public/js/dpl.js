@@ -50,26 +50,28 @@ $(document).ready(function(){
 		})
 	})
 
-	$.get(window.Laravel.url+'/dpl/list/outlet',
-		function (data){
-			$('#outlet').typeahead('destroy');
-			$('#outlet').typeahead({
-				source: data,
-				items: 'all',
-				showHintOnFocus: 'all',
-				displayText: function (item){
-					return item.customer_name;
-				},
-				afterSelect: function (item){
-					$('#outlet-id').val(item.id);
-					$('#alamat').val(item.address1+","+item.city+","+item.province);
-					$('#change-outlet').show();
-					$('#block-alamat').show();
-					$('#outlet').attr('readonly','readonly');
-				}
-			})
-		}
-	)
+	if($('#outlet').length){
+		$.get(window.Laravel.url+'/dpl/list/outlet',
+			function (data){
+				$('#outlet').typeahead('destroy');
+				$('#outlet').typeahead({
+					source: data,
+					items: 'all',
+					showHintOnFocus: 'all',
+					displayText: function (item){
+						return item.customer_name;
+					},
+					afterSelect: function (item){
+						$('#outlet-id').val(item.id);
+						$('#alamat').val(item.address1+","+item.city+","+item.province);
+						$('#change-outlet').show();
+						$('#block-alamat').show();
+						$('#outlet').attr('readonly','readonly');
+					}
+				})
+			}
+		)
+	}
 
 	$('.change-outlet').click(function(){
 			$(this).hide();

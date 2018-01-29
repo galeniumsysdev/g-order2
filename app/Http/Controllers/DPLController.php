@@ -656,7 +656,7 @@ class DPLController extends Controller {
 			if(!$allowed)
 				continue;
 
-			$dpl[$key]->btn_discount = ($list->active && $list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
+			$dpl[$key]->btn_discount = ($list->active && $list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">'.\Lang::get('dpl.discount').'</a>' : '';
 
 			$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
 									->where('role_user.user_id',$list->approved_by)
@@ -668,13 +668,13 @@ class DPLController extends Controller {
 			if(!empty($notified_users)){
 				foreach ($notified_users as $ind => $email) {
 					if(strpos($ind, $role) !== false){
-						$dpl[$key]->btn_confirm = ($list->active && !$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) ) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+						$dpl[$key]->btn_confirm = ($list->active && !$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) ) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">'.\Lang::get('dpl.confirmation').'</a>' : '';
 						break;
 					}
 				}
 			}
 
-			$dpl[$key]->btn_dpl_no = ($list->active && !$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
+			$dpl[$key]->btn_dpl_no = ($list->active && !$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">'.\Lang::get('dpl.dplNo').'</a>' : '';
 
 			array_push($dpl_show, $dpl[$key]);
 		}
@@ -734,7 +734,7 @@ class DPLController extends Controller {
 		if ($check_dpl) {
 			if(!is_null($check_dpl->suggest_no))
 			{
-				return redirect()->back()->withInput()->with('msg', 'DPL No #' . $dpl_no . ' already exist.');
+				return redirect()->back()->withInput()->with('msg', \Lang::get('dpl.dplNo').' #' . $dpl_no . ' '.\Lang::get('dpl.alreadyExist').'.');
 			}else{
 				$check_dpl->suggest_no = $suggest_no;
 				$check_dpl->save();

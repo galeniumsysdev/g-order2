@@ -18,22 +18,22 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Suggestion Number List</strong></div>
+          <div class="panel-heading"><strong>@lang('dpl.suggestNoList')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="table-responsive">
               <table id="dpl-list" class="display responsive nowrap" width="100%">
                 <thead>
                   <tr>
-                    <th>Suggest No.</th>
+                    <th>@lang('dpl.suggestNo')</th>
                     <th></th>
-                    <th>No. Trx</th>
-                    <th>Last Approver</th>
-                    <th>DPL No.</th>
+                    <th>@lang('dpl.trxNo')</th>
+                    <th>@lang('dpl.lastApprover')</th>
+                    <th>@lang('dpl.dplNo')</th>
                     <th>SPV</th>
                     <th>Outlet</th>
                     <th>Distributor</th>
-                    <th>Status PO</th>
-                    <th>Action</th>
+                    <th>@lang('dpl.poStatus')</th>
+                    <th>@lang('label.action')</th>
                   </tr>
                 </thead>
                 <tbody>
