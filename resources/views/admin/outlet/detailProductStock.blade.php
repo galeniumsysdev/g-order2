@@ -17,21 +17,21 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Stock Trx Detail</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.stockTrxDetail')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <h4>
-              Product Name : {{ $title }}<br/>
-              Stock : {{ $last_stock }}
+              @lang('outlet.productName') : {{ $title }}<br/>
+              @lang('outlet.stock') : {{ $last_stock }}
             </h4>
             <br/>
             <div class="table-responsive">
               <table id="detail-list" class="display responsive nowrap" width="100%">
                 <thead>
                   <tr>
-                    <th>Type</th>
-                    <th>Qty</th>
-                    <th>Batch No.</th>
-                    <th>Trx. Date</th>
+                    <th>@lang('outlet.type')</th>
+                    <th>@lang('outlet.qty')</th>
+                    <th>@lang('outlet.batchNo')</th>
+                    <th>@lang('outlet.trxDate')</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -46,7 +46,7 @@
                 </tbody>
               </table>
             </div>
-            <a href="/outlet/product/list" class="btn btn-default">Back</a>
+            <a href="/outlet/product/list" class="btn btn-default">@lang('label.back')</a>
           </div>
         </div>
       </div>

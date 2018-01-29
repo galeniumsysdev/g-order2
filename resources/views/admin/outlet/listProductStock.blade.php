@@ -17,16 +17,16 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Product List</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.productList')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="product-list-buttons">
               <div class="row">
                 <div class="col-xs-6">
-                  <a href="{{ route('outlet.formProduct') }}" class="btn btn-default">Add Product</a>
-                  <a href="{{ route('outlet.importProduct') }}" class="btn btn-default">Import Product</a>
+                  <a href="{{ route('outlet.formProduct') }}" class="btn btn-default">@lang('outlet.addProduct')</a>
+                  <a href="{{ route('outlet.importProduct') }}" class="btn btn-default">@lang('outlet.importProduct')</a>
                 </div>
                 <div class="col-xs-6">
-                  <a href="{{ route('outlet.importProductStock') }}" class="btn btn-info pull-right">Import Stock</a>
+                  <a href="{{ route('outlet.importProductStock') }}" class="btn btn-info pull-right">@lang('outlet.importStock')</a>
                 </div>
               </div>
             </div>
@@ -34,9 +34,9 @@
               <table id="product-list" class="display responsive nowrap" width="100%">
                 <thead>
                   <tr>
-                    <th>Nama Barang</th>
-                    <th>Stok</th>
-                    <th>Generik</th>                    
+                    <th>@lang('outlet.productName')</th>
+                    <th>@lang('outlet.stock')</th>
+                    <th>@lang('outlet.generic')</th>                    
                     <th></th>
                   </tr>
                 </thead>

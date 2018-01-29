@@ -17,7 +17,7 @@
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Import Stock</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.importStock')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
@@ -40,7 +40,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="file-import">Choose File</label>
+                            <label for="file-import">@lang('outlet.chooseFile')</label>
                           </div>
                         </div>
                         <div class="col-md-10">
@@ -69,7 +69,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="outlet">Confirmation</label>
+                          <label for="outlet">@lang('dpl.confirmation')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -78,12 +78,12 @@
                             <table id="import-stock" class="display responsive nowrap" width="100%">
                               <thead>
                                 <tr>
-                                  <th>Nama Barang</th>
-                                  <th>Stok Terakhir</th>
-                                  <th>Stok Baru</th>
-                                  <th>Satuan</th>
+                                  <th>@lang('outlet.productName')</th>
+                                  <th>@lang('outlet.lastStock')</th>
+                                  <th>@lang('outlet.currentStock')</th>
+                                  <th>@lang('outlet.unit')</th>
                                   <th>ID</th>
-                                  <th>Batch</th>
+                                  <th>@lang('outlet.batchNo')</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -102,7 +102,7 @@
                           </div>
                           {!! Form::open(['url' => route('outlet.importProductStockProcess')]) !!}
                           {{ Form::hidden('data',$data) }}
-                          {{ Form::submit('Execute', array('class'=>'btn btn-primary')) }}
+                          {{ Form::submit(Lang::get('outlet.batchNo'), array('class'=>'btn btn-primary')) }}
                           {{ Form::close() }}
                         </span>
                       </div>
