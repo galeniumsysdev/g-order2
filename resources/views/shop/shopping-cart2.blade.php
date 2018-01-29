@@ -8,15 +8,15 @@
   @endif
 <!--<link rel="stylesheet"href="//codeorigin.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />-->
   @if($products)
-  <form class="form-horizontal" action="" method="get">
+  <form class="form-horizontal" action="{{route('product.checkOut')}}" method="post">
     {{ csrf_field() }}
   <div class="row">
         <div class="col-sm-8 col-md-8 col-md-offset-2 col-sm-offset-2">
-          <div class="form-group">
+          <div class="form-group {{ $errors->has('dist') ? ' has-error' : '' }}">
             <label class="control-label col-sm-3" for="no_order">@lang('shop.supplier') :</label>
             <div class="col-sm-8">
               <!--<input type="text" id="distributor" name="dist" class="form-control" placeholder="Distributor" required readonly="readonly" value="">-->
-              <select class="form-control" id="distributor" name="dist">
+              <select class="form-control" id="distributor" name="dist" required>
                 @if($distributor->count()!=1)
                 <option value="">@lang('label.PilihSalahSatu')</option>
                 @endif
@@ -24,6 +24,11 @@
                 <option value="{{$dist->id}}">{{$dist->customer_name}}</option>
                 @endforeach
               </select>
+              @if ($errors->has('dist'))
+                  <span class="help-block">
+                      <strong>{{ $errors->first('dist') }}</strong>
+                  </span>
+              @endif
             </div>
           </div>
         </div>
@@ -105,7 +110,7 @@
   					<td><a href="{{route('product.index') }}" class="btn btn-warning"><i class="fa fa-angle-left"></i> @lang('shop.ContinueShopping')</a></td>
   					<td colspan="3" class="hidden-xs"></td>
   					<td class="hidden-xs text-center"></td>
-  					<td><a href="#" onclick="checkoutbtn();return false;"><button type="button" class="btn btn-success btn-block">@lang('shop.CheckOut') <i class="fa fa-angle-right"></i></button></a></td>
+  					<td><button type="submit" class="btn btn-success btn-block">@lang('shop.CheckOut') <i class="fa fa-angle-right"></i></button></td>
   				</tr>
           <tr style="border-top-style:hidden;">
             <td class="xs-only-text-left" colspan="6"><small>*@lang('pesan.notfixedprice')</small></td>
@@ -144,7 +149,7 @@ $(function()
 function checkoutbtn()
 {
   var id =$('#distributor').val();
-  window.location = "{{url('/checkout')}}"+"/"+id;
+  window.location = window.Laravel.url+"/checkout"+"/"+id;
 }
 </script>
 @endsection

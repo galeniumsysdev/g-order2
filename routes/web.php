@@ -75,7 +75,7 @@ Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
     ,'as' => 'product.shoppingCart'
   ]);
-  Route::get('/checkout/{distributorid}',[
+  Route::post('/checkout/{distributorid?}',[
       'uses' => 'ProductController@checkOut'
       ,'as' => 'product.checkOut'
     ]);
@@ -307,7 +307,7 @@ Route::group(['middleware' => ['permission:UploadCMO']], function () {
     });
 });
 Route::group(['middleware' => ['permission:DownloadCMO']], function () {
-  Route::get('viewAlldownloadfile/{id?}', 'FilesController@downfunc')->name('files.viewfile');  
+  Route::get('viewAlldownloadfile/{id?}', 'FilesController@downfunc')->name('files.viewfile');
   Route::get('/downloadCMO/{file}', function ($file='') {
       return response()->download(storage_path('app/uploads/'.$file));
   });
