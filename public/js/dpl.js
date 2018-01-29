@@ -50,7 +50,7 @@ $(document).ready(function(){
 		})
 	})
 
-	if($('#outlet').length){
+	if($('.product-container #outlet').length){
 		$.get(window.Laravel.url+'/dpl/list/outlet',
 			function (data){
 				$('#outlet').typeahead('destroy');

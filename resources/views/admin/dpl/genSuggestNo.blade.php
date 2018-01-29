@@ -30,7 +30,7 @@
                           <label for="outlet">Outlet</label>
                         </div>
                       </div>
-                      <div class="col-md-10  product-container">
+                      <div class="col-md-10 product-container">
                         {{ Form::text('outlet','',array('class'=>'form-control','id'=>'outlet','autocomplete'=>'off')) }}
                         {{ Form::button('X', array('class'=>'btn btn-link btn-remove text-danger change-outlet','id'=>'change-outlet')) }}
                         {{ Form::hidden('outlet_id','',array('class'=>'form-control','id'=>'outlet-id')) }}
