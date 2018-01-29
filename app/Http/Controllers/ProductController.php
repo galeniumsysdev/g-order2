@@ -327,7 +327,7 @@ class ProductController extends Controller
       if($prg) $dp->promo = $prg;else $dp->promo=null;
     }
 
-    $products = collect($dataproduct);
+    $products = collect($dataproduct);*/
 
     /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
     $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
@@ -576,7 +576,8 @@ class ProductController extends Controller
       $linepo = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
       if($linepo->count()==0) $linepo=null;
       $jns = PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
-      $jns=$jns->pluck('jns')->toArray();
+	$jns = $jns->toArray();
+      //$jns=$jns->pluck('jns')->toArray();
       //$jns = array_unique(array_pluck($cart->items,'jns'));
       $dist=$this->getDistributor($jns);
       //return view('shop.shopping-cart',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'distributor'=>$dist]);
@@ -610,7 +611,7 @@ class ProductController extends Controller
       if(in_array('PHARMA',$jns))
       {
         $pharma=true;
-      }
+      }	
       $alamat = DB::table("customer_sites as c")
           ->select("id", DB::raw("concat(c.address1,
 												IF(c.state IS NULL, '', concat(',',c.state)),
@@ -710,13 +711,13 @@ class ProductController extends Controller
           $jns = PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
           $jns=$jns->pluck('jns')->toArray();
           array_push($jns,$product->jns);
-          if($this->getDistributor($jns)->count()==0)
+         /* if($this->getDistributor($jns)->count()==0)
           {
             return response()->json([
                             'result' => 'errdist',
                             'jns'=>implode(",",$jns),
                           ],200);
-          }
+          }*/
         }
         if(Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
         and Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M")

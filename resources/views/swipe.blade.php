@@ -48,7 +48,7 @@
       <div class="row">
         <div class="large-12 columns">
           <div class="owl-carousel owl-theme owl-loaded owl-drag">
-            @foreach($flexfield->products->sortByDesc('pareto')->take(10) as $product)
+            @foreach($flexfield->products->sortByDesc('pareto')->sortBy('title')->take(10) as $product)
             <div class="item">
               <div class="thumbnail">
                 @if($product->imagePath)
