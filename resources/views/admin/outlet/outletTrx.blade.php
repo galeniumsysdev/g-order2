@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -28,7 +28,7 @@
                 <li><a href="#trx-out">Transaction Out</a></li>
               </ul>
               <!-- Transaction In -->
-              <div id="trx-in"> 
+              <div id="trx-in">
                 <div class="form-wrapper">
                   {!! Form::open(['url' => route('outlet.trxInProcess'), 'class'=>'form-trx']) !!}
                     <div class="form-group">
@@ -122,7 +122,7 @@
                 </div>
               </div>
               <!-- Transaction Out -->
-              <div id="trx-out"> 
+              <div id="trx-out">
                 <div class="form-wrapper">
                   {!! Form::open(['url' => route('outlet.trxOutProcess'), 'class'=>'form-trx']) !!}
                     <div class="form-group">

@@ -86,8 +86,18 @@ html, body {
 }
 #carousel-container {
   width: 100%;
-  overflow: auto;
+  overflow-x: scroll;
   margin-top: -5px;
+-webkit-overflow-scrolling: touch;
+-webkit-scroll-snap-points-x: repeat(50%);
+scroll-snap-points-x: repeat(50%);
+scroll-snap-type: mandatory;
+user-select: none;
+-webkit-user-select: none;
+-ms-user-select: none;
+-ms-touch-action:auto;
+touch-action:auto;
+-webkit-scroll-snap-type: mandatory;
 }
 #carousel-container .profile-rotater {
   width: 100%;
@@ -97,9 +107,10 @@ html, body {
   display: flex;
   -webkit-flex-direction: row;
   flex-direction: row;
-  position: relative;
+//  position: relative;
   left: 0;
   transition: left 0.3s linear;
+-webkit-overflow-scrolling: touch;
 }
 #carousel-container .profile-rotater .profile {
   display: inline-block;

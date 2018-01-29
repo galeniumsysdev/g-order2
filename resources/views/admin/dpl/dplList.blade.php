@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -29,9 +29,10 @@
                     <th>No. Trx</th>
                     <th>Last Approver</th>
                     <th>DPL No.</th>
-                    <th>MR</th>
+                    <th>SPV</th>
                     <th>Outlet</th>
                     <th>Distributor</th>
+                    <th>Status PO</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -45,7 +46,7 @@
                         {{ $list->suggest_no }}
                       @endif
                     </td>
-                    <td class="text-center">
+                    <td class="text-center" width="10">
                       @if($list->notrx)
                         <a href="{{ route('dpl.dplHistory',$list->suggest_no) }}"><i class="fa fa-history" aria-hidden="true"></i></a>
                       @endif
@@ -54,10 +55,19 @@
                       {{ $list->notrx }}
                     </td>
                     <td>{{ $list->dpl_appr_name }}</td>
-                    <td class="text-center">{{ $list->dpl_no }}</td>
+                    <td class="text-center">
+                      @if($list->dpl_no)
+                        {{ 'G'.$list->dpl_no }}
+                      @endif
+                    </td>
                     <td>{{ $list->dpl_mr_name }}</td>
                     <td width="200">{{ $list->dpl_outlet_name }}</td>
                     <td width="200">{{ $list->dpl_distributor_name }}</td>
+                    <td>
+                      @if($list->status_po)
+                      {!! $list->status_po !!}
+                      @endif
+                    </td>
                     <td class="text-center">
                       {!! $list->btn_discount !!}
                       {!! $list->btn_confirm !!}

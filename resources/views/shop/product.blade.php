@@ -7,7 +7,7 @@
 		<div class="container">
 			@include('shop.carausel')
 		</div>
-
+	
 	@foreach($product_flexfields as $flexfield)
 		<div class="container container-product">
 			<!--JUDUL KATEGORI-->
@@ -97,7 +97,7 @@
 							<div class="productboxCart">
 								<div class ="clearfix" id="addCart-{{$product->id}}">
 									<!--<a href="{{ route('product.addToCart',['id'=>$product->id])}}" class="btn btn-sm btn-success center-block" role="button">Add to cart</a>-->
-									<a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button">@lang('shop.AddToCart')</a>
+									<a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button"  id="addCart2-{{$product->id}}">@lang('shop.AddToCart')</a>
 								</div>
 							</div>
 
@@ -117,40 +117,10 @@
 				</div>
 			</div>
 		</div>
-
-
 	@endforeach
-
-
 	@endsection
 	@section('js')
-	<script>
-	$(document).ready(function() {
-	$('.carousel-container').owlCarousel({
-	loop: true,
-	margin: 10,
-	responsiveClass: true,
-	responsive: {
-	0: {
-	items: 2,
-	nav: true,
-	loop: false,
-	},
-	600: {
-	items: 3,
-	nav: false,
-	loop: false,
-	},
-	1000: {
-	items: 5,
-	nav: true,
-	loop: false,
-	margin: 20
-	}
-	}
-	})
-	})
-	</script>
+
 	<script src="{{ asset('js/myproduct.js') }}"></script>
 	<script src="{{ asset('assets/vendors/highlight.js') }}"></script>
 	@endsection

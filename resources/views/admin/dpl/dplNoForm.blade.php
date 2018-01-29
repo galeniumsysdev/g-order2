@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -27,7 +27,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="outlet">MR</label>
+                          <label for="outlet">SPV</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -103,7 +103,8 @@
                           <label for="dpl-no">No. DPL</label>
                         </div>
                       </div>
-                      <div class="col-md-10">
+                      <div class="input-group col-md-10">
+                        <span class="input-group-addon" id="basic-addon1">G</span>
                         {{ Form::text('dpl_no',$dpl_no,array('class'=>'form-control','id'=>'dpl-no',$readonly)) }}
                       </div>
                     </div>

@@ -21,10 +21,10 @@
 
 .thumbnail .boxprice {
   display: flex;
-  -webkit-flex:1;
-  flex:1;
+  /*-webkit-flex:1;
+  flex:1;*/
   flex-direction: column;
-  height: 100%;
+  /*height: 100%;*/
 }
 
 .display-flex .col-md-2 {

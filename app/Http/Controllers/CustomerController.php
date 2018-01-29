@@ -274,8 +274,7 @@ class CustomerController extends Controller
         if($sub) $groupdc = $sub->group_id;
         if($customer->psc_flag !=$request->psc_flag)
         {
-            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
-          //  dd($distributor);
+            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();                        
             if($distributor)
             {
               $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());

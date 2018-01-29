@@ -196,7 +196,6 @@ function inputreason()
   return false;
 }
 
-
 /*
 $('#reject_PO').on('click',function(){
   var label =  $('#reject_PO').text()

@@ -122,7 +122,7 @@ class RegisterController extends Controller
          if (isset($user_check->customer_id)){
             $customer = Customer::find($user_check->customer_id);
             if($customer->subgroupdc){
-                $groupdc =$customer->subgroupdc->groupdatacenter;
+                $groupdc =$customer->subgroupdc->groupdatacenter->id;
             }else $groupdc = null;
 
 
@@ -137,23 +137,23 @@ class RegisterController extends Controller
             $customer->langitude = $data['langitude'];
             $customer->save();
             /*getdistributor*/
+            if(is_null($customer->oracle_customer_id)){
+              if($customer->psc_flag=="1" and $customer->pharma_flag=="1")
+              {
+                  $distributorpsc = $this->mappingDistributor($groupdc,$city,'PSC');
+                  $distributorpharma = $this->mappingDistributor($groupdc,$city,'PHARMA');
+                  $distributor = $distributorpsc->union($distributorpharma);
+              }elseif($customer->psc_flag=="1"){
+                $distributor = $this->mappingDistributor($groupdc,$city,'PSC');
+              }elseif($customer->pharma_flag=="1"){
+                $distributor = $this->mappingDistributor($groupdc,$city,'PHARMA');
+              }
 
-            if($customer->psc_flag=="1" and $customer->pharma_flag=="1")
-            {
-                $distributorpsc = $this->mappingDistributor($groupdc,$city,'PSC');
-                $distributorpharma = $this->mappingDistributor($groupdc,$city,'PHARMA');
-                $distributor = $distributorpsc->union($distributorpharma);
-            }elseif($customer->psc_flag=="1"){
-              $distributor = $this->mappingDistributor($groupdc,$city,'PSC');
-            }elseif($customer->pharma_flag=="1"){
-              $distributor = $this->mappingDistributor($groupdc,$city,'PHARMA');
-            }
-
-            $distributor = $distributor->get();
-
-            if($distributor)
-            {
-              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+              $distributor = $distributor->get();
+		if($distributor)
+              {
+                $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+              }
             }
          }
          $user_check->password = bcrypt($data['password']);
@@ -220,6 +220,7 @@ class RegisterController extends Controller
        $district=DB::table('districts')->where('id','=',$request->district)->first();
        $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
 
+
        $custsites = new CustomerSite();
        $custsites->site_use_code = "SHIP_TO";
        $custsites->status = "A";
@@ -227,7 +228,9 @@ class RegisterController extends Controller
        $custsites->province = $province->name;
        $custsites->city = $city->name;
        $custsites->district = $district->name;
-       $custsites->state = $state->name;
+       if($state){
+         $custsites->state = $state->name;
+       }
        $custsites->postalcode = $request->postal_code;
        $custsites->Country = 'ID';
        $custsites->customer_id = $customer->id;
@@ -297,6 +300,7 @@ class RegisterController extends Controller
 
     public function mappingDistributor($groupdc,$city,$tipe)
     {
+      DB::enableQueryLog();
       $distributor = DB::table('customers as c')
               ->join('users as u','c.id','=','u.customer_id')
               ->join('role_user as ru','u.id','=','ru.user_id')
@@ -320,9 +324,9 @@ class RegisterController extends Controller
         $distributor = $distributor->where([
           ['c.pharma_flag','=',"1"]
         ])->whereNull('dg.group_id')
+          ->where('r.name','!=','Principal')
           ->whereRaw("exists (select 1 from distributor_regency as dr where c.id = dr.distributor_id and dr.regency_id = '".$city."')");
       }
-
       return $distributor;
     }
 
@@ -411,7 +415,7 @@ class RegisterController extends Controller
       $provinces = DB::table('provinces')->get();
       $groupdcs = GroupDatacenter::where('enabled_flag','1')->get();
       $pscproducts = DB::table('flexvalue')->where('master','=','PSC_PRODUCT')->where('enabled_flag','=','Y')->select('name')->orderBy('id')->get();
-      $pharmaproducts = DB::table('flexvalue')->where('master','=','PHARMA_PRODUCT')->where('enabled_flag','=','Y')->select('name')->orderBy('id')->get();      
+      $pharmaproducts = DB::table('flexvalue')->where('master','=','PHARMA_PRODUCT')->where('enabled_flag','=','Y')->select('name')->orderBy('id')->get();
       return view('auth.register',compact('categories','provinces','groupdcs','pscproducts','pharmaproducts'));
     }
 

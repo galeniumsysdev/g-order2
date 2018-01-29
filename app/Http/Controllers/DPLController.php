@@ -32,8 +32,13 @@ class DPLController extends Controller {
 	}
 
 	public function getOutletDPL(){
-		$outlets = OutletDistributor::select('customers.id','customers.customer_name')
-			->join('customers', 'customers.id', 'outlet_distributor.outlet_id')
+		$outlets = Customer::select('customers.id','customers.customer_name','cs.address1','cs.province','cs.city')
+			//->join('customers', 'customers.id', 'outlet_distributor.outlet_id')
+			->join('customer_sites as cs',function($join){
+					$join->on('cs.customer_id','=','customers.id');
+					$join->on('cs.site_use_code','=',DB::raw("'SHIP_TO'"));
+					$join->on('cs.primary_flag','=',DB::raw("'Y'"));
+			})
 			->join('users as u','customers.id','u.customer_id')
 			->join('role_user as ru','ru.user_id','u.id')
 			->join('roles as r','ru.role_id','r.id')
@@ -41,7 +46,7 @@ class DPLController extends Controller {
 			->whereIn('r.name',['Outlet','Apotik/Klinik'])
 			->where('customers.status','=','A')
 			->where('u.register_flag','=',1)
-			->groupBy('customers.id','customers.customer_name')
+			->groupBy('customers.id','customers.customer_name','cs.address1','cs.province','cs.city')
 			->orderBy('customers.customer_name')
 			->get();
 
@@ -67,6 +72,7 @@ class DPLController extends Controller {
 		$dplSuggestNo->mr_id = Auth::User()->id;
 		$dplSuggestNo->outlet_id = $request->outlet_id;
 		$dplSuggestNo->suggest_no = $token;
+		$dplSuggestNo->kowil_mr = $request->kowil_mr;
 		$dplSuggestNo->save();
 
 		$this->dplLog($token, 'Create DPL Suggest No.');
@@ -166,7 +172,7 @@ class DPLController extends Controller {
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->leftjoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->where('dpl_suggest_no.suggest_no', $suggest_no)
-			//->where('active', 1)
+			->where('active', 1)
 			->first();
 
 		if (!$dpl['fill_in']) {
@@ -200,7 +206,7 @@ class DPLController extends Controller {
 		foreach ($distributors as $key => $distributor) {
 			$distributor_list[$distributor->distributor_id] = $distributor->customer_name;
 		}
-		if($dpl->dpl_no)
+		if($header->dpl_no)
 		{
 			return view('admin.dpl.discountReform', compact('dpl', 'header', 'lines', 'distributor_list'));
 		}else return view('admin.dpl.discountForm', compact('dpl', 'header', 'lines', 'distributor_list'));
@@ -228,6 +234,19 @@ class DPLController extends Controller {
 					'bonus_gpl' => ($bonus_gpl[$key] ? $bonus_gpl[$key] : 0),
 				));
 		}
+		$user_role = Auth::user()->roles;
+
+		$dplno = DPLNo::where('suggest_no','=',$suggest_no)->first();
+		if(($user_role[0]->name == 'FSM' or $user_role[0]->name=='HSM') and ($dplno) )
+		{
+				$this->sendDPLNo($suggest_no,$dplno->dpl_no);
+				$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+					->update(array('fill_in' => 0,
+									'approved_by' => Auth::user()->id,
+									'next_approver' => null
+									));
+				return redirect('/dpl/list');
+		}
 
 		$next_approver = OrgStructure::select('org_structure.*','email')
 									->join('users','users.id','org_structure.directsup_user_id')
@@ -242,9 +261,10 @@ class DPLController extends Controller {
 							->where('suggest_no', $suggest_no)
 							->first();
 
-		$user_role = Auth::user()->roles;
+
 		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
 		if(!empty($notified_users)){
+			if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
 			$data = [
 				'title' => 'Permohonan Approval',
 				'message' => 'Permohonan Approval #'.$suggest_no,
@@ -252,15 +272,35 @@ class DPLController extends Controller {
 				'href' => route('dpl.readNotifDiscount'),
 				'mail' => [
 					'greeting'=>'Yang terhormat FSM/HSM Galenium',
-					'content'=> "Bersama ini kami informasikan No. Pengajuan DPL #".$suggest_no." membutuhkan approval Anda.\n\nUntuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.\nTerima kasih."
+					'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.<br>Untuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.<br>Terima kasih.'
 				]
 			];
+		}else{
+				$data = [
+					'title' => 'Pengisian No. DPL',
+					'message' => 'Pengisian No. DPL untuk #'.$suggest_no,
+					'id' => $suggest_no,
+					'href' => route('dpl.readNotifDPLInput'),
+					'mail' => [
+						'greeting'=>'',
+						'content'=> ''
+					]
+				];
+			}
 			foreach ($notified_users as $key => $email) {
-				$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-					->update(array('fill_in' => 0,
-									'approved_by' => Auth::user()->id,
-									'next_approver' => $key
-									));
+				if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+						->update(array('fill_in' => 0,
+										'approved_by' => Auth::user()->id,
+										'next_approver' => $key
+										));
+				}else{
+					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+						->update(array('fill_in' => 0,
+										'approved_by' => Auth::user()->id,
+										'next_approver' => null
+										));
+				}
 				foreach ($email as $key2 => $mail) {
 					$data['email'] = $mail;
 					if($key == 'FSM_HSM'){
@@ -332,6 +372,7 @@ class DPLController extends Controller {
 					break;
 				}
 			}
+
 			if($check_count == 0)
 				return redirect()->route('dpl.discountView',$suggest_no);
 		}
@@ -352,6 +393,7 @@ class DPLController extends Controller {
 		$action = $request->action;
 		if ($action == 'Approve') {
 			$user_role = Auth::user()->roles;
+
 			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
 			if(!empty($notified_users)){
 				if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
@@ -386,7 +428,15 @@ class DPLController extends Controller {
 					else{
 						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 							->update(array('approved_by' => Auth::user()->id, 'next_approver' => ''));
+						$dplno = DPLNo::where('suggest_no','=',$suggest_no)->first();
+						if(($user_role[0]->name == 'FSM' or $user_role[0]->name=='HSM') and ($dplno) )
+						{
+								$this->sendDPLNo($suggest_no,$dplno->dpl_no);
+								return true;
+								break;
+						}
 					}
+
 					foreach ($email as $key2 => $mail) {
 						$data['email'] = $mail;
 						if($key == 'FSM_HSM'){
@@ -404,6 +454,7 @@ class DPLController extends Controller {
 				}
 			}
 			$this->dplLog($suggest_no, $action);
+
 		} else {
 			$user_role = Auth::user()->roles;
 			$notified_users = $this->getArrayNotifiedEmail($suggest_no);
@@ -485,13 +536,20 @@ class DPLController extends Controller {
 		Auth::User()->notifications()
 		           	->where('id','=',$notifid)
 		            ->update(['read_at' => Carbon::now()]);
-
+		Auth::User()->notifications()
+		           	->whereraw("data like '%\"id\":\"".$suggest_no."\"%'")
+								->wherenull('read_at')
+		            ->update(['read_at' => Carbon::now()]);
 		return redirect()->route('dpl.discountApproval',$suggest_no);
 	}
 
 	public function readNotifApproval($suggest_no, $notifid){
 		Auth::User()->notifications()
 		           	->where('id','=',$notifid)
+		            ->update(['read_at' => Carbon::now()]);
+		Auth::User()->notifications()
+		           	->whereraw("data like '%\"id\":\"".$suggest_no."\"%'")
+								->wherenull('read_at')
 		            ->update(['read_at' => Carbon::now()]);
 
 		return redirect()->route('dpl.discountForm',$suggest_no);
@@ -501,7 +559,10 @@ class DPLController extends Controller {
 		Auth::User()->notifications()
 		           	->where('id','=',$notifid)
 		            ->update(['read_at' => Carbon::now()]);
-
+		Auth::User()->notifications()
+		           	->whereraw("data like '%\"id\":\"".$suggest_no."\"%'")
+								->wherenull('read_at')
+		            ->update(['read_at' => Carbon::now()]);
 		return redirect()->route('dpl.dplNoForm',$suggest_no);
 	}
 
@@ -557,20 +618,37 @@ class DPLController extends Controller {
 			'dpl_suggest_no.notrx',
 			'fill_in',
 			'approved_by',
-			'next_approver')
+			'next_approver','active'
+			,'so_headers.status'
+			,'fv.name as status_po')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->leftJoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->leftJoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->leftJoin('so_headers', 'so_headers.notrx', 'dpl_suggest_no.notrx')
+			->leftjoin('flexvalue as fv',function($join){
+				$join->on('so_headers.status','=','fv.id');
+				$join->on('fv.master','=',DB::raw("'status_po'"));
+			})
 			->leftjoin('customers as distributor', 'distributor.id', 'so_headers.distributor_id')
 			->where('active', 1)
-			->orderby('dpl_suggest_no.created_at','desc')
-			->get();
+			;
+
 
 		$user_role = Auth::user()->roles;
 		$role = $user_role[0]->name;
-
+		if($role=="SPV" or $role=="ASM")
+		{
+				$dpl =$dpl->where(function($query){
+						$query->where('dpl_suggest_no.mr_id','=',Auth::user()->id)
+									->orWhereExists(function($query2){
+											$query2->select(DB::raw(1))
+			                      ->from('org_structure as os')
+			                      ->whereRaw("os.user_id = dpl_suggest_no.mr_id and directsup_user_id = '".Auth::user()->id."'");
+									});
+				});
+		}
+		$dpl =$dpl->orderby('dpl_suggest_no.created_at','desc')->get();
 		$dpl_show = array();
 		foreach ($dpl as $key => $list) {
 			$allowed = DB::select('SELECT privilegeSuggestNo(?,?) AS allowed', [$list->suggest_no, Auth::user()->id]);
@@ -578,7 +656,7 @@ class DPLController extends Controller {
 			if(!$allowed)
 				continue;
 
-			$dpl[$key]->btn_discount = ($list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
+			$dpl[$key]->btn_discount = ($list->active && $list->fill_in && !empty($list->notrx)) ? '<a href="'.route('dpl.discountForm', $list->suggest_no) . '" class="btn btn-danger">Discount</a>' : '';
 
 			$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
 									->where('role_user.user_id',$list->approved_by)
@@ -590,13 +668,13 @@ class DPLController extends Controller {
 			if(!empty($notified_users)){
 				foreach ($notified_users as $ind => $email) {
 					if(strpos($ind, $role) !== false){
-						$dpl[$key]->btn_confirm = (!$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) && empty($list->dpl_no)) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
+						$dpl[$key]->btn_confirm = ($list->active && !$list->fill_in && !empty($list->notrx) && !empty($list->next_approver) ) ? '<a href="'.route('dpl.discountApproval', $list->suggest_no) . '" class="btn btn-primary">Confirmation</a>' : '';
 						break;
 					}
 				}
 			}
 
-			$dpl[$key]->btn_dpl_no = (!$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
+			$dpl[$key]->btn_dpl_no = ($list->active && !$list->fill_in && !empty($list->notrx) && empty($list->next_approver) && $role == 'Admin DPL' && empty($list->dpl_no)) ? '<a href="'.route('dpl.dplNoForm', $list->suggest_no) . '" class="btn btn-warning">DPL No.</a>' : '';
 
 			array_push($dpl_show, $dpl[$key]);
 		}
@@ -669,73 +747,59 @@ class DPLController extends Controller {
 			$dpl->suggest_no = $suggest_no;
 			$dpl->save();
 		}
-			$so_header = SoHeader::where('suggest_no',$suggest_no)->first();
-			$so_header->dpl_no = $dpl_no;
-			$so_header->status = 0;
-			$so_header->save();
-
-			$solines = SoLine::where('header_id','=',$so_header->id)
-								->where(function($query1){
-										$query1->whereNotNull('discount')
-														->orWhereNotNull('discount_gpl')
-														->orWhereNotNull('bonus_gpl');
-								})
-								->get();
-			foreach($solines as $soline){
-				/*if(intval($soline->bonus_gpl)!=0)
-				{
-					$newline = SoLine::Create(['header_id'=>$so_header->id
-													,'product_id'=>$soline->product_id
-													,'uom'=>$soline->uom_primary
-													,'qty_request'=>$soline->bonus_gpl
-													,'list_price'=>$soline->list_price
-													,'unit_price'=>0
-													,'amount'=>0
-													,'tax_amount'=>0
-													,'tax_type'=>$soline->tax_type
-													,'conversion_qty'=>1
-													,'inventory_item_id'=>$soline->inventory_item_id
-													,'uom_primary'=>$soline->uom_primary
-													,'qty_request_primary'=>$soline->bonus_gpl
-												]);
-				}else*/
-				if(floatval($soline->discount)+floatval($soline->discount_gpl)!=0){
-						$discount = floatval($soline->discount)+floatval($soline->discount_gpl);
-						$unitprice = $soline->list_price * (100-$discount)/100;
-						$soline->unit_price = $unitprice;
-						$soline->amount=$soline->qty_request*$unitprice;
-						if($soline->tax_type=="10%")
-						{
-							$soline->tax_amount =0.1*$soline->amount;
-						}
-						$soline->save();
-				}
-			}
-
-			/*$so_header = SoHeader::where('suggest_no',$suggest_no)
-								->update(array('dpl_no'=>$dpl_no, 'status'=>0));*/
-
-			$distributor = Customer::where('id','=',$so_header['distributor_id'])->first();
-
-			$data = [
-				'title' => 'New PO DPL',
-				'message' => 'New PO '.$so_header->notrx.' dg DPL#'.$dpl_no,
-				'id' => $so_header['id'],
-				'href' => route('order.notifnewpo'),
-				'mail' => [
-					'greeting'=>'',
-					'content'=> ''
-				],
-				'sendmail' => 0,
-				'email'=> $distributor->user->email
-			];
-
-			$apps_user = User::where('email',$distributor->user->email)->first();
-			if(!empty($apps_user))
-				$apps_user->notify(new PushNotif($data));
+			$this->sendDPLNo($suggest_no,$dpl_no);
 
 			return redirect()->route('dpl.list');
 
+	}
+
+	public function sendDPLNo($suggest_no,$dpl_no)
+	{
+		$so_header = SoHeader::where('suggest_no',$suggest_no)->first();
+		$so_header->dpl_no = $dpl_no;
+		$so_header->status = 0;
+		$so_header->save();
+
+		$solines = SoLine::where('header_id','=',$so_header->id)
+							->where(function($query1){
+									$query1->whereNotNull('discount')
+													->orWhereNotNull('discount_gpl')
+													->orWhereNotNull('bonus_gpl');
+							})
+							->get();
+		foreach($solines as $soline){
+			if(floatval($soline->discount)+floatval($soline->discount_gpl)!=0){
+					$discount = floatval($soline->discount)+floatval($soline->discount_gpl);
+					$unitprice = $soline->list_price * (100-$discount)/100;
+					$soline->unit_price = $unitprice;
+					$soline->amount=$soline->qty_request*$unitprice;
+					if($soline->tax_type=="10%")
+					{
+						$soline->tax_amount =0.1*$soline->amount;
+					}
+					$soline->save();
+			}
+		}
+
+		$distributor = Customer::where('id','=',$so_header['distributor_id'])->first();
+
+		$data = [
+			'title' => 'New PO DPL',
+			'message' => 'New PO '.$so_header->notrx.' dg DPL#'.$dpl_no,
+			'id' => $so_header['id'],
+			'href' => route('order.notifnewpo'),
+			'mail' => [
+				'greeting'=>'',
+				'content'=> ''
+			],
+			'sendmail' => 0,
+			'email'=> $distributor->user->email
+		];
+
+		$apps_user = User::where('email',$distributor->user->email)->first();
+		if(!empty($apps_user))
+			$apps_user->notify(new PushNotif($data));
+			return true;
 	}
 
 	public function suggestNoCancel(Request $request){
@@ -744,7 +808,10 @@ class DPLController extends Controller {
 		$note = $request->note;
 		$update = DPLSuggestNo::where('suggest_no',$suggest_no)
 							->update(array('note'=>$note,'active'=>0));
-
+		$soheader = SoHeader::where('suggest_no',$suggest_no)->first();
+		$soheader->status=-98;
+		$soheader->save();
+		$this->dplLog($suggest_no, 'Batalkan Pengajuan DPL #' . $suggest_no,$note);
 		// Notif to outlet
 		$dpl = DPLSuggestNo::select('users.email','note')
 							->join('users','users.customer_id','dpl_suggest_no.outlet_id')
@@ -754,8 +821,8 @@ class DPLController extends Controller {
 		$data = [
 			'title' => 'Pembatalan Pengajuan DPL',
 			'message' => 'Pembatalan Pengajuan DPL #'.$suggest_no,
-			'id' => $suggest_no,
-			'href' => route('dpl.readNotifDPLCancelOutlet'),
+			'id' => $soheader->id,
+			'href' => route('order.notifnewpo'),
 			'mail' => [
 				'greeting'=>'Pembatalan Pengajuan DPL #'.$suggest_no,
 				'content'=> "Pengajuan no DPL #".$suggest_no." untuk PO #".$customer_po." anda telah dibatalkan oleh marketing PT.Galenium Pharmasaia Laboratories dengan alasan\n\n".$note
@@ -804,12 +871,14 @@ class DPLController extends Controller {
 			{
 				DB::beginTransaction();
 	      try{
+					$suggest_no=$request->suggest_no;
 					SoLine::where('header_id','=',$so_header->id)
-					->update(['qty_confirm'=>null,'unit_price'=>'list_price']);
-					$updateDPL = DPLNo::where('dpl_no',$so_header->dpl_no)
+					->update(['qty_confirm'=>null,'unit_price'=>DB::raw('list_price')]);
+					$this->dpllog($suggest_no,'Change Distributor');
+					/*$updateDPL = DPLNo::where('dpl_no',$so_header->dpl_no)
 																			->update(array('suggest_no'=>null));
 					$so_header->dpl_no=null;
-					$so_header->save();
+					$so_header->save();*/
 					DB::commit();
 				}catch (\Exception $e) {
 		      DB::rollback();
@@ -889,11 +958,11 @@ class DPLController extends Controller {
 						 /*Update soline with new header_id*/
 						 if($so_header->distributor_id!=$request->distributor){
 							 $newlines = SoLine::where('header_id','=',$so_header->id)
- 	 	 						->whereNotIn('line_id',$request->lineid)
+ 	 	 						->whereIn('line_id',$request->lineid)
  								->update(['header_id'=>$newheader->id,'qty_confirm'=>null]);
 						 }else{
 							 $newlines = SoLine::where('header_id','=',$so_header->id)
- 	 	 						->whereNotIn('line_id',$request->lineid)
+ 	 	 						->whereIn('line_id',$request->lineid)
  								->update(['header_id'=>$newheader->id]);
 						 }
 						 //dd("suggestno:" $suggest_no);

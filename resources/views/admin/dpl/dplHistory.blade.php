@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -20,7 +20,7 @@
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
           <div class="panel-heading"><strong>History DPL #{{ $dpl[0]->suggest_no }}</strong></div>
-            <div class="panel-body" style="overflow-x:auto;">
+          <div class="panel-body" style="overflow-x:auto;">
               <div class="table-responsive">
                 <table class="display responsive nowrap" width="100%" id="dpl-history">
                   <thead>
@@ -47,7 +47,6 @@
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>

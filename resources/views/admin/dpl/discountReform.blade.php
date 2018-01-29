@@ -34,7 +34,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="outlet">MR</label>
+                          <label for="outlet">SPV</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -112,7 +112,7 @@
                             {{ (int)$line->qty_request_primary }}
                         </td>
                         <td data-th="@lang('shop.qtyavailable')" class="text-center xs-only-text-left">
-                            {{ (int)$line->qty_confirm }}
+                            {{ (int)$line->qty_confirm_primary }}
                         </td>
                       <!--  <td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
                             {{  number_format($line->amount,2) }}

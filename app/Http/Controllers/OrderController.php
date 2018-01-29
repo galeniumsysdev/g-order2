@@ -24,6 +24,7 @@ use Excel;
 use App\Events\PusherBroadcaster;
 use App\Notifications\PushNotif;
 use App\DPLSuggestNo;
+use App\DPLNo;
 use App\OutletStock;
 
 class OrderController extends Controller
@@ -52,7 +53,8 @@ class OrderController extends Controller
       $deliveryno = $deliveryno->groupBy('deliveryno','tgl_kirim');
 
       $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
-
+      if($header->status==-99 and $header->fill_in==1 and $header->customer_id = Auth::user()->customer_id)
+        return view('shop.dplorderupdate',compact('header','lines'));
       if ($user_dist->hasRole('Principal') )    {
         return view('shop.checkOrder1',compact('header','lines','deliveryno'));
       }else {
@@ -128,7 +130,8 @@ class OrderController extends Controller
       //var_dump($request->tglak."--".$request->tglaw);
       $liststatus = DB::table('flexvalue')->where([['master','=','status_po']
                                                 ,['enabled_flag','=','Y']
-                                                ,['id','!=',-99]  ])
+                                              ])
+                    ->whereNotIn('id',[-99,-98])
                     ->orderBy('id','asc')->get();
       if(Auth::user()->can('CheckStatusSO'))
       {
@@ -284,6 +287,7 @@ class OrderController extends Controller
               //notfullconfirm
               $dpl = DPLSuggestNo::where('suggest_no', $header->suggest_no)
                 ->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
+              //$nodpl= DPLNo::where('suggest_no', $header->suggest_no)->delete();
               $header->status=-99;
               $header->save();
               $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);
@@ -352,6 +356,8 @@ class OrderController extends Controller
         {
           $dpl = DPLSuggestNo::where('suggest_no', $header->suggest_no)
             ->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
+          app('App\Http\Controllers\DPLController')->dpllog($header->suggest_no,'PO ditolak Distributor '.Auth::user()->name,$request->alasan);
+          //$nodpl= DPLNo::where('suggest_no', $header->suggest_no)->delete();
           $header->status=-99;
           $header->save();
           $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);
@@ -651,11 +657,11 @@ class OrderController extends Controller
           $afterheader = DB::table('so_lines_sum_v')->where('header_id','=',$request->header_id)->first();
 
           if($afterheader->qty_accept_primary==$afterheader->qty_confirm_primary
-          or $afterheader->qty_accept_primary==$afterheader->qty_request_primary)
+          or ($afterheader->qty_confirm_primary==0 and $afterheader->qty_accept_primary==$afterheader->qty_request_primary))
           {
               $header->status = 4;
           }elseif(($afterheader->qty_shipping_primary==$afterheader->qty_confirm_primary and $afterheader->qty_shipping_primary!=0)
-          or $afterheader->qty_shipping_primary==$afterheader->qty_request_primary){
+          or ($afterheader->qty_confirm_primary==0 and $afterheader->qty_shipping_primary==$afterheader->qty_request_primary)){
               $header->status = 3;
           }else{ $header->status = 2;}
           $header->save();
@@ -780,6 +786,7 @@ class OrderController extends Controller
                                   ,'','','ENT','','',$warehouse,'*NB'));
                 $line = DB::table('so_lines as sl')
                       ->join('products as p','sl.product_id','=','p.id')
+                      ->wherenull('bonus_list_line_id')
                       ->where([
                         ['sl.header_id','=',$h->id]
                       ])->select('p.itemcode',DB::raw('sl.qty_confirm as qty_confirm'),'sl.uom_primary','sl.line_id')
@@ -879,8 +886,8 @@ class OrderController extends Controller
       ]);
       if($request->btnterima == "confirm")
       {
-          /*$updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
-                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);*/
+          $updshipping = SoShipping::where(['deliveryno'=>$request->nosj,'waybill'=>$request->airwayno])
+                        ->update(['tgl_terima_kurir'=>Carbon::now(), 'userid_kurir'=>Auth::user()->id]);
           $nosj=$request->nosj;
           $soheaders = SoHeader::whereExists(function ($query) use($nosj){
                 $query->select(DB::raw(1))
@@ -1039,6 +1046,84 @@ class OrderController extends Controller
             });
         })->export('xlsx');
 
+      }
+    }
+
+    public function updatePO(Request $request)
+    {
+      if ($request->update =="update")
+      {
+        //dd($request->all());
+        DB::beginTransaction();
+        try{
+          $soheader=SoHeader::select('so_headers.*','dsn.fill_in')
+                    ->leftjoin("dpl_suggest_no as dsn",'dsn.suggest_no','=','so_headers.suggest_no')
+                    ->where('so_headers.id','=',$request->header_id)->first();
+          if($soheader->fill_in==1){
+            $solines = SoLine::where('header_id','=',$request->header_id)
+                      ->whereIn('line_id',array_keys($request->qtyorder))
+                      ->get();
+            $ubah=false;
+            foreach ($solines as $line)
+            {
+              if($line->uom_primary==$request->uom[$line->line_id])
+              {
+                if($line->qty_request_primary != $request->qtyorder[$line->line_id]){
+                  $ubah=true;
+                  $line->qty_request_primary = $request->qtyorder[$line->line_id];
+                  $line->qty_request =  $request->qtyorder[$line->line_id]/$line->conversion_qty;
+                }
+              }elseif($line->uom==$uom[$line->line_id]){
+                if($line->qty_request != $request->qtyorder[$line->line_id]){
+                  $ubah=true;
+                  $line->qty_request = $request->qtyorder[$line->line_id];
+                  $line->qty_request_primary = $request->qtyorder[$line->line_id]*$line->conversion_qty;
+                }
+              }
+              $line->amount = $line->qty_request*$line->unit_price;
+              if(($line->tax_type)=="10%")
+              {
+                $line->tax_amount = 0.1 * $line->amount;
+              }
+              $line->save();
+            }
+            if($ubah){
+              app('App\Http\Controllers\DPLController')->dpllog($soheader->suggest_no,"Update PO Pengajuan DPL");
+            //if(isset($soheader->suggestno)){
+              $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($soheader->suggest_no);
+              //dd($notified_users);
+              if(!empty($notified_users)){
+                $data = [
+                  'title' => 'Update PO Pengajuan DPL',
+                  'message' => 'Trx '.$soheader->notrx.' Pengajuan DPL #'.$soheader->suggest_no.' telah diubah',
+                  'id' => $soheader->suggest_no,
+                  'href' => route('dpl.readNotifApproval'),
+                  'mail' => [
+                    'greeting'=>'',
+                    'content'=> ''
+                  ]
+                ];
+                foreach ($notified_users as $key => $email) {
+                  foreach ($email as $key => $mail) {
+                    $data['email'] = $mail;
+                    $data['sendmail'] = 0;
+                    $apps_user = User::where('email',$mail)->first();
+                    if(!empty($apps_user))
+                      $apps_user->notify(new PushNotif($data));
+                  }
+                }
+              }
+            }
+            DB::commit();
+            return redirect()->route('order.listPO')->withMessage(trans('pesan.update'));
+          }else{
+            return redirect()->back()->withError("Gagal simpan! PO telah diproses Galenium")->withInput();
+          }
+
+        }catch(\Exception $e) {
+          DB::rollback();
+          throw $e;
+        }
       }
     }
 

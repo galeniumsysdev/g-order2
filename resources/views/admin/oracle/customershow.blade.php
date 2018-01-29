@@ -7,7 +7,7 @@
     </style>
     <div class="row" >
         <div id="pesan">
-          @if($status= Session::get('message'))
+          @if($status= Session::get('success'))
     			<div class="alert alert-info">
     				{{$status}}
     			</div>
@@ -110,22 +110,47 @@
                             </div>
                           </div>
 
-                          @if(isset($subgroupname))
-                          <div class="form-group{{ $errors->has('kategori') ? ' has-error' : '' }}">
-                              <label for="kategori" class="control-label col-sm-2">@lang('label.categorydc') :</label>
+                          <div class="form-group" id="divkategoridc">
+                            <label for="kategori" class="control-label col-sm-2"><strong>@lang('label.categorydc') :</strong></label>
+                            <div class="col-sm-4">
+                                <select class="form-control" name="groupdc" id="groupdc" onchange="ubahdc('')" >
+                                  <option value="">--</option>
+                                  @forelse($groups as $groupdc)
+                                                        @if($groupdc->id==$groupid)
+                                    <option selected='selected' value={{ $groupdc->id }}>{{ $groupdc->display_name }}</option>
+                                                        @else
+                                    <option value={{$groupdc->id}}>{{$groupdc->display_name}}</option>
+                                                        @endif
+                                  @empty
+                                    <tr><td colspan="4">...</td></tr>
+                                  @endforelse
+                                </select>
+                                @if ($errors->has('groupdc'))
+                                  <span class="help-block">
+                                    <strong>{{ $errors->first('groupdc') }}</strong>
+                                  </span>
+                                @endif
+                            </div>
 
-                              <div class="col-sm-10">
-                                <p class="form-control"></p>
-                              </div>
+                            <div class="col-sm-6">
+                                <select class="form-control" name="subgroupdc" id="subgroupdc">
+
+                                </select>
+                                @if ($errors->has('subgroupdc'))
+                                  <span class="help-block">
+                                    <strong>{{ $errors->first('subgroupdc') }}</strong>
+                                  </span>
+                                @endif
+                            </div>
                           </div>
-                          @endif
+
 
                           <div class="form-group" id="status">
                               <div class="col-sm-12">
-                                <button type="submit" name="save_customer" class="btn btn-primary">@lang('label.save')</button>
+                                <button type="submit" name="save_customer" value="Save" class="btn btn-primary">@lang('label.save')</button>
                                 @if($customer->user)
                                   @if($customer->user->register_flag==0)
-                                    <button type="submit" name="send_customer" class="btn btn-success">Send Invitation Email</button>
+                                    <button type="submit" name="save_customer" value="Send" class="btn btn-success">Send Invitation Email</button>
                                   @endif
                                 @endif
                               </div>
@@ -237,4 +262,27 @@
     </div>
 @endsection
 @section('js')
+<script type="text/javascript">
+var baseurl = window.Laravel.url;
+$(document).ready(function() {
+  ubahdc({{isset($customer->subgroup_dc_id)?$customer->subgroup_dc_id:0}});
+  });
+function ubahdc(old){
+    var cat_id =$('#groupdc').val();
+    $.get(baseurl+'/ajax-subcat?cat_id='+cat_id,function(data){
+        //console.log(data);
+          $('#subgroupdc').empty();
+        $.each(data,function(index,subcatObj){
+          if (subcatObj.id==old)
+          {
+            $('#subgroupdc').append('<option value="'+subcatObj.id+'" selected=selected>'+subcatObj.display_name+'</option>');
+          }else{
+            $('#subgroupdc').append('<option value="'+subcatObj.id+'">'+subcatObj.display_name+'</option>');
+          }
+
+        });
+
+  	});
+}
+</script>
 @endsection

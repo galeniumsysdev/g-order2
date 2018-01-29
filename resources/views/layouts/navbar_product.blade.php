@@ -24,7 +24,7 @@
 	<!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
 	<link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
 	<link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
-
+@yield('css')
     <!-- Scripts -->
     <script>
     window.Laravel = {
@@ -67,7 +67,7 @@
                           <ul class="nav navbar-right-xs pull-right visible-xs">
                             <li>
                               <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart fa-lg" aria-hidden="true"></i>
-                              <span class="badge" id="shopcart2">{{ Session::has('cart')?Session::get('cart')->totalQty:"" }}</span></a>
+                              <span class="badge" id="shopcart2">{{ isset($countbrg)?$countbrg:"" }}</span></a>
                             </li>
                           </ul>
                         @endif
@@ -149,7 +149,9 @@
                             <li class="dropdown">
                               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">DPL&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                               <ul class="dropdown-menu">
+                                @if(Auth::user()->hasRole('SPV'))
                                 <li><a href="{{route('dpl.generateForm')}}">@lang('label.generatesuggestno')</a></li>
+                                @endif
                                 <li><a href="{{route('dpl.list')}}">@lang('label.listsuggestno')</a></li>
                               </ul>
                             </li>
@@ -210,7 +212,7 @@
                               </li>
                               <li class="hidden-xs">
                                 <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart" aria-hidden="true"></i>&nbsp;@lang('label.shopcart')
-                                  <span class="badge" id="shopcart">{{ Session::has('cart')?Session::get('cart')->totalQty:"" }}</span>
+                                  <span class="badge" id="shopcart">{{ isset($countbrg)?$countbrg:"" }}</span>
                                 </a>
                               </li>
                           @endif

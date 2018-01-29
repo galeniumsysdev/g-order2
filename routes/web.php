@@ -57,7 +57,7 @@ Route::group(['middleware'=>['auth','prevent-back-history']],function(){
   Route::post('profile', 'ProfileController@update_avatar')->name('profile.update');
   Route::post('add-address', 'ProfileController@addaddress')->name('profile.address');
   Route::post('add-contact', 'ProfileController@addcontact')->name('profile.contact');
-  Route::get('/add_address', 'profileController@addaddressview');
+  Route::get('add_address', 'ProfileController@addaddressview');
   Route::match(['patch','get'],'/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   //Route::get('/edit_address/{id}', 'ProfileController@editaddress')->name('profile.edit_address');;
   Route::get('/add_contact', function () {
@@ -182,8 +182,12 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::resource('GroupDataCenter','DataCenterController');
   Route::resource('SubgroupDatacenter','SubgroupDCController');
 
-
-
+  Route::get('/admin/flexvalue','FlexvalueController@index')->name('flexvalue.index');
+  Route::get('/admin/flexvalue/show/{master?}/{id?}','FlexvalueController@show')->name('flexvalue.show');
+  Route::get('/admin/flexvalue/create','FlexvalueController@create')->name('flexvalue.create');
+  Route::post('/admin/flexvalue/create','FlexvalueController@store')->name('flexvalue.store');
+  Route::patch('/admin/flexvalue/edit/{master?}/{id?}','FlexvalueController@update')->name('flexvalue.edit');
+  Route::delete('/admin/flexvalue/delete/{master?}/{id?}','FlexvalueController@destroy')->name('flexvalue.destroy');
 });
 
 Route::get('/manageOutlet/{id}/{notif_id}', 'CustomerController@show')->name('customer.show');
@@ -266,7 +270,11 @@ Route::group(['middleware' => ['auth','prevent-back-history']], function () {
   Route::post('/SO/approval','OrderController@approvalSO')->name('order.approvalSO');
   Route::get('/notif/newpo/{id?}/{notifid?}','OrderController@readnotifnewpo')->name('order.notifnewpo');
   Route::post('/PO/batal','OrderController@batalPO')->name('order.cancelPO');
+  Route::post('/PO/update','OrderController@updatePO')->name('order.updatePO');
   //Route::post('/PO/Receive','OrderController@receivePO')->name('order.receivePO');
+});
+
+Route::group(['middleware' => ['auth']], function () {
   Route::get('/download/PO/{file}', function ($file='') {
       return response()->download(storage_path('app/PO/'.$file));
   });
@@ -381,4 +389,8 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 */
 
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
+Route::get('/swipe', function(){
+return view('swipe');
+})->name('swipe');
+
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');
