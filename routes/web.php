@@ -190,7 +190,7 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::delete('/admin/flexvalue/delete/{master?}/{id?}','FlexvalueController@destroy')->name('flexvalue.destroy');
 });
 
-Route::get('/manageOutlet/{id}/{notif_id}', 'CustomerController@show')->name('customer.show');
+Route::get('/manageOutlet/{id?}/{notif_id?}', 'CustomerController@show')->name('customer.show');
 //Route::get('/searchNoo', 'CustomerController@searchNoo')->name('customer.searchNoo');
 Route::get('customer/searchOutlet', 'CustomerController@searchOutlet')->name('customer.searchoutlet');
 Route::get('customer/searchDistributor', 'CustomerController@searchDistributor')->name('customer.searchDistributor');

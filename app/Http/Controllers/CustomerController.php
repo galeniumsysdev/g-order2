@@ -112,7 +112,7 @@ class CustomerController extends Controller
             //$customer1 = $customer->pluck('id','customer_name','pharma_flag','psc_flag','tax_reference')->toArray();
             //$customer=DB::table('customers')->where('id','=',$user->customer_id)->select('id','customer_name','pharma_flag','psc_flag','tax_reference')->get();
             //dd($customer);
-              return view('admin.customer.show',compact('customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','outletdist','notif_id'));
+              return view('admin.customer.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','outletdist','notif_id'));
             }else{
               abort(403, 'Unauthorized action.');
             }
@@ -249,6 +249,39 @@ class CustomerController extends Controller
         Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
         $user->avatar = $filename;
       }
+      if(Auth::user()->hasRole('Principal'))
+      {
+        $oldcustomer=$user->customer_id;
+        if(isset($request->c_number))
+        {
+          $oraclecustomer = Customer::leftjoin('users','customers.id','=','users.customer_id')
+                          ->where('customer_number','=',$request->c_number)
+                          ->select('customers.*','users.email','users.register_flag')
+                          ->first();
+          if($oraclecustomer)
+          {
+            if(!$oraclecustomer->register_flag){
+              /*update all po outlet_id*/
+              DB::table('po_draft_headers')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+              DB::table('so_headers')->where('customer_id','=',$oldcustomer)->update(['customer_id'=>$oraclecustomer->id]);
+              /*attach to all outlet_distributor*/
+              $distributor = DB::table('outlet_distributor')->where('outlet_id','=',$oldcustomer)->select('distributor_id')->get();
+              if($distributor) $oraclecustomer->hasDistributor()->attach($distributor->pluck('distributor_id')->toArray());
+              /*product stock jika role Apotik/Klinik*/
+              if($user->hasRole('Apotik/Klinik'))
+              {
+                DB::table('outlet_products')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+                DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+              }
+              /*delete old customer_id*.
+              $user->customer_id = $oraclecustomer->id;
+
+            }else{
+              return redirect()->back()->withInput()->withErrors(['c_number'=>'Customer number already has registered to another user']);
+            }
+          }
+        }
+      }
       $user->name=$request->name;
       $user->save();
       $user->detachRoles($user->roles);
@@ -258,6 +291,7 @@ class CustomerController extends Controller
       $customer->tax_reference = $request->npwp;
       $customer->customer_name = $request->name;
       $customer->outlet_type_id =$request->category;
+
       $sites = $customer->sites()->where('primary_flag','=','Y')->first();
       if($sites)
       {
@@ -274,7 +308,7 @@ class CustomerController extends Controller
         if($sub) $groupdc = $sub->group_id;
         if($customer->psc_flag !=$request->psc_flag)
         {
-            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();                        
+            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
             if($distributor)
             {
               $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());

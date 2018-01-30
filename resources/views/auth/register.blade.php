@@ -248,7 +248,7 @@
                                </div>
                             </div>
                         </div>
-
+                        <!--
                         <div class="form-group{{ $errors->has('groupdc') ? ' has-error' : '' }}" id="divkategoridc">
                           <label for="kategori" class="control-label col-sm-4">**<strong>@lang('label.categorydc') </strong></label>
                           <div class="col-sm-3">
@@ -281,7 +281,7 @@
                                 </span>
                               @endif
                           </div>
-                         </div>
+                         </div>-->
 
                     </div>
                     <div class="form-horizontal col-sm-6">

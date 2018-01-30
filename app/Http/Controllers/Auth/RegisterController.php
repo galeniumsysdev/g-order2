@@ -112,8 +112,7 @@ class RegisterController extends Controller
 
     protected function update(array $data)
     {
-       $user_check = User::where('email', $data['email'])->where('api_token',$data['token1'])->first();
-
+       $user_check = User::where('email', $data['email'])->where('api_token',$data['token1'])->first();       
        if (!$user_check) {
            return back()->with('status', trans('auth.failed'));
        }
@@ -121,9 +120,10 @@ class RegisterController extends Controller
        {
          if (isset($user_check->customer_id)){
             $customer = Customer::find($user_check->customer_id);
-            if($customer->subgroupdc){
+            $groupdc = $customer->outlet_type_id;
+            /*if($customer->subgroupdc){
                 $groupdc =$customer->subgroupdc->groupdatacenter->id;
-            }else $groupdc = null;
+            }else $groupdc = null;*/
 
 
             $sites = $customer->sites()->where('primary_flag','=','Y')->first();
@@ -150,12 +150,41 @@ class RegisterController extends Controller
               }
 
               $distributor = $distributor->get();
-		if($distributor)
+		          if($distributor)
               {
                 $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+                $customeryasa=$distributor->where('customer_number','=',config('constant.customer_yasa'))->first();
+                if($customeryasa)
+                {
+                  $usernotif= User::where('customer_id','=',$customeryasa->id)
+                        ->orwhereExists(function ($query) {
+                                $query->select(DB::raw(1))
+                                      ->from('role_user as ru')
+                                      ->join('roles as r','ru.role_id','=','r.id')
+                                      ->whereRaw("ru.user_id = users.id and r.name = 'IT Galenium'");
+                            })->get();
+                  //dd($usernotif);
+                  $content="<strong>".$customer->customer_name."</strong> telah mendaftar melalui aplikasi ".config('app.name'). ". Harap mappingkan segera dengan data outlet yang ada pada master Customer Oracle.<br>";
+                  $data_email = [
+                    'title'=> 'Register Outlet',
+            				'message' => 'Pendaftaran outlet baru: '.$customer->customer_name,
+            				'id' => $user_check->id,
+            				'href' => route('customer.show')
+                    ,'mail' => [ 'greeting'=> "Pendaftaran Outlet Baru di ". config('app.name'),
+                                    'content' => $content,
+                            		]
+            			];
+
+                  foreach($usernotif as $u)
+                  {
+                    $data_email ['email']= $u->email;
+                    $u->notify(new PushNotif($data_email));
+                  }
+                }
               }
             }
          }
+
          $user_check->password = bcrypt($data['password']);
          $user_check->register_flag=1;
          $user_check->first_login = date('Y-m-d H:i:s');
@@ -186,10 +215,10 @@ class RegisterController extends Controller
 	      //return Redirect::back()->withErrors('psc', trans('auth.pscflag'))->withInput();
         return redirect(route('register'))->withErrors(['psc'=> [trans('auth.pscflag')]])->withInput();
       }
-      if($request->psc=="1" and (is_null($request->groupdc) or is_null($request->subgroupdc) ))
+    /*  if($request->psc=="1" and (is_null($request->groupdc) or is_null($request->subgroupdc) ))
       {
         return redirect(route('register'))->withErrors(['groupdc'=> trans('auth.groupdcerror')])->withInput();
-      }
+      }*/
 
       /*if($request->hasFile('imgphoto')) {
         $validator = Validator::make($request->all(), [
@@ -305,8 +334,8 @@ class RegisterController extends Controller
               ->join('users as u','c.id','=','u.customer_id')
               ->join('role_user as ru','u.id','=','ru.user_id')
               ->join('roles as r','ru.role_id','=','r.id')
-              ->leftjoin ('distributor_groupdc as dg','c.id','=', 'dg.distributor_id')
-              ->select('c.id','c.customer_name')
+              //->leftjoin ('distributor_groupdc as dg','c.id','=', 'dg.distributor_id')
+              ->select('c.id','c.customer_name','c.customer_number')
               ->where([
                 ['u.register_flag','=',true],
                 ['c.status','=','A'],
@@ -314,18 +343,37 @@ class RegisterController extends Controller
       if($tipe=="PSC"){
         $distributor = $distributor->where([
           ['c.psc_flag','=',"1"],
-          ['dg.group_id','=',$groupdc]
-        ])->whereRaw("((not exists (select 1 from distributor_regency as dr where c.id=dr.distributor_id)
+        //  ['dg.group_id','=',$groupdc]
+        ])/*->whereRaw("((not exists (select 1 from distributor_regency as dr where c.id=dr.distributor_id)
                   	  or exists (select 1 from distributor_regency as dr where c.id=dr.distributor_id and dr.regency_id = '".$city."')
-                       ))");
+                       ))")*/;
 
       }
       if($tipe=="PHARMA"){
         $distributor = $distributor->where([
-          ['c.pharma_flag','=',"1"]
-        ])->whereNull('dg.group_id')
-          ->where('r.name','!=','Principal')
-          ->whereRaw("exists (select 1 from distributor_regency as dr where c.id = dr.distributor_id and dr.regency_id = '".$city."')");
+          ['c.pharma_flag','=',"1"],
+          ['r.name','!=','Principal']
+        ]);/*->whereNull('dg.group_id')
+          ->whereRaw("exists (select 1 from distributor_regency as dr where c.id = dr.distributor_id and dr.regency_id = '".$city."')");*/
+      }
+      $dist_id = $distributor->get()->pluck('id')->toArray();
+      $groupmapping = DB::table("distributor_mappings")
+                    ->whereIn('distributor_id',$dist_id)
+                    ->groupBy('data')
+                    ->select('data')
+                    ->get();
+      foreach($groupmapping as $mapping)
+      {
+        if($mapping->data=="regencies")
+        {
+          $distributor =$distributor
+                      ->whereRaw("exists (select 1 from distributor_mappings where c.id = distributor_mappings.distributor_id
+                                          and distributor_mappings.data='".$mapping->data."' and distributor_mappings.data_id ='".$city."')");
+        }elseif($mapping->data=="category_outlets"){
+          $distributor =$distributor
+                      ->whereRaw("exists (select 1 from distributor_mappings where c.id = distributor_mappings.distributor_id
+                                          and distributor_mappings.data='".$mapping->data."' and distributor_mappings.data_id ='".$groupdc."')");
+        }
       }
       return $distributor;
     }
@@ -427,13 +475,18 @@ class RegisterController extends Controller
      */
     public function register2(Request $request)
     {
-        //$this->validator($request->all())->validate();
-        $this->verification($request->all())->validate();
+        DB::beginTransaction();
+        try{
+          $this->verification($request->all())->validate();
 
 
-        //event(new Registered($user = $this->create($request->all())));
-        event( new Registered( $user = $this->update($request->all()) ) );
-
+          //event(new Registered($user = $this->create($request->all())));
+          event( new Registered( $user = $this->update($request->all()) ) );
+          DB::commit();
+        }catch (\Exception $e) {
+          DB::rollback();
+          throw $e;
+        }
         if($user->register_flag){
           $this->guard()->login($user);
 
