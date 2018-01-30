@@ -20,12 +20,12 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Transaction</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.transaction')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div id="tabs" class="simple-tabs">
               <ul>
-                <li><a href="#trx-in">Transaction In</a></li>
-                <li><a href="#trx-out">Transaction Out</a></li>
+                <li><a href="#trx-in">@lang('outlet.trxIn')</a></li>
+                <li><a href="#trx-out">@lang('outlet.trxOut')</a></li>
               </ul>
               <!-- Transaction In -->
               <div id="trx-in">
@@ -36,7 +36,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="trx-in-date">Transaction Date</label>
+                              <label for="trx-in-date">@lang('outlet.trxDate')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -66,7 +66,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-in">Quantity</label>
+                              <label for="qty-in">@lang('outlet.qty')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -83,7 +83,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-in">Batch No.</label>
+                              <label for="qty-in">@lang('outlet.batchNo')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -97,7 +97,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-in">Delivery Order No.</label>
+                              <label for="qty-in">@lang('outlet.deliveryNo')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -130,7 +130,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="trx-out-date">Transaction Date</label>
+                              <label for="trx-out-date">@lang('outlet.trxDate')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -144,7 +144,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="product-name-out">Product</label>
+                              <label for="product-name-out">@lang('outlet.product')</label>
                             </div>
                           </div>
                           <div class="col-md-4 product-container">
@@ -160,7 +160,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-out">Quantity</label>
+                              <label for="qty-out">@lang('outlet.qty')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -177,7 +177,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-in">Batch No.</label>
+                              <label for="qty-in">@lang('outlet.batchNo')</label>
                             </div>
                           </div>
                           <div class="col-md-4">

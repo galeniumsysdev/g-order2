@@ -20,7 +20,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Tambah Produk</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.addProduct')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div id="tabs" class="simple-tabs">
               <div class="form-wrapper">
@@ -31,7 +31,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="trx-in-date">Nama Barang</label>
+                            <label for="trx-in-date">@lang('outlet.productName')</label>
                           </div>
                         </div>
                         <div class="col-md-4">
@@ -45,7 +45,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="product-name-in">Satuan</label>
+                            <label for="product-name-in">@lang('outlet.unit')</label>
                           </div>
                         </div>
                         <div class="col-md-4 product-container">
@@ -59,7 +59,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="qty-in">Harga</label>
+                            <label for="qty-in">@lang('outlet.price')</label>
                           </div>
                         </div>
                         <div class="col-md-4">
@@ -76,7 +76,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="product-name-in">Generik (Zat Aktif)</label>
+                            <label for="product-name-in">@lang('outlet.generic')</label>
                           </div>
                         </div>
                         <div class="col-md-4 product-container">
@@ -93,7 +93,7 @@
                         </div>
                         <div class="col-md-4">
                           {{ Form::submit('Submit', array('class'=>'btn btn-primary')) }}
-                          <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">Back</a>
+                          <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">@lang('label.back')</a>
                         </div>
                       </div>
                     </div>
