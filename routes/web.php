@@ -195,6 +195,7 @@ Route::get('/manageOutlet/{id?}/{notif_id?}', 'CustomerController@show')->name('
 Route::get('customer/searchOutlet', 'CustomerController@searchOutlet')->name('customer.searchoutlet');
 Route::get('customer/searchDistributor', 'CustomerController@searchDistributor')->name('customer.searchDistributor');
 Route::get('customer/searchOutletDistributor', 'CustomerController@searchOutletDistributor')->name('customer.searchOutletDistributor');
+Route::get('customer/searchOracleOutlet', 'CustomerController@searchOracleOutlet')->name('customer.oracle.searchoutlet');
 
 
 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Galenium Markeplace for order">
     <meta name="author" content="Pt. Solusi Integrasi Persada">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Simple Responsive Admin</title>
 	<!-- BOOTSTRAP STYLES-->
     <link href="{{asset('css/bootstrap.min.css')}}" rel="stylesheet" />
@@ -19,11 +20,15 @@
     <script>
     window.Laravel = {
                    csrfToken: '{{csrf_token()}}',
-                   url: "{{url('/')}}"
+                   url: "{{url('/')}}",
+                   auth: {
+                       user: '{{auth()->user()}}'
+                   }
                 }
     </script>
 </head>
 <body>
+  <div id="app">
   <div id="wrapper">
 
         <!-- Navigation -->
@@ -96,33 +101,22 @@
                         </li>
                     </ul>
                 </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
+                <notification class="dropdown-toggle" :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
+                <!--<li class="dropdown">
+
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="badge">{{json_encode(count(Auth::user()->unreadNotifications))}}</b></a>
                     <ul class="dropdown-menu alert-dropdown">
+                      @foreach(Auth::user()->unreadNotifications as $notif)
                         <li>
-                            <a href="#">Alert Name <span class="label label-default">Alert Badge</span></a>
+
                         </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-primary">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-success">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-info">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-warning">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-danger">Alert Badge</span></a>
-                        </li>
+                      @endforeach
                         <li class="divider"></li>
                         <li>
                             <a href="#">View All</a>
                         </li>
                     </ul>
-                </li>
+                </li>-->
                 <li class="dropdown">
 
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
@@ -177,7 +171,7 @@
 
         </div>
         <!-- /#page-wrapper -->
-
+      </div>
     </div>
      <!-- /. WRAPPER  -->
     <!-- SCRIPTS -AT THE BOTOM TO REDUCE THE LOAD TIME-->
@@ -186,6 +180,7 @@
       <!-- BOOTSTRAP SCRIPTS -->
     <script src="{{asset('js/bootstrap.min.js')}}"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.js"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
 
     @yield('js')
 

@@ -234,113 +234,119 @@ class CustomerController extends Controller
 
     if($request->save=="save")
     {
-      $user = User::find($id);
-      if($request->hasFile('avatar')) {
-        $validator = Validator::make($request->all(), [
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ])->validate();
-        $tmp = $user->avatar ;
-        if (File::exists(public_path('uploads/avatars/'.$tmp ))){
-          unlink(public_path('uploads/avatars/'.$tmp ));
-          //echo ("<br>delete image");
+      DB::beginTransaction();
+      try{
+        $user = User::find($id);
+        if($request->hasFile('avatar')) {
+          $validator = Validator::make($request->all(), [
+              'avatar' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+          ])->validate();
+          $tmp = $user->avatar ;
+          if (File::exists(public_path('uploads/avatars/'.$tmp ))){
+            unlink(public_path('uploads/avatars/'.$tmp ));
+            //echo ("<br>delete image");
+          }
+          $avatar = $request->file('avatar');
+          $filename = time() . '.' . $avatar->getClientOriginalExtension();
+          Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
+          $user->avatar = $filename;
         }
-        $avatar = $request->file('avatar');
-        $filename = time() . '.' . $avatar->getClientOriginalExtension();
-        Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
-        $user->avatar = $filename;
-      }
-      if(Auth::user()->hasRole('Principal'))
-      {
-        $oldcustomer=$user->customer_id;
-        if(isset($request->c_number))
+        if(Auth::user()->hasRole('Principal'))
         {
-          $oraclecustomer = Customer::leftjoin('users','customers.id','=','users.customer_id')
-                          ->where('customer_number','=',$request->c_number)
-                          ->select('customers.*','users.email','users.register_flag')
-                          ->first();
-          if($oraclecustomer)
+          $oldcustomer=$user->customer_id;
+          if(isset($request->c_number))
           {
-            if(!$oraclecustomer->register_flag){
-              /*update all po outlet_id*/
-              DB::table('po_draft_headers')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
-              DB::table('so_headers')->where('customer_id','=',$oldcustomer)->update(['customer_id'=>$oraclecustomer->id]);
-              /*attach to all outlet_distributor*/
-              $distributor = DB::table('outlet_distributor')->where('outlet_id','=',$oldcustomer)->select('distributor_id')->get();
-              if($distributor) $oraclecustomer->hasDistributor()->attach($distributor->pluck('distributor_id')->toArray());
-              /*product stock jika role Apotik/Klinik*/
-              if($user->hasRole('Apotik/Klinik'))
-              {
-                DB::table('outlet_products')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
-                DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+            $oraclecustomer = Customer::leftjoin('users','customers.id','=','users.customer_id')
+                            ->where('customer_number','=',$request->c_number)
+                            ->select('customers.*','users.email','users.register_flag')
+                            ->first();
+            if($oraclecustomer)
+            {
+              if(!$oraclecustomer->register_flag){
+                /*update all po outlet_id*/
+                DB::table('po_draft_headers')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+                DB::table('so_headers')->where('customer_id','=',$oldcustomer)->update(['customer_id'=>$oraclecustomer->id]);
+                /*attach to all outlet_distributor*/
+                $distributor = DB::table('outlet_distributor')->where('outlet_id','=',$oldcustomer)->select('distributor_id')->get();
+                if($distributor) $oraclecustomer->hasDistributor()->attach($distributor->pluck('distributor_id')->toArray());
+                /*product stock jika role Apotik/Klinik*/
+                if($user->hasRole('Apotik/Klinik'))
+                {
+                  DB::table('outlet_products')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+                  DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+                }
+                /*delete old customer_id*/
+                DB::table('customers')->where('id','=',$oldcustomer)->delete();
+                $user->customer_id = $oraclecustomer->id;
+                //$user->name = $oraclecustomer->customer_name;
+              }else{
+                return redirect()->back()->withInput()->withErrors(['c_number'=>'Customer number already has registered to another user']);
               }
-              /*delete old customer_id*.
-              $user->customer_id = $oraclecustomer->id;
-
-            }else{
-              return redirect()->back()->withInput()->withErrors(['c_number'=>'Customer number already has registered to another user']);
             }
           }
         }
-      }
-      $user->name=$request->name;
-      $user->save();
-      $user->detachRoles($user->roles);
-      $user->roles()->attach($request->role);
-      $customer = Customer::find($user->customer_id);
-      //dd($customer->hasDistributor->count());
-      $customer->tax_reference = $request->npwp;
-      $customer->customer_name = $request->name;
-      $customer->outlet_type_id =$request->category;
+        if(isset($request->name)) $user->name=$request->name;
+        $user->save();
+        $user->detachRoles($user->roles);
+        $user->roles()->attach($request->role);
+        $customer = Customer::find($user->customer_id);
+        //dd($customer->hasDistributor->count());
+        $customer->tax_reference = $request->npwp;
+        $customer->customer_name = $request->name;
+        $customer->outlet_type_id =$request->category;
 
-      $sites = $customer->sites()->where('primary_flag','=','Y')->first();
-      if($sites)
-      {
-        $city = $sites->city_id;
-      }else{
-        $city = null;
-      }
-      if($request->psc_flag=="1"){
-      //if(Auth::User()->hasRole('Marketing PSC')){
-        $customer->subgroup_dc_id =$request->subgroupdc;
-        $sub=DB::table('subgroup_datacenters as sdc')
-                  ->where('id','=',$request->subgroupdc)
-                  ->select('group_id')->first();
-        if($sub) $groupdc = $sub->group_id;
-        if($customer->psc_flag !=$request->psc_flag)
+        $sites = $customer->sites()->where('primary_flag','=','Y')->first();
+        if($sites)
         {
-            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
+          $city = $sites->city_id;
+        }else{
+          $city = null;
+        }
+        if($request->psc_flag=="1"){
+        //if(Auth::User()->hasRole('Marketing PSC')){
+          $customer->subgroup_dc_id =$request->subgroupdc;
+          $sub=DB::table('subgroup_datacenters as sdc')
+                    ->where('id','=',$request->subgroupdc)
+                    ->select('group_id')->first();
+          if($sub) $groupdc = $sub->group_id;
+          if($customer->psc_flag !=$request->psc_flag)
+          {
+              $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
+              if($distributor)
+              {
+                $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+              }
+          }
+
+        }else{
+          $customer->subgroup_dc_id =null;
+          $groupdc=null;
+        }
+
+        if($customer->pharma_flag !=$request->pharma_flag)
+        {
+          if($request->pharma_flag=="1")//adddistributor pharma
+          {
+            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
             if($distributor)
             {
               $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
             }
-        }
-
-      }else{
-        $customer->subgroup_dc_id =null;
-        $groupdc=null;
-      }
-
-      if($customer->pharma_flag !=$request->pharma_flag)
-      {
-        if($request->pharma_flag=="1")//adddistributor pharma
-        {
-          $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
-          if($distributor)
-          {
-            $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
           }
         }
+        $customer->psc_flag =$request->psc_flag;
+        $customer->pharma_flag =$request->pharma_flag;
+        $customer->save();
+        if($customer->hasDistributor->count()==0)
+        {
+          $pesan = " ".trans("pesan.adddistributor");
+        }
+        DB::commit();
+          return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.update").$pesan);
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
       }
-      $customer->psc_flag =$request->psc_flag;
-      $customer->pharma_flag =$request->pharma_flag;
-      $customer->save();
-      if($customer->hasDistributor->count()==0)
-      {
-        $pesan = " ".trans("pesan.adddistributor");
-      }
-
-        return redirect()->route('customer.show',['id'=>$id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.update").$pesan);
-
     }
   }
 
@@ -664,6 +670,23 @@ class CustomerController extends Controller
             ->where('status','=','A');
       $data = $data->select('id','customer_name');
       $data = $data->get();
+      return response()->json($data);
+    }
+
+    public function searchOracleOutlet(Request $request)
+    {
+      $data = Customer::where("customer_number","LIKE",$request->input('query')."%")
+            ->whereNotNull("oracle_customer_id")
+            ->where('status','=','A')
+            ->where('customer_class_code','=','OUTLET')
+            ->whereNotExists(function($query){
+              $query->select(DB::raw(1))
+                    ->from('users as u')
+                    ->whereRaw("u.customer_id= customers.id and u.register_flag='1'");
+            });
+
+      $data = $data->select('id','customer_name','customer_number','oracle_customer_id','tax_reference');
+      $data = $data->orderBy('customer_number','asc')->get();
       return response()->json($data);
     }
 
