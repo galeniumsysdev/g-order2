@@ -25,7 +25,7 @@
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Discount Form</strong></div>
+          <div class="panel-heading"><strong>@lang('dpl.discountForm')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
@@ -84,13 +84,13 @@
                         <th style="width:5%" class="text-center" rowspan="2">@lang('shop.qtyorder')</th>
                         <th style="width:5%" class="text-center" rowspan="2">@lang('shop.qtyavailable')</th>
                         <!--<th style="width:15%" class="text-center" rowspan="2">@lang('shop.SubTotal')</th>-->
-                        <th style="width:10%" class="text-center" rowspan="2">Discount<br/>Distributor</th>
+                        <th style="width:10%" class="text-center" rowspan="2">@lang('dpl.discount')<br/>Distributor</th>
                         <th class="text-center" colspan="2">GPL</th>
                         <th rowspan="2">@lang('shop.select')</th>
                       </tr>
                       <tr>
-                        <th style="width:10%" class="text-center">Discount</th>
-                        <th style="width:10%" class="text-center">Bonus</th>
+                        <th style="width:10%" class="text-center">@lang('dpl.discount')</th>
+                        <th style="width:10%" class="text-center">@lang('dpl.bonus')</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -147,11 +147,11 @@
                         &nbsp;
                       </div>
                       <div class="col-md-10">
-                        <input type="submit" class="btn btn-primary" value="Save" name="Save">
+                        <input type="submit" class="btn btn-primary" value="@lang('dpl.save')" name="Save">
                         @if(Auth::user()->hasRole('SPV'))
                         <input type="submit" class="btn btn-warning" value="Split" name="Split">
                         @endif
-                        <a href="{{ route('dpl.list') }}" class="btn btn-default">Back</a>
+                        <a href="{{ route('dpl.list') }}" class="btn btn-default">@lang('dpl.back')</a>
                       </div>
                     </div>
                   </div>

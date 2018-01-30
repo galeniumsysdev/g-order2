@@ -17,7 +17,7 @@
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Discount Form</strong></div>
+          <div class="panel-heading"><strong>@lang('dpl.discountForm')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
@@ -70,7 +70,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="distributor">No. Usulan</label>
+                          <label for="distributor">@lang('dpl.suggestNo')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -85,7 +85,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="distributor">Ditolak oleh</label>
+                          <label for="distributor">@lang('dpl.rejectedBy')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -99,7 +99,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="distributor">Alasan reject</label>
+                          <label for="distributor">@lang('dpl.reason')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -114,7 +114,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="distributor">Disetujui oleh</label>
+                          <label for="distributor">@lang('dpl.approvedBy')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -129,7 +129,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="distributor">No. DPL</label>
+                          <label for="distributor">@lang('dpl.dplNo')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -151,12 +151,12 @@
                         <th style="width:5%" class="text-center" rowspan="2">@lang('shop.uom')</th>
                         <th style="width:5%" class="text-center" rowspan="2">@lang('shop.qtyorder')</th>
                         <th style="width:15%" class="text-center" rowspan="2">@lang('shop.SubTotal')</th>
-                        <th style="width:10%" class="text-center" rowspan="2">Discount<br/>Distributor</th>
+                        <th style="width:10%" class="text-center" rowspan="2">@lang('dpl.discount')<br/>Distributor</th>
                         <th class="text-center" colspan="2">GPL</th>
                       </tr>
                       <tr>
-                        <th style="width:10%" class="text-center">Discount</th>
-                        <th style="width:10%" class="text-center">Bonus</th>
+                        <th style="width:10%" class="text-center">@lang('dpl.discount')</th>
+                        <th style="width:10%" class="text-center">@lang('dpl.bonus')</th>
                       </tr>
                     </thead>
                     <tbody>

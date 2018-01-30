@@ -18,7 +18,7 @@
     <div class="row">
       <div class="col-md-10 col-sm-offset-1">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>DPL Suggestion Number</strong></div>
+          <div class="panel-heading"><strong>@lang('dpl.dplSuggestNo')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
@@ -30,7 +30,7 @@
                           <label for="outlet">Outlet</label>
                         </div>
                       </div>
-                      <div class="col-md-10  product-container">
+                      <div class="col-md-10 product-container">
                         {{ Form::text('outlet','',array('class'=>'form-control','id'=>'outlet','autocomplete'=>'off')) }}
                         {{ Form::button('X', array('class'=>'btn btn-link btn-remove text-danger change-outlet','id'=>'change-outlet')) }}
                         {{ Form::hidden('outlet_id','',array('class'=>'form-control','id'=>'outlet-id')) }}
@@ -43,7 +43,7 @@
                     <div class="row">
                       <div class="col-md-2">
                         <div class="form-label">
-                          <label for="outlet">Alamat</label>
+                          <label for="outlet">@lang('label.address')</label>
                         </div>
                       </div>
                       <div class="col-md-10">
@@ -73,7 +73,7 @@
                         &nbsp;
                       </div>
                       <div class="col-md-10">
-                        {{ Form::submit('Generate',array('class'=>'btn btn-primary')) }}
+                        {{ Form::submit(Lang::get('dpl.generate'),array('class'=>'btn btn-primary')) }}
                       </div>
                     </div>
                   </div>

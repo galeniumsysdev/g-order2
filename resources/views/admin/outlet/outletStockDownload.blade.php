@@ -21,7 +21,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Report Stock</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.reportStock')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div>
               <div class="form-wrapper">
@@ -31,7 +31,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="trx-in-date">Tanggal</label>
+                            <label for="trx-in-date">@lang('dpl.date')</label>
                           </div>
                         </div>
                         <div class="col-md-4">
@@ -47,7 +47,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="product-name-in">Nama Outlet</label>
+                            <label for="product-name-in">@lang('outlet.outletName')</label>
                           </div>
                         </div>
                         <div class="col-md-4 outlet-container">
@@ -61,7 +61,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="qty-in">Provinsi</label>
+                            <label for="qty-in">@lang('outlet.province')</label>
                           </div>
                         </div>
                         <div class="col-md-4 province-container">
@@ -93,7 +93,7 @@
                         </div>
                         <div class="col-md-4">
                           {{ Form::submit('Submit', array('class'=>'btn btn-primary')) }}
-                          <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">Back</a>
+                          <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">@lang('label.back')</a>
                         </div>
                       </div>
                     </div>
@@ -106,11 +106,11 @@
               <table id="report-list" class="display responsive nowrap" width="100%">
                 <thead>
                   <tr>
-                    <th rowspan="2" class="text-center">Nama Outlet</th>
-                    <th rowspan="2" class="text-center">Nama Barang</th>
-                    <th rowspan="2" class="text-center">Batch</th>
-                    <th colspan="4" class="text-center">Jumlah</th>
-                    <th rowspan="2" class="text-center">Unit Price</th>
+                    <th rowspan="2" class="text-center">@lang('outlet.outletName')</th>
+                    <th rowspan="2" class="text-center">@lang('outlet.productName')</th>
+                    <th rowspan="2" class="text-center">@lang('outlet.batchNo')</th>
+                    <th colspan="4" class="text-center">@lang('outlet.qty')</th>
+                    <th rowspan="2" class="text-center">@lang('outlet.unitPrice')</th>
                     <th rowspan="2" class="text-center">Value</th>
                   </tr>
                   <tr>
@@ -125,7 +125,7 @@
                     <tr>
                       <td>{{ $result['outlet_name'] }}</td>
                       <td>{{ $result['title'] }}</td>
-                      <td>{{ $result['batch'] }}</td>
+                      <td>{!! $result['batch'] !!}</td>
                       <td align="right">{{ $result['begin'] }}</td>
                       <td align="right">{{ $result['in'] }}</td>
                       <td align="right">{{ $result['out'] }}</td>
