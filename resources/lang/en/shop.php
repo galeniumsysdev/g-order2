@@ -39,7 +39,7 @@ return [
     'listtransaksi' => 'Transaction History',
     'orderdate' => 'Order Date',
     'statustransaction' => 'Status Transaction',
-    'criteriapo' => 'Trx No/PO No/Distributor',
+    'criteriapo' => 'Trx No/PO No/Supplier',
     'criteriaso' => 'Trx No/PO No/Customer',
     'from'=>'From',
     'to'=>'To',
@@ -61,4 +61,5 @@ return [
     'select'=>'Select',
     'amountreceive'=>'Amount Receive',
     'AddToCart' => 'Add to cart',
+    'supplier'=>'Supplier',
 ];

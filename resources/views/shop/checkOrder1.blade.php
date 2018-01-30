@@ -24,11 +24,15 @@
               <div class="form-group">
                 <label for="subject" class="col-md-2 control-label">No.Trx</label>
                 <div class="col-md-10 ">
-                    <label class="form-class">{{$header->notrx}}&nbsp;<a href="{{url('/download/'.$header->file_po)}}" title="@lang('shop.download') file PO"><i class="glyphicon glyphicon-download-alt"></i></a></label>
+                    <label class="form-class">{{$header->notrx}}&nbsp;
+                      @if(isset($header->file_po))
+                        <a href="{{url('/download/'.$header->file_po)}}" title="@lang('shop.download') file PO"><i class="glyphicon glyphicon-download-alt"></i></a>
+                      @endif
+                    </label>
                 </div>
               </div>
               <div class="form-group">
-                <label for="name" class="col-md-2 control-label">Distributor</label>
+                <label for="name" class="col-md-2 control-label">@lang('shop.supplier')</label>
                   <div class="col-md-10">
                     <input type="text" class="form-control" value="{{$header->distributor_name}}" readonly>
                   </div>
@@ -253,7 +257,7 @@
                               <strong>Total: {{$curr}}<strong>
                             </td>
                   					<td style="text-align:right"><strong id="total">
-                              {{ number_format($header->total_amount,2) }}</strong></td>
+                              {{ number_format($header->amount_confirm+$header->tax_amount,2) }}</strong></td>
                               @if($header->status>1)
                               <td style="text-align:right"><strong>
                                 {{ number_format($taxaccept+$header->amount_accept,2) }}</strong></td>
@@ -347,12 +351,25 @@
                           <div class="form-group">
                             <label for="name" class="col-md-2 control-label">Keterangan</label>
                               <div class="col-md-10">
-                                <textarea class="form-control" rows="2" name="keterangan"></textarea>
+                                <textarea class="form-control" rows="2" name="note"></textarea>
                               </div>
                           </div>
                           <div class="col-xs-4 col-sm-2 pull-right">
                             <button type="submit" name="terima" value="terima" class="btn btn-success btn-block btnorder">@lang('shop.Receive')&nbsp;</button>
                           </div>
+                          @elseif(isset($delivery->first()->tgl_terima) and Auth::user()->customer_id==$header->distributor_id)
+                            <div class="form-group">
+                              <label for="name" class="col-md-2 control-label">Keterangan</label>
+                                <div class="col-md-10">
+                                  <textarea class="form-control" rows="2" name="note">{{$delivery->first()->keterangan}}</textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                              <label for="name" class="col-md-2 control-label">Tgl Terima</label>
+                                <div class="col-md-10">
+                                  {{$delivery->first()->tgl_terima}}
+                                </div>
+                            </div>
                           @endif
                         </div>
                       </div>

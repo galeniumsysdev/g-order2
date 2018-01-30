@@ -100,6 +100,10 @@ class BackgroundController extends Controller
                     $sl->unit_price=$oraSO->amount/$oraSO->ordered_quantity;
                     $sl->tax_amount=$oraSO->tax_value;
                     $sl->amount=$oraSO->amount;
+                    $sl->disc_reg_amount = null;
+                    $sl->disc_reg_percentage = null;
+                    $sl->disc_product_amount = null;
+                    $sl->disc_product_percentage=null;
                     $orapriceadj = $this->getadjustmentSO(null,$h->notrx,$sl);
                     foreach($orapriceadj as $adj )
                     {
@@ -465,7 +469,7 @@ class BackgroundController extends Controller
                               ->whereRaw("ac.customer_id = hcas.cust_Account_id")
                               ->wherein('customer_class_code',['REGULER','DISTRIBUTOR PSC','DISTRIBUTOR PHARMA','OUTLET','EXPORT','TOLL IN']);
                               })
-                    ->where('ac.last_update_date','>=',$lasttime)
+                    //->where('hcsua.last_update_date','>=',$lasttime)
                     ->select('cust_account_id', 'hcas.cust_acct_site_id as cust_acct_site_id', 'hcas.party_site_id', 'bill_to_flag', 'ship_to_flag', 'hcas.orig_system_reference', 'hcas.status as status', 'hcas.org_id as org_id'
                         , 'hcsua.SITE_USE_id as site_use_id'
                         , 'hcsua.site_use_code as site_use_code', 'hcsua.BILL_TO_SITE_USE_ID as bill_to_site_use_id'

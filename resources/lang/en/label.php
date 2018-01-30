@@ -92,5 +92,6 @@ return [
     'download' => 'Download Excel',
     'change_to_active'=>'Change to active',
     'change_to_inactive'=>'Change to inactive',
-    'outlet_position' =>'Position Outlet'
+    'outlet_position' =>'Position Outlet',
+    'PilihSalahSatu' => '--Choose One--',
 ];

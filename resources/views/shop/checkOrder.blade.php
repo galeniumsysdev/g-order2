@@ -35,7 +35,7 @@
                 </div>
               </div>
               <div class="form-group">
-                <label for="name" class="col-md-2 control-label">Distributor</label>
+                <label for="name" class="col-md-2 control-label">@lang('shop.supplier')</label>
                   <div class="col-md-10" >
                     <input type="text" class="form-control" value="{{$header->distributor_name}}" readonly>
                   </div>

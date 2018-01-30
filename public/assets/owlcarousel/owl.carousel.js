@@ -2813,7 +2813,7 @@
 	 */
 	Navigation.Defaults = {
 		nav: false,
-		navText: [ 'prev', 'next' ],
+		navText: [ "<i class='fa fa-arrow-left' aria-hidden='true'></i> prev", "next <i class='fa fa-arrow-right' aria-hidden='true'></i>" ],
 		navSpeed: false,
 		navElement: 'div',
 		navContainer: false,
