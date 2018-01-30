@@ -368,9 +368,12 @@ class OutletProductController extends Controller
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
                         ->whereBetween('outlet_stock.created_at',array($start_date,$end_date))
                         ->where('title','LIKE','%'.$product_name.'%');
-    if($generic)
-      $stockOutlet->where('generic','LIKE','%'.$generic.'%');
-
+    if($generic){
+      $stockAll = $stockOutlet->where('generic','LIKE','%'.$generic.'%')
+                              ->orderBy('trx_date','desc')
+                              ->get();
+    }
+    else{
     $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date','long_description as generic')
                         ->leftjoin('products','products.id','outlet_stock.product_id')
                         ->join('category_products as cp','cp.product_id','products.id')
@@ -383,6 +386,7 @@ class OutletProductController extends Controller
                         ->union($stockOutlet)
                         ->orderBy('trx_date','desc')
   											->get();
+    }
   	$trx = array();
   	$count = 0;
   	foreach ($stockAll as $key => $list) {
