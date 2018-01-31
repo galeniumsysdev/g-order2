@@ -21,6 +21,7 @@ use App\OeTransactionType;
 use App\User;
 use App\SoShipping;
 use App\CustomerSite;
+use App\CustomerContact;
 use App\qp_modifier_summary;
 use App\qp_qualifiers;
 use App\QpPricingDiskon;
@@ -304,92 +305,130 @@ class BackgroundController extends Controller
     }
 
     public function synchronize_oracle(){
-      $request= DB::table('tbl_request')->where('event','=','synchronize')
-                ->max('created_at');
-      if($request)
-      {
-        $lasttime = date_create($request);
-        echo"type:".gettype($lasttime);
-      }else{
-        $lasttime = date_create("2017-07-01");
+      DB::beginTransaction();
+      try{
+        $request= DB::table('tbl_request')->where('event','=','synchronize')
+                  ->max('created_at');
+        if($request)
+        {
+          $lasttime = date_create($request);
+          echo"type:".gettype($lasttime);
+        }else{
+          $lasttime = date_create("2017-07-01");
+        }
+        echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
+        $connoracle = DB::connection('oracle');
+        if($connoracle){
+          $newrequest= DB::table('tbl_request')->insertGetId([
+            'created_at'=>Carbon::now(),
+            'updated_at'=>Carbon::now(),
+            'event'=>'synchronize',
+          ]);
+          echo "request id:".$newrequest."<br>";
+          $this->getMasterItem($lasttime);
+          $this->getConversionItem($lasttime);
+          //dd();
+          $qp_listheader = $connoracle->table('qp_list_headers')
+                      ->where('last_update_date','>=',$lasttime)
+                      ->select('List_header_id','name', 'description','version_no', 'currency_code'
+                      , 'start_date_active', 'end_date_active', 'automatic_flag', 'list_type_code', 'terms_id', 'rounding_factor'
+                      , 'discount_lines_flag', 'active_flag', 'orig_org_id', 'global_flag')->get();
+          //dd($qp_listheader);
+          foreach($qp_listheader as $ql){
+              echo "list header id:".$ql->list_header_id."<br>";
+            $mylistheader = QpListHeaders::updateOrCreate (
+              ['list_header_id'=>$ql->list_header_id],
+              ['name'=>$ql->name,'description'=>$ql->description,'version_no'=>$ql->version_no,'currency_code'=>$ql->currency_code
+              ,'start_date_active'=>$ql->start_date_active,'end_date_active'=>$ql->end_date_active,'automatic_flag'=>$ql->automatic_flag
+              ,'list_type_code'=>$ql->list_type_code,'discount_lines_flag'=>$ql->discount_lines_flag,'active_flag'=>$ql->active_flag
+              ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
+              ]
+            );
+          }
+          $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
+                          ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
+                          ->where('qll.last_update_date','>=',$lasttime)
+                          ->where('qll.list_line_type_code','=','PLL')
+                          ->where('qll.product_attribute','=','PRICING_ATTRIBUTE1')
+                          ->select('qll.list_line_id', 'qll.list_header_id', 'product_attribute_context','product_attr_value'
+                                  ,'product_uom_code','qll.start_date_active','qll.end_date_active','revision_date','operand'
+                                  ,'qlh.currency_code','qlh.active_flag')
+                          ->get();
+          if($qp_listlines)
+          {
+            foreach($qp_listlines as $ql)
+            {
+              $myqplines = QpListLine::updateOrCreate(
+                ['list_line_id'=>$ql->list_line_id],
+                ['list_header_id'=>$ql->list_header_id
+                ,'product_attribute_context'=>$ql->product_attribute_context
+                , 'product_attr_value'=>$ql->product_attr_value
+                , 'product_uom_code'=>$ql->product_uom_code
+                ,'start_date_active'=>$ql->start_date_active
+                ,'end_date_Active'=>$ql->end_date_active
+                ,'revision_date'=>$ql->revision_date
+                ,'operand'=>$ql->operand
+                ,'currency_code'=>$ql->currency_code
+                ,'enabled_flag'=>$ql->active_flag
+              ]);
+            }
+          }
+          $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
+                            ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
+                            ->where([['otta.transaction_type_code', '=', 'ORDER'],
+                                    ['otta.order_category_code', '=','ORDER']
+                                  ])
+                            ->select('otta.transaction_type_id','ottt.name', 'ottt.description', 'otta.start_date_active', 'end_date_active', 'currency_code','price_list_id'
+                              , 'warehouse_id', 'org_id' )
+                      ->where('otta.last_update_date','>=',$lasttime)
+                      ->get();
+          foreach($transactiontype as $ott)
+          {
+              echo "transaction_type_id:".$ott->transaction_type_id."<br>";
+            $mytransactiontype = OeTransactionType::updateOrCreate(
+              ['transaction_type_id'=>$ott->transaction_type_id],
+              ['name'=>$ott->name,'description=>$ott->description','start_date_active'=>$ott->start_date_active
+              ,'end_date_active'=>$ott->end_date_active,'currency_code'=>$ott->currency_code,'price_list_id'=>$ott->price_list_id
+              ,'warehouse_id'=>$ott->warehouse_id,'org_id'=>$ott->org_id
+              ]
+            );
+          }
+          $this->getCustomer($lasttime);
+
+          //$customrsite =
+          DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
+        }
+        DB::commit();
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
       }
-      echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
-      $connoracle = DB::connection('oracle');
-      if($connoracle){
-        $newrequest= DB::table('tbl_request')->insertGetId([
+    }
+
+    public function getCustomer($lasttime = null)
+    {
+      DB::beginTransaction();
+      try{
+        if($lasttime==null)
+        {
+          $request= DB::table('tbl_request')->where('event','=','customer')
+                    ->max('created_at');
+          if($request)
+          {
+            $lasttime = date_create($request);
+            echo"type:".gettype($lasttime);
+          }else{
+            $lasttime = date_create("2017-07-01");
+          }
+          echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
+        }
+        $connoracle = DB::connection('oracle');
+        $newrequestcust= DB::table('tbl_request')->insertGetId([
           'created_at'=>Carbon::now(),
           'updated_at'=>Carbon::now(),
-          'event'=>'synchronize',
+          'event'=>'customer',
         ]);
-        echo "request id:".$newrequest."<br>";
-        $this->getMasterItem($lasttime);
-        $this->getConversionItem($lasttime);
-        //dd();
-        $qp_listheader = $connoracle->table('qp_list_headers')
-                    ->where('last_update_date','>=',$lasttime)
-                    ->select('List_header_id','name', 'description','version_no', 'currency_code'
-                    , 'start_date_active', 'end_date_active', 'automatic_flag', 'list_type_code', 'terms_id', 'rounding_factor'
-                    , 'discount_lines_flag', 'active_flag', 'orig_org_id', 'global_flag')->get();
-        //dd($qp_listheader);
-        foreach($qp_listheader as $ql){
-            echo "list header id:".$ql->list_header_id."<br>";
-          $mylistheader = QpListHeaders::updateOrCreate (
-            ['list_header_id'=>$ql->list_header_id],
-            ['name'=>$ql->name,'description'=>$ql->description,'version_no'=>$ql->version_no,'currency_code'=>$ql->currency_code
-            ,'start_date_active'=>$ql->start_date_active,'end_date_active'=>$ql->end_date_active,'automatic_flag'=>$ql->automatic_flag
-            ,'list_type_code'=>$ql->list_type_code,'discount_lines_flag'=>$ql->discount_lines_flag,'active_flag'=>$ql->active_flag
-            ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
-            ]
-          );
-        }
-        $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
-                        ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
-                        ->where('qll.last_update_date','>=',$lasttime)
-                        ->where('qll.list_line_type_code','=','PLL')
-                        ->where('qll.product_attribute','=','PRICING_ATTRIBUTE1')
-                        ->select('qll.list_line_id', 'qll.list_header_id', 'product_attribute_context','product_attr_value'
-                                ,'product_uom_code','qll.start_date_active','qll.end_date_active','revision_date','operand'
-                                ,'qlh.currency_code','qlh.active_flag')
-                        ->get();
-        if($qp_listlines)
-        {
-          foreach($qp_listlines as $ql)
-          {
-            $myqplines = QpListLine::updateOrCreate(
-              ['list_line_id'=>$ql->list_line_id],
-              ['list_header_id'=>$ql->list_header_id
-              ,'product_attribute_context'=>$ql->product_attribute_context
-              , 'product_attr_value'=>$ql->product_attr_value
-              , 'product_uom_code'=>$ql->product_uom_code
-              ,'start_date_active'=>$ql->start_date_active
-              ,'end_date_Active'=>$ql->end_date_active
-              ,'revision_date'=>$ql->revision_date
-              ,'operand'=>$ql->operand
-              ,'currency_code'=>$ql->currency_code
-              ,'enabled_flag'=>$ql->active_flag
-            ]);
-          }
-        }
-        $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
-                          ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
-                          ->where([['otta.transaction_type_code', '=', 'ORDER'],
-                                  ['otta.order_category_code', '=','ORDER']
-                                ])
-                          ->select('otta.transaction_type_id','ottt.name', 'ottt.description', 'otta.start_date_active', 'end_date_active', 'currency_code','price_list_id'
-                            , 'warehouse_id', 'org_id' )
-                    ->where('otta.last_update_date','>=',$lasttime)
-                    ->get();
-        foreach($transactiontype as $ott)
-        {
-            echo "transaction_type_id:".$ott->transaction_type_id."<br>";
-          $mytransactiontype = OeTransactionType::updateOrCreate(
-            ['transaction_type_id'=>$ott->transaction_type_id],
-            ['name'=>$ott->name,'description=>$ott->description','start_date_active'=>$ott->start_date_active
-            ,'end_date_active'=>$ott->end_date_active,'currency_code'=>$ott->currency_code,'price_list_id'=>$ott->price_list_id
-            ,'warehouse_id'=>$ott->warehouse_id,'org_id'=>$ott->org_id
-            ]
-          );
-        }
+        echo "request id:".$newrequestcust."<br>";
         $customers = $connoracle->table('ar_customers as ac')
                     ->leftjoin('HZ_CUSTOMER_PROFILES as hcp','ac.customer_id', 'hcp.cust_Account_id')
                     ->leftjoin('ra_terms as rt','hcp.STANDARD_TERMS','rt.term_id')
@@ -404,56 +443,68 @@ class BackgroundController extends Controller
                           , 'order_type_id'
                           , 'customer_name_phonetic'
                           , 'rt.name as payment_term' )
+                    ->orderBy('customer_number','asc')
                     ->get();
-        foreach($customers as $c)
-        {
-          echo "customer:".$c->customer_id."<br>";
-          $psc_flag=null;
-          $pharma_flag=null;
-          $export_flag=null;
-          $tollin_flag=null;
-          if($c->customer_class_code == 'DISTRIBUTOR PSC' or $c->customer_class_code=='OUTLET')
+        if(count($customers)){
+          echo "<h2>Data Customer Oracle</h2>";
+          echo "<table><tr><th>Customer Number</th><th>Customer Name</th></tr>";
+          foreach($customers as $c)
           {
-            $psc_flag="1";
-          }elseif($c->customer_class_code == 'DISTRIBUTOR PHARMA'){
-            $pharma_flag="1";
-          }elseif($c->customer_class_code == 'TOLL IN'){
-            $tollin_flag="1";
-          }elseif($c->customer_class_code == 'EXPORT'){
-            $export_flag="1";
-          }
-          $mycustomer = Customer::updateOrCreate(
-            ['oracle_customer_id'=>$c->customer_id],
-            ['customer_name'=>$c->customer_name,'customer_number'=>$c->customer_number,'status'=>$c->status
-            ,'customer_category_code'=>$c->customer_category_code,'customer_class_code'=>$c->customer_class_code
-            ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
-            ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
-            ,'payment_term_name'=>$c->payment_term,'psc_flag'=>$psc_flag,'pharma_flag'=>$pharma_flag,'export_flag'=>$export_flag,'tollin_flag'=>$tollin_flag
-            ]
-          );
-          if($c->status=='I'){
-            $updateuser = User::where('customer_id','=',$c->customer_id)
-            ->update(['validate_flag'=>0]);
-          }elseif($c->status=='A'){
-            $updateuser = User::where('customer_id','=',$c->customer_id)
-                          ->whereNotNull('password')->first();
-            if ($updateuser)
+            echo"<tr>";
+            echo "<td>".$c->customer_number."</td>";
+            echo "<td>".$c->customer_name."</td>";
+            echo "</tr>";
+            $psc_flag=null;
+            $pharma_flag=null;
+            $export_flag=null;
+            $tollin_flag=null;
+            if($c->customer_class_code == 'DISTRIBUTOR PSC' or $c->customer_class_code=='OUTLET')
             {
-              if($updateuser->validate_flag==0)
+              $psc_flag="1";
+            }elseif($c->customer_class_code == 'DISTRIBUTOR PHARMA'){
+              $pharma_flag="1";
+            }elseif($c->customer_class_code == 'TOLL IN'){
+              $tollin_flag="1";
+            }elseif($c->customer_class_code == 'EXPORT'){
+              $export_flag="1";
+            }
+            $mycustomer = Customer::updateOrCreate(
+              ['oracle_customer_id'=>$c->customer_id],
+              ['customer_name'=>$c->customer_name,'customer_number'=>$c->customer_number,'status'=>$c->status
+              ,'customer_category_code'=>$c->customer_category_code,'customer_class_code'=>$c->customer_class_code
+              ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
+              ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
+              ,'payment_term_name'=>$c->payment_term,'psc_flag'=>$psc_flag,'pharma_flag'=>$pharma_flag,'export_flag'=>$export_flag,'tollin_flag'=>$tollin_flag
+              ]
+            );
+            if($c->status=='I'){
+              $updateuser = User::where('customer_id','=',$c->customer_id)
+              ->update(['validate_flag'=>0]);
+            }elseif($c->status=='A'){
+              $updateuser = User::where('customer_id','=',$c->customer_id)
+                            ->whereNotNull('password')->first();
+              if ($updateuser)
               {
-                $updateuser->validate_flag=1;
-                $updateuser->save();
+                if($updateuser->validate_flag==0)
+                {
+                  $updateuser->validate_flag=1;
+                  $updateuser->save();
+                }
               }
             }
           }
+          echo"</table>";
         }
         $customersite = $this->getCustomerSites($lasttime);
-
-        //$customrsite =
-        DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
+        $customercontacts = $this->getCustomerContacts($lasttime);
+        DB::table('tbl_request')->where('id','=',$newrequestcust)->update(['tgl_selesai'=>Carbon::now()]);
+        DB::commit();
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
       }
-    }
 
+    }
     public function getCustomerSites($lasttime)
     {
       $connoracle = DB::connection('oracle');
@@ -462,14 +513,21 @@ class BackgroundController extends Controller
                     ->join('hz_party_sites hps','hcas.PARTY_SITE_ID', '=', 'hps.party_site_id')
                     ->join('hz_locations hl','hps.location_id','=','hl.location_id')
                     ->join('HZ_CUST_SITE_USES_ALL hcsua', 'hcas.CUST_ACCT_SITE_ID','=','hcsua.CUST_ACCT_SITE_ID')
+                    ->join('ar_customers ac','ac.customer_id', '=', 'hcas.cust_Account_id' )
                     ->whereIn('site_use_code', ['SHIP_TO','BILL_TO'])
-                    ->whereExists(function ($query) {
+                    /*->whereExists(function ($query) {
                         $query->select(DB::raw(1))
                               ->from('ar_customers as ac')
                               ->whereRaw("ac.customer_id = hcas.cust_Account_id")
                               ->wherein('customer_class_code',['REGULER','DISTRIBUTOR PSC','DISTRIBUTOR PHARMA','OUTLET','EXPORT','TOLL IN']);
-                              })
-                    //->where('hcsua.last_update_date','>=',$lasttime)
+                            })*/
+                    ->wherein('ac.customer_class_code',['REGULER','DISTRIBUTOR PSC','DISTRIBUTOR PHARMA','OUTLET','EXPORT','TOLL IN'])
+                    ->where(function ($query) use($lasttime) {
+                            $query->where('hcsua.last_update_date','>=',$lasttime)
+                                  ->orwhere('hcas.last_update_date', '>=', $lasttime)
+                                  ->orwhere('hps.last_update_date', '>=', $lasttime)
+                                  ->orwhere('hl.last_update_date', '>=', $lasttime);
+                        })
                     ->select('cust_account_id', 'hcas.cust_acct_site_id as cust_acct_site_id', 'hcas.party_site_id', 'bill_to_flag', 'ship_to_flag', 'hcas.orig_system_reference', 'hcas.status as status', 'hcas.org_id as org_id'
                         , 'hcsua.SITE_USE_id as site_use_id'
                         , 'hcsua.site_use_code as site_use_code', 'hcsua.BILL_TO_SITE_USE_ID as bill_to_site_use_id'
@@ -479,13 +537,23 @@ class BackgroundController extends Controller
                         , 'hcsua.tax_code as tax_code'
                         ,  'hl.ADDRESS1', 'hl.address2 as kecamatan','hl.address3 as kelurahan', 'hl.address4 as wilayah'
                         ,  'hl.city', 'hl.province', 'hl.country'
-                        , 'hcsua.WAREHOUSE_ID','hl.POSTAL_CODE','hcsua.primary_flag')
+                        , 'hcsua.WAREHOUSE_ID','hl.POSTAL_CODE','hcsua.primary_flag','ac.customer_number','ac.customer_name')
                     ->get();
-        if($sites)
+        if(count($sites))
         {
+          echo "<h2>Data Customer Site Oracle</h2>";
+          echo "<table><tr><th>Customer Number</th><th>Customer Name</th>";
+          echo "<th>Site Use Code</th><th>Address</th><th>Province</th><th>City</th><th>Status</th></tr>";
           foreach ($sites as $site)
           {
-              echo "Sites:".$site->cust_account_id."<br>";
+              //echo "Sites:".$site->cust_account_id."<br>";
+              echo "<tr>";
+              echo "<td>".$site->customer_number."</td>";
+              echo "<td>".$site->customer_name."</td>";
+              echo "<td>".$site->site_use_code."</td>";
+              echo "<td>".$site->address1."</td>";
+              echo "<td>".$site->province."</td>";
+              echo "<td>".$site->city."</td>";
               $province_id=null;
               $city_id=null;
               $desa_id=null;
@@ -520,10 +588,12 @@ class BackgroundController extends Controller
                   ,'city_id'=>$city_id,'province_id'=>$province_id,'district_id'=>$kecamatan_id,'state_id'=>$desa_id,'area'=>$site->wilayah
                   ]
                 );
-                echo "Sites berhasil ditambah/update<br>";
+                echo "<td>Sites berhasil ditambah/update</td>";
+                echo "</tr>";
               }
 
           }
+          echo"</table>";
           return true;
         }
       }else{
@@ -531,6 +601,69 @@ class BackgroundController extends Controller
       }
     }
 
+    public function getCustomerContacts($lasttime)
+    {
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $contacts = $connoracle->table('hz_cust_accounts hca')
+                    ->join('hz_parties obj','hca.party_id', '=', 'obj.party_id')
+                    ->join('hz_relationships rel','hca.party_id','=','rel.object_id')
+                    ->join('hz_contact_points hcp', 'rel.party_id','=','hcp.owner_table_id')
+                    ->join('hz_parties sub','rel.subject_id', '=', 'sub.party_id' )
+                    ->where('rel.relationship_type','=','CONTACT')
+                    ->where('rel.directional_flag','=','F')
+                    ->where('hcp.owner_table_name','=','HZ_PARTIES')
+                    /*->where(function ($query) use($lasttime) {
+                            $query->where('hcp.last_update_date','>=',$lasttime)
+                                  ->orwhere('rel.last_update_date', '>=', $lasttime);
+                        })*/
+                    ->select('sub.party_id','hca.cust_account_id'
+                             , 'account_number as customer_number', 'obj.party_name as customer_name'
+                             , 'sub.party_name as contact_name' , 'hcp.contact_point_type'
+                             ,  DB::raw("DECODE(hcp.contact_point_type, 'EMAIL', hcp.email_address
+                                    , 'PHONE', hcp.phone_country_code||hcp.phone_area_code || '-' || hcp.phone_number
+                                    , 'WEB'  , hcp.url
+                                    , 'Unknow contact Point Type ' || hcp.contact_point_type
+                                      ) as Contact")
+                             , 'hCP.phone_line_type', 'hcp.CONTACT_POINT_PURPOSE','hcp.contact_point_id')
+                    ->get();
+        if(count($contacts))
+        {
+          echo "<h2>Data Customer Contact Oracle</h2>";
+          echo "<table><tr><th>Customer Number</th><th>Customer Name</th>";
+          echo "<th>Contact Name</th><th>Contact Point Type</th><th>Contact</th><th>Line type</th><th>Status</th></tr>";
+          foreach ($contacts as $contact)
+          {
+              //echo "Sites:".$site->cust_account_id."<br>";
+              echo "<tr>";
+              echo "<td>".$contact->customer_number."</td>";
+              echo "<td>".$contact->customer_name."</td>";
+              echo "<td>".$contact->contact_name."</td>";
+              echo "<td>".$contact->contact_point_type."</td>";
+              echo "<td>".$contact->contact."</td>";
+              echo "<td>".$contact->phone_line_type."</td>";
+
+              $customer = Customer::where('oracle_customer_id','=',$contact->cust_account_id)->first();
+
+              if($customer)
+              {
+                $mycustomersite = CustomerContact::updateOrCreate(
+                  ['oracle_customer_id'=>$contact->cust_account_id,'customer_id'=>$customer->id,'contact'=>$contact->contact,'contact_point_id'=>$contact->contact_point_id],
+                  ['account_number'=>$contact->customer_number,'contact_name'=>$contact->contact_name,'contact_type'=>$contact->contact_point_type
+                  ]
+                );
+                echo "<td>Contact berhasil ditambah/update</td>";
+                echo "</tr>";
+              }
+
+          }
+          echo"</table>";
+          return true;
+        }
+      }else{
+        return false;
+      }
+    }
     public function getShippingSO($notrx,$lineid,$lasttime, $productid,$headerid)
     {
       $connoracle = DB::connection('oracle');

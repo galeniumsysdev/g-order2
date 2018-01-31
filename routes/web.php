@@ -188,6 +188,8 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::post('/admin/flexvalue/create','FlexvalueController@store')->name('flexvalue.store');
   Route::patch('/admin/flexvalue/edit/{master?}/{id?}','FlexvalueController@update')->name('flexvalue.edit');
   Route::delete('/admin/flexvalue/delete/{master?}/{id?}','FlexvalueController@destroy')->name('flexvalue.destroy');
+
+  Route::get('/oracle/getcustomer/{lasttime?}','BackgroundController@getCustomer')->name('oracle.synchronize.customer');
 });
 
 Route::get('/manageOutlet/{id?}/{notif_id?}', 'CustomerController@show')->name('customer.show');

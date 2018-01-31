@@ -112,7 +112,7 @@ class RegisterController extends Controller
 
     protected function update(array $data)
     {
-       $user_check = User::where('email', $data['email'])->where('api_token',$data['token1'])->first();       
+       $user_check = User::where('email', $data['email'])->where('api_token',$data['token1'])->first();
        if (!$user_check) {
            return back()->with('status', trans('auth.failed'));
        }
@@ -156,6 +156,35 @@ class RegisterController extends Controller
                 $customeryasa=$distributor->where('customer_number','=',config('constant.customer_yasa'))->first();
                 if($customeryasa)
                 {
+                  $shipto=$customer->sites()->where('site_use_code','=','SHIP_TO')->where('primary_flag','=','Y')
+                          ->where('status','=','A')
+                          ->first();
+                  $billto=$customer->sites()->where('site_use_code','=','BILL_TO')->where('primary_flag','=','Y')
+                          ->where('status','=','A')
+                          ->first();
+                  if($shipto and !$billto){
+                    $sitesbillto = new CustomerSite();
+                    $sitesbillto->oracle_customer_id = $shipto->oracle_customer_id;
+                    $sitesbillto->cust_acct_site_id = $shipto->cust_acct_site_id;
+                    $sitesbillto->site_use_id = $shipto->site_use_id;
+                    $sitesbillto->site_use_code = "BILL_TO";
+                    $sitesbillto->primary_flag='Y';
+                    $sitesbillto->status = "A";
+                    $sitesbillto->address1 = $shipto->address1;
+                    $sitesbillto->state = $shipto->state;
+                    $sitesbillto->district = $shipto->district;
+                    $sitesbillto->city = $shipto->city;
+                    $sitesbillto->province = $shipto->province;
+                    $sitesbillto->postalcode = $shipto->postal_code;
+                    $sitesbillto->Country = 'ID';
+                    $sitesbillto->customer_id = $shipto->customer_id;
+                    $sitesbillto->province_id = $shipto->province_id;
+                    $sitesbillto->city_id=$shipto->city_id;
+                    $sitesbillto->district_id=$shipto->district_id;
+                    $sitesbillto->state_id=$shipto->state_id;
+                    $sitesbillto->area=$shipto->area;
+                    $sitesbillto->save();
+                  }
                   $usernotif= User::where('customer_id','=',$customeryasa->id)
                         ->orwhereExists(function ($query) {
                                 $query->select(DB::raw(1))

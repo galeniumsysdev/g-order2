@@ -51,16 +51,12 @@ class CustomerController extends Controller
       //$customer_email = $customer->contact()->where('contact_type', 'EMAIL')->first();
       //$customer_contacts= $customer->whereHas(colors, function ($query) {                                         $query->where('color', 'blue'); //'color' is the column on the Color table where 'blue' is stored.}])->get();
       $customer_sites = $customer->sites;
+      Auth::User()->notifications()
+                    ->where('id','=',$notif_id)
+                      ->update(['read_at' => Carbon::now()]);
 
       if (Auth::user()->ability(array('MarketingGPL','Marketing PSC', 'Marketing Pharma'),'') )
       {
-        /*if ($customer->Status=="R")
-        {*/
-          Auth::User()->notifications()
-                      ->where('id','=',$notif_id)
-                        ->update(['read_at' => Carbon::now()]);
-        //}
-
         if($customer->contact()->where('contact_type', 'EMAIL')->first())
         {
           $customer_email = $customer->contact()->where('contact_type', 'EMAIL')->first();
@@ -87,7 +83,7 @@ class CustomerController extends Controller
                         ->where('d.id','=',$id)
                         ->get();
           return view('admin.customer.edit',compact('user','customer','customer_contacts','customer_email','customer_sites','categories','roles','groupdcs','groupdcid','roleid','distributors','notif_id'));
-      }elseif(Auth::user()->ability(array('Distributor', 'Principal', 'Distributor Cabang'),'')  )
+      }elseif(Auth::user()->ability(array('Distributor', 'Principal', 'Distributor Cabang','IT Galenium'),'')  )
       {
           if($customer->categoryOutlet){
               $categoryoutlet = $customer->categoryOutlet->name;
@@ -101,17 +97,16 @@ class CustomerController extends Controller
           }
 
           $email = $user->email;
+          if(Auth::user()->hasRole('IT Galenium')) {
+              $menu = "CustomerYasa";
+              return view('admin.oracle.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','notif_id','menu'));
+          }
           $outletdist = OutletDistributor::where([
             ['outlet_id','=',$user->customer_id],
             ['distributor_id','=',Auth::User()->customer_id],
             ])->first();
 
             if($outletdist){
-              //dd($outletdist);
-            //$id = $user->id;
-            //$customer1 = $customer->pluck('id','customer_name','pharma_flag','psc_flag','tax_reference')->toArray();
-            //$customer=DB::table('customers')->where('id','=',$user->customer_id)->select('id','customer_name','pharma_flag','psc_flag','tax_reference')->get();
-            //dd($customer);
               return view('admin.customer.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','outletdist','notif_id'));
             }else{
               abort(403, 'Unauthorized action.');
@@ -196,7 +191,6 @@ class CustomerController extends Controller
         return "";
       }
 
-
     //return Response::json($customers);
   }
 
@@ -251,7 +245,7 @@ class CustomerController extends Controller
           Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
           $user->avatar = $filename;
         }
-        if(Auth::user()->hasRole('Principal'))
+        if(Auth::user()->hasRole('IT Galenium'))
         {
           $oldcustomer=$user->customer_id;
           if(isset($request->c_number))
@@ -265,7 +259,16 @@ class CustomerController extends Controller
               if(!$oraclecustomer->register_flag){
                 /*update all po outlet_id*/
                 DB::table('po_draft_headers')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
-                DB::table('so_headers')->where('customer_id','=',$oldcustomer)->update(['customer_id'=>$oraclecustomer->id]);
+                DB::table('so_headers')->where('customer_id','=',$oldcustomer)
+                  ->whereIn('status',[0,1])
+                  ->update(['customer_id'=>$oraclecustomer->id
+                            ,'cust_ship_to'=>
+                            ,'cust_bill_to'=>
+                            ,'price_list_id'=>
+                            ,'payment_term_id'=>
+                            ,'oracle_ship_to'=>
+                            ,'oracle_bill_to'=>
+                            ,'oracle_customer_id'=>$oraclecustomer->oracle_customer_id]);
                 /*attach to all outlet_distributor*/
                 $distributor = DB::table('outlet_distributor')->where('outlet_id','=',$oldcustomer)->select('distributor_id')->get();
                 if($distributor) $oraclecustomer->hasDistributor()->attach($distributor->pluck('distributor_id')->toArray());
@@ -276,7 +279,8 @@ class CustomerController extends Controller
                   DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
                 }
                 /*delete old customer_id*/
-                DB::table('customers')->where('id','=',$oldcustomer)->delete();
+                DB::table('customers')->where('id','=',$oldcustomer)->update(['status'=>'I']);
+                $useroracle=User::where('customer_id','=',$oraclecustomer->id)->where('register_flag=','=','0')->delete();
                 $user->customer_id = $oraclecustomer->id;
                 //$user->name = $oraclecustomer->customer_name;
               }else{

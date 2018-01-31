@@ -5,6 +5,9 @@
 	        <div class="pull-left">
 	            <h2>Customer Oracle</h2>
 	        </div>
+					<div class="pull-right">
+	            <a href="{{route('oracle.synchronize.customer')}}" target="_blank" class="btn btn-success">Synchronize Customer Oracle</a>	            
+	        </div>
 	    </div>
 	</div>
 	@if ($message = Session::get('success'))
