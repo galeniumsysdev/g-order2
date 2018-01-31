@@ -87,7 +87,7 @@
                     Notification.requestPermission( permission => {
                       let notif = new Notification(notification.title || 'Judul', {
                         body: notification.message, // content for the alert
-                        icon: "https://pusher.com/static_logos/320x320.png" // optional image url
+                        icon: window.Laravel.url+"/img/logo/pusher-g-order.png" // optional image url
                       });
                       // link to page on clicking the notification
                       notif.onclick = () => {
