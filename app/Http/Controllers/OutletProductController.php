@@ -473,6 +473,9 @@ class OutletProductController extends Controller
     if($data['area'])
       $stockOutlet = $stockOutlet->where('city',$data['area']);
 
+    if($request->product_name)
+      $stockOutlet = $stockOutlet->where('title','LIKE','%'.$request->product_name.'%');
+
     $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','qp.operand as price')
                         ->join('products','products.id','outlet_stock.product_id')
                         ->join('qp_list_lines_v as qp',function($join){
@@ -496,7 +499,10 @@ class OutletProductController extends Controller
       $stockAll = $stockAll->where('province',$data['province']);
 
     if($data['area'])
-      $stockAll = $stockAll->where('city',$data['area']);
+      $stockAll = $stockAll->where('city',$data['area']); 
+
+    if($request->product_name)
+      $stockAll = $stockAll->where('title','LIKE','%'.$request->product_name.'%');
 
     $stockAll = $stockAll->union($stockOutlet)
                         ->orderBy('title','asc')
