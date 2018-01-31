@@ -41,6 +41,37 @@
                       </div>
                     </div>
                   </div>
+
+                  <div class="form-group">
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-md-2">
+                          <div class="form-label">
+                            <label for="trx-in-date">Nama Barang</label>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          {{ Form::text('product_name','',array('class'=>'form-control','id'=>'product-name')) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-md-2">
+                          <div class="form-label">
+                            <label for="trx-in-date">Generik</label>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          {{ Form::text('generic','',array('class'=>'form-control','id'=>'generic')) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   @if(Auth::user()->hasRole('Principal'))
                   <div class="form-group">
                     <div class="container-fluid">
@@ -98,6 +129,7 @@
                       </div>
                     </div>
                   </div>
+                  <legend></legend>
                 {{ Form::close() }}
               </div>
             </div>
@@ -137,14 +169,14 @@
                 </tbody>
               </table>
             </div>
-            <div>
+            <div style="text-align:center;">
               {!! Form::open(['url' => route('outlet.downloadStockProcess')]) !!}
               {{ Form::hidden('start_date', $data['start_date']) }}
               {{ Form::hidden('end_date', $data['end_date']) }}
               {{ Form::hidden('outlet_name', $data['outlet_name']) }}
               {{ Form::hidden('province', $data['province']) }}
               {{ Form::hidden('area', $data['area']) }}
-              {{ Form::submit('Download', array('class'=>'btn btn-primary')) }}
+              <br>{{ Form::submit('Download Report Stock', array('class'=>'btn btn-success')) }}
               {{ Form::close() }}
             </div>
             @endif

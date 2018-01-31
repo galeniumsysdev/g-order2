@@ -178,7 +178,7 @@
     <!-- JQUERY SCRIPTS -->
     <script src="{{asset('js/jquery.js')}}"></script>
       <!-- BOOTSTRAP SCRIPTS -->
-<!--    <script src="{{asset('js/bootstrap.min.js')}}"></script>-->
+    <!--<script src="{{asset('js/bootstrap.min.js')}}"></script>-->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>
 
