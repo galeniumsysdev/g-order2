@@ -28,4 +28,5 @@ return [
     'yourSuggestNo' => 'No. Usulan Anda adalah',
     'alreadyExist' => 'sudah digunakan',
     'confirmation' => 'Konfirmasi',
+    'save'=>'Simpan',
 ];

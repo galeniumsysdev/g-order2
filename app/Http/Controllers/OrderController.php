@@ -128,7 +128,7 @@ class OrderController extends Controller
     }
 
     public function listSO(Request $request)
-    {    
+    {
       $liststatus = DB::table('flexvalue')->where([['master','=','status_po']
                                                 ,['enabled_flag','=','Y']
                                               ])
@@ -358,14 +358,16 @@ class OrderController extends Controller
           $dpl = DPLSuggestNo::where('suggest_no', $header->suggest_no)
             ->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
           app('App\Http\Controllers\DPLController')->dpllog($header->suggest_no,'PO ditolak Distributor '.Auth::user()->name,$request->alasan);
-          //$nodpl= DPLNo::where('suggest_no', $header->suggest_no)->delete();
+          //$nodpl= DPLNo::where('suggest_no', $header->suggest_no)->delete();          
           $header->status=-99;
           $header->save();
           $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);
           if(!empty($notified_users)){
+            $pesan = 'Penolakan PO utk DPL #'.$header->dpl_no;
+            if(isset($request->alasan)) $pesan .=', alasan:'.$request->alasan;
             $data = [
               'title' => 'Resetting DPL',
-              'message' => 'Penolakan PO utk DPL #'.$header->dpl_no,
+              'message' => $pesan,
               'id' => $header->suggest_no,
               'href' => route('dpl.readNotifApproval'),
               'mail' => [
