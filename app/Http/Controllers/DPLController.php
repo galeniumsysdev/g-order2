@@ -125,7 +125,7 @@ class DPLController extends Controller {
 			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->where('suggest_no', $suggest_no)
-			->where('active', 1)
+			//->where('active', 1)
 			->first();
 
 		$header = DB::table('so_header_v as sh')
@@ -172,9 +172,11 @@ class DPLController extends Controller {
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->leftjoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->where('dpl_suggest_no.suggest_no', $suggest_no)
-			->where('active', 1)
+			//->where('active', 1)
 			->first();
 
+		if(!$dpl['active'])
+			return redirect('/dpl/discount/view/' . $suggest_no);
 		if (!$dpl['fill_in']) {
 			return redirect('/dpl/discount/approval/' . $suggest_no);
 		}
@@ -345,6 +347,8 @@ class DPLController extends Controller {
 			//->where('active', 1)
 			->first();
 
+		if(!$dpl['active'])
+				return redirect('/dpl/discount/view/' . $suggest_no);
 		if ($dpl['fill_in']) {
 			return redirect('/dpl/discount/form/' . $suggest_no);
 		}
@@ -631,7 +635,7 @@ class DPLController extends Controller {
 				$join->on('fv.master','=',DB::raw("'status_po'"));
 			})
 			->leftjoin('customers as distributor', 'distributor.id', 'so_headers.distributor_id')
-			->where('active', 1)
+			//->where('active', 1)
 			;
 
 
@@ -803,62 +807,73 @@ class DPLController extends Controller {
 	}
 
 	public function suggestNoCancel(Request $request){
-		$suggest_no = $request->suggest_no;
-		$customer_po = $request->customer_po;
-		$note = $request->note;
-		$update = DPLSuggestNo::where('suggest_no',$suggest_no)
-							->update(array('note'=>$note,'active'=>0));
-		$soheader = SoHeader::where('suggest_no',$suggest_no)->first();
-		$soheader->status=-98;
-		$soheader->save();
-		$this->dplLog($suggest_no, 'Batalkan Pengajuan DPL #' . $suggest_no,$note);
-		// Notif to outlet
-		$dpl = DPLSuggestNo::select('users.email','note')
-							->join('users','users.customer_id','dpl_suggest_no.outlet_id')
-							->where('suggest_no',$suggest_no)
-							->first();
+		DB::beginTransaction();
+		try{
+			$suggest_no = $request->suggest_no;
+			$customer_po = $request->customer_po;
+			$note = $request->note;
 
-		$data = [
-			'title' => 'Pembatalan Pengajuan DPL',
-			'message' => 'Pembatalan Pengajuan DPL #'.$suggest_no,
-			'id' => $soheader->id,
-			'href' => route('order.notifnewpo'),
-			'mail' => [
-				'greeting'=>'Pembatalan Pengajuan DPL #'.$suggest_no,
-				'content'=> "Pengajuan no DPL #".$suggest_no." untuk PO #".$customer_po." anda telah dibatalkan oleh marketing PT.Galenium Pharmasaia Laboratories dengan alasan\n\n".$note
-			],
-			'sendmail' => 1,
-			'email' => $dpl['email']
-		];
-		$apps_user = User::where('email',$dpl['email'])->first();
-		if(!empty($apps_user))
-			$apps_user->notify(new PushNotif($data));
+			$soheader = SoHeader::where('suggest_no',$suggest_no)->first();
+			$soheader->status=-98;
+			if(isset($soheader->dpl_no))
+				$deldplno = DPLNo::where('dpl_no','=',$soheader->dpl_no)
+										->where('suggest_no','=',$suggest_no)
+										->delete();
+			$soheader->save();
+			$this->dplLog($suggest_no, 'Batalkan Pengajuan DPL #' . $suggest_no,$note);
+			$update = DPLSuggestNo::where('suggest_no',$suggest_no)
+								->update(array('note'=>$note,'active'=>0));
+			// Notif to outlet
+			$dpl = DPLSuggestNo::select('users.email','note')
+								->join('users','users.customer_id','dpl_suggest_no.outlet_id')
+								->where('suggest_no',$suggest_no)
+								->first();
 
-		// Notif to Galenium
-		$notified_users = $this->getArrayNotifiedEmail($suggest_no);
-		if(!empty($notified_users)){
 			$data = [
 				'title' => 'Pembatalan Pengajuan DPL',
 				'message' => 'Pembatalan Pengajuan DPL #'.$suggest_no,
-				'id' => $suggest_no,
-				'href' => route('dpl.readNotifDPLCancel'),
+				'id' => $soheader->id,
+				'href' => route('order.notifnewpo'),
 				'mail' => [
-					'greeting'=>'',
-					'content'=> ''
+					'greeting'=>'Pembatalan Pengajuan DPL #'.$suggest_no,
+					'content'=> "Pengajuan no DPL #".$suggest_no." untuk PO #".$customer_po." anda telah dibatalkan oleh marketing PT.Galenium Pharmasaia Laboratories dengan alasan\n\n".$note
 				],
-				'sendmail' => 0
+				'sendmail' => 1,
+				'email' => $dpl['email']
 			];
-			foreach ($notified_users as $key => $email) {
-				foreach ($email as $key2 => $mail) {
-					$data['email'] = $mail;
-					$apps_user = User::where('email',$mail)->first();
-					if(!empty($apps_user))
-						$apps_user->notify(new PushNotif($data));
+			$apps_user = User::where('email',$dpl['email'])->first();
+			if(!empty($apps_user))
+				$apps_user->notify(new PushNotif($data));
+
+			// Notif to Galenium
+			$notified_users = $this->getArrayNotifiedEmail($suggest_no);
+			if(!empty($notified_users)){
+				$data = [
+					'title' => 'Pembatalan Pengajuan DPL',
+					'message' => 'Pembatalan Pengajuan DPL #'.$suggest_no,
+					'id' => $suggest_no,
+					'href' => route('dpl.readNotifDPLCancel'),
+					'mail' => [
+						'greeting'=>'',
+						'content'=> ''
+					],
+					'sendmail' => 0
+				];
+				foreach ($notified_users as $key => $email) {
+					foreach ($email as $key2 => $mail) {
+						$data['email'] = $mail;
+						$apps_user = User::where('email',$mail)->first();
+						if(!empty($apps_user))
+							$apps_user->notify(new PushNotif($data));
+					}
 				}
 			}
+			DB::commit();
+			return redirect()->route('dpl.list');
+		}catch (\Exception $e) {
+			DB::rollback();
+			throw $e;
 		}
-
-		return redirect()->route('dpl.list');
 	}
 
 	public function dplDiscountSplit(Request $request){

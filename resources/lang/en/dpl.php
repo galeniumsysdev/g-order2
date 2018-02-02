@@ -28,4 +28,5 @@ return [
     'yourSuggestNo' => 'Your Suggestion Number is',
     'alreadyExist' => 'already exist',
     'confirmation' => 'Confirmation',
+    'save'=>'Save',
 ];

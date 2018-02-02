@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Response;
 use Webpatser\Uuid\Uuid;
 use App\Notifications\InvitationUser;
+use Auth;
 
 
 
@@ -187,7 +188,7 @@ class UserController extends Controller
 
     public function oracleShow($id)
     {
-      $groupid=null;
+        $groupid=null;
         $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
                     ->where('id','=',$id)
                     ->orderBy('customer_name','asc')->first();
@@ -399,5 +400,134 @@ class UserController extends Controller
                   ->update(['email'=>$request->email]);
       }
       return redirect()->route('usercabang.edit',$id)->with('message','Successfully edit data');;
+    }
+
+    public function CustYasaNonOracle()
+    {
+      $customers = Customer::join('outlet_distributor as od','od.outlet_id','=','customers.id')
+                ->join('customers as yasa','od.distributor_id','=','yasa.id')
+                ->where('yasa.customer_number','=',config('constant.customer_yasa'))
+                ->whereNull('customers.oracle_customer_id')
+                ->where('customers.status','=','A')
+                ->select ('customers.*')
+                ->get();
+      return view('admin.oracle.CustYasaNonOracle',['customers'=>$customers,'menu'=>'custYasa']);
+    }
+
+    public function mergeCustomer(Request $request,$id)
+    {
+      if($request->save=="save")
+      {
+        DB::beginTransaction();
+        try{
+          $user = User::find($id);
+          if(Auth::user()->hasRole('IT Galenium'))
+          {
+            $oldcustomer=$user->customer_id;
+            if(isset($request->c_number))
+            {
+              $oraclecustomer = Customer::leftjoin('users','customers.id','=','users.customer_id')
+                              ->where('customer_number','=',$request->c_number)
+                              ->select('customers.*','users.email',DB::raw("ifnull('users.register_flag',0) as register_flag"))
+                              ->first();
+              if($oraclecustomer)
+              {
+                if($oraclecustomer->register_flag==0){
+                  /*update all po outlet_id*/
+                  DB::table('po_draft_headers')->where('customer_id','=',$oldcustomer)->update(['customer_id'=>$oraclecustomer->id]);
+                  $soheaders = DB::table('so_headers')->where('customer_id','=',$oldcustomer)
+                    //->whereIn('status',[0,1])
+                    ->select('cust_ship_to','cust_bill_to','customer_id')
+                    ->groupBy('cust_ship_to','cust_bill_to','customer_id')
+                    ->get();
+                  foreach($soheaders as $sh)
+                  {
+                    $orasitebill=null;
+                    $orasiteship=null;
+                    $shipto =CustomerSite::where('site_use_code','SHIP_TO')
+                                ->where('customer_id',$sh->customer_id)
+                                ->where('id',$sh->cust_ship_to)
+                                ->first();
+
+                    $billto =CustomerSite::where('site_use_code','BILL_TO')
+                                ->where('customer_id',$sh->customer_id)
+                                ->where('id',$sh->cust_bill_to)
+                                ->first();
+
+                    if($shipto){
+                      $orasiteship =CustomerSite::where('customer_id',$oraclecustomer->id)
+                                ->where('site_use_code','=',$shipto->site_use_code)
+                                ->where('province','=',$shipto->province)
+                                ->where('city','=',$shipto->city)
+                                ->where('district','=',$shipto->district)
+                                ->first();
+
+                    }
+
+                    if($billto){
+                      $orasitebill =CustomerSite::where('customer_id',$oraclecustomer->id)
+                                ->where('site_use_code','=',$billto->site_use_code)
+                                ->where('province','=',$billto->province)
+                                ->where('city','=',$billto->city)
+                                ->where('district','=',$billto->district)
+                                ->first();
+
+                    }
+                    if($orasitebill and $orasiteship){
+                      DB::table('so_headers')->where('customer_id','=',$sh->customer_id)
+                      ->where('cust_ship_to','=',$sh->cust_ship_to)
+                      ->where('cust_bill_to','=',$sh->cust_bill_to)
+                      ->update(['customer_id'=>$oraclecustomer->id
+                                ,'cust_ship_to'=>$orasiteship->id
+                                ,'cust_bill_to'=>$orasitebill->id
+                                ,'price_list_id'=>$orasitebill->price_list_id
+                                ,'payment_term_id'=>$orasitebill->payment_term_id
+                                ,'oracle_ship_to'=>$orasiteship->site_use_id
+                                ,'oracle_bill_to'=>$orasitebill->site_use_id
+                                ,'oracle_customer_id'=>$oraclecustomer->oracle_customer_id]);
+                    }
+                  }
+
+
+                  /*attach to all outlet_distributor*/
+                  $distributor = DB::table('outlet_distributor')->where('outlet_id','=',$oldcustomer)->select('distributor_id')->get();
+
+                  if($distributor) $oraclecustomer->hasDistributor()->sync($distributor->pluck('distributor_id')->toArray());
+                  /*product stock jika role Apotik/Klinik*/
+                  if($user->hasRole('Apotik/Klinik')){
+                    DB::table('outlet_products')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+                    DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+                  }
+                  /*Inactive old customer_id*/
+                  $dataoldcustomer = Customer::where('id','=',$oldcustomer)->first();
+                  $dataoldcustomer->status = 'I';
+                  $dataoldcustomer->save();
+                  $oraclecustomer->longitude = $dataoldcustomer->longitude;
+                  $oraclecustomer->langitude = $dataoldcustomer->langitude;
+                  $oraclecustomer->psc_flag = $dataoldcustomer->psc_flag;
+                  $oraclecustomer->pharma_flag = $dataoldcustomer->pharma_flag;
+                  $oraclecustomer->outlet_type_id = $dataoldcustomer->outlet_type_id;
+                  $oraclecustomer->subgroup_dc_id = $dataoldcustomer->subgroup_dc_id;
+                  $oraclecustomer->save();
+                  $useroracle=User::where('customer_id','=',$oraclecustomer->id)->where('register_flag','=','0')->delete();
+
+                  $user->customer_id = $oraclecustomer->id;
+                  $user->save();
+                  DB::commit();
+                  return redirect()->route('useroracle.show',['id'=>$id])->withMessage('Berhasil dimerge!');
+                }else{
+                  return redirect()->back()->withInput()->withErrors(['c_number'=>'Customer number already has registered to another user']);
+                }
+              }
+            }else{
+              return redirect()->back()->withInput()->withMessage('Customer Number Oracle harus diisi!');
+            }
+          }
+
+        }catch (\Exception $e) {
+          DB::rollback();
+          throw $e;
+        }
+      }
     }
 }

@@ -45,6 +45,19 @@
               </div>
             </div>
             @endif
+            @if($distributor->customer_number==config('constant.customer_yasa') and Auth::user()->hasRole('Outlet') )
+            <div class="form-group {{ $errors->has('npwp') ? ' has-error' : '' }}">
+              <label class="control-label col-sm-3" for="dplno">@lang('label.npwp') :</label>
+              <div class="col-sm-8">
+                    <input type="text" name="npwp" id="npwp" value="{{Auth::user()->customer->tax_reference}}" class="form-control" placeholder="@lang('label.npwp')" {{isset(Auth::user()->customer->tax_reference)?'readonly':''}}>
+                    @if ($errors->has('npwp'))
+                        <span class="help-block with-errors">
+                            <strong>{{ $errors->first('npwp') }}</strong>
+                        </span>
+                    @endif
+              </div>
+            </div>
+            @endif
             <div class="form-group{{ $errors->has('alamat') ? ' has-error' : '' }}">
               <label class="control-label col-sm-3" for="Alamat">*@lang('shop.ShipTo') :</label>
               <div class="col-sm-8">
@@ -160,7 +173,7 @@
         </tr>
 			</tfoot>
 		</table>
-    @if($bonus)
+    @if(count($bonus))
     <table class="table table-hover table-condensed">
       <caption align="center"><h4>Bonus Anda</h4></caption>
       <thead>

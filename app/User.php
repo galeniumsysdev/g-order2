@@ -23,7 +23,7 @@ class User extends Authenticatable {
    * @var array
    */
   protected $fillable = [
-      'id','name', 'email', 'password','validate_flag','register_flag','customer_id','api_token','code_verifikasi','first_login'
+      'id','name', 'email', 'password','validate_flag','register_flag','customer_id','api_token','code_verifikasi','first_login','created_by','last_update_by',
   ];
 	/**
 	 * The attributes that should be hidden for arrays.
@@ -31,7 +31,7 @@ class User extends Authenticatable {
 	 * @var array
 	 */
 	protected $hidden = [
-		'password', 'remember_token',
+		'password', 'remember_token'
 	];
 
 	/*public function hasAnyRole($roles)

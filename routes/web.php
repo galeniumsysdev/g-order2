@@ -175,6 +175,8 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::post('/users/cabang/{parent_id}','UserController@cabangStore')->name('usercabang.store');
   Route::get('/users/cabang/edit/{id}','UserController@cabangEdit')->name('usercabang.edit');
   Route::patch('/users/cabang/edit/{id}','UserController@cabangUpdate')->name('usercabang.update');
+  Route::get('/customer/yasaNonOracle','UserController@CustYasaNonOracle')->name('customer.yasaNonOracle');
+  Route::patch('/customer/updateyasaNonOracle/{id}','UserController@mergeCustomer')->name('customer.mergeCustomer');
 
   Route::resource('CategoryOutlet',  'Cat_OutletController');
   Route::resource('CategoryProduct',  'CategoryProductController');
@@ -188,6 +190,8 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::post('/admin/flexvalue/create','FlexvalueController@store')->name('flexvalue.store');
   Route::patch('/admin/flexvalue/edit/{master?}/{id?}','FlexvalueController@update')->name('flexvalue.edit');
   Route::delete('/admin/flexvalue/delete/{master?}/{id?}','FlexvalueController@destroy')->name('flexvalue.destroy');
+
+  Route::get('/oracle/getcustomer/{lasttime?}','BackgroundController@getCustomer')->name('oracle.synchronize.customer');
 });
 
 Route::get('/manageOutlet/{id?}/{notif_id?}', 'CustomerController@show')->name('customer.show');

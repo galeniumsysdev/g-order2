@@ -9,7 +9,7 @@ use Auth;
 use Session;
 use App\Banner;
 use DB;
-
+use App\Observers\UserActionsObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+      \App\User::observe(new UserActionsObserver);
+      \App\Customer::observe(new UserActionsObserver);
+      \App\CustomerSite::observe(new UserActionsObserver);
+      \App\CustomerContact::observe(new UserActionsObserver);
       view()->composer(['layouts.navbar_product','shop.product','swipe'], function($view)
      {
         $product_flexfields = Category::where([//ProductFlexfield::where([
@@ -66,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
         $countbrg=null;
         if(Auth::check()){
           if(Auth::user()->can('Create PO'))
-          {		
+          {
             DB::table('po_draft_lines')->whereraw("exists (select 1
                       from po_draft_headers
                       where po_draft_headers.id = po_draft_lines.po_header_id

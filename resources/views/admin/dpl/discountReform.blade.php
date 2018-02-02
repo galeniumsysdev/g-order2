@@ -75,6 +75,68 @@
                   </div>
                 </div>
                 <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">@lang('dpl.suggestNo')</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">{{ $dpl->suggest_no }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @if($dpl->log_type == 'Reject' or substr($dpl->log_type,0,10)=='PO ditolak')
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">@lang('dpl.rejectedBy')</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">{{ $dpl->reject_by }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">@lang('dpl.reason')</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">{!! $dpl->reason !!}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endif
+                @if($header->dpl_no)
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">@lang('dpl.dplNo')</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">
+                            {{ 'G'.$header->dpl_no }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endif
+                <div class="form-group">
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>
                       <tr>
@@ -86,7 +148,9 @@
                         <!--<th style="width:15%" class="text-center" rowspan="2">@lang('shop.SubTotal')</th>-->
                         <th style="width:10%" class="text-center" rowspan="2">@lang('dpl.discount')<br/>Distributor</th>
                         <th class="text-center" colspan="2">GPL</th>
+                        @if($lines->count()>1)
                         <th rowspan="2">@lang('shop.select')</th>
+                        @endif
                       </tr>
                       <tr>
                         <th style="width:10%" class="text-center">@lang('dpl.discount')</th>
@@ -132,7 +196,9 @@
                         <td data-th="Bonus" class="xs-only-text-left text-center">
                           <input type="number" name="bonus_gpl[{{$id}}]" id="bonus-gpl-{{$id}}" class="form-control text-center" value="{{ $line->bonus_gpl }}" style="min-width:80px;">
                         </td>
+                        @if($lines->count()>1)
                         <td data-th="@lang('shop.select')">{{ Form::checkbox('lineid[]', $id, true) }}</td>
+                        @endif
                       </tr>
                         @endforeach
                     </tbody>
@@ -148,10 +214,11 @@
                       </div>
                       <div class="col-md-10">
                         <input type="submit" class="btn btn-primary" value="@lang('dpl.save')" name="Save">
-                        @if(Auth::user()->hasRole('SPV'))
+                        @if(Auth::user()->hasRole('SPV') and $lines->count()>1)
                         <input type="submit" class="btn btn-warning" value="Split" name="Split">
                         @endif
                         <a href="{{ route('dpl.list') }}" class="btn btn-default">@lang('dpl.back')</a>
+                        <a href="#" id="btn-dpl-cancel" class="btn btn-danger pull-right">@lang('dpl.rejectSuggestNo')</a>
                       </div>
                     </div>
                   </div>

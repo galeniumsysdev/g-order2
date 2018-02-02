@@ -29,4 +29,5 @@ return [
     'product' => 'Produk',
     'trxList' => 'Daftar Transaksi',
     'period' => 'Periode',
+    'ExpDate'=>'Tgl Expired'
 ];

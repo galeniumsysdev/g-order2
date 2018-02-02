@@ -611,7 +611,7 @@ class ProductController extends Controller
       if(in_array('PHARMA',$jns))
       {
         $pharma=true;
-      }	
+      }
       $alamat = DB::table("customer_sites as c")
           ->select("id", DB::raw("concat(c.address1,
 												IF(c.state IS NULL, '', concat(',',c.state)),
@@ -624,7 +624,7 @@ class ProductController extends Controller
           ->orderBy('c.primary_flag','desc')
           ->get();
       $billto=null;
-      $bonus =null;
+      $bonus =collect([]);
       if ($dist!='')
       {
         $userdist = User::where('customer_id','=',$distributorid)->first();
@@ -960,6 +960,20 @@ class ProductController extends Controller
             $currency='IDR';
         }
 
+        if($customer->tax_reference!=$request->npwp)
+        {
+            if(isset($request->npwp) and is_null($customer->tax_reference))
+            {
+              $customer->tax_reference=$request->npwp;
+              $customer->save();
+            }elseif(is_null($request->npwp) and isset($customer->tax_reference)){
+              $request->npwp = $customer->tax_reference;
+            }elseif($request->npwp!=$customer->tax_reference){
+              $customer->tax_reference=$request->npwp;
+              $customer->save();
+            }
+        }
+
         //$tipetax=$customer->customer_category_code;
         if($customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
         and $customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M"){
@@ -986,7 +1000,7 @@ class ProductController extends Controller
 
             if(is_null($oracleshipid->warehouse))
             {
-              if($orgid==106)
+              if($orgid==config('constant.org_id'))
               {
                   $warehouseid = config('constant.warehouseid_YMP');
               }else{$warehouseid = config('constant.warehouseid_GPL');}
@@ -1039,8 +1053,6 @@ class ProductController extends Controller
         );
       }
 
-
-
        Validator::make($request->all(), [
            'no_order' => 'required|unique:so_headers,customer_po,null,null,customer_id,'.Auth::user()->customer_id.'|max:50',
            'alamat' => 'required',
@@ -1071,8 +1083,8 @@ class ProductController extends Controller
           'status' => $statusso,
           'org_id' => $orgid,
           'warehouse' =>$warehouseid,
-          'suggest_no'=>$request->coupon_no
-
+          'suggest_no'=>$request->coupon_no,
+          'npwp'=>$request->npwp
         ]);
       if($header){
         if($tmpnotrx==0){
