@@ -29,4 +29,5 @@ return [
     'product' => 'Product',
     'trxList' => 'Transaction List',
     'period' => 'Period',
+    'ExpDate'=>'Expired Date'
 ];

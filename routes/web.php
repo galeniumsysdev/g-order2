@@ -175,6 +175,8 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::post('/users/cabang/{parent_id}','UserController@cabangStore')->name('usercabang.store');
   Route::get('/users/cabang/edit/{id}','UserController@cabangEdit')->name('usercabang.edit');
   Route::patch('/users/cabang/edit/{id}','UserController@cabangUpdate')->name('usercabang.update');
+  Route::get('/customer/yasaNonOracle','UserController@CustYasaNonOracle')->name('customer.yasaNonOracle');
+  Route::patch('/customer/updateyasaNonOracle/{id}','UserController@mergeCustomer')->name('customer.mergeCustomer');
 
   Route::resource('CategoryOutlet',  'Cat_OutletController');
   Route::resource('CategoryProduct',  'CategoryProductController');

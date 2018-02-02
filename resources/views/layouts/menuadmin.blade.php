@@ -4,13 +4,16 @@
     </li>
     <li>
       <a href="javascript:;" data-toggle="collapse" data-target="#user"><i class="fa fa-fw fa-user"></i> User <i class="fa fa-fw fa-caret-down"></i></a>
-      @if($menu=='customer-oracle' or $menu=='user' )
+      @if($menu=='customer-oracle' or $menu=='user' or $menu=='custYasa' )
       <ul id="user" class="collapse in">
       @else
       <ul id="user" class="collapse">
       @endif
         <li {{$menu=='customer-oracle'?'class=active':''}}>
             <a href="{{route('useroracle.index')}}"><i class="fa fa-fw fa-user"></i> Customer Oracle</a>
+        </li>
+        <li {{$menu=='custYasa'?'class=active':''}}>
+            <a href="{{route('customer.yasaNonOracle')}}"><i class="fa fa-fw fa-user"></i> Customer Yasa Non Oracle</a>
         </li>
         <li {{$menu=='user'?'class=active':''}}>
             <a href="{{route('users.index')}}"><i class="fa fa-fw fa-user"></i> Other User</a>

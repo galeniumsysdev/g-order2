@@ -79,15 +79,15 @@ class OutletProductController extends Controller
   					->setCreator(Auth::user()->name)
   					->setCompany('PT. Galenium Pharmasia Laboratories')
   					->sheet('Product Stock '.date('Ymd His'), function($sheet){
-  						$sheet->row(1, array('ID','Nama Barang','Stock','Satuan','Kelompok','Batch'));
+  						$sheet->row(1, array('ID','Nama Barang','Stock','Satuan','Kelompok','Batch','Exp. Date(Cth:2017-01-31)'));
   						$sheet->setColumnFormat(array('D'=>'@'));
 
-  						$productsOutlet = OutletProducts::select('outlet_products.id as op_id','title','unit',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'))
+  						$productsOutlet = OutletProducts::select('outlet_products.id as op_id','title','unit',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'),'batch','exp_date')
   													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
                             ->where('outlet_products.enabled_flag','Y')
                             ->where('outlet_products.outlet_id',Auth::user()->customer_id)
-  													->groupBy('op_id','unit','title','flag');
-              $productsAll = Product::select('products.id as op_id','title','products.satuan_primary as unit',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'))
+  													->groupBy('op_id','unit','title','flag','batch','exp_date');
+              $productsAll = Product::select('products.id as op_id','title','products.satuan_primary as unit',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'),'batch','exp_date')
                                       ->leftjoin('outlet_stock as os',function($join)
                                         {
                                           $join->on('os.product_id','=','products.id');
@@ -97,7 +97,7 @@ class OutletProductController extends Controller
                                       ->join('categories as c','c.flex_value','cp.flex_value')
                                       ->where('c.parent','PHARMA')
                                       //->where('os.outlet_id',Auth::user()->customer_id)
-                                      ->groupBy('unit','op_id','title','flag')
+                                      ->groupBy('unit','op_id','title','flag','batch','exp_date')
                                       ->union($productsOutlet)
                                       ->orderBy('title')
                                       ->get();
@@ -108,7 +108,8 @@ class OutletProductController extends Controller
   																				($prod->product_qty ? $prod->product_qty : 0),
                                           $prod->unit,
                                           $prod->flag,
-  																				''
+  																				$prod->batch,
+                                          $prod->exp_date
   																				));
   						}
   					});
@@ -126,10 +127,13 @@ class OutletProductController extends Controller
 	    $file = $request->file_import;
 
 	    $data = Excel::load($file, function($reader){})->get();
-
 	    foreach ($data as $key => $value) {
-	    	$last_stock = OutletStock::where('product_id',$value->id)->sum('qty');
-	    	$data[$key]['last_stock'] = $last_stock;
+        if(isset($value->id)){
+    	    	$last_stock = OutletStock::where('product_id',$value->id);
+            if(is_null($value->batch))$last_stock =$last_stock->whereNull('batch')->sum('qty');
+            else $last_stock =$last_stock->where('batch',$value->batch)->sum('qty');
+    	    	$data[$key]['last_stock'] = $last_stock;
+        }else return redirect()->route('outlet.importProductStock')->with('msg','ID must be exists');
 	    }
 	  }
 
@@ -139,7 +143,6 @@ class OutletProductController extends Controller
   public function importProductStockProcess(Request $request)
   {
   	$data = json_decode($request->data);
-
   	$stock = array();
   	$idx = 0;
   	foreach ($data as $key => $prod) {
@@ -147,7 +150,8 @@ class OutletProductController extends Controller
       $stock[$idx]['outlet_id'] = Auth::user()->customer_id;
   		$stock[$idx]['event'] = 'adjust';
   		$stock[$idx]['qty'] = ($prod->last_stock > 0) ? '-'.$prod->last_stock : $prod->last_stock;
-  		$stock[$idx]['batch'] = NULL;
+  		$stock[$idx]['batch'] = $prod->batch;
+      $stock[$idx]['Exp_date'] = is_null($prod->{'exp._datecth2017_01_31'})?null:$prod->{'exp._datecth2017_01_31'}->date;
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
   		$idx++;
@@ -157,10 +161,11 @@ class OutletProductController extends Controller
   		$stock[$idx]['event'] = 'add_upload';
   		$stock[$idx]['qty'] = $prod->stock;
   		$stock[$idx]['batch'] = $prod->batch;
+      $stock[$idx]['Exp_date'] = is_null($prod->{'exp._datecth2017_01_31'})?null:$prod->{'exp._datecth2017_01_31'}->date;
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
   		$idx++;
-  	}
+  	}    
   	$insert_stock = OutletStock::insert($stock);
 
   	return redirect('/outlet/product/import/stock')->with('msg','Stock imported successfully.');
@@ -408,6 +413,7 @@ class OutletProductController extends Controller
 	  		$trx[$count]['qty'] = $list->qty.' '.$list->unit;
 	  		$trx[$count]['batch'] = $list->batch;
         $trx[$count]['deliveryorder_no'] = $list->deliveryorder_no;
+        $trx[$count]['exp_date'] = $list->exp_date;
 	  		$trx[$count]['trx_date'] = $list->trx_date;
 	  		$count++;
 	  	}
@@ -499,7 +505,7 @@ class OutletProductController extends Controller
       $stockAll = $stockAll->where('province',$data['province']);
 
     if($data['area'])
-      $stockAll = $stockAll->where('city',$data['area']); 
+      $stockAll = $stockAll->where('city',$data['area']);
 
     if($request->product_name)
       $stockAll = $stockAll->where('title','LIKE','%'.$request->product_name.'%');

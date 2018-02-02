@@ -2,12 +2,15 @@
 
 @section('content')
     <div class="row" >
-        <div id="pesan">
-        </div>
+      @if ($message = Session::get('message'))
+    		<div class="alert alert-success">
+    			<p>{{ $message }}</p>
+    		</div>
+    	@endif
             <div class="panel panel-primary">
                 <div class="panel-heading">Customer</div>
                 <div class="panel-body">
-                      <form action="{{route('customer.update',$user->id)}}" class="form-horizontal" method="post" role="form">
+                      <form action="{{route('customer.mergeCustomer',$user->id)}}" class="form-horizontal" method="post" role="form">
                           {{method_field('PATCH')}}
                           {{csrf_field()}}
                           <input type="hidden" value="{{$customer->id}}" id="customer_id">
@@ -76,6 +79,11 @@
                                               <i class="fa fa-times" aria-hidden="true"></i>
                                             </span>
                                             <input type="hidden" name="c_id" id="customer-id" class="form-control" value="{{$customer->oracle_customer_id}}">
+                                            @if ($errors->has('c_number'))
+                          										<span class="help-block">
+                          											<strong>{{ $errors->first('c_number') }}</strong>
+                          										</span>
+                          									@endif
                                           </div>
                                         </div>
                                     </div>
@@ -91,7 +99,7 @@
                                   <div class="form-group" id="status">
                                       <div class="col-sm-12">
                                         @if(Auth::user()->hasRole('IT Galenium'))
-                                        <button type="submit" name="save" value="save" id="save-customer" class="btn btn-primary">@lang('label.save')</button>
+                                        <button type="submit" name="save" value="save" id="save-customer" class="btn btn-primary">Merge</button>
                                         @endif
                                       </div>
                                   </div>

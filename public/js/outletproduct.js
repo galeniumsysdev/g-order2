@@ -28,11 +28,14 @@ $(document).ready(function() {
     }
     if($('#trx-list').length){
         trx_list_datatable = $('#trx-list').DataTable({
+            'scrollX':        true,
+            'scrollCollapse': true,
             'order': [],
             columnDefs: [
                 { responsivePriority: 1, targets: 0 },
                 { responsivePriority: 2, targets: 1 },
-                { responsivePriority: 3, targets: 3 }
+                { responsivePriority: 3, targets: 4 },
+                { responsivePriority: 3, targets: 5 },
             ]
         });
         window.setTimeout(function(){

@@ -33,7 +33,7 @@ class CustomerController extends Controller
       $this->middleware('auth');
   }
 
-  public function show($id,$notif_id)
+  public function show($id=null,$notif_id=null)
   {
     $user = User::find($id);
     $customer_email = $user->email;
@@ -98,8 +98,10 @@ class CustomerController extends Controller
 
           $email = $user->email;
           if(Auth::user()->hasRole('IT Galenium')) {
-              $menu = "CustomerYasa";
-              return view('admin.oracle.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','notif_id','menu'));
+              $menu = "custYasa";              
+              //return redirect()->route('')
+              return view('admin.oracle.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','notif_id','menu'))
+              ->withMessage('Data Berhasil diubah');
           }
           $outletdist = OutletDistributor::where([
             ['outlet_id','=',$user->customer_id],
@@ -245,50 +247,7 @@ class CustomerController extends Controller
           Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
           $user->avatar = $filename;
         }
-        if(Auth::user()->hasRole('IT Galenium'))
-        {
-          $oldcustomer=$user->customer_id;
-          if(isset($request->c_number))
-          {
-            $oraclecustomer = Customer::leftjoin('users','customers.id','=','users.customer_id')
-                            ->where('customer_number','=',$request->c_number)
-                            ->select('customers.*','users.email','users.register_flag')
-                            ->first();
-            if($oraclecustomer)
-            {
-              if(!$oraclecustomer->register_flag){
-                /*update all po outlet_id*/
-                DB::table('po_draft_headers')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
-                DB::table('so_headers')->where('customer_id','=',$oldcustomer)
-                  ->whereIn('status',[0,1])
-                  ->update(['customer_id'=>$oraclecustomer->id
-                            ,'cust_ship_to'=>
-                            ,'cust_bill_to'=>
-                            ,'price_list_id'=>
-                            ,'payment_term_id'=>
-                            ,'oracle_ship_to'=>
-                            ,'oracle_bill_to'=>
-                            ,'oracle_customer_id'=>$oraclecustomer->oracle_customer_id]);
-                /*attach to all outlet_distributor*/
-                $distributor = DB::table('outlet_distributor')->where('outlet_id','=',$oldcustomer)->select('distributor_id')->get();
-                if($distributor) $oraclecustomer->hasDistributor()->attach($distributor->pluck('distributor_id')->toArray());
-                /*product stock jika role Apotik/Klinik*/
-                if($user->hasRole('Apotik/Klinik'))
-                {
-                  DB::table('outlet_products')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
-                  DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
-                }
-                /*delete old customer_id*/
-                DB::table('customers')->where('id','=',$oldcustomer)->update(['status'=>'I']);
-                $useroracle=User::where('customer_id','=',$oraclecustomer->id)->where('register_flag=','=','0')->delete();
-                $user->customer_id = $oraclecustomer->id;
-                //$user->name = $oraclecustomer->customer_name;
-              }else{
-                return redirect()->back()->withInput()->withErrors(['c_number'=>'Customer number already has registered to another user']);
-              }
-            }
-          }
-        }
+
         if(isset($request->name)) $user->name=$request->name;
         $user->save();
         $user->detachRoles($user->roles);
@@ -296,7 +255,7 @@ class CustomerController extends Controller
         $customer = Customer::find($user->customer_id);
         //dd($customer->hasDistributor->count());
         $customer->tax_reference = $request->npwp;
-        $customer->customer_name = $request->name;
+        if (isset($request->name)) $customer->customer_name = $request->name;
         $customer->outlet_type_id =$request->category;
 
         $sites = $customer->sites()->where('primary_flag','=','Y')->first();
@@ -754,4 +713,5 @@ class CustomerController extends Controller
       }
 
     }
+
 }

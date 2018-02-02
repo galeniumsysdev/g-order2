@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -52,7 +52,7 @@
               <br/>
             </div>
             <div class="table-responsive">
-              <table id="trx-list" class="display responsive nowrap" width="100%">
+              <table id="trx-list" class="stripe row-border order-column" width="100%">
                 <thead>
                   <tr>
                     <th>@lang('outlet.trxDate')</th>
@@ -61,7 +61,8 @@
                     <th>@lang('outlet.transaction')</th>
                     <th>@lang('outlet.qty')</th>
                     <th>@lang('outlet.batchNo')</th>
-                    <th>@lang('outlet.deliveryNo')</th>
+                    <th>@lang('outlet.ExpDate')</th>
+                    <!--<th>@lang('outlet.deliveryNo')</th>-->
                   </tr>
                 </thead>
                 <tbody>
@@ -73,7 +74,8 @@
                       <td align="center">{!! $trx['event'] !!}</td>
                       <td align="center">{!! $trx['qty'] !!}</td>
                       <td align="center">{{ $trx['batch'] }}</td>
-                      <td align="center">{{ $trx['deliveryorder_no'] }}</td>
+                      <td align="center">{{ $trx['exp_date'] }}</td>
+                      <!--<td align="center">{{ $trx['deliveryorder_no'] }}</td>-->
                     </tr>
                   @endforeach
                 </tbody>
