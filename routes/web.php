@@ -384,6 +384,7 @@ Route::post('/outlet/product/submit','OutletProductController@submitProduct')->n
 Route::get('/outlet/product/delete/{id}','OutletProductController@deleteProduct')->name('outlet.deleteProduct');
 Route::get('/outlet/product/detail/{product_id}/{flag?}','OutletProductController@detailProductStock')->name('outlet.detailProductStock');
 Route::get('/outlet/product/getList','OutletProductController@getListProductStock')->name('outlet.getListProductStock');
+Route::get('/outlet/product/getBatchOut','OutletProductController@getListBatchStock')->name('outlet.getListBatchStock');
 
 Route::get('/outlet/transaction','OutletProductController@outletTrx')->name('outlet.trx');
 Route::get('/outlet/transaction/list','OutletProductController@outletTrxList')->name('outlet.trxList');

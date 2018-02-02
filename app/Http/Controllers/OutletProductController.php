@@ -10,6 +10,7 @@ use App\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Webpatser\Uuid\Uuid;
+use Carbon\Carbon;
 
 use Auth;
 use Excel;
@@ -165,7 +166,7 @@ class OutletProductController extends Controller
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
   		$idx++;
-  	}    
+  	}
   	$insert_stock = OutletStock::insert($stock);
 
   	return redirect('/outlet/product/import/stock')->with('msg','Stock imported successfully.');
@@ -366,7 +367,6 @@ class OutletProductController extends Controller
     $end_date = ($_GET && $_GET['end_date']) ? date('Y-m-d 23:59:59',strtotime($_GET['end_date'])) : date('Y-m-d 23:59:59');
     $product_name = ($_GET && $_GET['product_name']) ? trim($_GET['product_name']) : '';
     $generic = ($_GET && $_GET['generic']) ? trim($_GET['generic']) : '';
-
   	$stockOutlet = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date','outlet_products.generic as generic')
   											->leftjoin('outlet_products','outlet_products.id','outlet_stock.product_id')
                         ->where('outlet_products.enabled_flag','Y')
@@ -374,7 +374,7 @@ class OutletProductController extends Controller
                         ->whereBetween('outlet_stock.created_at',array($start_date,$end_date))
                         ->where('title','LIKE','%'.$product_name.'%');
     if($generic){
-      $stockAll = $stockOutlet->where('generic','LIKE','%'.$generic.'%')
+      $stockOutlet = $stockOutlet->where('generic','LIKE','%'.$generic.'%')
                               ->orderBy('trx_date','desc')
                               ->get();
     }
@@ -429,6 +429,8 @@ class OutletProductController extends Controller
   	$instock->event = 'trx_in';
   	$instock->qty = $request->qty_in;
     $instock->batch = $request->batch_no_in;
+    $instock->exp_date =is_null($request->exp_date_in)?null:date('Y-m-d',strtotime($request->exp_date_in));
+    $instock->trx_date =is_null($request->trx_in_date)?null:date('Y-m-d',strtotime($request->trx_in_date));
     $instock->deliveryorder_no = $request->delivery_no_in;
   	$instock->save();
 
@@ -437,9 +439,11 @@ class OutletProductController extends Controller
 
   public function outletTrxOutProcess(Request $request)
   {
+    dd($this->getListProductStock());
   	$outstock = new OutletStock;
   	$outstock->product_id = $request->product_code_out;
     $outstock->outlet_id = Auth::user()->customer_id;
+    $outstock->trx_date =is_null($request->trx_in_date)?null:date('Y-m-d',strtotime($request->trx_in_date));
   	$outstock->event = 'trx_out';
   	$outstock->qty = '-'.$request->qty_out;
     $outstock->batch = $request->batch_no_out;
@@ -707,4 +711,5 @@ class OutletProductController extends Controller
     $outlet = Customer::all();
     return response()->json($outlet);
   }
+
 }

@@ -66,14 +66,11 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-in">@lang('outlet.qty')</label>
+                              <label for="batch-no">@lang('outlet.batchNo')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
-                            <div class="input-prepend input-group">
-                              {{ Form::number('qty_in', '', array('class'=>'form-control qty','autocomplete'=>'off', 'id'=>'qty-in', 'min'=>1, 'required'=>'required')) }}
-                              <span class="add-on input-group-addon unit-sell" id="unit-sell-in"></span>
-                            </div>
+                            {{ Form::text('batch_no_in', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-in')) }}
                           </div>
                         </div>
                       </div>
@@ -83,11 +80,28 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-in">@lang('outlet.batchNo')</label>
+                              <label for="exp-date">@lang('outlet.ExpDate')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
-                            {{ Form::text('batch_no_in', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-in')) }}
+                            {{ Form::text('exp_date_in', '', array('class'=>'form-control exp_date','autocomplete'=>'off', 'id'=>'exp-date-in')) }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-md-2">
+                            <div class="form-label">
+                              <label for="qty-in">@lang('outlet.qty')</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="input-prepend input-group">
+                              {{ Form::number('qty_in', '', array('class'=>'form-control qty','autocomplete'=>'off', 'id'=>'qty-in', 'min'=>1, 'required'=>'required')) }}
+                              <span class="add-on input-group-addon unit-sell" id="unit-sell-in"></span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -160,15 +174,13 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-out">@lang('outlet.qty')</label>
+                              <label for="batch-out">@lang('outlet.batchNo')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
-                            <div class="input-prepend input-group">
-                              {{ Form::number('qty_out', '', array('class'=>'form-control qty', 'autocomplete'=>'off', 'id'=>'qty-out', 'min'=>1, 'required'=>'required')) }}
-                              <span class="add-on input-group-addon unit-sell" id="unit-sell-out"></span>
-                            </div>
+                            {{ Form::text('batch_no_out', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-out')) }}
                           </div>
+                          <div class="col-md-4" id="exp-date-out"></div>
                         </div>
                       </div>
                     </div>
@@ -177,11 +189,14 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-in">@lang('outlet.batchNo')</label>
+                              <label for="qty-out">@lang('outlet.qty')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
-                            {{ Form::text('batch_no_out', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-out')) }}
+                            <div class="input-prepend input-group">
+                              {{ Form::number('qty_out', '', array('class'=>'form-control qty', 'autocomplete'=>'off', 'id'=>'qty-out', 'min'=>1, 'required'=>'required')) }}
+                              <span class="add-on input-group-addon unit-sell" id="unit-sell-out"></span>
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -106,17 +106,24 @@ $(document).ready(function() {
                         return item.title;
                     },
                     afterSelect: function (item) {
+                      if(parseInt(item.product_qty)>0){
                         $('#product-name-out').attr('readonly','readonly');
                         $('#change-product-out').show();
                         $('#product-code-out').val(item.op_id);
                         $('#unit-sell-out').text(item.unit);
+                        $('#batch-no-out').val();
+                        $('#exp-date-out').text();
+                      }else{
+                        alert(item.title+' tidak memiliki stock');
+                        $('#product-name-out').val('');
+                      }
                     }
                 });
         }, 'json');
     }
 
 	$('.product-container').on('click','li',function(){
-		$(this).closest('.form-trx').find('.qty').focus();
+		$(this).closest('.form-trx').find('.batch-no').focus();
 	})
 
     $('.change-product').click(function(){
@@ -126,6 +133,7 @@ $(document).ready(function() {
         product_container.find('.product-code').val('');
         console.log($(this).closest('.form-trx').find('.unit-sell').text());
         $(this).closest('.form-trx').find('.unit-sell').text('');
+        $(this).closest('.form-trx').find('.batch-no').val('');
     })
 
     if($('#tabs').length)
@@ -193,4 +201,11 @@ $(document).ready(function() {
         window.location.href = window.Laravel.url+'/outlet/transaction/list?start_date='+$('#start-date-trx').val()+'&end_date='+$('#end-date-trx').val()+'&product_name='+$('#product-name').val()+'&generic='+$('#generic').val();
     })
     // ==============
+
+    if($('#exp-date-in').length){
+        $('#exp-date-in').datetimepicker({
+            format: "DD MMMM YYYY",
+            locale: "en"
+        });
+    }
 });
