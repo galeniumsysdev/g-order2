@@ -106,6 +106,7 @@ $(document).ready(function() {
                         return item.title;
                     },
                     afterSelect: function (item) {
+                      console.log("Qty"+item.product_qty);
                       if(parseInt(item.product_qty)>0){
                         $('#product-name-out').attr('readonly','readonly');
                         $('#change-product-out').show();
@@ -113,6 +114,7 @@ $(document).ready(function() {
                         $('#unit-sell-out').text(item.unit);
                         $('#batch-no-out').val();
                         $('#exp-date-out').text();
+                        getBatchOut();
                       }else{
                         alert(item.title+' tidak memiliki stock');
                         $('#product-name-out').val('');
@@ -134,6 +136,9 @@ $(document).ready(function() {
         console.log($(this).closest('.form-trx').find('.unit-sell').text());
         $(this).closest('.form-trx').find('.unit-sell').text('');
         $(this).closest('.form-trx').find('.batch-no').val('');
+        $('#exp-date-out').text('');
+        product_container.find('.product-name').removeAttr('readonly').val('');
+        $('#batch-no-out').removeAttr('readonly').val('');
     })
 
     if($('#tabs').length)
@@ -207,5 +212,39 @@ $(document).ready(function() {
             format: "DD MMMM YYYY",
             locale: "en"
         });
+    }
+
+    function getBatchOut()
+    {
+      var product_id = $("#product-code-out").val();
+      if(product_id!="")
+      {
+        $.get(window.Laravel.url+'/outlet/product/getBatchOut',{
+          product_code_out:product_id
+        }).done(
+            function(data){
+              console.log("total"+Object.keys(data).length);
+              if((Object.keys(data).length)==1)
+              {
+                $('#batch-no-out').val(data[0].batch);
+                $('#exp-date-out').text("Exp date:"+data[0].exp_date);
+                $('#batch-no-out').attr('readonly','readonly');
+              }else{
+                $('#batch-no-out').typeahead({
+                    name: 'batch-no-out',
+                    source: data,
+                    items: 'all',
+                    showHintOnFocus: 'all',
+                    displayText: function (item) {
+                        return item.batch+" ("+item.exp_date+")";
+                    },
+                    afterSelect: function (item) {
+                        $('#batch-no-out').val(item.batch);
+                        $('#exp-date-out').text("Exp date:"+item.exp_date);
+                    }
+                });
+              }
+            }, 'json');
+      }
     }
 });

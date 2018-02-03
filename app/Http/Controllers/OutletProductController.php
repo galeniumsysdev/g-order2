@@ -130,7 +130,7 @@ class OutletProductController extends Controller
 	    $data = Excel::load($file, function($reader){})->get();
 	    foreach ($data as $key => $value) {
         if(isset($value->id)){
-    	    	$last_stock = OutletStock::where('product_id',$value->id);
+    	    	$last_stock = OutletStock::where('product_id',$value->id)->where('outlet_id',Auth::user()->id);
             if(is_null($value->batch))$last_stock =$last_stock->whereNull('batch')->sum('qty');
             else $last_stock =$last_stock->where('batch',$value->batch)->sum('qty');
     	    	$data[$key]['last_stock'] = $last_stock;
@@ -147,6 +147,7 @@ class OutletProductController extends Controller
   	$stock = array();
   	$idx = 0;
   	foreach ($data as $key => $prod) {
+      $stock[$idx]['trx_date'] = date('Y-m-d', time());
   		$stock[$idx]['product_id'] = $prod->id;
       $stock[$idx]['outlet_id'] = Auth::user()->customer_id;
   		$stock[$idx]['event'] = 'adjust';
@@ -157,6 +158,7 @@ class OutletProductController extends Controller
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
   		$idx++;
 
+      $stock[$idx]['trx_date'] = date('Y-m-d', time());
   		$stock[$idx]['product_id'] = $prod->id;
       $stock[$idx]['outlet_id'] = Auth::user()->customer_id;
   		$stock[$idx]['event'] = 'add_upload';
@@ -239,7 +241,7 @@ class OutletProductController extends Controller
     												->leftjoin('outlet_products','outlet_products.id','outlet_stock.product_id')
     												->where('product_id',$product_id)
                             ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-    												->orderBy('outlet_stock.created_at','desc')
+    												->orderBy('outlet_stock.trx_date','desc')
     												->get();
     }
     else{
@@ -257,7 +259,7 @@ class OutletProductController extends Controller
                             ->leftjoin('products','products.id','outlet_stock.product_id')
                             ->where('product_id',$product_id)
                             ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                            ->orderBy('outlet_stock.created_at','desc')
+                            ->orderBy('outlet_stock.trx_date','desc')
                             ->get();
     }
 
@@ -285,7 +287,7 @@ class OutletProductController extends Controller
 					$idx_adj = 0;
 				}
 				$trx[$count]['batch'] = $list->batch;
-				$trx[$count]['trx_date'] = $list->created_at;
+				$trx[$count]['trx_date'] = $list->trx_date;
 				$count++;
 			}
 		}
@@ -363,35 +365,34 @@ class OutletProductController extends Controller
 
   public function outletTrxList()
   {
-    $start_date = ($_GET && $_GET['start_date']) ? date('Y-m-d 00:00:00',strtotime($_GET['start_date'])) : date('Y-m-d 00:00:00',strtotime('-1 month'));
-    $end_date = ($_GET && $_GET['end_date']) ? date('Y-m-d 23:59:59',strtotime($_GET['end_date'])) : date('Y-m-d 23:59:59');
+    $start_date = ($_GET && $_GET['start_date']) ? date('Y-m-d',strtotime($_GET['start_date'])) : date('Y-m-d',strtotime('-1 month'));
+    $end_date = ($_GET && $_GET['end_date']) ? date('Y-m-d',strtotime($_GET['end_date'])) : date('Y-m-d');
     $product_name = ($_GET && $_GET['product_name']) ? trim($_GET['product_name']) : '';
     $generic = ($_GET && $_GET['generic']) ? trim($_GET['generic']) : '';
-  	$stockOutlet = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date','outlet_products.generic as generic')
+
+  	$stockOutlet = OutletStock::select('title','outlet_stock.*','outlet_products.generic as generic')
   											->leftjoin('outlet_products','outlet_products.id','outlet_stock.product_id')
                         ->where('outlet_products.enabled_flag','Y')
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                        ->whereBetween('outlet_stock.created_at',array($start_date,$end_date))
-                        ->where('title','LIKE','%'.$product_name.'%');
-    if($generic){
-      $stockOutlet = $stockOutlet->where('generic','LIKE','%'.$generic.'%')
-                              ->orderBy('trx_date','desc')
-                              ->get();
-    }
-    else{
-    $stockAll = OutletStock::select('title','outlet_stock.*', 'outlet_stock.created_at as trx_date','long_description as generic')
+                        ->whereBetween('outlet_stock.trx_date',array($start_date,$end_date))
+                        ->where('title','LIKE','%'.$product_name.'%')
+                        ->where('generic','LIKE','%'.$generic.'%');
+
+    $stockAll = OutletStock::select('title','outlet_stock.*','long_description as generic')
                         ->leftjoin('products','products.id','outlet_stock.product_id')
                         ->join('category_products as cp','cp.product_id','products.id')
                         ->join('categories as c','c.flex_value','cp.flex_value')
                         ->where('c.parent','PHARMA')
                         ->where('products.Enabled_Flag','Y')
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                        ->whereBetween('outlet_stock.created_at',array($start_date,$end_date))
+                        ->whereBetween('outlet_stock.trx_date',array($start_date,$end_date))
                         ->where('title','LIKE','%'.$product_name.'%')
+                        ->where('long_description','LIKE','%'.$generic.'%')
                         ->union($stockOutlet)
                         ->orderBy('trx_date','desc')
+                        ->orderBy('created_at','desc')
   											->get();
-    }
+
   	$trx = array();
   	$count = 0;
   	foreach ($stockAll as $key => $list) {
@@ -413,7 +414,7 @@ class OutletProductController extends Controller
 	  		$trx[$count]['qty'] = $list->qty.' '.$list->unit;
 	  		$trx[$count]['batch'] = $list->batch;
         $trx[$count]['deliveryorder_no'] = $list->deliveryorder_no;
-        $trx[$count]['exp_date'] = $list->exp_date;
+        $trx[$count]['exp_date'] = $list->Exp_date;
 	  		$trx[$count]['trx_date'] = $list->trx_date;
 	  		$count++;
 	  	}
@@ -423,30 +424,49 @@ class OutletProductController extends Controller
 
   public function outletTrxInProcess(Request $request)
   {
+    if(!is_null($request->batch_no_in) and is_null($request->exp_date_in))
+    {
+      return redirect()->back()->withInput()->with('msg','Expired date harus disi jika batch number diisi');
+    }
   	$instock = new OutletStock;
+    $instock->trx_date = date('Y-m-d',strtotime($request->trx_in_date));
   	$instock->product_id = $request->product_code_in;
     $instock->outlet_id = Auth::user()->customer_id;
   	$instock->event = 'trx_in';
   	$instock->qty = $request->qty_in;
     $instock->batch = $request->batch_no_in;
     $instock->exp_date =is_null($request->exp_date_in)?null:date('Y-m-d',strtotime($request->exp_date_in));
-    $instock->trx_date =is_null($request->trx_in_date)?null:date('Y-m-d',strtotime($request->trx_in_date));
     $instock->deliveryorder_no = $request->delivery_no_in;
   	$instock->save();
 
-  	return redirect()->back()->with('msg','Transaction In has been done successfully.');
+  	return redirect()->route('outlet.trx')->with('msg','Transaction In has been done successfully.');
   }
 
   public function outletTrxOutProcess(Request $request)
   {
-    dd($this->getListProductStock());
+    /*check onhand*/
+    $datastock=$this->getStockBatchProduct($request);
+    if(is_null($request->batch_no_out))
+      $datastock = $datastock->where('batch','=',null);
+    if($datastock->count()>0)
+    {
+      $tglexpired = $datastock->first()->exp_date;
+      $jmlstock = $datastock->first()->product_qty;
+    }else{
+      return redirect()->back()->withInput()->with('err','Transaksi gagal disimpan.Stock tidak mencukupi');
+    }
+    if($jmlstock < $request->qty_out)
+    {
+      return redirect('/outlet/transaction#trx-out')->withInput()->with('err','Transaksi gagal disimpan karena stock tidak mencukupi. Sisa Stock ='.$jmlstock);
+    }
   	$outstock = new OutletStock;
+    $outstock->trx_date = date('Y-m-d',strtotime($request->trx_out_date));
   	$outstock->product_id = $request->product_code_out;
     $outstock->outlet_id = Auth::user()->customer_id;
-    $outstock->trx_date =is_null($request->trx_in_date)?null:date('Y-m-d',strtotime($request->trx_in_date));
   	$outstock->event = 'trx_out';
   	$outstock->qty = '-'.$request->qty_out;
     $outstock->batch = $request->batch_no_out;
+    if(isset($request->batch_no_out)) $outstock->Exp_date = $datastock->first()->exp_date;    
   	$outstock->save();
 
   	return redirect('/outlet/transaction#trx-out')->with('msg','Transaction Out has been done successfully.');
@@ -459,20 +479,20 @@ class OutletProductController extends Controller
 
   public function downloadProductStockView(Request $request)
   {
-    $data['start_date'] = date('Y-m-d 00:00:00',strtotime($request->start_date));
-    $data['end_date'] = date('Y-m-d 23:59:59',strtotime($request->end_date));
+    $data['start_date'] = date('Y-m-d',strtotime($request->start_date));
+    $data['end_date'] = date('Y-m-d',strtotime($request->end_date));
     $data['outlet_name'] = $request->outlet_name;
     $data['province'] = $request->province;
     $data['area'] = $request->area;
 
-    $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price')
+    $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price','batch')
                         ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                         ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                         ->join('customer_sites as cs','cs.customer_id','outlet.id')
                         ->where('outlet_products.enabled_flag','Y')
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                        ->whereBetween('outlet_stock.created_at',array($data['start_date'],$data['end_date']))
-                        ->groupby('title','product_id','outlet_name','price');
+                        ->whereBetween('outlet_stock.trx_date',array($data['start_date'],$data['end_date']))
+                        ->groupby('title','product_id','outlet_name','price','batch');
 
     if($data['outlet_name'])
       $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
@@ -486,7 +506,7 @@ class OutletProductController extends Controller
     if($request->product_name)
       $stockOutlet = $stockOutlet->where('title','LIKE','%'.$request->product_name.'%');
 
-    $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','qp.operand as price')
+    $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','qp.operand as price','batch')
                         ->join('products','products.id','outlet_stock.product_id')
                         ->join('qp_list_lines_v as qp',function($join){
                           $join->on('qp.product_attr_value','products.inventory_item_id');
@@ -499,8 +519,8 @@ class OutletProductController extends Controller
                         ->where('c.parent','PHARMA')
                         ->where('products.Enabled_Flag','Y')
                         ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                        ->whereBetween('outlet_stock.created_at',array($data['start_date'],$data['end_date']))
-                        ->groupby('title','product_id','outlet_name','price');
+                        ->whereBetween('outlet_stock.trx_date',array($data['start_date'],$data['end_date']))
+                        ->groupby('title','product_id','outlet_name','price','batch');
 
     if($data['outlet_name'])
       $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
@@ -522,35 +542,29 @@ class OutletProductController extends Controller
 
     foreach ($stockAll as $key => $prod) {
       $begin = OutletStock::where('product_id',$prod->product_id)
-                              ->whereDate('created_at','<=',$data['start_date'])
+                              ->where('batch',$prod->batch)
+                              ->whereDate('trx_date','<=',$data['start_date'])
                               ->sum('qty');
       $end = OutletStock::where('product_id',$prod->product_id)
-                              ->whereDate('created_at','<=',$data['end_date'])
+                              ->where('batch',$prod->batch)
+                              ->whereDate('trx_date','<=',$data['end_date'])
                               ->sum('qty');
       $in = OutletStock::where('product_id',$prod->product_id)
-                              ->whereDate('created_at','>=',$data['start_date'])
-                              ->whereDate('created_at','<=',$data['end_date'])
+                              ->where('batch',$prod->batch)
+                              ->whereDate('trx_date','>=',$data['start_date'])
+                              ->whereDate('trx_date','<=',$data['end_date'])
                               ->where('qty','>',0)
                               ->sum('qty');
       $out = OutletStock::where('product_id',$prod->product_id)
-                              ->whereDate('created_at','>=',$data['start_date'])
-                              ->whereDate('created_at','<=',$data['end_date'])
+                              ->where('batch',$prod->batch)
+                              ->whereDate('trx_date','>=',$data['start_date'])
+                              ->whereDate('trx_date','<=',$data['end_date'])
                               ->where('qty','<',0)
                               ->sum('qty');
-      $batch = OutletStock::select('batch')
-                              ->whereDate('created_at','>=',$data['start_date'])
-                              ->whereDate('created_at','<=',$data['end_date'])
-                              ->where('product_id',$prod->product_id)
-                              ->get();
-      $batch_no = '';
-      foreach ($batch as $key2 => $bat) {
-        if($bat->batch)
-          $batch_no .= $bat->batch."<br/>";
-      }
 
       $data['table'][$key]['outlet_name'] = $prod->outlet_name;
       $data['table'][$key]['title'] = $prod->title;
-      $data['table'][$key]['batch'] = $batch_no;
+      $data['table'][$key]['batch'] = $prod->batch;
       $data['table'][$key]['begin'] = $begin;
       $data['table'][$key]['in'] = $in;
       $data['table'][$key]['out'] = $out;
@@ -564,8 +578,8 @@ class OutletProductController extends Controller
 
   public function downloadProductStockProcess(Request $request)
   {
-    $data['start_date'] = date('Y-m-d 00:00:00',strtotime($request->start_date));
-    $data['end_date'] = date('Y-m-d 23:59:59',strtotime($request->end_date));
+    $data['start_date'] = date('Y-m-d',strtotime($request->start_date));
+    $data['end_date'] = date('Y-m-d',strtotime($request->end_date));
     $data['outlet_name'] = $request->outlet_name;
     $data['province'] = $request->province;
     $data['area'] = $request->area;
@@ -577,12 +591,12 @@ class OutletProductController extends Controller
                 'A' => 35,
                 'B' => 45,
                 'C' => 25,
-                'D' => 5,
-                'E' => 5,
-                'F' => 5,
-                'G' => 5,
-                'H' => 10,
-                'I' => 10,
+                'D' => 8,
+                'E' => 8,
+                'F' => 8,
+                'G' => 8,
+                'H' => 15,
+                'I' => 15,
               ));
 
               $sheet->row(1, array('STOCK OUTLET'));
@@ -616,14 +630,14 @@ class OutletProductController extends Controller
                   $cells->setFontWeight('bold');
               });
 
-              $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price')
+              $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price','batch')
                                   ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                                  ->whereBetween('outlet_stock.created_at',array($data['start_date'],$data['end_date']))
-                                  ->groupby('title','product_id','outlet_name','price');
+                                  ->whereBetween('outlet_stock.trx_date',array($data['start_date'],$data['end_date']))
+                                  ->groupby('title','product_id','outlet_name','price','batch');
 
               if($data['outlet_name'])
                 $stockOutlet = $stockOutlet->where('outlet.customer_name',$data['outlet_name']);
@@ -634,7 +648,7 @@ class OutletProductController extends Controller
               if($data['area'])
                 $stockOutlet = $stockOutlet->where('city',$data['area']);
 
-              $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','qp.operand as price')
+              $stockAll = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','qp.operand as price','batch')
                                   ->join('products','products.id','outlet_stock.product_id')
                                   ->join('qp_list_lines_v as qp',function($join){
                                     $join->on('qp.product_attr_value','products.inventory_item_id');
@@ -647,8 +661,8 @@ class OutletProductController extends Controller
                                   ->where('c.parent','PHARMA')
                                   ->where('products.Enabled_Flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
-                                  ->whereBetween('outlet_stock.created_at',array($data['start_date'],$data['end_date']))
-                                  ->groupby('title','product_id','outlet_name','price');
+                                  ->whereBetween('outlet_stock.trx_date',array($data['start_date'],$data['end_date']))
+                                  ->groupby('title','product_id','outlet_name','price','batch');
 
               if($data['outlet_name'])
                 $stockAll = $stockAll->where('outlet.customer_name',$data['outlet_name']);
@@ -665,35 +679,29 @@ class OutletProductController extends Controller
 
               foreach ($stockAll as $key => $prod) {
                 $begin = OutletStock::where('product_id',$prod->product_id)
-                                        ->whereDate('created_at','<=',$data['start_date'])
+                                        ->where('batch',$prod->batch)
+                                        ->whereDate('trx_date','<=',$data['start_date'])
                                         ->sum('qty');
                 $end = OutletStock::where('product_id',$prod->product_id)
-                                        ->whereDate('created_at','<=',$data['end_date'])
+                                        ->where('batch',$prod->batch)
+                                        ->whereDate('trx_date','<=',$data['end_date'])
                                         ->sum('qty');
                 $in = OutletStock::where('product_id',$prod->product_id)
-                                        ->whereDate('created_at','>=',$data['start_date'])
-                                        ->whereDate('created_at','<=',$data['end_date'])
+                                        ->where('batch',$prod->batch)
+                                        ->whereDate('trx_date','>=',$data['start_date'])
+                                        ->whereDate('trx_date','<=',$data['end_date'])
                                         ->where('qty','>',0)
                                         ->sum('qty');
                 $out = OutletStock::where('product_id',$prod->product_id)
-                                        ->whereDate('created_at','>=',$data['start_date'])
-                                        ->whereDate('created_at','<=',$data['end_date'])
+                                        ->where('batch',$prod->batch)
+                                        ->whereDate('trx_date','>=',$data['start_date'])
+                                        ->whereDate('trx_date','<=',$data['end_date'])
                                         ->where('qty','<',0)
                                         ->sum('qty');
-                $batch = OutletStock::select('batch')
-                                        ->whereDate('created_at','>=',$data['start_date'])
-                                        ->whereDate('created_at','<=',$data['end_date'])
-                                        ->where('product_id',$prod->product_id)
-                                        ->get();
-                $batch_no = '';
-                foreach ($batch as $key2 => $bat) {
-                  if($bat->batch)
-                    $batch_no .= $bat->batch."\n";
-                }
 
                 $sheet->row($key+6, array($prod->outlet_name,
                                           $prod->title,
-                                          $batch_no,
+                                          $prod->batch,
                                           $begin,
                                           $in,
                                           $out,
@@ -711,5 +719,46 @@ class OutletProductController extends Controller
     $outlet = Customer::all();
     return response()->json($outlet);
   }
+
+  public function getStockBatchProduct(Request $request)
+  {
+    $stockOutlet = OutletProducts::select('outlet_products.id as op_id','outlet_products.unit','title',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'),'batch','exp_date')
+  													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
+                            ->where('outlet_products.enabled_flag','Y')
+                            ->where('outlet_products.outlet_id',Auth::user()->customer_id);
+
+    $stockOutlet=$stockOutlet->where('os.product_id',$request->product_code_out);
+    if($request->batch_no_out) $stockOutlet=$stockOutlet->where('os.batch',$request->batch_no_out);
+    //else $stockOutlet=$stockOutlet->whereNull('os.batch',$request->batch_no_out);
+    $stockOutlet=$stockOutlet->groupBy('op_id','unit','title','flag','batch','exp_date');
+
+    $stockAll = Product::select('products.id as op_id','products.satuan_primary as unit','title',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'),'batch','exp_date')
+                              ->leftjoin('outlet_stock as os',function($join)
+                                {
+                                  $join->on('os.product_id','=','products.id');
+                                  $join->on('os.outlet_id','=',DB::raw("'".Auth::user()->customer_id."'"));
+                                })
+                              ->join('category_products as cp','cp.product_id','products.id')
+                              ->join('categories as c','c.flex_value','cp.flex_value')
+                              ->where('c.parent','PHARMA')
+                              ->where('os.product_id',$request->product_code_out);
+
+    if($request->batch_no_out) $stockAll=$stockAll->where('os.batch',$request->batch_no_out);
+    //else $stockOutlet=$stockOutlet->whereNull('os.batch',$request->batch_no_out);
+    $stockAll=$stockAll->groupBy('unit','op_id','title','flag','batch','exp_date')
+                              ->union($stockOutlet)
+                              ->orderBy('title')
+                              ->orderBy('exp_date')
+                              ->orderBy('batch')
+                              ->get();
+    return $stockAll;
+  }
+
+  public function getListBatchStock(Request $request,$product_id=null)
+  {
+    $data = $this->getStockBatchProduct($request);
+    return response()->json($data);
+  }
+
 
 }

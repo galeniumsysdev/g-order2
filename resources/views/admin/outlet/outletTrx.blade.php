@@ -15,6 +15,11 @@
         {{$status}}
     </div>
   @endif
+  @if($status= Session::get('err'))
+    <div class="alert alert-warning">
+        {{$status}}
+    </div>
+  @endif
 
   <div class="container">
     <div class="row">
@@ -71,7 +76,7 @@
                           </div>
                           <div class="col-md-4">
                             {{ Form::text('batch_no_in', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-in')) }}
-                          </div>
+                          </div>                          
                         </div>
                       </div>
                     </div>

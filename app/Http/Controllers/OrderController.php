@@ -358,7 +358,7 @@ class OrderController extends Controller
           $dpl = DPLSuggestNo::where('suggest_no', $header->suggest_no)
             ->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
           app('App\Http\Controllers\DPLController')->dpllog($header->suggest_no,'PO ditolak Distributor '.Auth::user()->name,$request->alasan);
-          //$nodpl= DPLNo::where('suggest_no', $header->suggest_no)->delete();          
+          //$nodpl= DPLNo::where('suggest_no', $header->suggest_no)->delete();
           $header->status=-99;
           $header->save();
           $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);
@@ -631,15 +631,16 @@ class OrderController extends Controller
               )  ;
             }
 
-            if (Auth::user()->hasRole('Apotik/Klinik') ){
+            /*if (Auth::user()->hasRole('Apotik/Klinik') ){
               $instock = new OutletStock;
               $instock->product_id = $soline->product_id;
               $instock->outlet_id = Auth::user()->customer_id;
+              $instock->trx_date = date('Y-m-d',Carbon::now());
               $instock->event = 'trx_in';
               $instock->qty = $qtyterima;
               $instock->deliveryorder_no = $request->deliveryno;
               $instock->save();
-            }
+            }*/
               $soline->qty_shipping = $soline->shippings->sum('qty_shipping');
               $soline->qty_accept = $soline->shippings->sum('qty_accept');
               $soline->save();
