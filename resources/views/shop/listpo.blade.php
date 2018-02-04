@@ -58,7 +58,7 @@
 
             <h6 class="card-subtitle mb-2 text-muted">
                 @if($request->jns==1)
-                  Distibutor: <strong>{{$t->distributor_name}}</strong>
+                  @lang('shop.supplier'): <strong>{{$t->distributor_name}}</strong>
                 @elseif($request->jns==2)
                   Customer: <strong>{{$t->customer_name}}</strong>
                 @endif
