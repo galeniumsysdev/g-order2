@@ -576,10 +576,8 @@ class ProductController extends Controller
       $linepo = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
       if($linepo->count()==0) $linepo=null;
       $jns = PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
-
-	//$jns = $jns->toArray();
+//	$jns = $jns->toArray();
       $jns=$jns->pluck('jns')->toArray();
-
       //$jns = array_unique(array_pluck($cart->items,'jns'));
       $dist=$this->getDistributor($jns);
       //return view('shop.shopping-cart',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'distributor'=>$dist]);
