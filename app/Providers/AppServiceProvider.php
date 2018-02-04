@@ -85,7 +85,7 @@ class AppServiceProvider extends ServiceProvider
             $countbrg = $jmlbrg;
           }
         }
-       // dd(DB::getQueryLog());
+      // dd(DB::getQueryLog());       
         //View::share('product_flexfields', $product_flexfields);
         $view->with(['product_flexfields'=> $product_flexfields,'countbrg'=>$countbrg]);
       });
