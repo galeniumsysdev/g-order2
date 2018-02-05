@@ -430,8 +430,9 @@ class ProductController extends Controller
             ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
             ->orderBy('pricing_group_sequence','asc')
             ->first();
+
         }
-        if($prg) $dp->promo = $prg;else $dp->promo=null;
+        if(isset($prg)) $dp->promo = $prg;else $dp->promo=null;
       }
       //  $sqlproduct .= " limit 12";
       $products = collect($dataproduct);
@@ -457,6 +458,7 @@ class ProductController extends Controller
      $product = DB::select($sqlproduct, ['cust'=>$vid]);
      $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$product[0]->id)->select('uom_code')->get();
      $product[0]->uom=$uom;
+     $prg=null;
      if(Auth::check()){
        if(Auth::user()->customer->oracle_customer_id){
        $prg =DB::table('qp_pricing_discount as qpd')
@@ -468,9 +470,9 @@ class ProductController extends Controller
            ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
            ->orderBy('pricing_group_sequence','asc')
            ->first();
+        $dp->promo = $prg;
        }
      }
-     if($prg) $dp->promo = $prg;else $dp->promo=null;
 
      return view('shop.detailProduct01',['product' => $product[0]]);
   }
@@ -744,7 +746,7 @@ class ProductController extends Controller
                           ],200);
           }
         }else{
-          if($tax) $taxamount = $request->qty*floatval($request->disc)*0.1;else $taxamount=0;
+          if($tax) $taxamount = round($request->qty*floatval($request->disc)*0.1,0);else $taxamount=0;
           $linepo = PoDraftLine::updateorCreate(
                       ['po_header_id'=>$headerpo->id,'product_id'=>$product->id],
                       ['qty_request'=>$request->qty

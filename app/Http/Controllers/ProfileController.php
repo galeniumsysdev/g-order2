@@ -272,11 +272,12 @@ class ProfileController extends Controller
       }else{
         $city = null;
       }
-      if(isset($customer->subgroup_dc_id)){
-        $sub=DB::table('subgroup_datacenters as sdc')
+      if(isset($customer->outlet_type_id)){
+      /*  $sub=DB::table('subgroup_datacenters as sdc')
                   ->where('id','=',  $customer->subgroup_dc_id)
                   ->select('group_id')->first();
-        if($sub) $groupdc = $sub->group_id;
+        if($sub) $groupdc = $sub->group_id;*/
+        $groupdc = $customer->outlet_type_id;
       }
       if($customer->psc_flag !=$request->psc_flag)
       {

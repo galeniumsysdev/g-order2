@@ -32,6 +32,8 @@ class BackgroundController extends Controller
 {
     public function getStatusOrderOracle()
     {
+      DB::beginTransaction();
+      try{
       $request= DB::table('tbl_request')->where('event','=','SalesOrder')
                 ->max('created_at');
       if($request)
@@ -41,11 +43,11 @@ class BackgroundController extends Controller
       }else{
         $lasttime = date_create("2017-07-01");
       }
-      /*$newrequest= DB::table('tbl_request')->insertGetId([
+      $newrequest= DB::table('tbl_request')->insertGetId([
         'created_at'=>Carbon::now(),
         'updated_at'=>Carbon::now(),
         'event'=>'SalesOrder'
-      ]);*/
+      ]);
       $connoracle = DB::connection('oracle');
       if($connoracle){
         echo "masuk<br>";
@@ -242,7 +244,11 @@ class BackgroundController extends Controller
         else{
           echo "can't connect to oracle";
         }
-
+        DB::commit();
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
+      }
     }
 
     public function insert_interface_oracle(SoHeader $h)
@@ -854,7 +860,7 @@ class BackgroundController extends Controller
           $adjustmentso=$adjustmentso->get() ;
           foreach($adjustmentso as $soline)
           {
-            echo $soline->line_id;
+            echo "adjust oracle line id:".$soline->line_id;
             $adj_price = $connoracle->table('oe_price_adjustments as opa')
                         ->where('opa.header_id','=',$soline->header_id)
                         ->where('opa.line_id','=',$soline->line_id)
@@ -865,9 +871,9 @@ class BackgroundController extends Controller
 
             $product = DB::table('products')->where('inventory_item_id','=',$soline->inventory_item_id)->select('id')->first();
             $newline = SoLine::updateOrCreate(['bonus_list_line_id'=>$list_line_id
-                                                ,'product_id'=>$product->id],
-                        ['header_id'=>$headerid
-                        , 'uom'=> $soline->order_quantity_uom
+                                                ,'product_id'=>$product->id,
+                                                'header_id'=>$headerid ],
+                        [ 'uom'=> $soline->order_quantity_uom
                         ,'qty_request'=>$soline->ordered_quantity
                         ,'qty_confirm'=>$soline->ordered_quantity*$soline->conversion
                         ,'list_price'=>$soline->unit_list_price
@@ -879,7 +885,6 @@ class BackgroundController extends Controller
                         ,'inventory_item_id'=>$soline->inventory_item_id
                         ,'uom_primary'=>$soline->primary_uom_code
                         ,'qty_request_primary'=>$soline->ordered_quantity*$soline->conversion
-                        ,'oracle_line_id'=>$soline->line_id
                         ]
                         );
             $updateoraline = $connoracle->table('oe_order_lines_all as ola')

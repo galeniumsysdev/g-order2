@@ -98,7 +98,7 @@ class CustomerController extends Controller
 
           $email = $user->email;
           if(Auth::user()->hasRole('IT Galenium')) {
-              $menu = "custYasa";              
+              $menu = "custYasa";
               //return redirect()->route('')
               return view('admin.oracle.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','notif_id','menu'))
               ->withMessage('Data Berhasil diubah');
@@ -265,13 +265,14 @@ class CustomerController extends Controller
         }else{
           $city = null;
         }
+        $groupdc =$customer->outlet_type_id;
         if($request->psc_flag=="1"){
         //if(Auth::User()->hasRole('Marketing PSC')){
           $customer->subgroup_dc_id =$request->subgroupdc;
-          $sub=DB::table('subgroup_datacenters as sdc')
+        /*$sub=DB::table('subgroup_datacenters as sdc')
                     ->where('id','=',$request->subgroupdc)
                     ->select('group_id')->first();
-          if($sub) $groupdc = $sub->group_id;
+          if($sub) $groupdc = $sub->group_id;*/
           if($customer->psc_flag !=$request->psc_flag)
           {
               $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
@@ -282,6 +283,19 @@ class CustomerController extends Controller
           }
 
         }else{
+          /*jika dilepas*/
+          if($customer->psc_flag !=$request->psc_flag)
+          {
+            $olddistributor = OutletDistributor::whereExists(function ($query){
+                              $query->select(DB::raw(1))
+                                    ->from('customers as c')
+                                    ->whereRaw("od.distributor_id = c.id ")
+                                    ->where('c.psc_flag','=','1')
+                                    ->wherenull('c.pharma_flag');
+                            })
+                            ->where('od.outlet_id','=',$customer->id)
+                            ->update(['inactive'=>1,'end_date_active'=>Carbon::now()]);
+          }
           $customer->subgroup_dc_id =null;
           $groupdc=null;
         }
@@ -290,11 +304,24 @@ class CustomerController extends Controller
         {
           if($request->pharma_flag=="1")//adddistributor pharma
           {
+            dd($customer->hasDistributor()->pluck('distributor_id')->toArray()) ;
             $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
             if($distributor)
             {
+              $distributor->whereNotIn('id',$customer->hasDistributor()->pluck('distributor_id')->toArray());
+              dd($distributor);
               $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
             }
+          }elseif($customer->pharma_flag=="1" and $request->pharma_flag==""){
+              $olddistributor = OutletDistributor::whereExists(function ($query){
+                                $query->select(DB::raw(1))
+                                      ->from('customers as c')
+                                      ->whereRaw("od.distributor_id = c.id ")
+                                      ->where('c.pharma_flag','=','1')
+                                      ->wherenull('c.psc_flag');
+                              })
+                              ->where('od.outlet_id','=',$customer->id)
+                              ->update(['inactive'=>1,'end_date_active'=>Carbon::now()]);
           }
         }
         $customer->psc_flag =$request->psc_flag;
