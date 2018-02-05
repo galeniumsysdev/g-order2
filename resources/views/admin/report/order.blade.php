@@ -1,4 +1,9 @@
 @extends('layouts.navbar_product')
+@section('css')
+<link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
+<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+<link href="{{ asset('css/outletproduct.css') }}" rel="stylesheet">
+@endsection
 @section('content')
 <div class="container">
   <div class="row">
@@ -16,23 +21,25 @@
                   <div class="col-sm-8">
                   <div class='col-sm-4'>
                       <div class="form-group">
-                          <div class='input-group date' id='datetimepicker6'>
+                          <!--<div class='input-group date' id='datetimepicker6'>
                               <input type='text' name="tglaw" class="form-control" required/>
                               <span class="input-group-addon">
                                   <span class="glyphicon glyphicon-calendar"></span>
                               </span>
-                          </div>
+                          </div>-->
+                            {{ Form::text('tglaw', date('Y-m-d'), array('class'=>'form-control','autocomplete'=>'off', 'id'=>'datetimepicker6', 'required'=>'required')) }}
                       </div>
                   </div>
                   <div class="col-sm-2 hidden-xs"><center>s.d</center></div>
                   <div class='col-sm-4'>
                       <div class="form-group">
-                          <div class='input-group date' id='datetimepicker7'>
+                        {{ Form::text('tglak', date('Y-m-d'), array('class'=>'form-control','autocomplete'=>'off', 'id'=>'datetimepicker7', 'required'=>'required')) }}
+                          <!--<div class='input-group date' id='datetimepicker7'>
                               <input type='text' name="tglak"  class="form-control" required/>
                               <span class="input-group-addon">
                                   <span class="glyphicon glyphicon-calendar"></span>
                               </span>
-                          </div>
+                          </div>-->
                       </div>
                   </div>
                 </div>
@@ -109,30 +116,20 @@
 @endsection
 @section('js')
 <script src="{{ asset('js/moment-with-locales.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datetimepicker.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
 <script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>-->
+
 <script type="text/javascript">
     $(function () {
-        $('#datetimepicker6').datepicker({
-            format: 'yyyy-mm-dd',
-            onClose: function() {
-                $("#datetimepicker7").datepicker(
-                        "change",
-                        { minDate: new Date($('#datetimepicker6').val()) }
-                );
-            }
-        });
-        $('#datetimepicker7').datepicker({
-          format: 'yyyy-mm-dd',
-          onClose: function() {
-            $("#datetimepicker6").datepicker(
-                    "change",
-                    { maxDate: new Date($('#datetimepicker7').val()) }
-            );
-        }
-        });
-
+      if($('#datetimepicker6, #datetimepicker7').length){
+          $('#datetimepicker6, #datetimepicker7').datetimepicker({
+              format: "YYYY-MM-DD",
+              locale: "en",
+              maxDate:"{{date('Y-m-d')}}"
+          });        
+      }
     });
 </script>
 
