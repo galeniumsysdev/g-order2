@@ -871,6 +871,7 @@ class OrderController extends Controller
               ->select('sh.notrx','sh.customer_name','sh.distributor_name',
                     'sh.tgl_order','sh.ship_to_addr','sh.status', 'sl.title'
                     ,'so_shipping.qty_shipping'
+                    ,'so_shipping.qty_backorder'
                     ,'so_shipping.deliveryno'
                     ,'so_shipping.waybill'
                     ,'so_shipping.header_id'
