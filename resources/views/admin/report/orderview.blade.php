@@ -55,10 +55,10 @@
       <th rowspan="2">Distributor</th>
       <th rowspan="2">Divisi</th>
       <th rowspan="2">Tgl Order</th>
-      <th colspan="4">Order</th>
+      <th colspan="4" align="center">Order</th>
       <th rowspan="2">Tgl Confirm Distributor</th>
       <th rowspan="2">Tgl Confirm Outlet Terima</th>
-      <th colspan="4">DO (Release PO)</th>
+      <th colspan="4" align="center">DO (Release PO)</th>
       <th rowspan="2">Service Level</th>
       <th rowspan="2">Lead Time</th>
       <th rowspan="2">Status</th>

@@ -1123,7 +1123,7 @@ class ProductController extends Controller
               $disc1 =$operand_reg->operand;
               $amountdisc1=$tmpprice*$disc1/100;
               $tmpprice =$tmpprice-$amountdisc1;
-              echo "tempprice".$tmpprice."<br>";
+              //echo "tempprice".$tmpprice."<br>";
             }else{
               $disc1 = 0;
               $amountdisc1=0;

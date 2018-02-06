@@ -717,8 +717,8 @@ class BackgroundController extends Controller
         {
           //$productid = Product::where('inventory_item_id','=',$ship->inventory_item_id)->select('id')->first();
           $my_so_ship =SoShipping::updateOrCreate(
-            ['delivery_detail_id'=>$ship->delivery_detail_id],
-            ['deliveryno'=>$ship->delivery_no,'source_header_id'=>$ship->source_header_id
+            ['delivery_detail_id'=>$ship->delivery_detail_id,'deliveryno'=>$ship->delivery_no],
+            ['source_header_id'=>$ship->source_header_id
             ,'source_line_id'=>$ship->source_line_id,'product_id'=>$productid
             ,'uom'=>$ship->src_requested_quantity_uom,'qty_request'=>$ship->src_requested_quantity
             ,'uom_primary'=>$ship->primary_uom,'qty_request_primary'=>$ship->requested_quantity

@@ -668,7 +668,7 @@ class OrderController extends Controller
           or ($afterheader->qty_confirm_primary==0 and $afterheader->qty_shipping_primary==$afterheader->qty_request_primary)){
               $header->status = 3;
           }else{ $header->status = 2;}
-          $header->save();
+          $header->save();          
           $dist=Customer::where('id','=',$header->distributor_id)->first();
           $content = 'Pesanan Anda dengan PO nomor: <strong>'.$header->customer_po.'</strong> dan SJ: '.$request->deliveryno.' telah diterima customer pada tanggal: '.Carbon::now().'.<br>';
           $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
@@ -1005,36 +1005,11 @@ class OrderController extends Controller
             $namapropinsi = DB::table('provinces')->where('id','=',$request->propinsi)->first();
             $namapropinsi = $namapropinsi->name;
           }
-          //dd($datalist->get())     ;
+
           $datalist =$datalist->groupBy('notrx', 'customer_name', 'tgl_order', 'distributor_name', 'alamat', 'status_name', 'divisi', 'channel', 'tgl_approve'
-	, 'id', 'line_id', 'product_id', 'title', 'amount', 'qty_request_primary', 'unit_price_primary', 'deliveryno', 'tgl_terima', 'tgl_kirim');
+	                                     , 'id', 'line_id', 'product_id', 'title', 'amount', 'qty_request_primary', 'unit_price_primary', 'deliveryno', 'tgl_terima', 'tgl_kirim');
           $datalist =$datalist->get();
 
-          /*foreach($datalist as $d)
-          {
-            $lines = DB::table('so_lines_v')
-                  ->where('header_id','=',$d->id)
-                  ->get();
-            $d->lines = $lines;
-            foreach($lines as $l)
-            {
-              $shippings = DB::table('so_shipping')
-                ->where('header_id','=',$l->header_id)
-                ->where('line_id','=',$l->line_id)
-                ->select('tgl_kirim','deliveryno','tgl_terima','qty_shipping','qty_accept','keterangan')
-                ->orderBy('tgl_kirim')
-                ->get();
-              $l->shippings=$shippings;
-            }
-          }*/
-
-          //dd($datalist);
-
-        //return view('admin.report.orderview',compact('datalist','request'));
-        /*$template = Excel::loadView('admin.report.orderview', array('datalist'=>$datalist))
-                    ->setTitle('Order'.Carbon::now())->sheet('Order');
-
-        $template =$template->export('xls');*/
         Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request,$namapropinsi,$nmchannel) {
             $excel->sheet('order', function($sheet) use($datalist,$request,$namapropinsi,$nmchannel) {
                 $sheet->loadView('admin.report.orderview',array('datalist'=>$datalist,'request'=>$request,'namapropinsi'=>$namapropinsi,'nmchannel'=>$nmchannel));
