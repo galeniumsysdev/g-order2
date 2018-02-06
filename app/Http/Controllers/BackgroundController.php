@@ -865,9 +865,9 @@ class BackgroundController extends Controller
 
             $product = DB::table('products')->where('inventory_item_id','=',$soline->inventory_item_id)->select('id')->first();
             $newline = SoLine::updateOrCreate(['bonus_list_line_id'=>$list_line_id
-                                                ,'product_id'=>$product->id],
-                        ['header_id'=>$headerid
-                        , 'uom'=> $soline->order_quantity_uom
+                                                ,'product_id'=>$product->id
+						      ,'header_id'=>$headerid],
+                        [ 'uom'=> $soline->order_quantity_uom
                         ,'qty_request'=>$soline->ordered_quantity
                         ,'qty_confirm'=>$soline->ordered_quantity*$soline->conversion
                         ,'list_price'=>$soline->unit_list_price

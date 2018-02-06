@@ -787,7 +787,7 @@ class OrderController extends Controller
                 //$sheet->appendRow(json_decode( json_encode($h), true));
                 $sheet->appendRow(array($h->customer_name,$h->customer_number,$h->transaction_name,$h->customer_po,$h->tgl_order
                                   ,$h->price_name,$h->oracle_ship_to,'','','',$h->currency,$h->oracle_bill_to
-                                  ,'','','ENT','','',$warehouse,'*NB'));
+                                  ,'','','ENT','','',$warehouse,'','','','*NB'));
                 $line = DB::table('so_lines as sl')
                       ->join('products as p','sl.product_id','=','p.id')
                       ->wherenull('bonus_list_line_id')
@@ -797,10 +797,10 @@ class OrderController extends Controller
                       ->get();
                 foreach($line as $l)
                 {
-                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom_primary,'','','','',$h->tgl_order,'','','','','','',$h->notrx,$l->line_id,'ENT','*DN'));
+                  $sheet->appendRow(array($l->itemcode,'',$l->qty_confirm,$l->uom_primary,'','','','',$h->tgl_order,'','','','','','',$h->notrx,$l->line_id,'ENT','*DN','ENT','*UP','*DN'));
 
                 }
-                $sheet->appendRow(array('*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*PB','*IR'));
+                $sheet->appendRow(array('*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*SAVE','*PB','*IR'));
             }
 
 
