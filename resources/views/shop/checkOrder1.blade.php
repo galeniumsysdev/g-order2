@@ -330,7 +330,7 @@
                               <tr>
                                 <td>{{$detail->product->title}}</td>
                                 <td style="text-align:center">{{$detail->uom_primary}}</td>
-                                <td style="text-align:center">{{(float)$detail->qty_shipping+$detail->qty_backorder}}</td>
+                                <td style="text-align:center">{{(float)$detail->qty_shipping}}</td>
                                 <td style="text-align:center">
                                   @if(Auth::user()->customer_id==$header->customer_id and (int)$detail->qty_accept==0)
                                     <input type="number" class="form-control input-sm" value="{{(float)$detail->qty_shipping}}" name="qtyreceive[{{$detail->line_id}}][{{$detail->id}}]">

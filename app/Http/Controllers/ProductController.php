@@ -458,7 +458,7 @@ class ProductController extends Controller
      $product = DB::select($sqlproduct, ['cust'=>$vid]);
      $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$product[0]->id)->select('uom_code')->get();
      $product[0]->uom=$uom;
-     $prg=null;
+
      if(Auth::check()){
        if(Auth::user()->customer->oracle_customer_id){
        $prg =DB::table('qp_pricing_discount as qpd')
