@@ -55,7 +55,7 @@ class BackgroundController extends Controller
                   ['approve','=',1],
                   ['status','>=',0],
                   ['status','<',3],
-                //  ['notrx','=','PO-20171124-XI-00024']
+                  ['notrx','=','PO-20180207-II-00008']
         ])->get();
         if($headers){
           foreach($headers as $h)
@@ -170,8 +170,9 @@ class BackgroundController extends Controller
               elseif($h->status>0 and $h->status<3 )
               {
                 echo "status sudah booked belum kirim untuk notrx:".$h->notrx."<br>";
+                $jmlolddelivery = SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count();
                 $mysoline = SoLine::where([
-                                    ['header_id','=',$h->id],
+                                    ['header_id','=',$h->id],                                    
                                     ['qty_confirm','!=',0]
                                     ])
                           ->get();
@@ -185,9 +186,13 @@ class BackgroundController extends Controller
                   if($ship==1)
                   {
                     $jmlkirim = $sl->shippings()->sum('qty_shipping');
-                    if ($sl->qty_shipping != $jmlkirim)
+                    $sl->qty_accept = $sl->shippings()->sum('qty_accept');
+                    $sl->save();
+                    echo "jmlkirim:".$jmlkirim."<br>";
+                    if ($jumshippingbefore != $jmlkirim)
                     {
                       $sl->qty_shipping = $jmlkirim;
+                      $sl->qty_accept = $sl->shippings()->sum('qty_accept');
                       $sl->save();
                       $berubah=true;
                     }
@@ -209,28 +214,33 @@ class BackgroundController extends Controller
                   //if($soline_notsend->count()>0){
                   if($soline_notsend->qty_confirm_primary<>$soline_notsend->qty_shipping_primary){
                     $h->status=2;
+                  }elseif($soline_notsend->qty_accept_primary==$soline_notsend->qty_shipping_primary){
+                    $h->status=4;
                   }else{
                     $h->status=3;
                   }
                   $h->save();
-                  $content = 'PO Anda nomor '.$h->customer_po.' telah dikirimkan oleh '.$h->distributor->customer_name.'. ';
-                  $content .='Silahkan check PO anda kembali.<br>' ;
-                  $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
-                  $data=[
-                    'title' => 'Pengiriman PO',
-                    'message' => 'PO #'.$h->customer_po.' telah dikirim',
-                    'id' => $h->id,
-                    'href' => route('order.notifnewpo'),
-                    'mail' => [
-                      'greeting'=>'Pengriman Barang PO #'.$h->customer_po.'.',
-                      'content' =>$content,
-                    ]
-                  ];
-                  foreach ($h->outlet->users as $u)
+                  if($jmlolddelivery!=SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count())
                   {
-                    $data['email']=$u->email;
-                    //event(new PusherBroadcaster($data, $u->email));
-                    $u->notify(new PushNotif($data));
+                    $content = 'PO Anda nomor '.$h->customer_po.' telah dikirimkan oleh '.$h->distributor->customer_name.'. ';
+                    $content .='Silahkan check PO anda kembali.<br>' ;
+                    $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                    $data=[
+                      'title' => 'Pengiriman PO',
+                      'message' => 'PO #'.$h->customer_po.' telah dikirim',
+                      'id' => $h->id,
+                      'href' => route('order.notifnewpo'),
+                      'mail' => [
+                        'greeting'=>'Pengriman Barang PO #'.$h->customer_po.'.',
+                        'content' =>$content,
+                      ]
+                    ];
+                    foreach ($h->outlet->users as $u)
+                    {
+                      $data['email']=$u->email;
+                      //event(new PusherBroadcaster($data, $u->email));
+                      $u->notify(new PushNotif($data));
+                    }
                   }
                 }
 
@@ -240,7 +250,7 @@ class BackgroundController extends Controller
         }//if$headers
 
 
-      }// end if(connoracle){
+    }// end if(connoracle){
         else{
           echo "can't connect to oracle";
         }
@@ -674,6 +684,7 @@ class BackgroundController extends Controller
     public function getShippingSO($notrx,$lineid,$lasttime, $productid,$headerid)
     {
       $connoracle = DB::connection('oracle');
+      DB::enableQueryLog();
       if($connoracle){
         //$lasttime = date_create("2017-07-01");
         $oraship = $connoracle->table('wsh_delivery_Details as wdd')
@@ -689,12 +700,12 @@ class BackgroundController extends Controller
                           ['wdd.source_code','=','OE']
                           ,[DB::raw('nvl(ola.attribute1,ola.orig_sys_document_ref)'),'=',$notrx]
                           ,[DB::raw('nvl(ola.attribute2,ola.orig_sys_line_ref)'),'=',strval($lineid)]
-                          ,['wdd.last_update_date','>',$lasttime]
+                          //,['wdd.last_update_date','>=',$lasttime]
                         ])
-                  ->where(function ($query) {
+                  /*->where(function ($query) {
                               $query->whereNotNull('ola.attribute1')
                                     ->orWhere('ola.order_source_id','=',config('constant.order_source_id'));
-                          })
+                          })*/
                   ->select('wnd.name as delivery_no',  'wdd.source_header_id', 'wdd.source_line_id',  'wdd.delivery_detail_id','wdd.inventory_item_id'
                       , 'wdd.src_requested_quantity_uom', 'wdd.src_Requested_quantity'
                       , 'wdd.requested_quantity_uom as primary_uom', 'wdd.requested_quantity'
@@ -711,30 +722,93 @@ class BackgroundController extends Controller
                             and mmt.TRANSACTION_TYPE_ID=52) as transaction_date')
                       ,'wdd.inventory_item_id'
                       ,'wnd.waybill'
+                      ,'wdd.released_status'
                     )
                   ->get();
           //  var_dump($oraship);
+        if($oraship->count()>0){
+          //var_dump($oraship->pluck('delivery_detail_id','delivery_no')->toArray());
+          $deletedelivery=$oraship->pluck('delivery_detail_id','delivery_no')
+                                  ->map(function ($item, $key) {
+                                        return "$item-$key";
+                                  })->toArray();
+        //  echo "new deletedelivery<br>";
+          //var_dump($deletedelivery);
+          $upd_so_ship = SoShipping::where('product_id','=',$productid)
+                        ->where('line_id','=',$lineid)
+                        ->where('header_id','=',$headerid)
+                        ->whereNotIn(DB::raw("concat(delivery_detail_id,'-',deliveryno)"),$deletedelivery)
+                        ->update(['qty_backorder'=>DB::raw('qty_request_primary'),'qty_shipping'=>0,'qty_accept'=>0]);
+                      //  dd(DB::getQueryLog());
         foreach($oraship as $ship)
         {
-          //$productid = Product::where('inventory_item_id','=',$ship->inventory_item_id)->select('id')->first();
-          $my_so_ship =SoShipping::updateOrCreate(
-            ['delivery_detail_id'=>$ship->delivery_detail_id,'deliveryno'=>$ship->delivery_no],
-            ['source_header_id'=>$ship->source_header_id
-            ,'source_line_id'=>$ship->source_line_id,'product_id'=>$productid
-            ,'uom'=>$ship->src_requested_quantity_uom,'qty_request'=>$ship->src_requested_quantity
-            ,'uom_primary'=>$ship->primary_uom,'qty_request_primary'=>$ship->requested_quantity
-            ,'qty_shipping'=>$ship->picked_quantity
-            ,'batchno'=>$ship->lot_number
-            ,'split_source_id'=>$ship->split_from_delivery_detail_id
-            ,'tgl_kirim'=>$ship->transaction_date
-            ,'conversion_qty'=>$ship->convert_qty
-            ,'header_id' =>$headerid
-            ,'line_id'=>$lineid
-            ,'waybill'=>$ship->waybill
-            ]
-          );
+          //echo "delivery detail id-delivery_no".$ship->delivery_detail_id."-".$ship->delivery_no."<br>";
+          $my_so_ship = SoShipping::where('delivery_detail_id','=',$ship->delivery_detail_id)
+            ->where('deliveryno','=',$ship->delivery_no)
+            ->where('product_id','=',$productid)
+            ->where('line_id','=',$lineid)
+            ->where('header_id','=',$headerid)
+            ->first();
+          if($my_so_ship){
+            if($ship->released_status=="C")/*closing*/
+            {
+              $my_so_ship->qty_backorder = intval($my_so_ship->qty_backorder)+$my_so_ship->qty_shipping - $ship->picked_quantity;
+              $my_so_ship->qty_shipping = $ship->picked_quantity;
+              $my_so_ship->batchno = $ship->lot_number;
+              $my_so_ship->qty_accept = $ship->shipped_quantity;
+              $my_so_ship->qty_shipconfirm = $ship->shipped_quantity;
+              $my_so_ship->waybill=$ship->waybill;
+              $my_so_ship->save();
+            }elseif(is_null($my_so_ship->qty_accept)){
+              //$productid = Product::where('inventory_item_id','=',$ship->inventory_item_id)->select('id')->first();
+              $my_so_ship =SoShipping::updateOrCreate(
+                ['delivery_detail_id'=>$ship->delivery_detail_id,'deliveryno'=>$ship->delivery_no],
+                ['source_header_id'=>$ship->source_header_id
+                ,'source_line_id'=>$ship->source_line_id,'product_id'=>$productid
+                ,'uom'=>$ship->src_requested_quantity_uom,'qty_request'=>$ship->src_requested_quantity
+                ,'uom_primary'=>$ship->primary_uom,'qty_request_primary'=>$ship->requested_quantity
+                ,'qty_shipping'=>$ship->picked_quantity
+                ,'batchno'=>$ship->lot_number
+                ,'split_source_id'=>$ship->split_from_delivery_detail_id
+                ,'tgl_kirim'=>$ship->transaction_date
+                ,'conversion_qty'=>$ship->convert_qty
+                ,'header_id' =>$headerid
+                ,'line_id'=>$lineid
+                ,'waybill'=>$ship->waybill
+                ,'qty_shipconfirm'=>$ship->shipped_quantity
+                ]
+              );
+            }else{
+              $my_so_ship->batchno = $ship->lot_number;
+              $my_so_ship->waybill=$ship->waybill;
+              $my_so_ship->save();
+            }
+          } else{
+            $newsoship = new SoShipping;
+            $newsoship->delivery_detail_id = $ship->delivery_detail_id;
+            $newsoship->deliveryno = $ship->delivery_no;
+            $newsoship->source_header_id = $ship->source_header_id;
+            $newsoship->source_line_id = $ship->source_line_id;
+            $newsoship->product_id = $productid;
+            $newsoship->uom = $ship->src_requested_quantity_uom;
+            $newsoship->qty_request = $ship->src_requested_quantity;
+            $newsoship->uom_primary = $ship->primary_uom;
+            $newsoship->qty_request_primary = $ship->requested_quantity;
+            $newsoship->qty_shipping = $ship->picked_quantity;
+            $newsoship->batchno = $ship->lot_number;
+            $newsoship->split_source_id = $ship->split_from_delivery_detail_id;
+            $newsoship->tgl_kirim = $ship->transaction_date;
+            $newsoship->conversion_qty = $ship->convert_qty;
+            $newsoship->header_id = $headerid;
+            $newsoship->line_id = $lineid;
+            $newsoship->waybill=$ship->waybill;
+            $newsoship->save();
+          }
+
         }
+        //var_dump(DB::getQueryLog());
         return 1;
+        }
       }else{
         return 0;
       }

@@ -131,7 +131,7 @@ body {
 
 
 .navbar.navbar-default.navbar-static-top.header{
-  background-color: rgb(0,118,192);
+  background-color: rgb(0,118,192)!important;
   color: rgb(0,0,0);
 }
 
@@ -570,7 +570,6 @@ ul.dropdown-notif li .item-right button{
 
 html,body {
   margin: 0;
-  padding: 0;
   height: 100%!important;
 }
 

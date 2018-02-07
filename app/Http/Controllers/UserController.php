@@ -188,6 +188,7 @@ class UserController extends Controller
 
     public function oracleShow($id)
     {
+      DB::enableQueryLog();
         $groupid=null;
         $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
                     ->where('id','=',$id)
@@ -202,9 +203,22 @@ class UserController extends Controller
                       ->where('r.name','=','Principal')
                       ->select('u.name','u.id','u.customer_id')
                       ->get();
+        $mappings = DB::table('distributor_mappings')
+                    ->leftjoin('regencies as r',function($join){
+              				$join->on('distributor_mappings.data_id','=','r.id');
+              				$join->on('distributor_mappings.data','=',DB::raw("'regencies'"));
+              			})
+                    ->leftjoin('category_outlets as co',function($join){
+              				$join->on('distributor_mappings.data_id','=','co.id');
+              				$join->on('distributor_mappings.data','=',DB::raw("'category_outlets'"));
+              			})
+                    ->where('distributor_id','=',$customer->id)
+                    ->select('data',db::raw("case when data = 'regencies' then r.name else co.name end name"))
+                    ->get();
         return view('admin.oracle.customershow',['customer'=>$customer,'customer_sites'=>$customer_sites
                                                 ,'customer_contacts'=>$customer_contacts,'roles'=>$roles
-                                                ,'principals'=>$principals,'menu'=>'customer-oracle','groups'=>$group,'groupid'=>$groupid]);
+                                                ,'principals'=>$principals,'mappings'=>$mappings
+                                                ,'menu'=>'customer-oracle','groups'=>$group,'groupid'=>$groupid]);
     }
 
     public function oracleUpdate(Request $request,$id)

@@ -42,8 +42,11 @@
                         <li role="presentation"><a href="#address" aria-controls="Address" role="tab" data-toggle="tab">@lang('label.address')</a></li>
                         <li role="presentation"><a href="#contact" aria-controls="Contact" role="tab" data-toggle="tab">@lang('label.contact')</a></li>
                         @if($customer->user)
+                          @if($customer->user->ability(array('Distributor','Distributor Cabang'),''))
+                            <li role="presentation"><a href="#mapping_distributor" aria-controls="mapping_distributor" role="tab" data-toggle="tab">Mapping Distributor</a></li>
+                          @endif
                           @if($customer->user->hasRole('Distributor'))
-                          <li role="presentation"><a href="#distributor_cabang" aria-controls="distributor_cabang" role="tab" data-toggle="tab">Distributor Cabang</a></li>
+                            <li role="presentation"><a href="#distributor_cabang" aria-controls="distributor_cabang" role="tab" data-toggle="tab">Distributor Cabang</a></li>
                           @endif
                         @endif
                     </ul>
@@ -211,6 +214,31 @@
                                 </tr>
                                 @empty
                                   <tr><td colspan="4">No data</td></tr>
+                                @endforelse
+                              </tbody>
+                            </table>
+
+                          </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="mapping_distributor">
+                          <div class="table-responsive">
+                            <table id="contact-table" class="table table-striped">
+                              <thead>
+                                <tr>
+                                  <th width="30%">Tipe</th>
+                                  <th width="30%">Value</th>
+                                  <th width="20%">Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @forelse($mappings as $m)
+                                <tr>
+                                  <td>{{$m->data}}</td>
+                                  <td>{{$m->name}}</td>
+                                  <td></td>
+                                </tr>
+                                @empty
+                                  <tr><td colspan="3">No data</td></tr>
                                 @endforelse
                               </tbody>
                             </table>

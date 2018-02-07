@@ -307,7 +307,7 @@
                           <p class="pull-right">Date: {{$delivery->first()->tgl_kirim}}</p>
                         </h6>
                       </div>
-                      @if(Auth::user()->customer_id==$header->customer_id and $delivery->sum('qty_accept')==0)
+                      @if(Auth::user()->customer_id==$header->customer_id and intval($delivery->sum('qty_accept'))==0)
                       <div id="{{$key}}" class="panel-collapse collapse in">
                       @else
                       <div id="{{$key}}" class="panel-collapse collapse">
@@ -347,7 +347,11 @@
                               @endforeach
                             </tbody>
                           </table>
-                          @if(Auth::user()->customer_id==$header->customer_id and is_null($delivery->first()->tgl_terima))
+
+                          @if(Auth::user()->customer_id==$header->customer_id and
+                            is_null($delivery->where('deliveryno','=',$key)->first()->tgl_terima) and
+                              intval($delivery->sum('qty_accept'))==0
+                            )
                           <div class="form-group">
                             <label for="name" class="col-md-2 control-label">Keterangan</label>
                               <div class="col-md-10">

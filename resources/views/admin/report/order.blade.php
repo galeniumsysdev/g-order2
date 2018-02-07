@@ -45,7 +45,7 @@
                 </div>
                 </div>
                 <div class="form-group">
-                  <label class="control-label col-sm-2" for="distributor"><strong>Distributor :</strong></label>
+                  <label class="control-label col-sm-2" for="distributor"><strong>@lang('shop.supplier') :</strong></label>
                     <div class="col-sm-8">
                       <div class="input-group col-sm-12">
                         <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="distributor" id="distributor" value="" >
@@ -57,7 +57,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                  <label class="control-label col-sm-2" for="outlet"><strong>@lang('label.outlet') :</strong></label>
+                  <label class="control-label col-sm-2" for="outlet"><strong>Customer :</strong></label>
                     <div class="col-sm-8">
                       <div class="input-group col-sm-12">
                         <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="outlet" id="outlet" value="" >

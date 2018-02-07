@@ -108,6 +108,7 @@
         @endif
         @php($lineno=0)
         @php($tmpline=null)
+        @php($tmpline2=null)
         @foreach($data as $detail)
           @if($lineno>0)
             <tr>
@@ -144,10 +145,17 @@
           <td align="right">{{$detail->qty_shipping}}</td>
           <td align="right">{{number_format($detail->qty_shipping*$detail->unit_price_primary,2)}}</td>
           <td>{{$detail->tgl_kirim}}</td>
-          <td>@if(isset($detail->tgl_kirim))
-            {{$detail->service_level}}
-            @endif
-          </td>
+          @if($detail->line_id<>$tmpline2)
+            @php($tmpline2=$detail->line_id)
+            <td rowspan="{{$groupline}}" align="center" style="vertical-align:middle">
+              @if(isset($detail->tgl_kirim))
+              {{($data->where('line_id',$detail->line_id)->sum('qty_shipping')/$detail->qty_request_primary)*100}}%
+              @endif
+            </td>
+          @else
+            <td></td>
+          @endif
+
           <td>@if(isset($detail->tgl_terima))
                 {{$detail->lead_time}}
               @endif

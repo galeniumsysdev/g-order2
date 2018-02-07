@@ -79,7 +79,7 @@
                               <tr>
                                 <td data-th="@lang('shop.Product')">{{$detailkirim->title}}</td>
                                 <td data-th="@lang('shop.uom')">{{$detailkirim->uom_primary}}</td>
-                                <td data-th="@lang('shop.qtyship')">{{$detailkirim->qty_shipping}}</td>
+                                <td data-th="@lang('shop.qtyship')">{{$detailkirim->qty_shipping+$detailkirim->qty_backorder}}</td>
                               </tr>
                               @endforeach
                             </tbody>
@@ -92,7 +92,7 @@
                                   @lang('shop.finish_shipping')
                               </button>
                             </div>
-                        </div>                      
+                        </div>
                         @endif
                       </form>
                     @endforeach
