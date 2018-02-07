@@ -244,6 +244,7 @@ class BackgroundController extends Controller
         else{
           echo "can't connect to oracle";
         }
+	 DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
         DB::commit();
       }catch (\Exception $e) {
         DB::rollback();
