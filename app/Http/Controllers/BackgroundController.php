@@ -172,8 +172,7 @@ class BackgroundController extends Controller
                 echo "status sudah booked belum kirim untuk notrx:".$h->notrx."<br>";
                 $jmlolddelivery = SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count();
                 $mysoline = SoLine::where([
-                                    ['header_id','=',$h->id],
-                                    ['line_id','=',176],
+                                    ['header_id','=',$h->id],                                    
                                     ['qty_confirm','!=',0]
                                     ])
                           ->get();
