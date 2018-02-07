@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
       \App\CustomerSite::observe(new UserActionsObserver);
       \App\CustomerContact::observe(new UserActionsObserver);
       \App\OutletStock::observe(new UserActionsObserver);
+      \App\SoShipping::observe(new UserActionsObserver);
       view()->composer(['layouts.navbar_product','shop.product','swipe'], function($view)
      {
         $product_flexfields = Category::where([//ProductFlexfield::where([
@@ -85,7 +86,7 @@ class AppServiceProvider extends ServiceProvider
             $countbrg = $jmlbrg;
           }
         }
-      // dd(DB::getQueryLog());       
+      // dd(DB::getQueryLog());
         //View::share('product_flexfields', $product_flexfields);
         $view->with(['product_flexfields'=> $product_flexfields,'countbrg'=>$countbrg]);
       });

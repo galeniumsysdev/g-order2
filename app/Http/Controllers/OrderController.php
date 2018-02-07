@@ -55,7 +55,7 @@ class OrderController extends Controller
       $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
       if($header->status==-99 and $header->fill_in==1 and $header->customer_id = Auth::user()->customer_id)
         return view('shop.dplorderupdate',compact('header','lines'));
-      if ($user_dist->hasRole('Principal') )    {
+      if ($user_dist->hasRole('Principal') )    {        
         return view('shop.checkOrder1',compact('header','lines','deliveryno'));
       }else {
         $print=Input::get('print','');
