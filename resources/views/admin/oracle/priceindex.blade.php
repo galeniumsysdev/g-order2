@@ -6,7 +6,7 @@
 	            <h2>Pricelist Oracle</h2>
 	        </div>
 					<div class="pull-right">
-	            <a href="{{route('oracle.synchronize.customer')}}" target="_blank" class="btn btn-success">Synchronize Customer Oracle</a>
+	            <a href="{{route('oracle.synchronize.pricelist')}}" target="_blank" class="btn btn-success">Synchronize Pricelist Oracle</a>
 	        </div>
 	    </div>
 	</div>
@@ -26,6 +26,16 @@
 				<th>End Date</th>
   		</tr>
     </thead>
+		<tfoot>
+        <tr>
+					<th>Price Name</th>
+					<th>Products</th>
+					<th>UOM</th>
+					<th>Price</th>
+					<th>Start Date</th>
+					<th>End Date</th>
+        </tr>
+    </tfoot>
     <tbody>
     	@foreach ($data as $dt)
     	<tr>
@@ -58,7 +68,11 @@
     href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
     <script>
       $(document).ready(function() {
-        $('#table').DataTable({
+				$('#table tfoot th').each( function () {
+		        var title = $(this).text();
+		        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+		    } );
+        var table =  $('#table').DataTable({
           'columnDefs' : [
                             {
                                'searchable'    : true,
@@ -69,6 +83,16 @@
                             }
                         ]
         });
+				table.columns().every( function () {
+		        var that = this;
+		        $( 'input', this.footer() ).on( 'keyup change', function () {
+		            if ( that.search() !== this.value ) {
+		                that
+		                    .search( this.value )
+		                    .draw();
+		            }
+		        } );
+		    } );
     } );
      </script>
 @endsection

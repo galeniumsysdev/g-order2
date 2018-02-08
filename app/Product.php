@@ -60,7 +60,7 @@ class Product extends Model
     public function getRealPrice($id,$uom)
     {
       $harga = DB::select("select getProductPrice ( :cust, :prod, :uom ) AS harga from dual", ['cust'=>$id,'prod'=>$this->id,'uom'=>$uom]);
-      return $harga[0]->harga;
+      if($harga) return $harga[0]->harga;else return 0;
     }
 
     public function getConversion($uom)

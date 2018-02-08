@@ -55,7 +55,7 @@ class BackgroundController extends Controller
                   ['approve','=',1],
                   ['status','>=',0],
                   ['status','<',3],
-                  ['notrx','=','PO-20180207-II-00008']
+                //  ['notrx','=','PO-20180207-II-00008']
         ])->get();
         if($headers){
           foreach($headers as $h)
@@ -172,7 +172,7 @@ class BackgroundController extends Controller
                 echo "status sudah booked belum kirim untuk notrx:".$h->notrx."<br>";
                 $jmlolddelivery = SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count();
                 $mysoline = SoLine::where([
-                                    ['header_id','=',$h->id],                                    
+                                    ['header_id','=',$h->id],
                                     ['qty_confirm','!=',0]
                                     ])
                           ->get();
@@ -345,51 +345,8 @@ class BackgroundController extends Controller
           $this->getMasterItem($lasttime);
           $this->getConversionItem($lasttime);
           //dd();
-          $qp_listheader = $connoracle->table('qp_list_headers')
-                      ->where('last_update_date','>=',$lasttime)
-                      ->select('List_header_id','name', 'description','version_no', 'currency_code'
-                      , 'start_date_active', 'end_date_active', 'automatic_flag', 'list_type_code', 'terms_id', 'rounding_factor'
-                      , 'discount_lines_flag', 'active_flag', 'orig_org_id', 'global_flag')->get();
-          //dd($qp_listheader);
-          foreach($qp_listheader as $ql){
-              echo "list header id:".$ql->list_header_id."<br>";
-            $mylistheader = QpListHeaders::updateOrCreate (
-              ['list_header_id'=>$ql->list_header_id],
-              ['name'=>$ql->name,'description'=>$ql->description,'version_no'=>$ql->version_no,'currency_code'=>$ql->currency_code
-              ,'start_date_active'=>$ql->start_date_active,'end_date_active'=>$ql->end_date_active,'automatic_flag'=>$ql->automatic_flag
-              ,'list_type_code'=>$ql->list_type_code,'discount_lines_flag'=>$ql->discount_lines_flag,'active_flag'=>$ql->active_flag
-              ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
-              ]
-            );
-          }
-          $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
-                          ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
-                          ->where('qll.last_update_date','>=',$lasttime)
-                          ->where('qll.list_line_type_code','=','PLL')
-                          ->where('qll.product_attribute','=','PRICING_ATTRIBUTE1')
-                          ->select('qll.list_line_id', 'qll.list_header_id', 'product_attribute_context','product_attr_value'
-                                  ,'product_uom_code','qll.start_date_active','qll.end_date_active','revision_date','operand'
-                                  ,'qlh.currency_code','qlh.active_flag')
-                          ->get();
-          if($qp_listlines)
-          {
-            foreach($qp_listlines as $ql)
-            {
-              $myqplines = QpListLine::updateOrCreate(
-                ['list_line_id'=>$ql->list_line_id],
-                ['list_header_id'=>$ql->list_header_id
-                ,'product_attribute_context'=>$ql->product_attribute_context
-                , 'product_attr_value'=>$ql->product_attr_value
-                , 'product_uom_code'=>$ql->product_uom_code
-                ,'start_date_active'=>$ql->start_date_active
-                ,'end_date_Active'=>$ql->end_date_active
-                ,'revision_date'=>$ql->revision_date
-                ,'operand'=>$ql->operand
-                ,'currency_code'=>$ql->currency_code
-                ,'enabled_flag'=>$ql->active_flag
-              ]);
-            }
-          }
+          $price = $this->getPricelist($lasttime);
+
           $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
                             ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
                             ->where([['otta.transaction_type_code', '=', 'ORDER'],
@@ -419,6 +376,92 @@ class BackgroundController extends Controller
       }catch (\Exception $e) {
         DB::rollback();
         throw $e;
+      }
+    }
+
+    public function getPricelist($lasttime=null)
+    {
+      if(is_null($lasttime))
+      {
+        $request= DB::table('tbl_request')->where('event','=','synchronize')
+                  ->max('created_at');
+        if($request)
+        {
+          $lasttime = date_create($request);
+          //echo"type:".gettype($lasttime);
+        }else{
+          $lasttime = date_create("2017-07-01");
+        }
+      }
+      echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $qp_listheader = $connoracle->table('qp_list_headers')
+                    ->where('last_update_date','>=',$lasttime)
+                    ->select('List_header_id','name', 'description','version_no', 'currency_code'
+                    , 'start_date_active', 'end_date_active', 'automatic_flag', 'list_type_code', 'terms_id', 'rounding_factor'
+                    , 'discount_lines_flag', 'active_flag', 'orig_org_id', 'global_flag')->get();
+        //dd($qp_listheader);
+        foreach($qp_listheader as $ql){
+            echo "list header id:".$ql->list_header_id.":".$ql->name."<br>";
+          $mylistheader = QpListHeaders::updateOrCreate (
+            ['list_header_id'=>$ql->list_header_id],
+            ['name'=>$ql->name,'description'=>$ql->description,'version_no'=>$ql->version_no,'currency_code'=>$ql->currency_code
+            ,'start_date_active'=>$ql->start_date_active,'end_date_active'=>$ql->end_date_active,'automatic_flag'=>$ql->automatic_flag
+            ,'list_type_code'=>$ql->list_type_code,'discount_lines_flag'=>$ql->discount_lines_flag,'active_flag'=>$ql->active_flag
+            ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
+            ]
+          );
+        }
+
+        $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
+                        ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
+                        ->where('qll.last_update_date','>=',$lasttime)
+                        ->where('qll.list_line_type_code','=','PLL')
+                        ->where('qll.product_attribute','=','PRICING_ATTRIBUTE1')
+                        ->select('qll.list_line_id', 'qll.list_header_id', 'product_attribute_context','product_attr_value'
+                                ,'product_uom_code','qll.start_date_active','qll.end_date_active','revision_date','operand'
+                                ,'qlh.currency_code','qlh.active_flag','qlh.name')
+                        ->get();
+        if($qp_listlines)
+        {
+          echo "<h2>Data Priceline Oracle</h2>";
+          echo "<table><tr><th>Price Name</th><th>Line Id</th><th>Products</th><th>Operand</th><th>Start Date</th><th>End Date</th></tr>";
+
+          foreach($qp_listlines as $ql)
+          {
+            $myqplines = QpListLine::updateOrCreate(
+              ['list_line_id'=>$ql->list_line_id],
+              ['list_header_id'=>$ql->list_header_id
+              ,'product_attribute_context'=>$ql->product_attribute_context
+              , 'product_attr_value'=>$ql->product_attr_value
+              , 'product_uom_code'=>$ql->product_uom_code
+              ,'start_date_active'=>$ql->start_date_active
+              ,'end_date_active'=>$ql->end_date_active
+              ,'revision_date'=>$ql->revision_date
+              ,'operand'=>$ql->operand
+              ,'currency_code'=>$ql->currency_code
+              ,'enabled_flag'=>$ql->active_flag
+            ]);
+            $product = Product::where('inventory_item_id','=',$ql->product_attr_value)->select('title')->first();
+            if(isset($product)) $nmproduct = $product->title;else $nmproduct = $ql->product_attr_value;
+
+            echo "<tr>";
+            echo "<td>".$ql->name."</td>";
+            echo "<td>".$ql->list_line_id."</td>";
+            echo "<td>".$nmproduct."</td>";
+            echo "<td>".$ql->operand."</td>";
+            echo "<td>".$ql->start_date_active."</td>";
+            echo "<td>".$ql->end_date_active."</td>";
+            echo "</tr>";
+          }
+          echo "</table><br>";
+          echo "Delete data<br>";          
+        }
+        return 1;
+      }else{
+        echo "Can't connect to oracle database";
+        return 0;
       }
     }
 
@@ -1043,7 +1086,8 @@ class BackgroundController extends Controller
       }
     }
 
-    public function updateDiskonTable($tglskrg){
+    public function updateDiskonTable($tglskrg)
+    {
       if(is_null($tglskrg))
       {
           $tglskrg =date('Y-m-d');

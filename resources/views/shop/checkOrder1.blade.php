@@ -244,7 +244,7 @@
                               @if($header->tax_amount==0)
                                 @php($taxaccept=0)
                               @else
-                                @php($taxaccept=0.1*$header->amount_accept)
+                                @php($taxaccept=round(0.1*$header->amount_accept))
                               @endif
                               {{number_format($taxaccept,2)}}
                             </strong>

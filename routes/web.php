@@ -193,6 +193,7 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
 
   Route::get('/oracle/getcustomer/{lasttime?}','BackgroundController@getCustomer')->name('oracle.synchronize.customer');
   Route::get('/pricelist/index','PriceController@index')->name('oracle.pricelist.index');
+  Route::get('/oracle/getPrice/{lasttime?}', 'BackgroundController@getPricelist')->name('oracle.synchronize.pricelist');
 });
 
 Route::get('/manageOutlet/{id?}/{notif_id?}', 'CustomerController@show')->name('customer.show');
@@ -296,6 +297,7 @@ Route::get('/oracle/getOrder', 'BackgroundController@getStatusOrderOracle')->nam
 Route::get('/oracle/exportexcel/{id}', 'OrderController@createExcel')->name('order.createExcel');
 Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->name('order.synchronizeOracle');
 Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
+
 
 
 Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
