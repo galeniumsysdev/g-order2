@@ -9,7 +9,7 @@
         <div class="panel-body" style="overflow-x:auto;">
           <div id="frmsearch" class="panel panel-default">
             <br>
-            <form class="form-horizontal" role="form" method="POST" action="{{route('report.orderexcel')}}">
+            <form class="form-horizontal" role="form" method="POST" action="{{ route('report.orderexcel') }}">
                 {{ csrf_field() }}
                 <div class="form-group">
                   <label for="tgl_kirim" class="col-sm-2 control-label">*Period :</label>

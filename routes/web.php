@@ -321,6 +321,8 @@ Route::group(['middleware' => ['role:Principal','prevent-back-history']], functi
   Route::post('/report/order','OrderController@rptOrderForm')->name('report.orderexcel');
   /*end report order*/
 });
+  Route::get('/dpl/report/','DPLController@dplreport')->name('dpl.report');
+  Route::post('/dpl/report/','DPLController@dplreport')->name('dpl.reportdownload');
 
 /**
 * created by WK Productions
