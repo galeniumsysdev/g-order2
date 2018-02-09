@@ -54,8 +54,8 @@ class BackgroundController extends Controller
         $headers = SoHeader::whereNotNull('oracle_customer_id')->where([
                   ['approve','=',1],
                   ['status','>=',0],
-                  ['status','<',3],
-                  ['notrx','=','PO-20180207-II-00008']
+                  ['status','<=',3],
+                  //['notrx','=','PO-20180207-II-00008']
         ])->get();
         if($headers){
           foreach($headers as $h)
