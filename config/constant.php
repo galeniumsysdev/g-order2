@@ -27,5 +27,5 @@ return [
      'def_warehouse_GPL' => 'GFG',
      'price_rbp'=>7054,
      'price_hna'=>7062,
-
+     'customer_yasa'=>'GPL1000001',
 ];

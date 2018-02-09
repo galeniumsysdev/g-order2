@@ -570,11 +570,11 @@ class ProductController extends Controller
         //Session::forget('cart');
         return view('shop.shopping-cart',['products'=>null]);
       }*/
-	DB::enableQueryLog();
       /*$oldCart = Session::get('cart');
       $cart =  new Cart($oldCart);*/
       $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id]);
       $linepo = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
+      if($linepo->count()==0) $linepo=null;
       $jns = PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
 	$jns = $jns->toArray();
       //$jns=$jns->pluck('jns')->toArray();
@@ -584,16 +584,21 @@ class ProductController extends Controller
       return view('shop.shopping-cart2',['products'=>$linepo, 'headerpo'=>$headerpo ,'distributor'=>$dist]);
     }
 
-    public function checkOut($distributorid){
+    public function checkOut(Request $request){
       /*if (!Session::has('cart')){
         //Session::forget('cart');
         return view('shop.shopping-cart',['products'=>null]);
       }
       $oldCart = Session::get('cart');*/
+      $distributorid = $request->dist;
+      if($distributorid=='')
+      {
+        return redirect()->back()->withInput()->withErrors(['dist'=>'Distributor is required']);
+      }
       $headerpo = PoDraftHeader::where('customer_id','=',Auth::user()->customer_id)->first();
       if($headerpo){
         $linepo  = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
-        if(!$linepo){
+        if($linepo->count()==0){
             return view('shop.shopping-cart',['products'=>null]);
         }
         $jns= PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();

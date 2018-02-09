@@ -63,6 +63,15 @@
                         @endif
 											</div>
 										</div>
+                    @if(!$files and $filereject)
+                    <div class="form-group">
+											<label for="period" class="col-xs-4 col-md-2 control-label">Reason Reject</label>
+											<div class="col-xs-8 col-md-8" >
+                        <textarea class="form-control"> {{$filereject->keterangan}}</textarea>
+                        <font color="red">File CMO versi ({{$filereject->version}}), ditolak oleh Yasa Mitra Persana. Harap Upload ulang kembali File CMO!!!</font>
+											</div>
+										</div>
+                    @endif
 
 										<div class="form-group">
 												<div class="col-md-10 col-md-offset-2">

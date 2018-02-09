@@ -39,7 +39,7 @@ return [
     'listtransaksi' => 'Daftar Transaksi',
     'orderdate' => 'Tanggal Order',
     'statustransaction' => 'Status Transaksi',
-    'criteriapo' => 'Trx No/PO No/Distributor',
+    'criteriapo' => 'Trx No/PO No/Supplier',
     'criteriaso' => 'Trx No/PO No/Customer',
     'from'=>'Dari',
     'to'=>'Sampai',
@@ -60,4 +60,5 @@ return [
     'select'=>'Pilih',
     'amountreceive'=>'Nilai Terima/Kirim',
     'AddToCart' => 'Beli',
+    'supplier'=>'Supplier',
 ];

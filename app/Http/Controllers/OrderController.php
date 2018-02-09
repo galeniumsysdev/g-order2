@@ -112,22 +112,23 @@ class OrderController extends Controller
         }
         if(isset($request->tglaw) )
         {
-          $trx =$trx->where('tgl_order','>=',$request->tglaw);
+          $trx =$trx->wheredate('tgl_order','>=',$request->tglaw);
         }
         if(isset($request->tglak) )
         {
-          $trx =$trx->where('tgl_order','<=',$request->tglak);
+          $trx =$trx->wheredate('tgl_order','<=',$request->tglak);
         }
       }
       //var_dump($trx->toSql());
+      $trx = $trx->orderBy('tgl_order','desc');
+      $trx = $trx->orderBy('notrx','desc');
       $trx = $trx->get();
+
       return view('shop.listpo',compact('liststatus','trx','request'));
     }
 
     public function listSO(Request $request)
-    {
-
-      //var_dump($request->tglak."--".$request->tglaw);
+    {    
       $liststatus = DB::table('flexvalue')->where([['master','=','status_po']
                                                 ,['enabled_flag','=','Y']
                                               ])
@@ -181,17 +182,17 @@ class OrderController extends Controller
         }
         if(isset($request->tglaw) )
         {
-          $trx =$trx->where('tgl_order','>=',$request->tglaw);
+          $trx =$trx->wheredate('tgl_order','>=',$request->tglaw);
         }
         if(isset($request->tglak) )
         {
-          $trx =$trx->where('tgl_order','<=',date('Y-m-d H:i:s', strtotime($request->tglak." 23:59:59")));
+          $trx =$trx->wheredate('tgl_order','<=',$request->tglak);
         }
       }
-      //var_dump($trx->toSql());
       $trx = $trx->orderBy('tgl_order','desc');
       $trx = $trx->orderBy('notrx','desc');
       $trx = $trx->get();
+
       return view('shop.listpo',compact('liststatus','trx','request'));
     }
 

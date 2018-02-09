@@ -27,11 +27,19 @@
                             <span class="input-group-btn">
                               <button class="btn btn-secondary" type="button"><i class="fa fa-search" aria-hidden="true"></i></button>
                             </span>-->
-                            <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="distributor" id="distributor" value="" >
+                            @if(isset($id))
+                            <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="distributor" id="distributor" value="{{$downloads->first()->customer_name}}" >
+                            <span class="input-group-addon" id="change-dist">
+                              <i class="fa fa-times" aria-hidden="true"></i>
+                            </span>
+                            <input type="hidden" name="dist_id" id="dist_id" value="{{$distributor}}">
+                            @else
+                            <input type="text" data-provide="typeahead" autocomplete="off"  class="form-control mb-8 mr-sm-8 mb-sm-4" name="distributor" id="distributor" >
                             <span class="input-group-addon" id="change-dist">
                               <i class="fa fa-times" aria-hidden="true"></i>
                             </span>
                             <input type="hidden" name="dist_id" id="dist_id">
+                            @endif
                           </div>
 
                           </div>
@@ -118,35 +126,53 @@
                             </td>
                               <td data-title="Status">
                               @if(Auth::user()->hasRole('Principal') and is_null($down->approve))
-                                {!! Form::open(['method' => 'PUT','route' => ['files.approvecmo', $down->id],'style'=>'display:inline']) !!}
+                                {!! Form::open(['method' => 'PUT','route' => ['files.approvecmo', $down->id],'style'=>'display:inline','class'=>'form-horizontal']) !!}
                                 {!! Form::token() !!}
                                 <input type="hidden" name="bulan" value="{{$bulan}}">
                                 <input type="hidden" name="tahun" value="{{$tahun}}">
                                 <input type="hidden" name="distributor" value="{{$distributor}}">
                                 <input type="hidden" name="status" value="{{$status}}">
-                                <button type="submit" name="approve" value="approve" class="btn btn-success btn-sm"  title="@lang('label.approve')">
+                                <button type="submit" name="approve" value="approve" class="btn btn-success btn-sm"  title="@lang('label.approve')"
+                                onclick="$('#reason-reject').removeAttr('required');">
                                   <i class="fa fa-check" aria-hidden="true"></i>@lang('label.approve')
                                 </button>
 
-                                <button type="submit" name="approve" value="reject" class="btn btn-danger btn-sm"  title="@lang('label.reject')">
+                                <button type="button" name="approve" value="reject" data-toggle="modal" data-backdrop="static" data-target="#reasonReject" class="btn btn-danger btn-sm"  title="@lang('label.reject')">
                                   <i class="fa fa-ban" aria-hidden="true"></i>@lang('label.reject')
                                 </button>
-
-                            </form>
+                                <div class="modal fade" id="reasonReject" tabindex="-1" role="dialog" aria-labelledby="reasonRejectModalLabel">
+                                  <div class="modal-dialog" id="modal-dialog-reason-reject" role="document">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        <h4 class="modal-title" id="authenticationModalLabel">Reason Reject</h4>
+                                      </div>
+                                      <div class="modal-body text-center">
+                                          {{ Form::textarea('reason_reject','',array('class'=>'form-control','id'=>'reason-reject','required'=>'required')) }}
+                                          <br>
+                                          <button type="submit" name="approve" class="btn btn-danger" value="reject">@lang('label.reject')</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                {{ Form::close() }}
                               @elseif(is_null($down->approve))
                                 @lang('label.none')
                               @elseif($down->approve)
                                 @lang('label.approve')
                               @elseif($down->approve==0)
                                 @lang('label.reject')
+                                @if($down->keterangan)
+                                  (Alasan: {{$down->keterangan}})
+                                @endif
                               @endif
                             </td>
-
-
                         </tr>
                     @empty
                         <tr>
-                          <td colspan="0"><strong>@lang('label.notfound')</strong></td>
+                          <td style="text-align:center;padding-left:0" colspan="6"><strong>@lang('label.notfound')</strong></td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -166,7 +192,12 @@
 <script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
 <script>
   $(document).ready(function() {
-    $('#change-dist').hide();
+    if($('#dist_id').val()!="") {
+      $('#change-dist').show();
+      $('#distributor').attr('readonly','readonly');
+    }else{
+      $('#change-dist').hide();
+    }
     /*typeahead distributor*/
     var path2 = "{{ route('customer.searchDistributor') }}";
     $.get(path2,
