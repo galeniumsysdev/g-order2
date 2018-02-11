@@ -11,7 +11,7 @@
         <div class="panel-body">
           <div id="frmsearch" class="panel panel-default">
             <br>
-            <form class="form-horizontal" role="form" method="POST" action="{{ route('dpl.reportdownload') }}">
+            <form class="form-horizontal" role="form" method="POST" action="{{ route('dpl.reportdownload') }}" id="reportNOO">
                 {{ csrf_field() }}
                 <div class="form-group" style="margin-bottom:5px;">
                   <label for="tgl_kirim" class="col-sm-2 control-label" style="margin-left:15px;">Periode :</label>
@@ -19,7 +19,7 @@
 		                <div class='col-sm-4'>
 		                    <div class="form-group">
                           <div class="col-md-12">
-                            {{ Form::text('trx_in_date', date('d M Y'), array('class'=>'form-control','autocomplete'=>'off', 'id'=>'trx-in-date', 'required'=>'required')) }}
+                            {{ Form::text('trx_in_date', date('F Y'), array('class'=>'form-control','autocomplete'=>'off', 'id'=>'trx-in-date', 'required'=>'required')) }}
                           </div>
 		                    </div>
 		                </div>
@@ -102,7 +102,7 @@
     $('#change-outlet').hide();
     $('#change-dist').hide();
     /*typeahead distributor*/
-    var path2 = "{{ route('customer.searchDistributor') }}";
+    var path2 = "{{ route('customer.searchDistributor',['flag'=>'PHARMA']) }}";
     $.get(path2,
         function (data) {
             $('#distributor').typeahead({

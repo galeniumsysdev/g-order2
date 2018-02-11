@@ -1,4 +1,4 @@
-<center><h2>REKAP DPL REGION TENGAH 1</h2></center>
+<center><h2>REKAP DPL</h2></center>
 <table>
   <tr><td colspan="2"><strong>Parameter</strong></td></tr>
   <tr>

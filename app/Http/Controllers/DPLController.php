@@ -691,14 +691,7 @@ class DPLController extends Controller {
     {
       if ($request->method()=='GET')
       {
-        $provinces = DB::table('provinces')->get();
-        $channels = DB::table('subgroup_datacenters')
-                  ->join('group_datacenters','group_datacenters.id','=','subgroup_datacenters.group_id')
-                  ->select('subgroup_datacenters.id',DB::raw("concat(group_datacenters.display_name,'-',subgroup_datacenters.display_name) as name"))
-                  ->orderBy('group_datacenters.id','asc')
-                  ->orderBy('subgroup_datacenters.id','asc')
-                  ->get();
-        return view('admin.dpl.dplreport',compact('provinces','request','channels'));
+        return view('admin.dpl.dplreport');
       }
       else {
       	DB::enablequerylog();
@@ -729,7 +722,10 @@ class DPLController extends Controller {
                     		,'sl.header_id','sl.line_id'
 						    ,DB::raw("ifnull(ship.qty_shipping,ship.qty_accept) as jml_kirim")
                             );
-
+					if(isset($request->trx_in_date))
+          {
+            $datalist=$datalist->whereraw("date_format(dpl_no.created_at,'%M-%Y')='".$request->trx_in_date."'");
+          }
           if(isset($request->dist_id))
           {
             $datalist=$datalist->where('sh.distributor_id','=',$request->dist_id);
@@ -952,7 +948,7 @@ class DPLController extends Controller {
 	{
 		if ($request->method()=='GET')
 		{
-			
+
 		}
 	}
 
