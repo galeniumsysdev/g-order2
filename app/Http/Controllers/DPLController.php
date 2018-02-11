@@ -724,7 +724,7 @@ class DPLController extends Controller {
                             );
 					if(isset($request->trx_in_date))
           {
-            $datalist=$datalist->whereraw("date_format(dpl_no.created_at,'%M-%Y')='".$request->trx_in_date."'");
+            $datalist=$datalist->whereraw("date_format(dpl_no.created_at,'%M %Y')='".$request->trx_in_date."'");
           }
           if(isset($request->dist_id))
           {
@@ -732,7 +732,7 @@ class DPLController extends Controller {
           }
 
 		  $datalist =$datalist->get();
-		  //DD(DB::getquerylog());
+		  //var_dump(DB::getquerylog());
 
 		  //return view ('admin.dpl.reportdownload',compact('datalist','request'));
 
@@ -740,12 +740,12 @@ class DPLController extends Controller {
             $excel->sheet('order', function($sheet) use($datalist,$request) {
                 $sheet->loadView('admin.dpl.reportdownload',array('datalist'=>$datalist,'request'=>$request));
                  $sheet->setWidth(array(
-                                    'I'     =>  50,
-                                    'K'     =>  10,
-                                    'L'     =>  10,
-                                    'Q'     =>  10,
-                                    'S'     =>  10,
-                                    'T'     =>  10,
+                                    'D'     =>  50,
+                                    'F'     =>  50,
+                                    'H'     =>  15,
+                                    'I'     =>  15,
+                                    'M'     =>  50,
+                                    'N'     =>  10,
                                 ));
                 $sheet->getStyle('U')->getAlignment()->setWrapText(true);
             });

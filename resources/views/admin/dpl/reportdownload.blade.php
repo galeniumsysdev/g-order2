@@ -18,7 +18,7 @@
       <th rowspan="2">Sales In Unit</th>
       <th rowspan="2">HNA</th>
       <th rowspan="2">Total</th>
-      <th colspan="3">Kondisi Discount</th>
+      <th colspan="3" align="center">Kondisi Discount</th>
       <th rowspan="2">Distributor</th>
       <th rowspan="2">No. Transaksi</th>
     </tr>
