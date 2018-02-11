@@ -691,7 +691,7 @@ class DPLController extends Controller {
     {
       if ($request->method()=='GET')
       {
-        return view('admin.dpl.dplreport');
+        return view('admin.dpl.dplReport');
       }
       else {
       	DB::enablequerylog();
