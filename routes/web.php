@@ -193,12 +193,13 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
 
   Route::get('/oracle/getcustomer/{lasttime?}','BackgroundController@getCustomer')->name('oracle.synchronize.customer');
   Route::get('/pricelist/index','PriceController@index')->name('oracle.pricelist.index');
+  Route::get('/oracle/getPrice/{lasttime?}', 'BackgroundController@getPricelist')->name('oracle.synchronize.pricelist');
 });
 
 Route::get('/manageOutlet/{id?}/{notif_id?}', 'CustomerController@show')->name('customer.show');
 //Route::get('/searchNoo', 'CustomerController@searchNoo')->name('customer.searchNoo');
 Route::get('customer/searchOutlet', 'CustomerController@searchOutlet')->name('customer.searchoutlet');
-Route::get('customer/searchDistributor', 'CustomerController@searchDistributor')->name('customer.searchDistributor');
+Route::get('customer/searchDistributor/{flag?}', 'CustomerController@searchDistributor')->name('customer.searchDistributor');
 Route::get('customer/searchOutletDistributor', 'CustomerController@searchOutletDistributor')->name('customer.searchOutletDistributor');
 Route::get('customer/searchOracleOutlet', 'CustomerController@searchOracleOutlet')->name('customer.oracle.searchoutlet');
 
@@ -298,6 +299,7 @@ Route::get('/oracle/synchronize', 'BackgroundController@synchronize_oracle')->na
 Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSummary');
 
 
+
 Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
 /*
 Route::get('/test',function () {
@@ -327,6 +329,8 @@ Route::group(['middleware' => ['role:Principal','prevent-back-history']], functi
   Route::post('/report/order','OrderController@rptOrderForm')->name('report.orderexcel');
   /*end report order*/
 });
+  Route::get('/dpl/report/','DPLController@dplreport')->name('dpl.report');
+  Route::post('/dpl/report/','DPLController@dplreport')->name('dpl.reportdownload');
 
 /**
 * created by WK Productions

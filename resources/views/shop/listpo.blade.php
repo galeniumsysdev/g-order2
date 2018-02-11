@@ -64,7 +64,7 @@
                 @endif
             </h6>
             <p class="card-text"> @lang('shop.orderdate'):
-              <strong>{{date('d-M-Y',strtotime($t->tgl_order))}}</strong> | Amount: <strong>{{number_format($t->amount_confirm,2)}}</strong> | Status: <strong class="text-success">
+              <strong>{{date('d-M-Y',strtotime($t->tgl_order))}}</strong> | Amount: <strong>{{number_format($t->amount_confirm+$t->tax_amount,2)}}</strong> | Status: <strong class="text-success">
               @if($t->status==0 and $t->approve==1 and Auth::user()->hasRole('Principal'))
                 Menunggu Booked dari Oracle
               @else

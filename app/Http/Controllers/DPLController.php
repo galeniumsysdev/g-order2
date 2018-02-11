@@ -17,6 +17,7 @@ use App\User;
 use App\Role;
 use Carbon\Carbon;
 use Auth;
+use Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Events\PusherBroadcaster;
@@ -686,6 +687,73 @@ class DPLController extends Controller {
 		return view('admin.dpl.dplList', array('dpl' => $dpl_show));
 	}
 
+	public function dplreport(Request $request)
+    {
+      if ($request->method()=='GET')
+      {
+        return view('admin.dpl.dplreport');
+      }
+      else {
+      	DB::enablequerylog();
+        $datalist = DB::table('dpl_no')
+                    ->join('so_headers as sh','dpl_no.dpl_no','sh.dpl_no')
+                    ->join('customers as c','sh.customer_id','c.id')
+                    ->join('so_lines_v as sl','sh.id','sl.header_id')
+                    ->join('customers as dist','sh.distributor_id','dist.id')
+                    ->join('dpl_suggest_no as dsn','dpl_no.suggest_no','dsn.suggest_no')
+                    ->leftjoin('users as mr','dsn.mr_id','mr.id')
+                    ->leftjoin('so_shipping as ship',function($union){
+                    	$union->on('ship.line_id','sl.line_id');
+                    	$union->on('ship.header_id','sl.header_id');
+                    })
+
+                    ->select('dpl_no.dpl_no','dpl_no.created_at','c.customer_name'
+                    		,'sl.title as nm_product','sl.qty_request_primary'
+                    		,DB::raw("(sl.list_price/sl.conversion_qty) as hna")
+                    		,'sl.amount as total'
+                    		,'sl.bonus_gpl as gpl_bonus'
+                    		,'sl.discount_gpl as gpl_discount'
+                    		,'sl.discount as disc_distributor'
+                    		,'dist.customer_name as distributor'
+                    		,'dsn.mr_id'
+                    		,'dsn.kowil_MR'
+                    		,'mr.name as spv_name'
+                    		,'ship.deliveryno'
+                    		,'sl.header_id','sl.line_id'
+						    ,DB::raw("ifnull(ship.qty_shipping,ship.qty_accept) as jml_kirim")
+                            );
+					if(isset($request->trx_in_date))
+          {
+            $datalist=$datalist->whereraw("date_format(dpl_no.created_at,'%M-%Y')='".$request->trx_in_date."'");
+          }
+          if(isset($request->dist_id))
+          {
+            $datalist=$datalist->where('sh.distributor_id','=',$request->dist_id);
+          }
+
+		  $datalist =$datalist->get();
+		  //DD(DB::getquerylog());
+
+		  //return view ('admin.dpl.reportdownload',compact('datalist','request'));
+
+        Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request) {
+            $excel->sheet('order', function($sheet) use($datalist,$request) {
+                $sheet->loadView('admin.dpl.reportdownload',array('datalist'=>$datalist,'request'=>$request));
+                 $sheet->setWidth(array(
+                                    'I'     =>  50,
+                                    'K'     =>  10,
+                                    'L'     =>  10,
+                                    'Q'     =>  10,
+                                    'S'     =>  10,
+                                    'T'     =>  10,
+                                ));
+                $sheet->getStyle('U')->getAlignment()->setWrapText(true);
+            });
+        })->export('xlsx');
+
+      }
+    }
+
 	public function dplNoInputForm($suggest_no) {
 		$user_role = Auth::user()->roles;
 
@@ -873,6 +941,14 @@ class DPLController extends Controller {
 		}catch (\Exception $e) {
 			DB::rollback();
 			throw $e;
+		}
+	}
+
+	public function dplReportExcel(Request $request)
+	{
+		if ($request->method()=='GET')
+		{
+
 		}
 	}
 

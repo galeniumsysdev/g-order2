@@ -62,195 +62,175 @@ class BackgroundController extends Controller
           {
             echo "notrx:".$h->notrx."<br>";
 
-              /*if($h->status==0 and $h->interface_flag=="N")//jika blm terinterface
-              {
-                echo "insert interface oracle<br>";
-                $this->insert_interface_oracle($h);
-                $h->interface_flag="Y";
-                $h->save();
-              }elseif($h->status>=0 and $h->interface_flag=="Y")//jika blm dibook dan sudah terinterface*/
-              if($h->status==0)
-              {
-                $mysoline = SoLine::where([
-                                    ['header_id','=',$h->id],
-                                    ['qty_confirm','!=',0]
-                                    ])
-                          ->get();
-                //getSo di Oracle
-                foreach($mysoline as $sl)
+                if($h->status==0)
                 {
-                  echo "line:".$sl->line_id."<br>";
-                  /*$oraSO = $connoracle->table('oe_ordeR_headers_all as oha')
-                        ->join('oe_order_lines_all as ola','ola.headeR_id','=','oha.headeR_id')
-                        ->where([
-                          ['nvl(ola.attribute1,oha.orig_sys_document_ref)','=',$notrx],
-                          [' nvl(ola.attribute2,ola.ORIG_SYS_LINE_REF)','=',$lineid],
-                          ['ola.line_Category_code', '=','ORDER'],
-                          ['oha.flow_status_code','=','BOOKED'],
-                        ])->select('ola.header_id','ola.line_id','ola.ordered_quantity','ola.unit_selling_price'
-                          ,'ola.unit_list_price','tax_value'
-                          ,DB::raw("inv_convert.inv_um_convert(ola.inventory_item_id,'".$uom."','".$uomprimary."') as rate_primary'")
-                          ,DB::raw("inv_convert.inv_um_convert(ola.inventory_item_id,'ola.order_quantity_uom','".$uom."') as rate'")
-                          )->get();*/
-                  $oraSO=$this->getSalesOrder($h->notrx,$sl);
-                //  dd($oraSO);
-                  if(!is_null($oraSO))
+                  $mysoline = SoLine::where([
+                                      ['header_id','=',$h->id],
+                                      ['qty_confirm','!=',0]
+                                      ])
+                            ->get();
+                  //getSo di Oracle
+                  foreach($mysoline as $sl)
                   {
-                    echo "qty:".$oraSO->ordered_quantity."<br>";
-                    $sl->qty_confirm =$oraSO->ordered_quantity_primary;
-                    //$sl->qty_confirm_primary=$oraSO->ordered_quantity_primary;
-                    $sl->list_price=$oraSO->unit_list_price/$oraSO->ordered_quantity;
-                    $sl->unit_price=$oraSO->amount/$oraSO->ordered_quantity;
-                    $sl->tax_amount=$oraSO->tax_value;
-                    $sl->amount=$oraSO->amount;
-                    $sl->disc_reg_amount = null;
-                    $sl->disc_reg_percentage = null;
-                    $sl->disc_product_amount = null;
-                    $sl->disc_product_percentage=null;
-                    $orapriceadj = $this->getadjustmentSO(null,$h->notrx,$sl);
-                    foreach($orapriceadj as $adj )
+                    echo "line:".$sl->line_id."<br>";
+                    $oraSO=$this->getSalesOrder($h->notrx,$sl);
+                    if(!is_null($oraSO))
                     {
-                      echo "bucket:".$adj->pricing_group_sequence."<br>";
-                      echo "amount:".$adj->adjusted_amount."<br>";
-                      echo "percentage:".$adj->operand."<br>";
-                      if($adj->pricing_group_sequence==1)
+                      echo "qty:".$oraSO->ordered_quantity."<br>";
+                      $sl->qty_confirm =$oraSO->ordered_quantity_primary;
+                      //$sl->qty_confirm_primary=$oraSO->ordered_quantity_primary;
+                      $sl->list_price=$oraSO->unit_list_price/$oraSO->ordered_quantity;
+                      $sl->unit_price=$oraSO->amount/$oraSO->ordered_quantity;
+                      $sl->tax_amount=$oraSO->tax_value;
+                      $sl->amount=$oraSO->amount;
+                      $sl->disc_reg_amount = null;
+                      $sl->disc_reg_percentage = null;
+                      $sl->disc_product_amount = null;
+                      $sl->disc_product_percentage=null;
+                      $orapriceadj = $this->getadjustmentSO(null,$h->notrx,$sl);
+                      foreach($orapriceadj as $adj )
                       {
-                        $sl->disc_reg_amount = $adj->adjusted_amount*-1;
-                        $sl->disc_reg_percentage = $adj->operand;
-                      }elseif($adj->pricing_group_sequence==2)
-                      {
-                        $sl->disc_product_amount = $adj->adjusted_amount*-1;
-                        $sl->disc_product_percentage = $adj->operand;
-                      }else{
-                        $sl->disc_product_amount += $adj->adjusted_amount*-1;
+                        echo "bucket:".$adj->pricing_group_sequence."<br>";
+                        echo "amount:".$adj->adjusted_amount."<br>";
+                        echo "percentage:".$adj->operand."<br>";
+                        if($adj->pricing_group_sequence==1)
+                        {
+                          $sl->disc_reg_amount = $adj->adjusted_amount*-1;
+                          $sl->disc_reg_percentage = $adj->operand;
+                        }elseif($adj->pricing_group_sequence==2)
+                        {
+                          $sl->disc_product_amount = $adj->adjusted_amount*-1;
+                          $sl->disc_product_percentage = $adj->operand;
+                        }else{
+                          $sl->disc_product_amount += $adj->adjusted_amount*-1;
+                        }
                       }
+                      $sl->save();
                     }
-                    $sl->save();
-                  }
-                }//endforeach soline
-                //
-                //$oraheader = $connoracle->selectone('select min(booked_date)');
-                $newline =$this->getadjustmentHeaderSO($h->notrx,$h->id);
-                $oraheader = $connoracle->selectone("select min(booked_date) as booked_date from oe_order_headers_all oha
-                              where  oha.flow_status_code ='BOOKED' and exists (select 1 from oe_ordeR_lines_all ola
-                                          where ola.headeR_id =oha.headeR_id
-                                            and nvl(ola.attribute1,oha.orig_sys_document_ref)='".$h->notrx."')");
-                //dd($oraheader);
-                if(!is_null($oraheader->booked_date))
-                {
-                  $h->status=1;
-                  $h->interface_flag="Y";
-                  $h->status_oracle ="BOOKED";
-                  $h->save();
-                  //notification to user
-                   $customer = Customer::where('id','=',$h->customer_id)->first();
-                   $content ='PO Anda nomor '.$h->notrx.' telah dikonfirmasi oleh '.$h->distributor->customer_name.'. Silahkan check PO anda kembali.<br>';
-                   $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
-                   $data = [
-           					'title' => 'Konfirmasi PO',
-           					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-           					'id' => $h->id,
-           					'href' => route('order.notifnewpo'),
-           					'mail' => [
-           						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
-                      'content' =>$content,
-           					]
-           				];
-                   foreach($customer->users as $u)
-                   {
-                    $data['email']= $u->email;
-                     //$u->notify(new BookOrderOracle($h,$customer->customer_name));
-                    // event(new PusherBroadcaster($data, $u->email));
-                     $u->notify(new PushNotif($data));
-                   }
-                }
-
-
-              }//endif status==0 (belum di booked)
-              elseif($h->status>0 and $h->status<3 )
-              {
-                echo "status sudah booked belum kirim untuk notrx:".$h->notrx."<br>";
-                $jmlolddelivery = SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count();
-                $mysoline = SoLine::where([
-                                    ['header_id','=',$h->id],                                    
-                                    ['qty_confirm','!=',0]
-                                    ])
-                          ->get();
-                $berubah=false;
-                //getSo di Oracle
-                foreach($mysoline as $sl)
-                {
-                  $jumshippingbefore = $sl->qty_shipping;
-                  echo "line:".$sl->line_id."<br>";
-                  $ship = $this->getShippingSO($h->notrx,$sl->line_id,$lasttime,$sl->product_id,$h->id);
-                  if($ship==1)
+                  }//endforeach soline
+                  //
+                  //$oraheader = $connoracle->selectone('select min(booked_date)');
+                  $newline =$this->getadjustmentHeaderSO($h->notrx,$h->id);
+                  $oraheader = $connoracle->selectone("select min(booked_date) as booked_date from oe_order_headers_all oha
+                                where  oha.flow_status_code ='BOOKED' and exists (select 1 from oe_ordeR_lines_all ola
+                                            where ola.headeR_id =oha.headeR_id
+                                              and nvl(ola.attribute1,oha.orig_sys_document_ref)='".$h->notrx."')");
+                  //dd($oraheader);
+                  if(!is_null($oraheader->booked_date))
                   {
-                    $jmlkirim = $sl->shippings()->sum('qty_shipping');
-                    $sl->qty_accept = $sl->shippings()->sum('qty_accept');
-                    $sl->save();
-                    echo "jmlkirim:".$jmlkirim."<br>";
-                    if ($jumshippingbefore != $jmlkirim)
+                    $h->status=1;
+                    $h->interface_flag="Y";
+                    $h->status_oracle ="BOOKED";
+                    $h->save();
+                    //notification to user
+                     $customer = Customer::where('id','=',$h->customer_id)->first();
+                     $content ='PO Anda nomor '.$h->notrx.' telah dikonfirmasi oleh '.$h->distributor->customer_name.'. Silahkan check PO anda kembali.<br>';
+                     $content .= 'Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                     $data = [
+             					'title' => 'Konfirmasi PO',
+             					'message' => 'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
+             					'id' => $h->id,
+             					'href' => route('order.notifnewpo'),
+             					'mail' => [
+             						'greeting'=>'Konfirmasi PO '.$h->customer_po.' oleh distributor.',
+                        'content' =>$content,
+             					]
+             				];
+                     foreach($customer->users as $u)
+                     {
+                      $data['email']= $u->email;
+                       //$u->notify(new BookOrderOracle($h,$customer->customer_name));
+                      // event(new PusherBroadcaster($data, $u->email));
+                       $u->notify(new PushNotif($data));
+                     }
+                  }
+
+
+                }//endif status==0 (belum di booked)
+                elseif($h->status>0 and $h->status<3 )
+                {
+                  echo "status sudah booked belum kirim untuk notrx:".$h->notrx."<br>";
+                  $jmlolddelivery = SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count();
+                  $mysoline = SoLine::where([
+                                      ['header_id','=',$h->id],
+                                      ['qty_confirm','!=',0]
+                                      ])
+                            ->get();
+                  $berubah=false;
+                  //getSo di Oracle
+                  foreach($mysoline as $sl)
+                  {
+                    $jumshippingbefore = $sl->qty_shipping;
+                    echo "line:".$sl->line_id."<br>";
+                    $ship = $this->getShippingSO($h->notrx,$sl->line_id,$lasttime,$sl->product_id,$h->id);
+                    if($ship==1)
                     {
-                      $sl->qty_shipping = $jmlkirim;
+                      $jmlkirim = $sl->shippings()->sum('qty_shipping');
                       $sl->qty_accept = $sl->shippings()->sum('qty_accept');
                       $sl->save();
-                      $berubah=true;
+                      echo "jmlkirim:".$jmlkirim."<br>";
+                      if ($jumshippingbefore != $jmlkirim)
+                      {
+                        $sl->qty_shipping = $jmlkirim;
+                        $sl->qty_accept = $sl->shippings()->sum('qty_accept');
+                        $sl->save();
+                        $berubah=true;
+                      }
+
+                      //dd($jmlkirim);
                     }
-
-                    //dd($jmlkirim);
                   }
-                }
 
-                //notif to customer jika berubah
-                if($berubah)
-                {
-                  $soline_notsend = DB::table('so_lines_sum_v')
-                                    ->where('header_id','=',$h->id)
-                                    //->where('qty_confirm_primary','<>','qty_shipping_primary')
-                                    ;
-                  $soline_notsend = $soline_notsend->first();
-                  //dd($soline_notsend);
-                  //echo "count: ".$soline_notsend->qty_confirm_primary()."<br>";
-                  //if($soline_notsend->count()>0){
-                  if($soline_notsend->qty_confirm_primary<>$soline_notsend->qty_shipping_primary){
-                    $h->status=2;
-                  }elseif($soline_notsend->qty_accept_primary==$soline_notsend->qty_shipping_primary){
-                    $h->status=4;
-                  }else{
-                    $h->status=3;
-                  }
-                  $h->save();
-                  if($jmlolddelivery!=SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count())
+                  //notif to customer jika berubah
+                  if($berubah)
                   {
-                    $content = 'PO Anda nomor '.$h->customer_po.' telah dikirimkan oleh '.$h->distributor->customer_name.'. ';
-                    $content .='Silahkan check PO anda kembali.<br>' ;
-                    $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
-                    $data=[
-                      'title' => 'Pengiriman PO',
-                      'message' => 'PO #'.$h->customer_po.' telah dikirim',
-                      'id' => $h->id,
-                      'href' => route('order.notifnewpo'),
-                      'mail' => [
-                        'greeting'=>'Pengriman Barang PO #'.$h->customer_po.'.',
-                        'content' =>$content,
-                      ]
-                    ];
-                    foreach ($h->outlet->users as $u)
+                    $soline_notsend = DB::table('so_lines_sum_v')
+                                      ->where('header_id','=',$h->id)
+                                      //->where('qty_confirm_primary','<>','qty_shipping_primary')
+                                      ;
+                    $soline_notsend = $soline_notsend->first();
+                    //dd($soline_notsend);
+                    //echo "count: ".$soline_notsend->qty_confirm_primary()."<br>";
+                    //if($soline_notsend->count()>0){
+                    if($soline_notsend->qty_confirm_primary<>$soline_notsend->qty_shipping_primary){
+                      $h->status=2;
+                    }elseif($soline_notsend->qty_accept_primary==$soline_notsend->qty_shipping_primary){
+                      $h->status=4;
+                    }else{
+                      $h->status=3;
+                    }
+                    $h->save();
+                    if($jmlolddelivery!=SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count())
                     {
-                      $data['email']=$u->email;
-                      //event(new PusherBroadcaster($data, $u->email));
-                      $u->notify(new PushNotif($data));
+                      $content = 'PO Anda nomor '.$h->customer_po.' telah dikirimkan oleh '.$h->distributor->customer_name.'. ';
+                      $content .='Silahkan check PO anda kembali.<br>' ;
+                      $content .='Terimakasih telah menggunakan aplikasi '.config('app.name', 'g-Order');
+                      $data=[
+                        'title' => 'Pengiriman PO',
+                        'message' => 'PO #'.$h->customer_po.' telah dikirim',
+                        'id' => $h->id,
+                        'href' => route('order.notifnewpo'),
+                        'mail' => [
+                          'greeting'=>'Pengriman Barang PO #'.$h->customer_po.'.',
+                          'content' =>$content,
+                        ]
+                      ];
+                      foreach ($h->outlet->users as $u)
+                      {
+                        $data['email']=$u->email;
+                        //event(new PusherBroadcaster($data, $u->email));
+                        $u->notify(new PushNotif($data));
+                      }
                     }
                   }
-                }
 
-              }
+                }
             }//foreach
 
-        }//if$headers
+          }//if$headers
 
 
-    }// end if(connoracle){
+        }// end if(connoracle){
         else{
           echo "can't connect to oracle";
         }
@@ -345,51 +325,9 @@ class BackgroundController extends Controller
           $this->getMasterItem($lasttime);
           $this->getConversionItem($lasttime);
           //dd();
-          $qp_listheader = $connoracle->table('qp_list_headers')
-                      ->where('last_update_date','>=',$lasttime)
-                      ->select('List_header_id','name', 'description','version_no', 'currency_code'
-                      , 'start_date_active', 'end_date_active', 'automatic_flag', 'list_type_code', 'terms_id', 'rounding_factor'
-                      , 'discount_lines_flag', 'active_flag', 'orig_org_id', 'global_flag')->get();
-          //dd($qp_listheader);
-          foreach($qp_listheader as $ql){
-              echo "list header id:".$ql->list_header_id."<br>";
-            $mylistheader = QpListHeaders::updateOrCreate (
-              ['list_header_id'=>$ql->list_header_id],
-              ['name'=>$ql->name,'description'=>$ql->description,'version_no'=>$ql->version_no,'currency_code'=>$ql->currency_code
-              ,'start_date_active'=>$ql->start_date_active,'end_date_active'=>$ql->end_date_active,'automatic_flag'=>$ql->automatic_flag
-              ,'list_type_code'=>$ql->list_type_code,'discount_lines_flag'=>$ql->discount_lines_flag,'active_flag'=>$ql->active_flag
-              ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
-              ]
-            );
-          }
-          $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
-                          ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
-                          ->where('qll.last_update_date','>=',$lasttime)
-                          ->where('qll.list_line_type_code','=','PLL')
-                          ->where('qll.product_attribute','=','PRICING_ATTRIBUTE1')
-                          ->select('qll.list_line_id', 'qll.list_header_id', 'product_attribute_context','product_attr_value'
-                                  ,'product_uom_code','qll.start_date_active','qll.end_date_active','revision_date','operand'
-                                  ,'qlh.currency_code','qlh.active_flag')
-                          ->get();
-          if($qp_listlines)
-          {
-            foreach($qp_listlines as $ql)
-            {
-              $myqplines = QpListLine::updateOrCreate(
-                ['list_line_id'=>$ql->list_line_id],
-                ['list_header_id'=>$ql->list_header_id
-                ,'product_attribute_context'=>$ql->product_attribute_context
-                , 'product_attr_value'=>$ql->product_attr_value
-                , 'product_uom_code'=>$ql->product_uom_code
-                ,'start_date_active'=>$ql->start_date_active
-                ,'end_date_Active'=>$ql->end_date_active
-                ,'revision_date'=>$ql->revision_date
-                ,'operand'=>$ql->operand
-                ,'currency_code'=>$ql->currency_code
-                ,'enabled_flag'=>$ql->active_flag
-              ]);
-            }
-          }
+          $price = $this->getPricelist($lasttime);
+          $this->getMasterDiscount($lasttime);
+
           $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
                             ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
                             ->where([['otta.transaction_type_code', '=', 'ORDER'],
@@ -419,6 +357,102 @@ class BackgroundController extends Controller
       }catch (\Exception $e) {
         DB::rollback();
         throw $e;
+      }
+    }
+
+    public function getPricelist($lasttime=null)
+    {
+      if(is_null($lasttime))
+      {
+        $request= DB::table('tbl_request')->where('event','=','synchronize')
+                  ->max('created_at');
+        if($request)
+        {
+          $lasttime = date_create($request);
+          //echo"type:".gettype($lasttime);
+        }else{
+          $lasttime = date_create("2017-07-01");
+        }
+      }
+      echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        $qp_listheader = $connoracle->table('qp_list_headers')
+                    ->where('last_update_date','>=',$lasttime)
+                    ->select('List_header_id','name', 'description','version_no', 'currency_code'
+                    , 'start_date_active', 'end_date_active', 'automatic_flag', 'list_type_code', 'terms_id', 'rounding_factor'
+                    , 'discount_lines_flag', 'active_flag', 'orig_org_id', 'global_flag')->get();
+        //dd($qp_listheader);
+        foreach($qp_listheader as $ql){
+            echo "list header id:".$ql->list_header_id.":".$ql->name."<br>";
+          $mylistheader = QpListHeaders::updateOrCreate (
+            ['list_header_id'=>$ql->list_header_id],
+            ['name'=>$ql->name,'description'=>$ql->description,'version_no'=>$ql->version_no,'currency_code'=>$ql->currency_code
+            ,'start_date_active'=>$ql->start_date_active,'end_date_active'=>$ql->end_date_active,'automatic_flag'=>$ql->automatic_flag
+            ,'list_type_code'=>$ql->list_type_code,'discount_lines_flag'=>$ql->discount_lines_flag,'active_flag'=>$ql->active_flag
+            ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
+            ]
+          );
+        }
+
+        $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
+                        ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
+                        ->where('qll.last_update_date','>=',$lasttime)
+                        ->where('qll.list_line_type_code','=','PLL')
+                        ->where('qll.product_attribute','=','PRICING_ATTRIBUTE1')
+                        ->select('qll.list_line_id', 'qll.list_header_id', 'product_attribute_context','product_attr_value'
+                                ,'product_uom_code','qll.start_date_active','qll.end_date_active','revision_date','operand'
+                                ,'qlh.currency_code','qlh.active_flag','qlh.name')
+                        ->get();
+        if($qp_listlines)
+        {
+          echo "<h2>Data Priceline Oracle</h2>";
+          echo "<table><tr><th>Price Name</th><th>Line Id</th><th>Products</th><th>Operand</th><th>Start Date</th><th>End Date</th></tr>";
+
+          foreach($qp_listlines as $ql)
+          {
+            $myqplines = QpListLine::updateOrCreate(
+              ['list_line_id'=>$ql->list_line_id],
+              ['list_header_id'=>$ql->list_header_id
+              ,'product_attribute_context'=>$ql->product_attribute_context
+              , 'product_attr_value'=>$ql->product_attr_value
+              , 'product_uom_code'=>$ql->product_uom_code
+              ,'start_date_active'=>$ql->start_date_active
+              ,'end_date_active'=>$ql->end_date_active
+              ,'revision_date'=>$ql->revision_date
+              ,'operand'=>$ql->operand
+              ,'currency_code'=>$ql->currency_code
+              ,'enabled_flag'=>$ql->active_flag
+            ]);
+            $product = Product::where('inventory_item_id','=',$ql->product_attr_value)->select('title')->first();
+            if(isset($product)) $nmproduct = $product->title;else $nmproduct = $ql->product_attr_value;
+
+            echo "<tr>";
+            echo "<td>".$ql->name."</td>";
+            echo "<td>".$ql->list_line_id."</td>";
+            echo "<td>".$nmproduct."</td>";
+            echo "<td>".$ql->operand."</td>";
+            echo "<td>".$ql->start_date_active."</td>";
+            echo "<td>".$ql->end_date_active."</td>";
+            echo "</tr>";
+          }
+          echo "</table><br>";
+          echo "Delete data<br>";
+          $dellistline = QpListLine::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
+                        ->delete();
+          $oralistlines =$connoracle->table('qp_list_lines_v as qll')
+                        ->where('list_line_type_code','=','PLL')
+                        ->select('list_line_id')->get();
+          if($oralistlines){
+            $dellistline = QpListLine::whereNotIn('list_line_id',$oralistlines->pluck('list_line_id')->toArray())
+                        ->delete();
+          }
+
+        }
+        return 1;
+      }else{
+        echo "Can't connect to oracle database";
+        return 0;
       }
     }
 
@@ -1043,7 +1077,8 @@ class BackgroundController extends Controller
       }
     }
 
-    public function updateDiskonTable($tglskrg){
+    public function updateDiskonTable($tglskrg)
+    {
       if(is_null($tglskrg))
       {
           $tglskrg =date('Y-m-d');
@@ -1194,7 +1229,7 @@ class BackgroundController extends Controller
       }
     }
 
-    public function getMasterDiscount($tglskrg){
+    public function getMasterDiscount($tglskrg=){
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $modifiers = $connoracle->table('qp_list_headers as qlh')

@@ -680,7 +680,7 @@ class CustomerController extends Controller
       return response()->json($data);
     }
 
-    public function searchDistributor(Request $request)
+    public function searchDistributor(Request $request,$flag=null)
     {
       $data = DB::table('customers as c')
               ->join('users as u','c.id','=','u.customer_id')
@@ -690,8 +690,9 @@ class CustomerController extends Controller
               ->where([
                 ['u.register_flag','=',true],
                 ['c.status','=','A'],
-              ])->whereIn('r.name',['Distributor','Distributor Cabang','Principal'])
-              ->orderBy('c.customer_name','asc')
+              ])->whereIn('r.name',['Distributor','Distributor Cabang','Principal']);
+      if($flag=="PHARMA")  $data=$data->where('c.pharma_flag','=','1')      ;
+      $data=$data->orderBy('c.customer_name','asc')
               ->get();
       return response()->json($data);
     }

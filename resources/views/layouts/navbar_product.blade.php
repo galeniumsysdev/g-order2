@@ -150,9 +150,10 @@
                               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">DPL&nbsp; <i class="fa fa-caret-down" aria-hidden="true"></i></a>
                               <ul class="dropdown-menu">
                                 @if(Auth::user()->hasRole('SPV'))
-                                <li><a href="{{route('dpl.generateForm')}}">@lang('label.generatesuggestno')</a></li>
+                                <li><a href="{{ route('dpl.generateForm') }}">@lang('label.generatesuggestno')</a></li>
+                                <li><a href="{{ route('dpl.list') }}">@lang('label.listsuggestno')</a></li>
                                 @endif
-                                <li><a href="{{route('dpl.list')}}">@lang('label.listsuggestno')</a></li>
+                                <li><a href="{{ route('dpl.report') }}">Report DPL</a></li>
                               </ul>
                             </li>
                             <!-- End of addition -->
