@@ -151,8 +151,8 @@
                               <ul class="dropdown-menu">
                                 @if(Auth::user()->hasRole('SPV'))
                                 <li><a href="{{ route('dpl.generateForm') }}">@lang('label.generatesuggestno')</a></li>
-                                <li><a href="{{ route('dpl.list') }}">@lang('label.listsuggestno')</a></li>
                                 @endif
+                                <li><a href="{{ route('dpl.list') }}">@lang('label.listsuggestno')</a></li>
                                 <li><a href="{{ route('dpl.report') }}">Report DPL</a></li>
                               </ul>
                             </li>
