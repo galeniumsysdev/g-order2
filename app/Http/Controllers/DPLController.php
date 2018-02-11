@@ -702,6 +702,10 @@ class DPLController extends Controller {
                     ->join('customers as dist','sh.distributor_id','dist.id')
                     ->join('dpl_suggest_no as dsn','dpl_no.suggest_no','dsn.suggest_no')
                     ->leftjoin('users as mr','dsn.mr_id','mr.id')
+										->leftjoin('flexvalue as fl',function($join){
+											$join->on('fl.id','=','sh.status');
+											$join->on('fl.master','=',DB::raw("'status_po'"));
+											})
                     ->leftjoin('so_shipping as ship',function($union){
                     	$union->on('ship.line_id','sl.line_id');
                     	$union->on('ship.header_id','sl.header_id');
@@ -720,8 +724,9 @@ class DPLController extends Controller {
                     		,'mr.name as spv_name'
                     		,'ship.deliveryno'
                     		,'sl.header_id','sl.line_id'
+												, 'fl.name as status'
 						    ,DB::raw("ifnull(ship.qty_shipping,ship.qty_accept) as jml_kirim")
-                            );
+                            )->where('dsn.active','=',1);
 					if(isset($request->trx_in_date))
           {
             $datalist=$datalist->whereraw("date_format(dpl_no.created_at,'%M %Y')='".$request->trx_in_date."'");
@@ -730,26 +735,42 @@ class DPLController extends Controller {
           {
             $datalist=$datalist->where('sh.distributor_id','=',$request->dist_id);
           }
+					if(Auth::user()->hasRole('SPV') or Auth::user()->hasRole('ASM'))
+					{
+							$datalist =$datalist->where(function($query){
+									$query->where('dsn.mr_id','=',Auth::user()->id)
+												->orWhereExists(function($query2){
+														$query2->select(DB::raw(1))
+						                      ->from('org_structure as os')
+						                      ->whereRaw("os.user_id = dsn.mr_id and directsup_user_id = '".Auth::user()->id."'");
+												});
+							});
+					}
+			  $datalist =$datalist->orderBy('dpl_no','asc')->orderBy('title','asc')->orderBy('deliveryno','asc')->get();
+				$datalist =$datalist->groupBy('dpl_no');
+				//dd($datalist);
+			  //DD(DB::getquerylog());
 
-		  $datalist =$datalist->get();
-		  //var_dump(DB::getquerylog());
-
-		  //return view ('admin.dpl.reportdownload',compact('datalist','request'));
-
-        Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request) {
-            $excel->sheet('order', function($sheet) use($datalist,$request) {
-                $sheet->loadView('admin.dpl.reportdownload',array('datalist'=>$datalist,'request'=>$request));
-                 $sheet->setWidth(array(
-                                    'D'     =>  50,
-                                    'F'     =>  50,
-                                    'H'     =>  15,
-                                    'I'     =>  15,
-                                    'M'     =>  50,
-                                    'N'     =>  10,
-                                ));
-                $sheet->getStyle('U')->getAlignment()->setWrapText(true);
-            });
-        })->export('xlsx');
+			  //return view ('admin.dpl.reportdownload',compact('datalist','request'));
+				//if($datalist->count()>0){
+	        Excel::create('Order-'.Carbon::now(), function($excel) use($datalist,$request) {
+	            $excel->sheet('order', function($sheet) use($datalist,$request) {
+	                $sheet->loadView('admin.dpl.reportdownload',array('datalist'=>$datalist,'request'=>$request));
+	                 $sheet->setWidth(array(
+																		'D'     =>  50,
+																		'F'     =>  50,
+																		'H'     =>  15,
+																		'I'     =>  15,
+																		'M'     =>  50,
+																		'N'     =>  10,
+																		'O'			=>  30,
+	                                ));
+	                $sheet->getStyle('D','F','M')->getAlignment()->setWrapText(true);
+									$sheet->row(6, function($row) { $row->setBackground('#CCCCCC'); });
+									$sheet->row(7, function($row) { $row->setBackground('#CCCCCC'); });
+	            });
+	        })->export('xlsx');
+				//}
 
       }
     }
