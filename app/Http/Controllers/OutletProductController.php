@@ -457,7 +457,7 @@ class OutletProductController extends Controller
     }
     if($jmlstock < $request->qty_out)
     {
-      return redirect('/outlet/transaction#trx-out')->withInput()->with('err','Transaksi gagal disimpan karena stock tidak mencukupi. Sisa Stock ='.$jmlstock);
+      return redirect()->back()->withInput()->with('err','Transaksi Keluar gagal disimpan karena stock tidak mencukupi. Sisa Stock ='.$jmlstock);
     }
   	$outstock = new OutletStock;
     $outstock->trx_date = date('Y-m-d',strtotime($request->trx_out_date));
@@ -466,10 +466,10 @@ class OutletProductController extends Controller
   	$outstock->event = 'trx_out';
   	$outstock->qty = '-'.$request->qty_out;
     $outstock->batch = $request->batch_no_out;
-    if(isset($request->batch_no_out)) $outstock->Exp_date = $datastock->first()->exp_date;    
+    if(isset($request->batch_no_out)) $outstock->Exp_date = $datastock->first()->exp_date;
   	$outstock->save();
 
-  	return redirect('/outlet/transaction#trx-out')->with('msg','Transaction Out has been done successfully.');
+  	return redirect('/outlet/transaction')->with('msg','Transaction Out has been done successfully.');
   }
 
   public function downloadProductStock()
