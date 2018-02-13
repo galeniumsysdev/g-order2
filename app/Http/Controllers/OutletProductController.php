@@ -130,7 +130,7 @@ class OutletProductController extends Controller
 	    $data = Excel::load($file, function($reader){})->get();
 	    foreach ($data as $key => $value) {
         if(isset($value->id)){
-    	    	$last_stock = OutletStock::where('product_id',$value->id)->where('outlet_id',Auth::user()->id);
+    	    	$last_stock = OutletStock::where('product_id',$value->id)->where('outlet_id',Auth::user()->customer_id);
             if(is_null($value->batch))$last_stock =$last_stock->whereNull('batch')->sum('qty');
             else $last_stock =$last_stock->where('batch',$value->batch)->sum('qty');
     	    	$data[$key]['last_stock'] = $last_stock;
@@ -145,8 +145,9 @@ class OutletProductController extends Controller
   {
   	$data = json_decode($request->data);
   	$stock = array();
-  	$idx = 0;
+  	$idx = 0;    
   	foreach ($data as $key => $prod) {
+      if($prod->last_stock!=0){
       $stock[$idx]['trx_date'] = date('Y-m-d', time());
   		$stock[$idx]['product_id'] = $prod->id;
       $stock[$idx]['outlet_id'] = Auth::user()->customer_id;
@@ -157,7 +158,7 @@ class OutletProductController extends Controller
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
   		$idx++;
-
+      }
       $stock[$idx]['trx_date'] = date('Y-m-d', time());
   		$stock[$idx]['product_id'] = $prod->id;
       $stock[$idx]['outlet_id'] = Auth::user()->customer_id;
@@ -486,7 +487,11 @@ class OutletProductController extends Controller
     $data['area'] = $request->area;
 
     $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price','batch')
-                        ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
+                        ->join('outlet_products',function($join)
+                          {
+                            $join->on('outlet_products.id','=','outlet_stock.product_id');
+                            $join->on('outlet_products.outlet_id','=','outlet_stock.outlet_id');
+                          })
                         ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                         ->join('customer_sites as cs','cs.customer_id','outlet.id')
                         ->where('outlet_products.enabled_flag','Y')
@@ -631,7 +636,11 @@ class OutletProductController extends Controller
               });
 
               $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price','batch')
-                                  ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
+                                  ->join('outlet_products',function($join)
+                                    {
+                                      $join->on('outlet_products.id','=','outlet_stock.product_id');
+                                      $join->on('outlet_products.outlet_id','=','outlet_stock.outlet_id');
+                                    })
                                   ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
