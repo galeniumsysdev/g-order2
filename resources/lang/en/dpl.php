@@ -29,4 +29,5 @@ return [
     'alreadyExist' => 'already exist',
     'confirmation' => 'Confirmation',
     'save'=>'Save',
+    'attachSP'=>'Attachment SP',
 ];

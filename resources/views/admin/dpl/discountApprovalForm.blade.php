@@ -124,6 +124,24 @@
                   </div>
                 </div>
                 @endif
+                @if(isset($dpl->file_sp))
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">@lang('dpl.attachSP')</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">
+                          <a href="{{url('/download/'.$dpl->file_sp)}}" title="Download SP">File SP<i class="glyphicon glyphicon-download-alt"></i></a>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                @endif
                 <div class="form-group">
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>

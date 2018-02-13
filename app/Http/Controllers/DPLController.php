@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Events\PusherBroadcaster;
 use App\Notifications\PushNotif;
+use Illuminate\Support\Facades\Validator;
 
 class DPLController extends Controller {
 	public function __construct() {
@@ -121,7 +122,7 @@ class DPLController extends Controller {
 			'suggest_no',
 			'notrx',
 			'fill_in',
-			'approver.name as approver_name')
+			'approver.name as approver_name','file_sp')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
@@ -167,7 +168,8 @@ class DPLController extends Controller {
 			'fill_in',
 			'approver.name as approver_name',
 			'dpl_no.dpl_no',
-			'dpl_suggest_no.active')
+			'dpl_suggest_no.active',
+			'dpl_suggest_no.file_sp')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
@@ -216,112 +218,133 @@ class DPLController extends Controller {
 	}
 
 	public function discountSet(Request $request) {
-		$discount = $request->discount;
-		$discount_gpl = $request->discount_gpl;
-		$bonus_gpl = $request->bonus_gpl;
-		$suggest_no = $request->suggest_no;
-		$distributor = $request->distributor;
-		$notrx = $request->notrx;
-		$note = $request->note;
-
-		$so_header = SoHeader::where('notrx', $notrx)
-			->update(array('distributor_id' => $distributor));
-
-		$input_note = dplSuggestNo::where('suggest_no',$suggest_no)
-									->update(array('note'=>$note));
-
-		foreach ($discount as $key => $disc) {
-			$so_line = SoLine::where('line_id', $key)
-				->update(array('discount' => ($disc ? $disc : 0),
-					'discount_gpl' => ($discount_gpl[$key] ? $discount_gpl[$key] : 0),
-					'bonus_gpl' => ($bonus_gpl[$key] ? $bonus_gpl[$key] : 0),
-				));
-		}
-		$user_role = Auth::user()->roles;
-
-		$dplno = DPLNo::where('suggest_no','=',$suggest_no)->first();
-		if(($user_role[0]->name == 'FSM' or $user_role[0]->name=='HSM') and ($dplno) )
-		{
-				$this->sendDPLNo($suggest_no,$dplno->dpl_no);
-				$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-					->update(array('fill_in' => 0,
-									'approved_by' => Auth::user()->id,
-									'next_approver' => null
-									));
-				return redirect('/dpl/list');
-		}
-
-		$next_approver = OrgStructure::select('org_structure.*','email')
-									->join('users','users.id','org_structure.directsup_user_id')
-									->where('user_id', Auth::user()->id)
-									->first();
-
-		$this->dplLog($suggest_no, 'Input Discount');
-
-		//notif
-		$dpl_outlet = DPLSuggestNo::select('dpl_suggest_no.*','customer_name')
-							->join('customers','customers.id','dpl_suggest_no.outlet_id')
-							->where('suggest_no', $suggest_no)
-							->first();
-
-
-		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
-		if(!empty($notified_users)){
-			if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
-			$data = [
-				'title' => 'Permohonan Approval',
-				'message' => 'Permohonan Approval #'.$suggest_no,
-				'id' => $suggest_no,
-				'href' => route('dpl.readNotifDiscount'),
-				'mail' => [
-					'greeting'=>'Yang terhormat FSM/HSM Galenium',
-					'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.<br>Untuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.<br>Terima kasih.'
-				]
-			];
-		}else{
-				$data = [
-					'title' => 'Pengisian No. DPL',
-					'message' => 'Pengisian No. DPL untuk #'.$suggest_no,
-					'id' => $suggest_no,
-					'href' => route('dpl.readNotifDPLInput'),
-					'mail' => [
-						'greeting'=>'',
-						'content'=> ''
-					]
-				];
+		DB::beginTransaction();
+		try{
+			$discount = $request->discount;
+			$discount_gpl = $request->discount_gpl;
+			$bonus_gpl = $request->bonus_gpl;
+			$suggest_no = $request->suggest_no;
+			$distributor = $request->distributor;
+			$notrx = $request->notrx;
+			$note = $request->note;
+			$path=null;
+			if($request->hasFile('filesp'))
+			{
+				$validator = Validator::make($request->all(), [
+						'filesp' => 'required|mimes:jpeg,jpg,png,pdf|max:10240',
+				])->validate();
+				$path = $request->file('filesp')->storeAs(
+						'PO', "SP_".$notrx.".".$request->file('filesp')->getClientOriginalExtension()
+				);
+				$update_file = DPLSuggestNo::where('suggest_no',$suggest_no)
+											->update(array('file_sp'=>$path,'last_update_by'=>Auth::user()->id));
 			}
-			foreach ($notified_users as $key => $email) {
-				if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
-					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-						->update(array('fill_in' => 0,
-										'approved_by' => Auth::user()->id,
-										'next_approver' => $key
-										));
-				}else{
+			$so_header = SoHeader::where('notrx', $notrx)->update(array('distributor_id' => $distributor));
+
+			$input_note = DPLSuggestNo::where('suggest_no',$suggest_no)
+										->update(array('note'=>$note,'last_update_by'=>Auth::user()->id));
+
+			foreach ($discount as $key => $disc) {
+				$so_line = SoLine::where('line_id', $key)
+					->update(array('discount' => ($disc ? $disc : 0),
+						'discount_gpl' => ($discount_gpl[$key] ? $discount_gpl[$key] : 0),
+						'bonus_gpl' => ($bonus_gpl[$key] ? $bonus_gpl[$key] : 0),
+					));
+			}
+			$user_role = Auth::user()->roles;
+
+			$dplno = DPLNo::where('suggest_no','=',$suggest_no)->first();
+			if(($user_role[0]->name == 'FSM' or $user_role[0]->name=='HSM') and ($dplno) )
+			{
+					$this->sendDPLNo($suggest_no,$dplno->dpl_no);
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 						->update(array('fill_in' => 0,
 										'approved_by' => Auth::user()->id,
 										'next_approver' => null
+										,'last_update_by'=>Auth::user()->id
 										));
+					DB::commit();
+					return redirect('/dpl/list');
+			}
+
+			$next_approver = OrgStructure::select('org_structure.*','email')
+										->join('users','users.id','org_structure.directsup_user_id')
+										->where('user_id', Auth::user()->id)
+										->first();
+
+			$this->dplLog($suggest_no, 'Input Discount');
+
+			//notif
+			$dpl_outlet = DPLSuggestNo::select('dpl_suggest_no.*','customer_name')
+								->join('customers','customers.id','dpl_suggest_no.outlet_id')
+								->where('suggest_no', $suggest_no)
+								->first();
+
+
+			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
+			if(!empty($notified_users)){
+				if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+				$data = [
+					'title' => 'Permohonan Approval',
+					'message' => 'Permohonan Approval #'.$suggest_no,
+					'id' => $suggest_no,
+					'href' => route('dpl.readNotifDiscount'),
+					'mail' => [
+						'greeting'=>'Yang terhormat FSM/HSM Galenium',
+						'content'=> 'Bersama ini kami informasikan No. Pengajuan DPL #'.$suggest_no.' membutuhkan approval Anda.<br>Untuk melihat detail pengajuan DPL, silakan login ke dalam sistem aplikasi gOrder (http://g-order.id) menggunakan email dan password Anda.<br>Terima kasih.'
+					]
+				];
+			}else{
+					$data = [
+						'title' => 'Pengisian No. DPL',
+						'message' => 'Pengisian No. DPL untuk #'.$suggest_no,
+						'id' => $suggest_no,
+						'href' => route('dpl.readNotifDPLInput'),
+						'mail' => [
+							'greeting'=>'',
+							'content'=> ''
+						]
+					];
 				}
-				foreach ($email as $key2 => $mail) {
-					$data['email'] = $mail;
-					if($key == 'FSM_HSM'){
-						if($user_role[0]->name == 'Admin DPL')
-							$data['sendmail'] = 1;
+				foreach ($notified_users as $key => $email) {
+					if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+							->update(array('fill_in' => 0,
+											'approved_by' => Auth::user()->id,
+											'next_approver' => $key
+											,'last_update_by'=>Auth::user()->id
+											));
+					}else{
+						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
+							->update(array('fill_in' => 0,
+											'approved_by' => Auth::user()->id,
+											'next_approver' => null
+											,'last_update_by'=>Auth::user()->id
+											));
+					}
+					foreach ($email as $key2 => $mail) {
+						$data['email'] = $mail;
+						if($key == 'FSM_HSM'){
+							if($user_role[0]->name == 'Admin DPL')
+								$data['sendmail'] = 1;
+							else
+								$data['sendmail'] = 0;
+						}
 						else
 							$data['sendmail'] = 0;
+						$apps_user = User::where('email',$mail)->first();
+						if(!empty($apps_user))
+							$apps_user->notify(new PushNotif($data));
 					}
-					else
-						$data['sendmail'] = 0;
-					$apps_user = User::where('email',$mail)->first();
-					if(!empty($apps_user))
-						$apps_user->notify(new PushNotif($data));
+					break;
 				}
 			}
+			DB::commit();
+			return redirect('/dpl/list');
+		}catch (\Exception $e) {
+			DB::rollback();
+			throw $e;
 		}
-
-		return redirect('/dpl/list');
 	}
 
 	public function discountApprovalForm($suggest_no) {
@@ -340,7 +363,8 @@ class DPLController extends Controller {
 			'approved_by',
 			'next_approver',
 			'approver.name as approver_name',
-			'dpl_suggest_no.active')
+			'dpl_suggest_no.active',
+			'dpl_suggest_no.file_sp')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
 			->leftjoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
@@ -428,11 +452,11 @@ class DPLController extends Controller {
 				foreach ($notified_users as $key => $email) {
 					if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
 						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-							->update(array('approved_by' => Auth::user()->id, 'next_approver' => $key));
+							->update(array('approved_by' => Auth::user()->id, 'next_approver' => $key,'last_update_by'=>Auth::user()->id));
 					}
 					else{
 						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-							->update(array('approved_by' => Auth::user()->id, 'next_approver' => ''));
+							->update(array('approved_by' => Auth::user()->id, 'next_approver' => '','last_update_by'=>Auth::user()->id));
 						$dplno = DPLNo::where('suggest_no','=',$suggest_no)->first();
 						if(($user_role[0]->name == 'FSM' or $user_role[0]->name=='HSM') and ($dplno) )
 						{
@@ -476,7 +500,7 @@ class DPLController extends Controller {
 				];
 				foreach ($notified_users as $key => $email) {
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
-						->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1));
+						->update(array('approved_by' => '', 'next_approver' => '', 'fill_in' => 1,'last_update_by'=>Auth::user()->id));
 					foreach ($email as $key2 => $mail) {
 						$data['email'] = $mail;
 						if($key == 'FSM_HSM')
@@ -501,20 +525,20 @@ class DPLController extends Controller {
 							->where('suggest_no', $suggest_no)
 							->first();
 		if($curr_pos == '')
-			$positions['SPV'][] = $dpl['email'];
+			{$positions['SPV'][] = $dpl['email']; return $positions;}
 
 		$next_approver = OrgStructure::select('org_structure.*','email')
 									->join('users','users.id','org_structure.directsup_user_id')
 									->where('user_id', $dpl['mr_id'])
 									->first();
 		if($curr_pos == '' || ($curr_pos != 'ASM' && $curr_pos != 'Admin DPL' && $curr_pos != 'FSM' && $curr_pos != 'HSM'))
-			$positions['ASM'][] = $next_approver['email'];
+			{$positions['ASM'][] = $next_approver['email']; return $positions;}
 
 		$next_approver = User::whereHas('roles', function($q){
 								    $q->where('name', 'Admin DPL');
 								})->first();
 		if($curr_pos == '' || ($curr_pos != 'Admin DPL' && $curr_pos != 'FSM' && $curr_pos != 'HSM'))
-			$positions['Admin DPL'][] = $next_approver['email'];
+			{$positions['Admin DPL'][] = $next_approver['email'];return $positions;}
 
 		$next_approver = User::whereHas('roles', function($q){
 								    $q->where('name', 'FSM');
@@ -612,12 +636,14 @@ class DPLController extends Controller {
 	public function dplList() {
 		$dpl = DPLSuggestNo::select('mr.id as dpl_mr_id',
 			'mr.name as dpl_mr_name',
+			'org_structure.user_code as dpl_mr_code',
 			'outlet.id as dpl_outlet_id',
 			'outlet.customer_name as dpl_outlet_name',
 			'distributor.id as dpl_distributor_id',
 			'distributor.customer_name as dpl_distributor_name',
 			'approver.id as dpl_appr_id',
 			'approver.name as dpl_appr_name',
+			'roles.name as dpl_appr_role',
 			'dpl_suggest_no.suggest_no',
 			'dpl_no.dpl_no',
 			'dpl_suggest_no.notrx',
@@ -627,8 +653,11 @@ class DPLController extends Controller {
 			,'so_headers.status'
 			,'fv.name as status_po')
 			->join('users as mr', 'mr.id', 'dpl_suggest_no.mr_id')
+			->leftjoin('org_structure','org_structure.user_id','mr.id')
 			->join('customers as outlet', 'outlet.id', 'dpl_suggest_no.outlet_id')
 			->leftJoin('users as approver', 'approver.id', 'dpl_suggest_no.approved_by')
+			->leftjoin('role_user as ru','ru.user_id','approver.id')
+			->leftjoin('roles','ru.role_id','roles.id')
 			->leftJoin('dpl_no', 'dpl_no.suggest_no', 'dpl_suggest_no.suggest_no')
 			->leftJoin('so_headers', 'so_headers.notrx', 'dpl_suggest_no.notrx')
 			->leftjoin('flexvalue as fv',function($join){
@@ -688,7 +717,7 @@ class DPLController extends Controller {
 	}
 
 	public function dplreport(Request $request)
-    {
+    {			
       if ($request->method()=='GET')
       {
         return view('admin.dpl.dplReport');
@@ -735,6 +764,16 @@ class DPLController extends Controller {
           {
             $datalist=$datalist->where('sh.distributor_id','=',$request->dist_id);
           }
+					if(isset($request->spv_id))
+          {
+						//$spv = User::where('id','=',$request->spv_id)->select('id','name')->first();
+            $datalist=$datalist->whereRaw("privilegeSuggestNo(dpl_no.suggest_no,'".$request->spv_id."')=1");
+          }
+					if(isset($request->asm_id))
+          {
+						//$asm = User::where('id','=',$request->asm_id)->select('id','name')->first();
+            $datalist=$datalist->whereRaw("privilegeSuggestNo(dpl_no.suggest_no,'".$request->asm_id."')=1");
+          }
 					if(Auth::user()->hasRole('SPV') or Auth::user()->hasRole('ASM'))
 					{
 							$datalist =$datalist->where(function($query){
@@ -766,8 +805,8 @@ class DPLController extends Controller {
 																		'O'			=>  30,
 	                                ));
 	                $sheet->getStyle('D','F','M')->getAlignment()->setWrapText(true);
-									$sheet->row(6, function($row) { $row->setBackground('#CCCCCC'); });
-									$sheet->row(7, function($row) { $row->setBackground('#CCCCCC'); });
+									/*$sheet->row(6, function($row) { $row->setBackground('#CCCCCC'); });
+									$sheet->row(7, function($row) { $row->setBackground('#CCCCCC'); });*/
 	            });
 	        })->export('xlsx');
 				//}
@@ -965,14 +1004,6 @@ class DPLController extends Controller {
 		}
 	}
 
-	public function dplReportExcel(Request $request)
-	{
-		if ($request->method()=='GET')
-		{
-
-		}
-	}
-
 	public function dplDiscountSplit(Request $request){
 		$distributor = $request->distributor;
 		$notrx = $request->notrx;
@@ -1078,8 +1109,15 @@ class DPLController extends Controller {
  								->update(['header_id'=>$newheader->id]);
 						 }
 						 //dd("suggestno:" $suggest_no);
+						 $oldsuggestno = dplSuggestNo::where('suggest_no','=',$request->suggest_no)
+						 										->first();
+							if($oldsuggestno){
 							$updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
-			                                    ->update(array('notrx'=>$newnotrx));
+			                                    ->update(array('notrx'=>$newnotrx,'mr_id'=>$oldsuggestno->mr_id,'kowil_mr'=>$oldsuggestno->kowil_mr,'file_sp'=>$oldsuggestno->file_sp));
+							}else{
+								$updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
+				                                    ->update(array('notrx'=>$newnotrx));
+							}
 							$this->dplLog($suggest_no, 'Split From Trx #' . $notrx);
 			          $notified_users = $this->getArrayNotifiedEmail($suggest_no,'');
 							//	dd($notified_users);
@@ -1115,5 +1153,47 @@ class DPLController extends Controller {
 			}
 
 		}
+
 	}
+
+
+	public function getListSpvAsm(Request $request,$posisi){
+		$id = $request->input('id');
+			$data = DB::table('users as u')
+					->join('role_user as ru','u.id','=','ru.user_id')
+					->join('roles as r','ru.role_id','=','r.id')
+					->where('r.name','=',$posisi)
+					->where('u.register_flag','=',1);
+			if	(Auth::check())
+			{
+				if($posisi=="SPV" and !is_null($id)){
+					$data=$data->WhereExists(function($query2) use($id){
+							$query2->select(DB::raw(1))
+										->from('org_structure as os')
+										->whereRaw("os.user_id = u.id and directsup_user_id = '".$id."'");
+									});
+				}elseif(Auth::user()->hasRole($posisi) and ($posisi=="ASM" or $posisi="SPV"))
+				{
+					$data=$data->where('u.id','=',Auth::user()->id);
+				}elseif($posisi=="SPV" and Auth::user()->hasRole('ASM'))
+				{
+					$data=$data->WhereExists(function($query2){
+							$query2->select(DB::raw(1))
+										->from('org_structure as os')
+										->whereRaw("os.user_id = u.id and directsup_user_id = '".Auth::user()->id."'");
+									});
+				}elseif($posisi=="ASM" and Auth::user()->hasRole('SPV'))
+				{
+					$data=$data->WhereExists(function($query2){
+							$query2->select(DB::raw(1))
+										->from('org_structure as os')
+										->whereRaw("os.directsup_user_id = u.id and os.user_id = '".Auth::user()->id."'");
+									});
+
+				}
+			}
+			$data=$data->select('u.id','u.name')->orderBy('u.name','asc')->get();
+			return response()->json($data);;
+	}
+
 }

@@ -18,7 +18,7 @@
     </div>
   @endif
 
-  {!! Form::open(['url' => route('dpl.discountSplit'), 'id'=>'generate-sugg-no-form']) !!}
+  {!! Form::open(['url' => route('dpl.discountSplit'), 'id'=>'generate-sugg-no-form','files'=>true]) !!}
   {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
   {{ Form::hidden('notrx',$dpl['notrx'],array('id'=>'suggest_no')) }}
   <div class="container">
@@ -137,6 +137,27 @@
                 </div>
                 @endif
                 <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">@lang('dpl.attachSP')</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">
+                          @if(Auth::user()->hasRole('SPV') or Auth::user()->hasRole('ASM'))
+                            {{Form::file('filesp',array('class'=>'form-control'))}}
+                          @endif
+                          @if(isset($dpl->file_sp))
+                            <a href="{{url('/download/'.$dpl->file_sp)}}" title="Download SP">File SP<i class="glyphicon glyphicon-download-alt"></i></a>
+                          @endif
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>
                       <tr>
@@ -214,7 +235,7 @@
                       </div>
                       <div class="col-md-10">
                         <input type="submit" class="btn btn-primary" value="@lang('dpl.save')" name="Save">
-                        @if(Auth::user()->hasRole('SPV') and $lines->count()>1)
+                        @if($lines->count()>1)
                         <input type="submit" class="btn btn-warning" value="Split" name="Split">
                         @endif
                         <a href="{{ route('dpl.list') }}" class="btn btn-default">@lang('dpl.back')</a>
