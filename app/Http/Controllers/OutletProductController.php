@@ -457,7 +457,7 @@ class OutletProductController extends Controller
     }
     if($jmlstock < $request->qty_out)
     {
-      return redirect('/outlet/transaction#trx-out')->withInput()->with('err','Transaksi gagal disimpan karena stock tidak mencukupi. Sisa Stock ='.$jmlstock);
+      return redirect()->back()->withInput()->with('err','Transaksi keluar gagal disimpan karena stock tidak mencukupi. Sisa Stock ='.$jmlstock);
     }
   	$outstock = new OutletStock;
     $outstock->trx_date = date('Y-m-d',strtotime($request->trx_out_date));
@@ -469,7 +469,7 @@ class OutletProductController extends Controller
     if(isset($request->batch_no_out)) $outstock->Exp_date = $datastock->first()->exp_date;    
   	$outstock->save();
 
-  	return redirect('/outlet/transaction#trx-out')->with('msg','Transaction Out has been done successfully.');
+  	return redirect()->route('outlet.trx')->with('msg','Transaction Out has been done successfully.');
   }
 
   public function downloadProductStock()
@@ -486,7 +486,11 @@ class OutletProductController extends Controller
     $data['area'] = $request->area;
 
     $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price','batch')
-                        ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
+                        ->join('outlet_products',function($join)
+                          {
+                            $join->on('outlet_products.id','=','outlet_stock.product_id');
+                            $join->on('outlet_products.outlet_id','=','outlet_stock.outlet_id');
+                          })
                         ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                         ->join('customer_sites as cs','cs.customer_id','outlet.id')
                         ->where('outlet_products.enabled_flag','Y')
@@ -631,8 +635,11 @@ class OutletProductController extends Controller
               });
 
               $stockOutlet = OutletStock::select('title','outlet_stock.product_id','outlet.customer_name as outlet_name','outlet_products.price as price','batch')
-                                  ->join('outlet_products','outlet_products.id','outlet_stock.product_id')
-                                  ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
+                                  ->join('outlet_products',function($join)
+                                    {
+                                      $join->on('outlet_products.id','=','outlet_stock.product_id');
+                                      $join->on('outlet_products.outlet_id','=','outlet_stock.outlet_id');
+                                    })                                  ->join('customers as outlet','outlet.id','outlet_stock.outlet_id')
                                   ->join('customer_sites as cs','cs.customer_id','outlet.id')
                                   ->where('outlet_products.enabled_flag','Y')
                                   ->where('outlet_stock.outlet_id',Auth::user()->customer_id)
