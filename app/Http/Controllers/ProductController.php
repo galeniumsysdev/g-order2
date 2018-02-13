@@ -1232,7 +1232,7 @@ class ProductController extends Controller
           $suggest_no=$request->coupon_no;
 
           $updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
-                                    ->update(array('notrx'=>$notrx));
+                                    ->update(array('notrx'=>$notrx,'file_sp'=>$path,'last_update_by'=>Auth::user()->id));
 
           $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($suggest_no,'');
     			if(!empty($notified_users)){

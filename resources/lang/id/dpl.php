@@ -29,4 +29,5 @@ return [
     'alreadyExist' => 'sudah digunakan',
     'confirmation' => 'Konfirmasi',
     'save'=>'Simpan',
+    'attachSP'=>'Lampiran SP',
 ];

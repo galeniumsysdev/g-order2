@@ -54,13 +54,13 @@
                     <td>
                       {{ $list->notrx }}
                     </td>
-                    <td>{{ $list->dpl_appr_name }}</td>
+                    <td>{{ $list->dpl_appr_role }}</td>
                     <td class="text-center">
                       @if($list->dpl_no)
                         {{ 'G'.$list->dpl_no }}
                       @endif
                     </td>
-                    <td>{{ $list->dpl_mr_name }}</td>
+                    <td>{{ isset($list->dpl_mr_code)?$list->dpl_mr_code:$list->dpl_mr_name }}</td>
                     <td width="200">{{ $list->dpl_outlet_name }}</td>
                     <td width="200">{{ $list->dpl_distributor_name }}</td>
                     <td>

@@ -304,7 +304,7 @@ class CustomerController extends Controller
         {
           if($request->pharma_flag=="1")//adddistributor pharma
           {
-            dd($customer->hasDistributor()->pluck('distributor_id')->toArray()) ;
+            //dd($customer->hasDistributor()->pluck('distributor_id')->toArray()) ;
             $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
             if($distributor)
             {

@@ -13,7 +13,7 @@
     </div>
   @endif
 
-  {!! Form::open(['url' => route('dpl.discountSet'), 'id'=>'generate-sugg-no-form']) !!}
+  {!! Form::open(['url' => route('dpl.discountSet'), 'id'=>'generate-sugg-no-form','files'=>true]) !!}
   {{ Form::hidden('suggest_no',$dpl['suggest_no'],array('id'=>'suggest_no')) }}
   {{ Form::hidden('notrx',$dpl['notrx'],array('id'=>'notrx')) }}
   {{ Form::hidden('customer_po',$header->customer_po,array('id'=>'customer-po')) }}
@@ -136,13 +136,34 @@
                       </div>
                       <div class="col-md-10">
                         <span class="default-value">
-                            {{ 'G'.$header->dpl_no }}                          
+                            {{ 'G'.$header->dpl_no }}
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
                 @endif
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-2">
+                        <div class="form-label">
+                          <label for="distributor">@lang('dpl.attachSP')</label>
+                        </div>
+                      </div>
+                      <div class="col-md-10">
+                        <span class="default-value">
+                          @if(Auth::user()->hasRole('SPV') or Auth::user()->hasRole('ASM'))
+                            {{Form::file('filesp',array('class'=>'form-control'))}}
+                          @endif
+                          @if(isset($dpl->file_sp))
+                            <a href="{{url('/download/'.$dpl->file_sp)}}" title="Download SP">File SP<i class="glyphicon glyphicon-download-alt"></i></a>
+                          @endif
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div class="form-group">
                   <table id="cart" class="table table-hover table-condensed">
                       <thead>
