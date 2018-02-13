@@ -331,6 +331,7 @@ Route::group(['middleware' => ['role:Principal','prevent-back-history']], functi
 });
   Route::get('/dpl/report/','DPLController@dplreport')->name('dpl.report');
   Route::post('/dpl/report/','DPLController@dplreport')->name('dpl.reportdownload');
+  Route::get('/dpl/ajax/asmspv/{posisi}','DPLController@getListSpvAsm')->name('dpl.ajax.asmspv');
 
 /**
 * created by WK Productions

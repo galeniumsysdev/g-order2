@@ -5,6 +5,24 @@
     <td>Period</td>
     <td>{{ $request->trx_in_date }}</td>
   </tr>
+  @if(!is_null($request->asm_id))
+    <tr>
+      <td>ASM</td>
+      <td>{{ $request->asm }}</td>
+    </tr>
+  @endif
+  @if(!is_null($request->spv_id))
+    <tr>
+      <td>SPV</td>
+      <td>{{ $request->spv }}</td>
+    </tr>
+  @endif
+  @if(!is_null($request->dist_id))
+    <tr>
+      <td>Distributor</td>
+      <td>{{ $request->distributor }}</td>
+    </tr>
+  @endif
 </table>
 <table border="1">
   <thead>

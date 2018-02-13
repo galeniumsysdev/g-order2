@@ -717,7 +717,7 @@ class DPLController extends Controller {
 	}
 
 	public function dplreport(Request $request)
-    {
+    {			
       if ($request->method()=='GET')
       {
         return view('admin.dpl.dplReport');
@@ -764,6 +764,16 @@ class DPLController extends Controller {
           {
             $datalist=$datalist->where('sh.distributor_id','=',$request->dist_id);
           }
+					if(isset($request->spv_id))
+          {
+						//$spv = User::where('id','=',$request->spv_id)->select('id','name')->first();
+            $datalist=$datalist->whereRaw("privilegeSuggestNo(dpl_no.suggest_no,'".$request->spv_id."')=1");
+          }
+					if(isset($request->asm_id))
+          {
+						//$asm = User::where('id','=',$request->asm_id)->select('id','name')->first();
+            $datalist=$datalist->whereRaw("privilegeSuggestNo(dpl_no.suggest_no,'".$request->asm_id."')=1");
+          }
 					if(Auth::user()->hasRole('SPV') or Auth::user()->hasRole('ASM'))
 					{
 							$datalist =$datalist->where(function($query){
@@ -795,8 +805,8 @@ class DPLController extends Controller {
 																		'O'			=>  30,
 	                                ));
 	                $sheet->getStyle('D','F','M')->getAlignment()->setWrapText(true);
-									$sheet->row(6, function($row) { $row->setBackground('#CCCCCC'); });
-									$sheet->row(7, function($row) { $row->setBackground('#CCCCCC'); });
+									/*$sheet->row(6, function($row) { $row->setBackground('#CCCCCC'); });
+									$sheet->row(7, function($row) { $row->setBackground('#CCCCCC'); });*/
 	            });
 	        })->export('xlsx');
 				//}
@@ -994,14 +1004,6 @@ class DPLController extends Controller {
 		}
 	}
 
-	public function dplReportExcel(Request $request)
-	{
-		if ($request->method()=='GET')
-		{
-
-		}
-	}
-
 	public function dplDiscountSplit(Request $request){
 		$distributor = $request->distributor;
 		$notrx = $request->notrx;
@@ -1151,5 +1153,47 @@ class DPLController extends Controller {
 			}
 
 		}
+
 	}
+
+
+	public function getListSpvAsm(Request $request,$posisi){
+		$id = $request->input('id');
+			$data = DB::table('users as u')
+					->join('role_user as ru','u.id','=','ru.user_id')
+					->join('roles as r','ru.role_id','=','r.id')
+					->where('r.name','=',$posisi)
+					->where('u.register_flag','=',1);
+			if	(Auth::check())
+			{
+				if($posisi=="SPV" and !is_null($id)){
+					$data=$data->WhereExists(function($query2) use($id){
+							$query2->select(DB::raw(1))
+										->from('org_structure as os')
+										->whereRaw("os.user_id = u.id and directsup_user_id = '".$id."'");
+									});
+				}elseif(Auth::user()->hasRole($posisi) and ($posisi=="ASM" or $posisi="SPV"))
+				{
+					$data=$data->where('u.id','=',Auth::user()->id);
+				}elseif($posisi=="SPV" and Auth::user()->hasRole('ASM'))
+				{
+					$data=$data->WhereExists(function($query2){
+							$query2->select(DB::raw(1))
+										->from('org_structure as os')
+										->whereRaw("os.user_id = u.id and directsup_user_id = '".Auth::user()->id."'");
+									});
+				}elseif($posisi=="ASM" and Auth::user()->hasRole('SPV'))
+				{
+					$data=$data->WhereExists(function($query2){
+							$query2->select(DB::raw(1))
+										->from('org_structure as os')
+										->whereRaw("os.directsup_user_id = u.id and os.user_id = '".Auth::user()->id."'");
+									});
+
+				}
+			}
+			$data=$data->select('u.id','u.name')->orderBy('u.name','asc')->get();
+			return response()->json($data);;
+	}
+
 }
