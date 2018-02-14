@@ -178,11 +178,12 @@
 
                                     <div class="form-group" id="status">
                   										<div class="col-sm-12">
-                                        @if($customer->Status!="A")
-                  											<!--<button type="button" id="reject-customer" class="btn btn-warning" name="reject"><strong>@lang('label.reject')</strong></button>
-                  											<button type="submit" id="edit-customer" class="btn btn-success" value="approve" name="save"><strong>@lang('label.approve')</strong></button>&nbsp;-->
-                                        @endif
                                         <button type="submit" id="save-customer" class="btn btn-primary" value="save" name="save"><i class="fa fa-floppy-o" aria-hidden="true"></i>&nbsp; @lang('label.save')</button>&nbsp;&nbsp;
+                                        @if($customer->Status!="A")
+                                          <button type="submit" id="active-customer" class="btn btn-success" value="active" name="save"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp; Active User</button>&nbsp;&nbsp;
+                                        @else
+                                          <button type="submit" id="inactive-customer" class="btn btn-warning" value="Inactive" name="save"><i class="fa fa-ban" aria-hidden="true"></i>&nbsp; Inactive User</button>&nbsp;&nbsp;
+                                        @endif
                   										</div>
                                     </div>
 
