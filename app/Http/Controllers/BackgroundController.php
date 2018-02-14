@@ -34,33 +34,33 @@ class BackgroundController extends Controller
     {
       DB::beginTransaction();
       try{
-        $request= DB::table('tbl_request')->where('event','=','SalesOrder')
-                  ->max('created_at');
-        if($request)
-        {
-          $lasttime = date_create($request);
-          //echo"type:".gettype($lasttime);
-        }else{
-          $lasttime = date_create("2017-07-01");
-        }
-        $newrequest= DB::table('tbl_request')->insertGetId([
-          'created_at'=>Carbon::now(),
-          'updated_at'=>Carbon::now(),
-          'event'=>'SalesOrder'
-        ]);
-        $connoracle = DB::connection('oracle');
-        if($connoracle){
-          echo "masuk<br>";
-          $headers = SoHeader::whereNotNull('oracle_customer_id')->where([
-                    ['approve','=',1],
-                    ['status','>=',0],
-                    ['status','<',3],
-                  //  ['notrx','=','PO-20180207-II-00008']
-          ])->get();
-          if($headers){
-            foreach($headers as $h)
-            {
-              echo "notrx:".$h->notrx."<br>";
+      $request= DB::table('tbl_request')->where('event','=','SalesOrder')
+                ->max('created_at');
+      if($request)
+      {
+        $lasttime = date_create($request);
+        //echo"type:".gettype($lasttime);
+      }else{
+        $lasttime = date_create("2017-07-01");
+      }
+      $newrequest= DB::table('tbl_request')->insertGetId([
+        'created_at'=>Carbon::now(),
+        'updated_at'=>Carbon::now(),
+        'event'=>'SalesOrder'
+      ]);
+      $connoracle = DB::connection('oracle');
+      if($connoracle){
+        echo "masuk<br>";
+        $headers = SoHeader::whereNotNull('oracle_customer_id')->where([
+                  ['approve','=',1],
+                  ['status','>=',0],
+                  ['status','<=',3],
+                  //['notrx','=','PO-20180207-II-00008']
+        ])->get();
+        if($headers){
+          foreach($headers as $h)
+          {
+            echo "notrx:".$h->notrx."<br>";
 
                 if($h->status==0)
                 {
@@ -234,7 +234,7 @@ class BackgroundController extends Controller
         else{
           echo "can't connect to oracle";
         }
-        DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
+	 DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
         DB::commit();
       }catch (\Exception $e) {
         DB::rollback();

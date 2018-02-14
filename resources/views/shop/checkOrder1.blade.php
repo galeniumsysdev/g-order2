@@ -347,6 +347,7 @@
                               @endforeach
                             </tbody>
                           </table>
+
                           @if(Auth::user()->customer_id==$header->customer_id and
                             is_null($delivery->where('deliveryno','=',$key)->first()->tgl_terima) and
                               intval($delivery->sum('qty_accept'))==0

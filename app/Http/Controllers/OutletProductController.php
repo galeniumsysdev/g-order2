@@ -82,9 +82,7 @@ class OutletProductController extends Controller
   					->setCompany('PT. Galenium Pharmasia Laboratories')
   					->sheet('Product Stock '.date('Ymd His'), function($sheet){
   						$sheet->row(1, array('ID','Nama Barang','Stock','Satuan','Kelompok','Batch','Exp. Date(Cth:2017-01-31)'));
-  						$sheet->setColumnFormat(array('D'=>'@',
-                                            'G' => 'yyyy-mm-dd'
-                                  ));
+  						$sheet->setColumnFormat(array('D'=>'@','G' => 'yyyy-mm-dd'));
 
   						$productsOutlet = OutletProducts::select('outlet_products.id as op_id','title','unit',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'),'batch','exp_date')
   													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
@@ -114,7 +112,7 @@ class OutletProductController extends Controller
                                           $prod->flag,
   																				$prod->batch,
                                           (!is_null($prod->exp_date)?PHPExcel_Shared_Date::PHPToExcel(strtotime($prod->exp_date)):null)
-  																				));
+                                        ));
   						}
   					});
   	})->download('xlsx');
@@ -139,7 +137,7 @@ class OutletProductController extends Controller
             if(is_null($value->batch))$last_stock =$last_stock->whereNull('batch')->sum('qty');
             else $last_stock =$last_stock->where('batch',$value->batch)->sum('qty');
     	    	$data[$key]['last_stock'] = $last_stock;
-        }else return redirect()->route('outlet.importProductStock')->with('msg','ID must be exists');
+		        }else return redirect()->route('outlet.importProductStock')->with('msg','ID must be exists');
 	    }
 	  }
 
@@ -153,6 +151,7 @@ class OutletProductController extends Controller
   	$idx = 0;
   	foreach ($data as $key => $prod) {
       if($prod->last_stock!=0){
+	echo "id:".$prod->id."<br>";
       $stock[$idx]['trx_date'] = date('Y-m-d', time());
   		$stock[$idx]['product_id'] = $prod->id;
       $stock[$idx]['outlet_id'] = Auth::user()->customer_id;
@@ -170,7 +169,7 @@ class OutletProductController extends Controller
   		$stock[$idx]['event'] = 'add_upload';
   		$stock[$idx]['qty'] = $prod->stock;
   		$stock[$idx]['batch'] = $prod->batch;
-      $stock[$idx]['Exp_date'] = isset($prod->{'exp._datecth2017_01_31'}->date)?$prod->{'exp._datecth2017_01_31'}->date:null;
+      $stock[$idx]['Exp_date'] =isset($prod->{'exp._datecth2017_01_31'}->date)?$prod->{'exp._datecth2017_01_31'}->date:null;
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
   		$idx++;
@@ -463,7 +462,7 @@ class OutletProductController extends Controller
     }
     if($jmlstock < $request->qty_out)
     {
-      return redirect()->back()->withInput()->with('err','Transaksi Keluar gagal disimpan karena stock tidak mencukupi. Sisa Stock ='.$jmlstock);
+      return redirect()->back()->withInput()->with('err','Transaksi keluar gagal disimpan karena stock tidak mencukupi. Sisa Stock ='.$jmlstock);
     }
   	$outstock = new OutletStock;
     $outstock->trx_date = date('Y-m-d',strtotime($request->trx_out_date));
@@ -475,7 +474,7 @@ class OutletProductController extends Controller
     if(isset($request->batch_no_out)) $outstock->Exp_date = $datastock->first()->exp_date;
   	$outstock->save();
 
-  	return redirect('/outlet/transaction')->with('msg','Transaction Out has been done successfully.');
+  	return redirect()->route('outlet.trx')->with('msg','Transaction Out has been done successfully.');
   }
 
   public function downloadProductStock()
