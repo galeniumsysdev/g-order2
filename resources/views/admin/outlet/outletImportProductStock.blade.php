@@ -101,7 +101,7 @@
                                   <td>{{ $cell['stock'] }}</td>
                                   <td>{{ $cell['satuan'] }}</td>
                                   <td>{{ (string)$cell['batch'] }}</td>
-                                  <td>{{date($cell['exp._datecth2017_01_31'])}}</td>
+                                  <td>{{ !is_null($cell['exp._datecth2017_01_31'])?date_format($cell['exp._datecth2017_01_31'],'Y-m-d'):null}}</td>
                                   <td>{{ $cell['id'] }}</td>
                                 </tr>
                               @endforeach

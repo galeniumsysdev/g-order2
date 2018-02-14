@@ -14,6 +14,7 @@ use Carbon\Carbon;
 
 use Auth;
 use Excel;
+use PHPExcel_Shared_Date;
 
 class OutletProductController extends Controller
 {
@@ -81,7 +82,7 @@ class OutletProductController extends Controller
   					->setCompany('PT. Galenium Pharmasia Laboratories')
   					->sheet('Product Stock '.date('Ymd His'), function($sheet){
   						$sheet->row(1, array('ID','Nama Barang','Stock','Satuan','Kelompok','Batch','Exp. Date(Cth:2017-01-31)'));
-  						$sheet->setColumnFormat(array('D'=>'@'));
+  						$sheet->setColumnFormat(array('D'=>'@','G' => 'yyyy-mm-dd'));
 
   						$productsOutlet = OutletProducts::select('outlet_products.id as op_id','title','unit',DB::raw('sum(qty) as product_qty'),DB::raw('"outlet" as flag'),'batch','exp_date')
   													->leftjoin('outlet_stock as os','os.product_id','outlet_products.id')
@@ -110,8 +111,7 @@ class OutletProductController extends Controller
                                           $prod->unit,
                                           $prod->flag,
   																				$prod->batch,
-                                          $prod->exp_date
-  																				));
+                                          (!is_null($prod->exp_date)?PHPExcel_Shared_Date::PHPToExcel(strtotime($prod->exp_date)):null)  																				));
   						}
   					});
   	})->download('xlsx');
@@ -134,7 +134,7 @@ class OutletProductController extends Controller
             if(is_null($value->batch))$last_stock =$last_stock->whereNull('batch')->sum('qty');
             else $last_stock =$last_stock->where('batch',$value->batch)->sum('qty');
     	    	$data[$key]['last_stock'] = $last_stock;
-        }else return redirect()->route('outlet.importProductStock')->with('msg','ID must be exists');
+		        }else return redirect()->route('outlet.importProductStock')->with('msg','ID must be exists');
 	    }
 	  }
 
@@ -148,13 +148,14 @@ class OutletProductController extends Controller
   	$idx = 0;
   	foreach ($data as $key => $prod) {
       if($prod->last_stock!=0){
+	echo "id:".$prod->id."<br>";
       $stock[$idx]['trx_date'] = date('Y-m-d', time());
   		$stock[$idx]['product_id'] = $prod->id;
       $stock[$idx]['outlet_id'] = Auth::user()->customer_id;
   		$stock[$idx]['event'] = 'adjust';
   		$stock[$idx]['qty'] = ($prod->last_stock > 0) ? '-'.$prod->last_stock : $prod->last_stock;
   		$stock[$idx]['batch'] = $prod->batch;
-      $stock[$idx]['Exp_date'] = is_null($prod->{'exp._datecth2017_01_31'})?null:$prod->{'exp._datecth2017_01_31'}->date;
+      $stock[$idx]['Exp_date'] = isset($prod->{'exp._datecth2017_01_31'}->date)?$prod->{'exp._datecth2017_01_31'}->date:null;
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
   		$idx++;
@@ -165,7 +166,7 @@ class OutletProductController extends Controller
   		$stock[$idx]['event'] = 'add_upload';
   		$stock[$idx]['qty'] = $prod->stock;
   		$stock[$idx]['batch'] = $prod->batch;
-      $stock[$idx]['Exp_date'] = is_null($prod->{'exp._datecth2017_01_31'})?null:$prod->{'exp._datecth2017_01_31'}->date;
+      $stock[$idx]['Exp_date'] =isset($prod->{'exp._datecth2017_01_31'}->date)?$prod->{'exp._datecth2017_01_31'}->date:null;
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
   		$idx++;
@@ -769,5 +770,17 @@ class OutletProductController extends Controller
     return response()->json($data);
   }
 
+  public function isDate($value)
+  {
+      if (!$value) {
+          return false;
+      }
+      try {
+          new \DateTime($value);
+          return true;
+      } catch (\Exception $e) {
+          return false;
+      }
+  }
 
 }
