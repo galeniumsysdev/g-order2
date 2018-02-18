@@ -25,6 +25,7 @@ Route::post('/ajax/changeOrderUom', 'OrderController@changeOrderUom');
 Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
 Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
+Route::get('/ajax/getCatOutlet', 'UserController@getkategoriOutlet');
 Route::get('/ajax/typeaheadProvince', 'ProfileController@getListProvince');
 Route::get('/ajax/typeaheadCity/{propid?}', 'ProfileController@getListCity');
 Route::get('/ajax/typeaheadOutlet', 'OutletProductController@getListOutlet');
@@ -35,6 +36,8 @@ Route::get('/ajax-subcat',function () {
 });
 
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
+Route::post('/ajax/addMappingType', 'UserController@ajaxAddMappingType')->name('ajax.addmapping.type');
+Route::get('/ajax/getMappingType/{id?}', 'UserController@ajaxGetMappingType')->name('ajax.mapping.getdata');
 
 Route::get('detail/{id}', [
   'uses' => 'ProductController@show'

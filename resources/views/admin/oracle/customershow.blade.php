@@ -222,27 +222,23 @@
                         </div>
                         <div role="tabpanel" class="tab-pane" id="mapping_distributor">
                           <div class="table-responsive">
-                            <table id="contact-table" class="table table-striped">
+                            <table id="mapping-table" class="display responsive"  width="100%">
                               <thead>
                                 <tr>
-                                  <th width="30%">Tipe</th>
-                                  <th width="30%">Value</th>
-                                  <th width="20%">Action</th>
+                                  <th width="15px"><input type="checkbox" name="all" id="check-all">All</th>
+                                  <th width="45%">Tipe</th>
+                                  <th width="50%">Value</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                @forelse($mappings as $m)
-                                <tr>
-                                  <td>{{$m->data}}</td>
-                                  <td>{{$m->name}}</td>
-                                  <td></td>
-                                </tr>
-                                @empty
-                                  <tr><td colspan="3">No data</td></tr>
-                                @endforelse
+
                               </tbody>
                             </table>
-
+                            <div class="pull">
+                                <button type="button" class="btn btn-sm btn-success"  class="add-mapping" data-toggle="modal" data-target="#addMapping"> Add New Mapping</button>
+                  	            <button class="btn btn-sm btn-danger" name="action_mapping" value="delete">Delete</button>
+                                <button class="btn btn-sm btn-primary" name="action_mapping" value="preview">Preview Outlet</button>
+                  	        </div>
                           </div>
                         </div>
                         <div role="tabpanel" class="tab-pane" id="distributor_cabang">
@@ -288,29 +284,77 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="addMapping" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+          <form data-toggle="validator" id="frm-addmapping"  method="POST">
+              {{csrf_field()}}
+              <input type="hidden" value="{{$customer->id}}" name="customerid">
+  		      <div class="modal-header">
+  		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+  		        <h4 class="modal-title" id="myModalLabel">Add New Mapping</h4>
+  		      </div>
+  		      <div class="modal-body">
+              <span id="form_output"></span>
+  		        <div class="form-group">
+  							<label class="control-label" for="title">Tipe:</label>
+  							<select name="type" id="mapping-type" class="form-control" onchange="getvaluemapping()">
+                  <option value="-">Pilih Salah Satu</option>
+                  <option value="regencies">Regencies</option>
+                  <option value="category_outlets">Category Outlet</option>
+                </select>
+  							<div class="help-block with-errors"></div>
+  						</div>
+  						<div class="form-group">
+  							<label class="control-label" for="title">Value:</label>
+  							<select name="value[]" id="mapping-value" class="form-control" multiple>
+                </select>
+  							<div class="help-block with-errors"></div>
+  						</div>
+  		      </div>
+            <div class="modal-footer">
+              <div class="form-group">
+                 <input type="hidden" name="button_action" id="button_action" value="" />
+  							<button type="submit" name="add" value="add" class="btn crud-submit btn-success">Submit</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+  						</div>
+            </div>
+          </form>
+		    </div>
+		  </div>
+		</div>
+
 @endsection
 @section('js')
+<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css">
+<script src="{{ asset('js/customeroracle.js') }}"></script>
+
 <script type="text/javascript">
 var baseurl = window.Laravel.url;
 $(document).ready(function() {
+  var baseurl = window.Laravel.url;
   ubahdc({{isset($customer->subgroup_dc_id)?$customer->subgroup_dc_id:0}});
   });
-function ubahdc(old){
-    var cat_id =$('#groupdc').val();
-    $.get(baseurl+'/ajax-subcat?cat_id='+cat_id,function(data){
-        //console.log(data);
-          $('#subgroupdc').empty();
-        $.each(data,function(index,subcatObj){
-          if (subcatObj.id==old)
-          {
-            $('#subgroupdc').append('<option value="'+subcatObj.id+'" selected=selected>'+subcatObj.display_name+'</option>');
-          }else{
-            $('#subgroupdc').append('<option value="'+subcatObj.id+'">'+subcatObj.display_name+'</option>');
-          }
+  function ubahdc(old){
+      var cat_id =$('#groupdc').val();
+      $.get(baseurl+'/ajax-subcat?cat_id='+cat_id,function(data){
+          //console.log(data);
+            $('#subgroupdc').empty();
+          $.each(data,function(index,subcatObj){
+            if (subcatObj.id==old)
+            {
+              $('#subgroupdc').append('<option value="'+subcatObj.id+'" selected=selected>'+subcatObj.display_name+'</option>');
+            }else{
+              $('#subgroupdc').append('<option value="'+subcatObj.id+'">'+subcatObj.display_name+'</option>');
+            }
 
-        });
+          });
 
-  	});
-}
+      });
+  }
 </script>
 @endsection

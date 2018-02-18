@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Response;
 use Webpatser\Uuid\Uuid;
 use App\Notifications\InvitationUser;
 use Auth;
+use Datatables;
+use Carbon\Carbon;
 
 
 
@@ -154,7 +156,8 @@ class UserController extends Controller
     public function getListCity()
     {
         $id = Input::get('id');
-        $city = DB::table('regencies')->where('province_id','=',$id)->get();
+        if(is_null($id)) $city = DB::table('regencies')->orderBy('name')->get();
+        else $city = DB::table('regencies')->where('province_id','=',$id)->get();
         return Response::json($city);
     }
 
@@ -170,6 +173,23 @@ class UserController extends Controller
       $id = Input::get('id');
         $subdistricts = DB::table('villages')->where('district_id','=',$id)->get();
         return Response::json($subdistricts);
+    }
+
+    public function getkategoriOutlet()
+    {
+      $kategori = DB::table('category_outlets')->where('enable_flag','=','Y');
+      $id = Input::get('id');
+      if(!is_null($id)){
+        $kategori =$kategori->whereNotExists(function ($query) use($id) {
+                  $query->select(DB::raw(1))
+                        ->from('distributor_mappings')
+                        ->where('data','=','category_outlets')
+                        ->whereRaw('distributor_mappings.data_id= category_outlets.id')
+                        ->where('distributor_mappings.distributor_id','=',$id);
+              });
+      }
+      $kategori=$kategori->get();
+      return Response::json($kategori);
     }
 
     public function oracleIndex()
@@ -213,7 +233,7 @@ class UserController extends Controller
               				$join->on('distributor_mappings.data','=',DB::raw("'category_outlets'"));
               			})
                     ->where('distributor_id','=',$customer->id)
-                    ->select('data',db::raw("case when data = 'regencies' then r.name else co.name end name"))
+                    ->select('distributor_mappings.id','data',db::raw("case when data = 'regencies' then r.name else co.name end name"))
                     ->get();
         return view('admin.oracle.customershow',['customer'=>$customer,'customer_sites'=>$customer_sites
                                                 ,'customer_contacts'=>$customer_contacts,'roles'=>$roles
@@ -225,63 +245,84 @@ class UserController extends Controller
     {
       DB::beginTransaction();
       try{
-        $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
-                    ->where('id','=',$id)
-                    ->orderBy('customer_name','asc')->first();
-        //dd($customer);
-        if($customer->customer_class_code=="OUTLET" and $request->psc_flag=="1")
+        //dd($request->all());
+        if($request->save_customer=="Send" or $request->save_customer=="Save")
         {
-          $this->validate($request, [
-              'subgroupdc' => 'required',
-          ]);
-          $customer->subgroup_dc_id = $request->subgroupdc;
-        }
-        $customer->psc_flag = $request->psc_flag;
-        $customer->pharma_flag = $request->pharma_flag;
-        $customer->export_flag = $request->export_flag;
-        $customer->tollin_flag = $request->tollin_flag;
-        $customer->save();
-        if($request->distributor!="")
-        {
-          $customer->hasDistributor()->sync($request->distributor);
-        }
-
-        $usercustomer = User::where('customer_id','=',$customer->id)->first();
-
-        if($usercustomer)
-        {
+          $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+                      ->where('id','=',$id)
+                      ->orderBy('customer_name','asc')->first();
+          //dd($customer);
+          if($customer->customer_class_code=="OUTLET" and $request->psc_flag=="1")
+          {
             $this->validate($request, [
-                'email' => 'required|email|unique:users,email,'.$usercustomer->id
+                'subgroupdc' => 'required',
             ]);
-            $usercustomer->email = $request->email;
-            $usercustomer->save();
-        }else{
-          $this->validate($request, [
-              'email' => 'required|email|unique:users'
-          ]);
-          $usercustomer = User::firstorCreate(
-                            ['customer_id'=>$customer->id],
-                            ['email'=>$request->email,'name'=>$request->customer_name
-                            ,'api_token'=>str_random(60)
-                            , 'id'=>Uuid::generate()->string]
-                      );
+            $customer->subgroup_dc_id = $request->subgroupdc;
+          }
+          $customer->psc_flag = $request->psc_flag;
+          $customer->pharma_flag = $request->pharma_flag;
+          $customer->export_flag = $request->export_flag;
+          $customer->tollin_flag = $request->tollin_flag;
+          $customer->save();
+          if($request->distributor!="")
+          {
+            $customer->hasDistributor()->sync($request->distributor);
+          }
 
-        }
-        if($request->role!="")
-        {
-          $usercustomer->roles()->sync($request->role);
-        }
-        DB::commit();
-        if($request->save_customer=="Send")
-        {
-          $usercustomer->validate_flag=1;
-          $usercustomer->save();
-          $usercustomer->notify(new InvitationUser($usercustomer));
-          return redirect()->route('useroracle.show',$id)
-                          ->with('success','Successfully Send Email');
-        }elseif($request->save_customer=="Save"){
-          return redirect()->route('useroracle.show',$id)
-                          ->with('success','Customer Oracle updated successfully');
+          $usercustomer = User::where('customer_id','=',$customer->id)->first();
+
+          if($usercustomer)
+          {
+              $this->validate($request, [
+                  'email' => 'required|email|unique:users,email,'.$usercustomer->id
+              ]);
+              $usercustomer->email = $request->email;
+              $usercustomer->save();
+          }else{
+            $this->validate($request, [
+                'email' => 'required|email|unique:users'
+            ]);
+            $usercustomer = User::firstorCreate(
+                              ['customer_id'=>$customer->id],
+                              ['email'=>$request->email,'name'=>$request->customer_name
+                              ,'api_token'=>str_random(60)
+                              , 'id'=>Uuid::generate()->string]
+                        );
+
+          }
+          if($request->role!="")
+          {
+            $usercustomer->roles()->sync($request->role);
+          }
+          DB::commit();
+          if($request->save_customer=="Send")
+          {
+            $usercustomer->validate_flag=1;
+            $usercustomer->save();
+            $usercustomer->notify(new InvitationUser($usercustomer));
+            return redirect()->route('useroracle.show',$id)
+                            ->with('success','Successfully Send Email');
+          }elseif($request->save_customer=="Save"){
+            return redirect()->route('useroracle.show',$id)
+                            ->with('success','Customer Oracle updated successfully');
+          }
+        }elseif($request->action_mapping=="delete"){
+          if(isset($request->mapping)){
+            foreach($request->mapping as $key=>$value)
+            {
+              DB::enableQueryLog();
+                $deletedata = DB::table('distributor_mappings')->whereraw("distributor_id='".$id."'")
+                  ->whereraw("data='".$key."'")
+                  ->whereIn('data_id',$value)
+                  ->delete();
+            }
+            DB::commit();
+            return redirect()->route('useroracle.show',$id)
+                            ->with('success','Successfully delete data mapping');
+          }else{
+            return redirect()->back()->withInput()
+                            ->withErrors('mapping','Pilih salah satu!');
+          }
         }
       }catch (\Exception $e) {
         DB::rollback();
@@ -543,5 +584,55 @@ class UserController extends Controller
           throw $e;
         }
       }
+    }
+
+    public function ajaxAddMappingType(Request $request)
+    {
+       $error_array = array();
+       $success_output = '';
+      if($request->get('button_action')=="add")
+      {
+        $customerid=$request->get('customerid');
+        $datatype = $request->get('type');
+        foreach ($request->value as $nil){
+          $insert = DB::table("distributor_mappings")
+                    ->insert(['distributor_id'=>$customerid
+                              ,'data'=>$datatype
+                              ,'data_id'=>$nil
+                              ,'created_at'=>Carbon::now()
+                              ,'updated_at'=>Carbon::now()
+                            ]);
+        }
+        $success_output = '<div class="alert alert-success">Data Inserted</div>';
+      }
+      $output = array(
+            'error'     =>  $error_array,
+            'success'   =>  $success_output
+        );
+      echo json_encode($output);
+
+    }
+
+    public function ajaxGetMappingType($id=null)
+    {
+      $mappings = DB::table('distributor_mappings')
+                  ->leftjoin('regencies as r',function($join){
+                    $join->on('distributor_mappings.data_id','=','r.id');
+                    $join->on('distributor_mappings.data','=',DB::raw("'regencies'"));
+                  })
+                  ->leftjoin('category_outlets as co',function($join){
+                    $join->on('distributor_mappings.data_id','=','co.id');
+                    $join->on('distributor_mappings.data','=',DB::raw("'category_outlets'"));
+                  });
+      if(!is_null($id))
+      $mappings =$mappings->where('distributor_id','=',$id);
+
+      $mappings =$mappings->select('distributor_mappings.id','data',db::raw("case when data = 'regencies' then r.name else co.name end name"));
+
+      return Datatables::of($mappings)
+            ->editColumn('id',function($mappings){
+              return '<input type="checkbox" class="chk-mapping" name="mapping[]" value='.$mappings->id.'>';
+            })->rawColumns(['id'])
+            ->make(true);
     }
 }
