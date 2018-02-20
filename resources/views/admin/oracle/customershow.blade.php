@@ -42,7 +42,7 @@
                         <li role="presentation"><a href="#address" aria-controls="Address" role="tab" data-toggle="tab">@lang('label.address')</a></li>
                         <li role="presentation"><a href="#contact" aria-controls="Contact" role="tab" data-toggle="tab">@lang('label.contact')</a></li>
                         @if($customer->user)
-                          @if($customer->user->ability(array('Distributor','Distributor Cabang'),''))
+                          @if($customer->user->ability(array('Distributor','Distributor Cabang','Principal'),''))
                             <li role="presentation"><a href="#mapping_distributor" aria-controls="mapping_distributor" role="tab" data-toggle="tab">Mapping Distributor</a></li>
                           @endif
                           @if($customer->user->hasRole('Distributor'))
@@ -237,7 +237,7 @@
                             <div class="pull">
                                 <button type="button" class="btn btn-sm btn-success"  class="add-mapping" data-toggle="modal" data-target="#addMapping"> Add New Mapping</button>
                   	            <button class="btn btn-sm btn-danger" name="action_mapping" value="delete">Delete</button>
-                                <button class="btn btn-sm btn-primary" name="action_mapping" value="preview">Preview Outlet</button>
+                                <a href="{{route('customer.mappingOutlet',$customer->id)}}" target="_blank" class="btn btn-sm btn-primary">Preview Outlet</a>
                   	        </div>
                           </div>
                         </div>

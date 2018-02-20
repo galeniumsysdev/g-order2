@@ -106,7 +106,7 @@ Route::get('/shopping-cart',[
 
 
 
-Route::group(['middleware' => 'prevent-back-history'],function(){
+Route::group(['middleware' => ['web']],function(){
   Auth::routes();
   //Route::get('/home', 'HomeController@index');
 });
@@ -180,6 +180,8 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::patch('/users/cabang/edit/{id}','UserController@cabangUpdate')->name('usercabang.update');
   Route::get('/customer/yasaNonOracle','UserController@CustYasaNonOracle')->name('customer.yasaNonOracle');
   Route::patch('/customer/updateyasaNonOracle/{id}','UserController@mergeCustomer')->name('customer.mergeCustomer');
+  Route::get('/distributor/mappingOutlet/{id?}','UserController@MappingOutletDistributor')->name('customer.mappingOutlet');
+  Route::patch('/distributor/remappingOutlet/{id?}','UserController@remappingOutlet')->name('customer.remappingOutlet');
 
   Route::resource('CategoryOutlet',  'Cat_OutletController');
   Route::resource('CategoryProduct',  'CategoryProductController');
