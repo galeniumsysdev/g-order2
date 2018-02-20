@@ -34,6 +34,7 @@ return [
     'confpass' => 'Confirm Password',
     'newpassword' => 'New Password',
     'newconfpass' => 'New Confirm Password',
+    'currentpass' => 'Current Password',
     'cp' => 'Contact Name',
     'forgotpassword' => 'Forgot Your Password?',
     'pwdminlength'=>'Minimum password length is 6 characters',
