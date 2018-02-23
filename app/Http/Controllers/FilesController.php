@@ -177,8 +177,10 @@ class FilesController extends Controller
             $downloads=$downloads->where('files_cmo.approve','=',$request->status);
           }
         }
-      }else{
+      }elseif(Auth::user()->hasRole('Distributor')){
         $downloads=$downloads->where('distributor_id','=',Auth::user()->customer_id);
+      }else{
+        $downloads=$downloads->where('files_cmo.approve','=',1);
       }
       if($request->tahun!="")
       {

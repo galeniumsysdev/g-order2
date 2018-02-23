@@ -111,7 +111,8 @@ class OutletProductController extends Controller
                                           $prod->unit,
                                           $prod->flag,
   																				$prod->batch,
-                                          (!is_null($prod->exp_date)?PHPExcel_Shared_Date::PHPToExcel(strtotime($prod->exp_date)):null)  																				));
+                                          (!is_null($prod->exp_date)?PHPExcel_Shared_Date::PHPToExcel(strtotime($prod->exp_date)):null)
+                                        ));
   						}
   					});
   	})->download('xlsx');
@@ -127,7 +128,9 @@ class OutletProductController extends Controller
   	if($request->file_import){
 	    $file = $request->file_import;
 
-	    $data = Excel::load($file, function($reader){})->get();
+	    $data = Excel::load($file, function($reader){
+        $reader->formatDates(true, 'Y-m-d');
+      })->get();
 	    foreach ($data as $key => $value) {
         if(isset($value->id)){
     	    	$last_stock = OutletStock::where('product_id',$value->id)->where('outlet_id',Auth::user()->customer_id);

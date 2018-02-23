@@ -325,7 +325,7 @@ class BackgroundController extends Controller
           $this->getMasterItem($lasttime);
           $this->getConversionItem($lasttime);
           //dd();
-          $price = $this->getPricelist($lasttime);
+          //$price = $this->getPricelist($lasttime);
           $this->getMasterDiscount($lasttime);
 
           $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
@@ -469,7 +469,7 @@ class BackgroundController extends Controller
             $lasttime = date_create($request);
             echo"type:".gettype($lasttime);
           }else{
-            $lasttime = date_create("2017-07-01");
+            $lasttime = date_create("2017-01-01");
           }
           echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
         }
@@ -493,7 +493,7 @@ class BackgroundController extends Controller
                           , 'price_list_id'
                           , 'order_type_id'
                           , 'customer_name_phonetic'
-                          , 'rt.name as payment_term' )
+                          , 'rt.name as payment_term','ac.orig_system_reference' )
                     ->orderBy('customer_number','asc')
                     ->get();
         if(count($customers)){
@@ -519,15 +519,33 @@ class BackgroundController extends Controller
             }elseif($c->customer_class_code == 'EXPORT'){
               $export_flag="1";
             }
-            $mycustomer = Customer::updateOrCreate(
-              ['oracle_customer_id'=>$c->customer_id],
-              ['customer_name'=>$c->customer_name,'customer_number'=>$c->customer_number,'status'=>$c->status
-              ,'customer_category_code'=>$c->customer_category_code,'customer_class_code'=>$c->customer_class_code
-              ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
-              ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
-              ,'payment_term_name'=>$c->payment_term,'psc_flag'=>$psc_flag,'pharma_flag'=>$pharma_flag,'export_flag'=>$export_flag,'tollin_flag'=>$tollin_flag
-              ]
-            );
+
+              $existscustomer = Customer::where('id',$c->orig_system_reference)->first();
+
+
+            if($existscustomer){
+              echo "insert customer oracle to customer id:" . $c->orig_system_reference."<br>";
+              $mycustomer = Customer::updateOrCreate(
+                ['id'=>$c->orig_system_reference],
+                ['oracle_customer_id'=>$c->customer_id, 'customer_name'=>$c->customer_name,'customer_number'=>$c->customer_number,'status'=>$c->status
+                ,'customer_category_code'=>$c->customer_category_code,'customer_class_code'=>$c->customer_class_code
+                ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
+                ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
+                ,'payment_term_name'=>$c->payment_term
+                ,
+                ]
+              );
+            }else{
+              $mycustomer = Customer::updateOrCreate(
+                ['oracle_customer_id'=>$c->customer_id],
+                ['customer_name'=>$c->customer_name,'customer_number'=>$c->customer_number,'status'=>$c->status
+                ,'customer_category_code'=>$c->customer_category_code,'customer_class_code'=>$c->customer_class_code
+                ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
+                ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
+                ,'payment_term_name'=>$c->payment_term,'psc_flag'=>$psc_flag,'pharma_flag'=>$pharma_flag,'export_flag'=>$export_flag,'tollin_flag'=>$tollin_flag
+                ]
+              );
+            }
             if($c->status=='I'){
               $updateuser = User::where('customer_id','=',$c->customer_id)
               ->update(['validate_flag'=>0]);
@@ -579,7 +597,7 @@ class BackgroundController extends Controller
                                   ->orwhere('hps.last_update_date', '>=', $lasttime)
                                   ->orwhere('hl.last_update_date', '>=', $lasttime);
                         })
-                    ->select('cust_account_id', 'hcas.cust_acct_site_id as cust_acct_site_id', 'hcas.party_site_id', 'bill_to_flag', 'ship_to_flag', 'hcas.orig_system_reference', 'hcas.status as status', 'hcas.org_id as org_id'
+                    ->select('cust_account_id', 'hcas.cust_acct_site_id as cust_acct_site_id', 'hcas.party_site_id', 'bill_to_flag', 'ship_to_flag', 'ac.orig_system_reference', 'hcas.status as status', 'hcas.org_id as org_id'
                         , 'hcsua.SITE_USE_id as site_use_id'
                         , 'hcsua.site_use_code as site_use_code', 'hcsua.BILL_TO_SITE_USE_ID as bill_to_site_use_id'
                         , 'hcsua.payment_term_id as payment_term_id'
@@ -628,17 +646,75 @@ class BackgroundController extends Controller
 
               if($customer)
               {
-                $mycustomersite = CustomerSite::updateOrCreate(
-                  ['oracle_customer_id'=>$site->cust_account_id,'cust_acct_site_id'=>$site->cust_acct_site_id,'site_use_id'=>$site->site_use_id],
-                  ['site_use_code'=>$site->site_use_code,'primary_flag'=>$site->primary_flag,'status'=>$site->status,'bill_to_site_use_id'=>$site->bill_to_site_use_id
-                  ,'payment_term_id'=>$site->payment_term_id,'price_list_id'=>$site->price_list_id
-                  ,'order_type_id'=>$site->order_type_id,'tax_code'=>$site->tax_code
-                  ,'address1'=>$site->address1,'state'=>$site->kelurahan,'district'=>$site->kecamatan
-                  ,'city'=>$site->city,'province'=>$site->province,'postal_code'=>$site->postal_code,'Country'=>$site->country
-                  ,'org_id'=>$site->org_id,'warehouse'=>$site->warehouse_id,'customer_id'=>$customer->id
-                  ,'city_id'=>$city_id,'province_id'=>$province_id,'district_id'=>$kecamatan_id,'state_id'=>$desa_id,'area'=>$site->wilayah
-                  ]
-                );
+                /*check apakah ada customer berasal dari register*/
+                $oldcustsite = CustomerSite::where('customer_id','=',$site->orig_system_reference)
+                              ->whereNull('oracle_customer_id')
+                              ->where('primary_flag','=',$site->primary_flag)
+                              ->where('site_use_code','=',$site->site_use_code)
+                              ->where('city','=',$site->city)
+                              ->where('province','=',$site->province)
+                              ->first();
+                if($oldcustsite)
+                {
+                  $oldcustsite->oracle_customer_id = $site->cust_account_id;
+                  $oldcustsite->cust_acct_site_id = $site->cust_acct_site_id;
+                  $oldcustsite->site_use_id = $site->site_use_id;
+                  $oldcustsite->status = $site->status;
+                  $oldcustsite->bill_to_site_use_id=$site->bill_to_site_use_id;
+                  $oldcustsite->payment_term_id=$site->payment_term_id;
+                  $oldcustsite->price_list_id=$site->price_list_id;
+                  $oldcustsite->order_type_id=$site->order_type_id;
+                  $oldcustsite->tax_code=$site->tax_code;
+                  $oldcustsite->org_id = $site->org_id;
+                  $oldcustsite->warehouse=$site->warehouse_id;
+                  $oldcustsite->area=$site->wilayah;
+                  $oldcustsite->save();
+                  /*update soheader*/
+                  if($oldcustsite->site_use_code=="SHIP_TO"){
+                    DB::table('so_headers')->where('customer_id','=',$oldcustsite->customer_id)
+                    ->where('cust_ship_to','=',$oldcustsite->cust_ship_to)
+                    ->update(['price_list_id'=>$site->price_list_id
+                              ,'payment_term_id'=>$site->payment_term_id
+                              ,'oracle_ship_to'=>$site->site_use_id
+                              ,'oracle_customer_id'=>$customer->oracle_customer_id]);
+                  }elseif($oldcustsite->site_use_code=="BILL_TO"){
+                    DB::table('so_headers')->where('customer_id','=',$oldcustsite->customer_id)
+                    ->where('cust_bill_to','=',$oldcustsite->cust_ship_to)
+                    ->update(['price_list_id'=>$site->price_list_id
+                              ,'payment_term_id'=>$site->payment_term_id
+                              ,'oracle_bill_to'=>$site->site_use_id
+                              ,'oracle_customer_id'=>$customer->oracle_customer_id]);
+                  }
+
+
+
+
+              /*  }elseif($oldcustsite->count()>1){
+                  $mycustomersite = CustomerSite::updateOrCreate(
+                      ['customer_id','=',$site->orig_system_reference,'city'=>$site->city,'province'=>$site->province,'site_use_code'=>$site->site_use_code,'primary_flag'=>$site->primary_flag],
+                      ['oracle_customer_id'=>$site->cust_account_id,'cust_acct_site_id'=>$site->cust_acct_site_id,'site_use_id'=>$site->site_use_id
+                      ,'status'=>$site->status,'bill_to_site_use_id'=>$site->bill_to_site_use_id
+                      ,'payment_term_id'=>$site->payment_term_id,'price_list_id'=>$site->price_list_id
+                      ,'order_type_id'=>$site->order_type_id,'tax_code'=>$site->tax_code
+                      ,'address1'=>$site->address1,'state'=>$site->kelurahan,'district'=>$site->kecamatan
+                      ,'postal_code'=>$site->postal_code,'Country'=>$site->country
+                      ,'org_id'=>$site->org_id,'warehouse'=>$site->warehouse_id
+                      ,'city_id'=>$city_id,'province_id'=>$province_id,'district_id'=>$kecamatan_id,'state_id'=>$desa_id,'area'=>$site->wilayah
+                      ]
+                    );*/
+                }else{
+                  $mycustomersite = CustomerSite::updateOrCreate(
+                    ['oracle_customer_id'=>$site->cust_account_id,'cust_acct_site_id'=>$site->cust_acct_site_id,'site_use_id'=>$site->site_use_id],
+                    ['site_use_code'=>$site->site_use_code,'primary_flag'=>$site->primary_flag,'status'=>$site->status,'bill_to_site_use_id'=>$site->bill_to_site_use_id
+                    ,'payment_term_id'=>$site->payment_term_id,'price_list_id'=>$site->price_list_id
+                    ,'order_type_id'=>$site->order_type_id,'tax_code'=>$site->tax_code
+                    ,'address1'=>$site->address1,'state'=>$site->kelurahan,'district'=>$site->kecamatan
+                    ,'city'=>$site->city,'province'=>$site->province,'postal_code'=>$site->postal_code,'Country'=>$site->country
+                    ,'org_id'=>$site->org_id,'warehouse'=>$site->warehouse_id,'customer_id'=>$customer->id
+                    ,'city_id'=>$city_id,'province_id'=>$province_id,'district_id'=>$kecamatan_id,'state_id'=>$desa_id,'area'=>$site->wilayah
+                    ]
+                  );
+                }
                 echo "<td>Sites berhasil ditambah/update</td>";
                 echo "</tr>";
               }
@@ -664,10 +740,10 @@ class BackgroundController extends Controller
                     ->where('rel.relationship_type','=','CONTACT')
                     ->where('rel.directional_flag','=','F')
                     ->where('hcp.owner_table_name','=','HZ_PARTIES')
-                    /*->where(function ($query) use($lasttime) {
+                    ->where(function ($query) use($lasttime) {
                             $query->where('hcp.last_update_date','>=',$lasttime)
                                   ->orwhere('rel.last_update_date', '>=', $lasttime);
-                        })*/
+                        })
                     ->select('sub.party_id','hca.cust_account_id'
                              , 'account_number as customer_number', 'obj.party_name as customer_name'
                              , 'sub.party_name as contact_name' , 'hcp.contact_point_type'
@@ -1077,94 +1153,99 @@ class BackgroundController extends Controller
       }
     }
 
-    public function updateDiskonTable($tglskrg)
+    public function updateDiskonTable($tglskrg=null)
     {
       if(is_null($tglskrg))
       {
           $tglskrg =date('Y-m-d');
       }
+      $insertprice = $this->getPricelist();
+      if($insertprice==1){
 
-      $listheader = QpListHeaders::whereIn('list_type_code',['DLT'])
+        $listheader = QpListHeaders::whereIn('list_type_code',['DLT','PRO'])
                     ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
               and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
-               ->where('list_header_id','=',22289)
+               //->where('list_header_id','=',22289)
                 ->get();
 
-      foreach ($listheader as $priceheader)
-      {
-        if(is_null($priceheader->start_date_active))
+        foreach ($listheader as $priceheader)
         {
-          $tglawheader=date_create('2017-01-01');
-        }else{
-          $tglawheader = $priceheader->start_date_active;
-        }
-        if(is_null($priceheader->end_date_active))
-        {
-          $tglakheader=date_create(date('Y').'-12-31');
-        }else{
-          $tglakheader = $priceheader->end_date_active;
-        }
+          if(is_null($priceheader->start_date_active))
+          {
+            $tglawheader=date_create('2017-01-01');
+          }else{
+            $tglawheader = $priceheader->start_date_active;
+          }
+          if(is_null($priceheader->end_date_active))
+          {
+            $tglakheader=date_create(date('Y').'-12-31');
+          }else{
+            $tglakheader = $priceheader->end_date_active;
+          }
 
-        $listdiskon = qp_modifier_summary::where('list_header_id','=',$priceheader->list_header_id)
+          $listdiskon = qp_modifier_summary::where('list_header_id','=',$priceheader->list_header_id)
                           ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
                                   and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
                           ->where('product_attr', '=','PRICING_ATTRIBUTE1')
                           ->where('list_line_type_code','=','DIS')
-                          ->where('list_line_id','=',23301)
+                        //  ->where('list_line_id','=',23301)
                           ->orderBy('list_header_id','asc')
                           ->orderBy('list_line_id','asc')
                           ->orderBy('pricing_group_sequence','asc')
                           ->get();
-        foreach($listdiskon as $diskon)
-        {
-          $a=$diskon->list_line_id;
-          echo ('line_id:'.$a);
-          $qualifierlist = qp_qualifiers::where('list_header_id','=',$diskon->list_header_id)
-                          ->where(function ($query) use ($a) {
-                                $query->where('list_line_id', '=', $a)
-                                      ->orWhere('list_line_id', '=', -1);
-                            })
-                            ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
-                                    and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
-                          ;
-
-
-          if($qualifierlist->get())
+          foreach($listdiskon as $diskon)
           {
-            /*customer id condition*/
-            $customerlist = $qualifierlist->where('qualifier_context','=','customer')
-              ->where('qualifier_attribute','=','QUALIFIER_ATTRIBUTE2')
-              ->get();
-            if($customerlist)
-            {
-              foreach ($customerlist as $cust)
-              {
+            $a=$diskon->list_line_id;
+            echo ('line_id:'.$a);
+            $qualifierlist = qp_qualifiers::where('list_header_id','=',$diskon->list_header_id)
+                            ->where(function ($query) use ($a) {
+                                  $query->where('list_line_id', '=', $a)
+                                        ->orWhere('list_line_id', '=', -1);
+                              })
+                              ->whereRaw("'".$tglskrg."' between ifnull(start_date_active,date('2017-01-01'))
+                                      and ifnull(end_date_active,DATE_ADD('".$tglskrg."',INTERVAL 1 day))")
+                            ;
 
-                QpPricingDiskon::updateorCreate(
-                  ['list_header_id'=>$diskon->list_header_id
-                  , 'list_line_id'=>$diskon->list_line_id
-                  ,'list_line_no' =>$diskon->list_line_no
-                  , 'item_id'=>$diskon->product_attr_val
-                  , 'customer_id'=>$cust->qualifier_attr_value]
-                  ,[
-                  'list_line_type_code'  =>$diskon->list_line_type_code
-                  ,'modifier_level_code'=>$diskon->modifier_level_code
-                  ,'operand'=>$diskon->operand
-                  ,'arithmetic_operator_code'=>$diskon->arithmetic_operator_code
-                  ,'start_date_active'=>$tglawheader
-                  ,'end_date_active'=>$tglakheader
-                  ,'uom_code'=>$diskon->product_uom_code
-                  ,'comparison_operator_code'=>$diskon->comparison_operator_code
-                  ,'pricing_attribute_context'=>$diskon->pricing_attribute_context
-                  ,'pricing_attr'=>$diskon->pricing_atr
-                  ,'pricing_attr_value_from'=>$diskon->pricing_attr_value_from
-                  ,'pricing_attr_value_to'=>$diskon->pricing_attr_value_to
-                  ]
-                );
+
+            if($qualifierlist->get())
+            {
+              /*customer id condition*/
+              $customerlist = $qualifierlist->where('qualifier_context','=','customer')
+                ->where('qualifier_attribute','=','QUALIFIER_ATTRIBUTE2')
+                ->get();
+              if($customerlist)
+              {
+                foreach ($customerlist as $cust)
+                {
+
+                  QpPricingDiskon::updateorCreate(
+                    ['list_header_id'=>$diskon->list_header_id
+                    , 'list_line_id'=>$diskon->list_line_id
+                    ,'list_line_no' =>$diskon->list_line_no
+                    , 'item_id'=>$diskon->product_attr_val
+                    , 'customer_id'=>$cust->qualifier_attr_value]
+                    ,[
+                    'list_line_type_code'  =>$diskon->list_line_type_code
+                    ,'modifier_level_code'=>$diskon->modifier_level_code
+                    ,'operand'=>$diskon->operand
+                    ,'arithmetic_operator_code'=>$diskon->arithmetic_operator_code
+                    ,'start_date_active'=>$tglawheader
+                    ,'end_date_active'=>$tglakheader
+                    ,'uom_code'=>$diskon->product_uom_code
+                    ,'comparison_operator_code'=>$diskon->comparison_operator_code
+                    ,'pricing_attribute_context'=>$diskon->pricing_attribute_context
+                    ,'pricing_attr'=>$diskon->pricing_atr
+                    ,'pricing_attr_value_from'=>$diskon->pricing_attr_value_from
+                    ,'pricing_attr_value_to'=>$diskon->pricing_attr_value_to
+                    ]
+                  );
+                }
               }
             }
           }
         }
+      }else{
+        echo "Tidak ada data yang baru";
       }
 
 
@@ -1218,127 +1299,150 @@ class BackgroundController extends Controller
               }
             }
 
-            if($insert_flag)
+            /*if($insert_flag)
             {
               //notif ke sysadmin
 
-            }
+            }*/
             return true;
         }
 
       }
     }
 
-    public function getMasterDiscount($tglskrg=){
+    public function getMasterDiscount($tglskrg=null){
+      if(is_null($tglskrg))
+      {
+        $request= DB::table('tbl_request')->where('event','=','synchronize')
+                  ->max('created_at');
+        if($request)
+        {
+          $tglskrg = date_create($request);
+          //echo"type:".gettype($lasttime);
+        }else{
+          $tglskrg = date_create("2017-07-01");
+        }
+      }
+      echo "lasttime:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
+      $this->getPricelist($tglskrg);
       $connoracle = DB::connection('oracle');
       if($connoracle){
-        $modifiers = $connoracle->table('qp_list_headers as qlh')
-                      ->join('qp_modifier_summary_v as qms','qlh.list_header_id','=','qms.list_header_id')
-                      ->where('product_attribute_context','=','ITEM')
-                      ->whereRaw('nvl(qlh.end_date_active,trunc(sysdate)+1) >= trunc(sysdate) and
-                                  nvl(qms.end_date_active,trunc(sysdate)+1) >= trunc(sysdate)')
-                      ->select('qlh.list_header_id', 'qms.list_line_id', 'qms.list_line_no', 'qms.list_line_type_code', 'qms.MODIFIER_LEVEL_CODE'
-                          , 'qms.operand', 'qms.arithmetic_operator'
-                          , 'qms.comparison_operator_code','qms.PRICING_ATTRIBUTE_CONTEXT'
-                          , 'qms.pricing_attr', 'qms.pricing_attr_value_from', 'qms.pricing_attr_value_to'
-                          , 'qms.PRICING_GROUP_SEQUENCE', 'qlh.ORIG_ORG_ID'
-                          , 'qms.product_attr_val','qms.PRODUCT_UOM_CODE','qms.product_attr')
-                      ->orderBy('qlh.list_header_id','asc')
-                      ->orderBy('qlh.list_line_no','asc')
-                      ->get();
-        if($modifiers)
+        $connoracle->enableQueryLog();
+        /*delete data yg end_date_active berakhir*/
+        $listheader = $connoracle->table('qp_list_headers')
+                    ->where('list_type_code','!=','PRL')
+                    ->whereraw('nvl(end_date_active,sysdate+1) < trunc(sysdate)')
+                    ->select('list_header_id')
+                    ->get();
+        if($listheader->count()>0)
         {
-          foreach ($modifiers as $m){
-            $qualifiers = $connoracle->table('qp_qualifiers_v as qqv')
-                          ->whereRaw("qqv.list_header_id =".$m->list_header_id."and (qqv.list_line_id=-1 or qqv.list_line_id=".$m->list_line_id." )" )
-                          ->whereRaw("nvl(qms.end_date_active,trunc(sysdate)+1) >= trunc(sysdate) ")
-                          ->select('qualifier_id','comparison_operator_code','qualifier_context','qualifier_attribute'
-                                  ,  'qualifier_attr_value'
-                                  )
-                          ->get();
-            if($quelifiers)
+          $delqlh = QpListHeaders::whereIn('list_header_id',$listheader->pluck('list_header_id')->toArray())
+                    ->delete();
+          $delqdiskon = QpPricingDiskon::whereIn('list_header_id',$listheader->pluck('list_header_id')->toArray())
+                    ->delete();
+        }
+        /*insert pricing diskon*/
+        $modifiers = $connoracle->table('gpl_pricing_diskon_v')
+                      ->whereraw('nvl(end_date_active,sysdate+1)>= trunc(sysdate)')
+                      ->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
+                      ->get();
+        if($modifiers){
+          echo "<table><caption>Data Diskon</caption>";
+          echo "<tr><th>Price Name</th><th>Product</th><th>Customer</th><th>Operand</th><th>Status</th></tr>";
+          foreach($modifiers as $m)
+          {
+            $product_name =null;
+            $product = Product::where('inventory_item_id','=',$m->product_attr_val)->first();
+            if($product) $product_name = $product->title;
+            echo "<tr>";
+            echo "<td>".$m->name."-".$m->list_header_id."</td>";
+            echo "<td>".$product_name."</td>";
+            $customer=collect([]);
+            if(!is_null($m->customer_number))
+              $customer = Customer::where('oracle_customer_id','=',$m->customer_number)->select('customer_name','customer_number')->first();
+            elseif(!is_null($m->ship_to))
+              $customer = Customer::join('customer_sites as cs','cs.customer_id','customers.id')
+                          ->where('site_use_id','=',$m->ship_to)->select('customer_name','customer_number')->first();
+            elseif(!is_null($m->bill_to))
+            $customer = Customer::join('customer_sites as cs','cs.customer_id','customers.id')
+                        ->where('site_use_id','=',$m->bill_to)->select('customer_name','customer_number')->first();
+
+            if($customer)
             {
-              foreach($qualifiers as $q)
-              {
-                if($q->qualifier_context == "CUSTOMER" and $q->qualifier_attribute=="QUALIFIER_ATTRIBUTE2")
-                  $discount = QpPricingDiskon::updateOrCreate(
-                        ['list_header_id'=>$m->list_header_id
-                        , 'list_line_id'=>$m->list_line_id
-                        ,'list_line_no' =>$m->list_line_no],
-                        [ 'item_id'=>$m->product_attr_val
-                        ,'list_line_type_code'  =>$m->list_line_type_code
-                        ,'modifier_level_code'=>$m->modifier_level_code
-                        ,'operand'=>$m->operand
-                        ,'arithmetic_operator_code'=>$m->arithmetic_operator_code
-                        ,'start_date_active'=>$m->start_date_active
-                        ,'end_date_active'=>$m->end_date_active
-                        ,'uom_code'=>$m->product_uom_code
-                        ,'comparison_operator_code'=>$m->comparison_operator_code
-                        ,'pricing_attribute_context'=>$m->pricing_attribute_context
-                        ,'pricing_attr'=>$m->pricing_atr
-                        ,'pricing_attr_value_from'=>$m->pricing_attr_value_from
-                        ,'pricing_attr_value_to'=>$m->pricing_attr_value_to
-                        ,'product_attr'=>$m->product_attr
-                        ,'customer_id'=>$q->qualifier_attr_value
-                      ]);
-                elseif($q->qualifier_context == "CUSTOMER" and $q->qualifier_attribute=="QUALIFIER_ATTRIBUTE11")
-                $discount = QpPricingDiskon::updateOrCreate(
-                      ['list_header_id'=>$m->list_header_id
-                      , 'list_line_id'=>$m->list_line_id
-                      ,'list_line_no' =>$m->list_line_no],
-                      [ 'item_id'=>$m->product_attr_val
-                      ,'list_line_type_code'  =>$m->list_line_type_code
-                      ,'modifier_level_code'=>$m->modifier_level_code
-                      ,'operand'=>$m->operand
-                      ,'arithmetic_operator_code'=>$m->arithmetic_operator_code
-                      ,'start_date_active'=>$m->start_date_active
-                      ,'end_date_active'=>$m->end_date_active
-                      ,'uom_code'=>$m->product_uom_code
-                      ,'comparison_operator_code'=>$m->comparison_operator_code
-                      ,'pricing_attribute_context'=>$m->pricing_attribute_context
-                      ,'pricing_attr'=>$m->pricing_atr
-                      ,'pricing_attr_value_from'=>$m->pricing_attr_value_from
-                      ,'pricing_attr_value_to'=>$m->pricing_attr_value_to
-                      ,'product_attr'=>$m->product_attr
-                      ,'ship_to_id'=>$q->qualifier_attr_value
-                    ]);
-                elseif($q->qualifier_context == "CUSTOMER")  {
-                    if($q->qualifier_attribute=="QUALIFIER_ATTRIBUTE33")
-                    {
-                      /*address4*/
-                    }elseif($q->qualifier_attribute=="QUALIFIER_ATTRIBUTE32"){
-                      /*Subchannel*/
-                    }
+              echo "<td>".$customer->customer_number."-".$customer->customer_name."</td>";
+            }else echo "<td></td>";
 
-                }elseif($q->qualifier_context == "CUSTOMER" and $q->qualifier_attribute=="QUALIFIER_ATTRIBUTE32")  {
+            echo "<td>".$m->operand."</td>";
+            $olddiscount =  QpPricingDiskon::where([
+              ['list_header_id','=',$m->list_header_id],
+              ['list_line_id','=',$m->list_line_id],
+              ['item_id','=',$m->product_attr_val]
+            ]);
+            if(!is_null($m->customer_number)) $olddiscount = $olddiscount->where('customer_id',$m->customer_number);
+            if(!is_null($m->ship_to)) $olddiscount = $olddiscount->where('ship_to_id',$m->ship_to);
+            if(!is_null($m->bill_to)) $olddiscount = $olddiscount->where('bill_to_id',$m->bill_to);
+            //if(!is_null($m->product_attr_val))  $olddiscount = $olddiscount->where('item_id',$m->product_attr_val);
 
-                }
-              }
-
-            } else{
-              $discount = QpPricingDiskon::updateOrCreate(
-                ['list_header_id'=>$m->list_header_id
-                , 'list_line_id'=>$m->list_line_id
-                ,'list_line_no' =>$m->list_line_no],
-                [ 'item_id'=>$m->product_attr_val
-                ,'list_line_type_code'  =>$m->list_line_type_code
+            $old_discount = $olddiscount->get();
+            if($old_discount->count()==1)
+            {
+              $updatediscount = $olddiscount->update([
+                'list_line_type_code'  =>$m->list_line_type_code
+                ,'list_line_no' =>$m->list_line_no
                 ,'modifier_level_code'=>$m->modifier_level_code
                 ,'operand'=>$m->operand
-                ,'arithmetic_operator_code'=>$m->arithmetic_operator_code
+                ,'arithmetic_operator_code'=>$m->arithmetic_operator
                 ,'start_date_active'=>$m->start_date_active
                 ,'end_date_active'=>$m->end_date_active
                 ,'uom_code'=>$m->product_uom_code
                 ,'comparison_operator_code'=>$m->comparison_operator_code
                 ,'pricing_attribute_context'=>$m->pricing_attribute_context
-                ,'pricing_attr'=>$m->pricing_atr
+                ,'pricing_attr'=>$m->pricing_attr
                 ,'pricing_attr_value_from'=>$m->pricing_attr_value_from
                 ,'pricing_attr_value_to'=>$m->pricing_attr_value_to
-                ,'product_attr'=>$m->product_attr
-                ]
-              );
+                ,'pricing_group_sequence'=>$m->pricing_group_sequence
+                ,'orig_org_id'=>$m->orig_org_id
+                ,'price_break_type_code'=>$m->price_break_type_code
+              ]);
+              echo "<td>update</td>";
+            }elseif($old_discount->count()==0){
+              /*insert*/
+              $updatediscount = $olddiscount->insert([
+                'list_header_id'=>$m->list_header_id
+                ,'list_line_id'=> $m->list_line_id
+                ,'item_id'=> $m->product_attr_val
+                ,'customer_id' => $m->customer_number
+                ,'ship_to_id'=>$m->ship_to
+                ,'bill_to_id'=>$m->bill_to
+                ,'list_line_type_code'  =>$m->list_line_type_code
+                ,'list_line_no' =>$m->list_line_no
+                ,'modifier_level_code'=>$m->modifier_level_code
+                ,'operand'=>$m->operand
+                ,'arithmetic_operator_code'=>$m->arithmetic_operator
+                ,'start_date_active'=>$m->start_date_active
+                ,'end_date_active'=>$m->end_date_active
+                ,'uom_code'=>$m->product_uom_code
+                ,'comparison_operator_code'=>$m->comparison_operator_code
+                ,'pricing_attribute_context'=>$m->pricing_attribute_context
+                ,'pricing_attr'=>$m->pricing_attr
+                ,'pricing_attr_value_from'=>$m->pricing_attr_value_from
+                ,'pricing_attr_value_to'=>$m->pricing_attr_value_to
+                ,'pricing_group_sequence'=>$m->pricing_group_sequence
+                ,'orig_org_id'=>$m->orig_org_id
+                ,'price_break_type_code'=>$m->price_break_type_code
+              ]);
+              echo "<td>insert</td>";
+            }else{
+              /*duplicate*/
+              echo "<td>duplicate</td>";
             }
+            echo"</tr>";
           }
         }
+
+        $del_line_diskon = QpPricingDiskon::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
+                          ->delete();
+
       }
     }
 

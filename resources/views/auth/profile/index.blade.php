@@ -9,6 +9,21 @@
 			<p>{{ $message }}</p>
 		</div>
 	@endif
+	@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+  @endif
+	@if ($errors = Session::get('error'))
+		<div class="alert alert-warning">
+			<p>{{ $errors }}</p>
+		</div>
+	@endif
+
 	<div class="row">
 		<div class="col-md-10 col-md-offset-1">
 			<img src="{{asset('/uploads/avatars/'.$customer->avatar)}}" style="width:120px; height:120px; float:left; border-radius:50%; margin-right:25px; border-style: solid;" id="img_avatar">
@@ -36,36 +51,68 @@
 				</div>
 			</div>-->
 			<h5><strong><u>Email</u></U></strong> : {{ $customer->email }}</h5>
-			@if(!is_null(Auth::user()->customer_id))
+
 				<form class="form-horizontal" action="{{route('profile.updateprofile')}}"  method="POST">
 					{{csrf_field()}}
+					@if(!is_null(Auth::user()->customer_id))
 					<h5><strong><u>Category</u></strong> : {{$customer->tipeoutlet}}</h5>
-					<h5><strong><u>Tax ID</u></strong> : {{$customer->tax_reference}}</h5>
-					@if($customer->psc_flag=="1" or $customer->pharma_flag=="1")
-						<div class="form-check form-check-inline">
-							<label class="form-check-label"><strong><u>Product</u></strong> : </label>
-							<label class="form-check-label ">
-								@if($customer->psc_flag=="1")
-								  <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="psc_flag" value="1" checked disabled> PSC
-									<input type="hidden" name="psc_flag" value="1">
-								@else
-									<input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="psc_flag" value="1"> PSC
-								@endif
-							</label>
-							<label class="form-check-label">
-								@if($customer->pharma_flag=="1")
-								    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="pharma_flag" value="1" checked disabled> Pharma
-										<input type="hidden" name="pharma_flag" value="1">
-								@else
-								    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="pharma_flag" value="1"> Pharma
-								@endif
-							</label>
+					<div class="form-inline row">
+						<label class="col-sm-3 col-form-label" for="tax"><strong>Tax ID</strong> </label>
+						<div class="col-sm-4">
+							<input type="text" name="tax" value="{{$customer->tax_reference}}" class="form-control form-control-sm" placeholder="Tax Number">
 						</div>
-						<div>
-							<button type="submit" name="Save" value="updateprofile" class="btn btn-sm btn-success">@lang('label.save')</button>
-						</div>
+					</div>
+						@if($customer->psc_flag=="1" or $customer->pharma_flag=="1")
+							<div class="form-check form-check-inline">
+								<label class="form-check-label"><strong>Product</strong> : </label>
+								<label class="form-check-label ">
+									@if($customer->psc_flag=="1")
+									  <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="psc_flag" value="1" checked disabled> PSC
+										<input type="hidden" name="psc_flag" value="1">
+									@else
+										<input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="psc_flag" value="1"> PSC
+									@endif
+								</label>
+								<label class="form-check-label">
+									@if($customer->pharma_flag=="1")
+									    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="pharma_flag" value="1" checked disabled> Pharma
+											<input type="hidden" name="pharma_flag" value="1">
+									@else
+									    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="pharma_flag" value="1"> Pharma
+									@endif
+								</label>
+							</div>
+						@endif
 					@endif
+					<div class="form-inline row">
+						<label class="col-sm-3 col-form-label" for="current_password"><strong>@lang('label.currentpass')</strong> </label>
+						<div class="col-sm-4">
+							<input type="text" name="current_pswd" class="form-control form-control-sm" placeholder="@lang('label.currentpass')">
+						</div>
+					</div>
+					<div class="form-inline row">
+						<label class="col-sm-3 col-form-label" for="new_pswd"><strong>@lang('label.newpassword')</strong> </label>
+						<div class="col-sm-4">
+							<input type="text" name="new_pswd" class="form-control form-control-sm" placeholder="@lang('label.newpassword')">
+						</div>
+					</div>
+					<div class="form-inline row">
+						<label class="col-sm-3 col-form-label" for="confirm_new_pswd"><strong>@lang('label.newconfpass')</strong></label>
+						<div class="col-sm-4">
+							<input type="text" name="confirm_new_pswd" class="form-control form-control-sm" placeholder="@lang('label.newconfpass')">
+						</div>
+					</div>
+
+						<div>
+							<div class="col-sm-3">
+								@if(!is_null(Auth::user()->customer_id))
+								<button type="submit" name="Save" value="updateprofile" class="btn btn-sm btn-success">@lang('label.save')</button>
+								@endif
+								<button type="submit" name="Save" value="ChangePassword" class="btn btn-sm btn-info">Change Password</button>
+							</div>
+						</div>
 		    </form>
+			@if(!is_null(Auth::user()->customer_id))
 				<!--UNTUK ALAMAT-->
 				<h3><strong><u>Address</u></strong></h3>
 				@if($customer_sites->count()>=1)

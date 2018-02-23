@@ -38,6 +38,11 @@ class Customer extends Model
     return $this->belongsToMany('App\Customer','outlet_distributor','outlet_id','distributor_id')->withTimestamps();
   }
 
+  public function hasOutlet()
+  {
+    return $this->belongsToMany('App\Customer','outlet_distributor','distributor_id','outlet_id')->withTimestamps();
+  }
+
   public function subgroupdc()
   {
     return $this->belongsTo('App\SubgroupDatacenter','subgroup_dc_id');

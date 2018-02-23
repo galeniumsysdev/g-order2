@@ -34,6 +34,7 @@ return [
     'confpass' => 'Pengulangan Kata Sandi',
     'newpassword' => 'Kata Sandi Baru',
     'newconfpass' => 'Pengulangan Kata Sandi Baru',
+    'currentpass' => 'Kata Sandi saat ini',
     'cp' => 'Nama kontak',
     'forgotpassword' => 'Lupa Kata Sandi?',
     'pwdminlength'=>'Minimum password berisi 6 karakter',
@@ -93,5 +94,5 @@ return [
     'change_to_active'=>'Klik untuk aktifkan',
     'change_to_inactive'=>'Klik untuk menonaktifkan',
     'outlet_position' =>'Lokasi Outlet',
-    'PilihSalahSatu' => '--Pilih Salah Satu--',   
+    'PilihSalahSatu' => '--Pilih Salah Satu--',
 ];

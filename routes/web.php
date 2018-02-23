@@ -25,6 +25,7 @@ Route::post('/ajax/changeOrderUom', 'OrderController@changeOrderUom');
 Route::get('/ajax/getCity', 'UserController@getListCity');
 Route::get('/ajax/getDistrict', 'UserController@getListDistrict');
 Route::get('/ajax/getSubdistrict', 'UserController@getListSubDistrict');
+Route::get('/ajax/getCatOutlet', 'UserController@getkategoriOutlet');
 Route::get('/ajax/typeaheadProvince', 'ProfileController@getListProvince');
 Route::get('/ajax/typeaheadCity/{propid?}', 'ProfileController@getListCity');
 Route::get('/ajax/typeaheadOutlet', 'OutletProductController@getListOutlet');
@@ -35,6 +36,9 @@ Route::get('/ajax-subcat',function () {
 });
 
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
+Route::post('/ajax/addMappingType', 'UserController@ajaxAddMappingType')->name('ajax.addmapping.type');
+Route::get('/ajax/getMappingType/{id?}', 'UserController@ajaxGetMappingType')->name('ajax.mapping.getdata');
+Route::get('/ajax/getPriceList', 'PriceController@ajaxPriceList')->name('ajax.price.getdata');
 
 Route::get('detail/{id}', [
   'uses' => 'ProductController@show'
@@ -103,7 +107,7 @@ Route::get('/shopping-cart',[
 
 
 
-Route::group(['middleware' => 'prevent-back-history'],function(){
+Route::group(['middleware' => ['web']],function(){
   Auth::routes();
   //Route::get('/home', 'HomeController@index');
 });
@@ -158,6 +162,9 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::get('/product/getParetoProduct','ProductController@getAjaxProduct')->name('product.getAjaxProduct');
   Route::post('/product/updatePareto','ProductController@updatePareto')->name('product.updatePareto');
   Route::delete('/product/updatePareto/{id}','ProductController@destroyPareto')->name('product.destroyPareto');
+  Route::get('/product/pricelist','PriceController@index')->name('product.priceindex');
+  Route::get('/product/searchdiskon','PriceController@searchDiskon')->name('product.searchDiskon');
+  Route::post('/product/diskonIndex','PriceController@diskonIndex')->name('product.diskonIndex');
 
   Route::get('masterProduct/{id}', [
   'uses' => 'ProductController@master'
@@ -177,6 +184,8 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::patch('/users/cabang/edit/{id}','UserController@cabangUpdate')->name('usercabang.update');
   Route::get('/customer/yasaNonOracle','UserController@CustYasaNonOracle')->name('customer.yasaNonOracle');
   Route::patch('/customer/updateyasaNonOracle/{id}','UserController@mergeCustomer')->name('customer.mergeCustomer');
+  Route::get('/distributor/mappingOutlet/{id?}','UserController@MappingOutletDistributor')->name('customer.mappingOutlet');
+  Route::patch('/distributor/remappingOutlet/{id?}','UserController@remappingOutlet')->name('customer.remappingOutlet');
 
   Route::resource('CategoryOutlet',  'Cat_OutletController');
   Route::resource('CategoryProduct',  'CategoryProductController');
@@ -202,6 +211,8 @@ Route::get('customer/searchOutlet', 'CustomerController@searchOutlet')->name('cu
 Route::get('customer/searchDistributor/{flag?}', 'CustomerController@searchDistributor')->name('customer.searchDistributor');
 Route::get('customer/searchOutletDistributor', 'CustomerController@searchOutletDistributor')->name('customer.searchOutletDistributor');
 Route::get('customer/searchOracleOutlet', 'CustomerController@searchOracleOutlet')->name('customer.oracle.searchoutlet');
+Route::get('customer/searchCustomerOracle', 'CustomerController@searchCustomerOracle')->name('customer.oracle.searchCustomer');
+Route::get('ajax/searchProduct', 'PriceController@ajaxSearchProduct')->name('oracle.searchProduct');
 
 
 
@@ -300,7 +311,7 @@ Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSumma
 
 
 
-Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
+Route::get('/oracle/getdiskon/{tglskrg?}', 'BackgroundController@getMasterDiscount')->name('oracle.synchronize.diskon');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));

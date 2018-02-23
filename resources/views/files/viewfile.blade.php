@@ -92,7 +92,7 @@
                 <table class="table table-sm"  id="table">
                     <thead>
                       <tr>
-                        @if(Auth::user()->hasRole('Principal'))
+                        @if(!Auth::user()->hasRole('Distributor'))
                         <th>Distributor</th>
                         @endif
                         <th>Period</th>
@@ -106,7 +106,7 @@
                     <tbody>
                     @forelse($downloads as $down)
                         <tr>
-                            @if(Auth::user()->hasRole('Principal'))
+                            @if(!Auth::user()->hasRole('Distributor'))
                             <td data-title="Distributor">{{$down->customer_name}}</td>
                             @endif
                             <td data-title="Period">{{ $down->period }}</td>

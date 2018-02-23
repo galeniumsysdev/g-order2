@@ -248,10 +248,6 @@ class ProductController extends Controller
   public function getIndex()
   {
     if(Auth::check()){
-      /*if(Auth::user()->can('Create PO')){
-        $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
-        return view('shop.index',['products' => $products]);
-      }else{*/
         if(Auth::user()->hasRole('IT Galenium')) {
             return redirect('/admin');
         }elseif(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik') ) {
@@ -261,12 +257,10 @@ class ProductController extends Controller
         }else{/*if(Auth::user()->hasRole('Marketing PSC') || Auth::user()->hasRole('Marketing Pharma')) {*/
             return redirect('/home');
         }
-      //}
-
     }else{
-      //return view('auth.login');
+
       $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
-      //dd(Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->toSQL());
+
       return view('shop.index',['products' => $products]);
     }
 
@@ -379,11 +373,16 @@ class ProductController extends Controller
     }
     //  $sqlproduct .= " limit 12";
     $products = collect($dataproduct);
+    $polineexist = DB::table('po_draft_lines')
+            ->join('po_draft_headers as pdh', 'po_draft_lines.po_header_id','=','pdh.id')
+            ->where('pdh.customer_id','=',Auth::user()->customer_id)
+            ->select('product_id','qty_request','uom')
+            ->get();
     /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
     $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
     $products->appends($_REQUEST)->render();
     $products ->setPath(url()->current());*/
-    return view('shop.index',['products' => $products]);
+    return view('shop.index',['products' => $products,'polineexist'=>$polineexist]);
   }
 
   public function category($id)
@@ -436,11 +435,16 @@ class ProductController extends Controller
       }
       //  $sqlproduct .= " limit 12";
       $products = collect($dataproduct);
+      $polineexist = DB::table('po_draft_lines')
+              ->join('po_draft_headers as pdh', 'po_draft_lines.po_header_id','=','pdh.id')
+              ->where('pdh.customer_id','=',Auth::user()->customer_id)
+              ->select('product_id','qty_request','uom')
+              ->get();
       //dd($products);
       /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
       $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
       $products ->setPath(url()->current());*/
-    return view('shop.index',['products' => $products,'nama_kategori'=>$kategory->description]);
+    return view('shop.index',['products' => $products,'nama_kategori'=>$kategory->description,'polineexist'=>$polineexist]);
   }
 
   public function show($id)
@@ -682,31 +686,7 @@ class ProductController extends Controller
         $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$id)->select('uom_code')->get();
         $product->uom=$uom;
         $product->jns=$product->categories()->first()->parent;
-        /*$oldCart = Session::has('cart')?Session::get('cart'):null;
 
-        if(!is_null($oldCart))
-        { //check product barang yang sama ada di keranjang belanja
-          if(array_key_exists($id.'-'.$request->satuan, $oldCart->items)){
-            return response()->json([
-                            'result' => 'exist',
-                            'totline' => $oldCart->totalQty,
-                          ],200);
-          }
-
-          if(!in_array($product->jns,$oldCart->items))
-          {
-            $jns = array_unique(array_pluck($oldCart->items,'jns'));
-            array_push($jns,$product->jns);
-            if($this->getDistributor($jns)->count()==0)
-            {
-              return response()->json([
-                              'result' => 'errdist',
-                              'jns'=>implode(",",$jns),
-                            ],200);
-            }
-
-          }
-        }*/
         $tax=false;
         $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id]);
         if($headerpo){
@@ -758,7 +738,7 @@ class ProductController extends Controller
                       ,'list_price'=>floatval($request->hrg)
                       ,'unit_price'=>floatval($request->disc)
                       ,'amount'=>$request->qty*floatval($request->hrg)
-                      ,'discount'=>$request->qty*(floatval($request->hrg)-floatval($request->disc))
+                      ,'discount'=>round($request->qty*floatval($request->hrg),0)-round($request->qty*floatval($request->disc),0)
                       ,'tax_amount'=>$taxamount
                       ,'jns'=>$product->jns
                       ]
@@ -767,7 +747,7 @@ class ProductController extends Controller
         }
 
         $headerpo->subtotal +=($request->qty*floatval($request->hrg));
-        $headerpo->discount+= (floatval($request->hrg)-floatval($request->disc)) *$request->qty;
+        $headerpo->discount+= round($request->qty*floatval($request->hrg),0)-round($request->qty*floatval($request->disc),0);
         if($tax)
         {
             $headerpo->tax =PoDraftLine::where('po_header_id','=',$headerpo->id)->sum('tax_amount');
@@ -802,11 +782,11 @@ class ProductController extends Controller
                         )->groupBy('po_header_id')->first();
         //dd(DB::getQueryLog());
         if($newline){
-        $headerpo->Tax = $newline->tax_amount;
-        $headerpo->subtotal= $newline->subtotal;
-        $headerpo->discount = $newline->discount;
-        $headerpo->amount = $newline->subtotal-$newline->discount+$newline->tax_amount;
-        $headerpo->save();
+          $headerpo->Tax = $newline->tax_amount;
+          $headerpo->subtotal= $newline->subtotal;
+          $headerpo->discount = $newline->discount;
+          $headerpo->amount = $newline->subtotal-$newline->discount+$newline->tax_amount;
+          $headerpo->save();
         }else{
           $headerpo->Tax = 0;
           $headerpo->subtotal= 0;
@@ -873,9 +853,10 @@ class ProductController extends Controller
             $line->primary_uom = $product->satuan_primary;
             $line->list_price = $request->hrg;
             $line->unit_price = $request->disc;
-            $line->discount = $request->qty * ($request->hrg-$request->disc);
+            $line->discount = round($request->qty * $request->hrg,0) - round($request->qty *$request->disc,0);
             $line->amount = $request->qty *$request->hrg;
-            if($tax) $line->tax_amount = 0.1 * ($request->qty * $request->disc);else $line->tax_amount = 0;
+            if($tax) $taxamount = round($request->qty*floatval($request->disc)*0.1,0);else $taxamount=0;
+            if($tax) $line->tax_amount = round(0.1 * ($request->qty * $request->disc),0);else $line->tax_amount = 0;
             $line->jns = $product->categories()->first()->parent;
             $line->save();
           }

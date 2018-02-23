@@ -13,6 +13,7 @@ use Auth;
 use Image;
 use File;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 
 class ProfileController extends Controller
@@ -263,48 +264,84 @@ class ProfileController extends Controller
   {
     if($request->Save=="updateprofile")
     {
-      $customer=Auth::user()->customer;
-      $groupdc=null;
-      $sites = $customer->sites()->where('primary_flag','=','Y')->first();
-      if($sites)
+      /*$changepswd =false;
+      $pesanchangepswd=null;
+      if(!is_null($request->current_pswd) and !is_null($request->new_pswd))
+        $changepswd = $this->changePassword($request);
+      if($changepswd) $pesanchangepswd = "Password berhasil diubah! ";else return redirect()->back();*/
+      if(!is_null(Auth::user()->customer_id))
       {
-        $city = $sites->city_id;
-      }else{
-        $city = null;
-      }
-      if(isset($customer->outlet_type_id)){
-      /*  $sub=DB::table('subgroup_datacenters as sdc')
-                  ->where('id','=',  $customer->subgroup_dc_id)
-                  ->select('group_id')->first();
-        if($sub) $groupdc = $sub->group_id;*/
-        $groupdc = $customer->outlet_type_id;
-      }
-      if($customer->psc_flag !=$request->psc_flag)
-      {
-        if($request->psc_flag=="1")//adddistributor pharma
+        $customer=Auth::user()->customer;
+        $groupdc=null;
+        $sites = $customer->sites()->where('primary_flag','=','Y')->first();
+        if($sites)
         {
-          $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
-          if($distributor)
+          $city = $sites->city_id;
+        }else{
+          $city = null;
+        }
+        if(isset($request->tax)) $customer->tax_reference = $request->tax;
+        if(isset($customer->outlet_type_id)){
+        /*  $sub=DB::table('subgroup_datacenters as sdc')
+                    ->where('id','=',  $customer->subgroup_dc_id)
+                    ->select('group_id')->first();
+          if($sub) $groupdc = $sub->group_id;*/
+          $groupdc = $customer->outlet_type_id;
+        }
+        if($customer->psc_flag !=$request->psc_flag)
+        {
+          if($request->psc_flag=="1")//adddistributor pharma
           {
-            $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
+            if($distributor)
+            {
+              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+            }
           }
         }
-      }
-      if($customer->pharma_flag !=$request->pharma_flag)
-      {
-        if($request->pharma_flag=="1")//adddistributor pharma
+        if($customer->pharma_flag !=$request->pharma_flag)
         {
-          $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
-          if($distributor)
+          if($request->pharma_flag=="1")//adddistributor pharma
           {
-            $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+            $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
+            if($distributor)
+            {
+              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+            }
           }
         }
+        $customer->psc_flag = $request->psc_flag;
+        $customer->pharma_flag = $request->pharma_flag;
+        $customer->save();
+        return redirect(route('profile.index'))->with('message',$pesanchangepswd.trans("pesan.update"));
       }
-      $customer->psc_flag = $request->psc_flag;
-      $customer->pharma_flag = $request->pharma_flag;
-      $customer->save();
-      return redirect(route('profile.index'))->with('message',trans("pesan.update"));
+    }elseif($request->Save=="ChangePassword")
+    {
+      if (!(Hash::check($request->current_pswd, Auth::user()->password))) {
+          // The passwords matches
+          return redirect()->back()->with("error",trans('auth.notmatchpswd'));
+          return false;
+      }
+
+      if(strcmp($request->current_pswd, $request->new_pswd) == 0){
+          //Current password and new password are same
+          return redirect()->back()->with("error",trans('auth.diffchangepwsd'));
+          return false;
+      }
+
+      $validatedData = $this->validate($request,[
+          'current_pswd' => 'required',
+          'new_pswd' => 'required|string|min:6',
+          'confirm_new_pswd' => 'required|string|min:6|same:new_pswd'
+      ]);
+
+      //Change Password
+      $user = Auth::user();
+      $user->password = bcrypt($request->new_pswd);
+      $user->save();
+      $pesanchangepswd = "Password berhasil diubah! ";
+      return redirect(route('profile.index'))->with('message',$pesanchangepswd);
     }
   }
+
 }

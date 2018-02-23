@@ -97,8 +97,9 @@
 							<div class="productboxCart">
 								<div class ="clearfix" id="addCart-{{$product->id}}">
 									<!--<a href="{{ route('product.addToCart',['id'=>$product->id])}}" class="btn btn-sm btn-success center-block" role="button">Add to cart</a>-->
-									<a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button"  id="addCart2-{{$product->id}}">@lang('shop.AddToCart')</a>
+									<a onclick="addCart('{{$product->id}}');return false;" href="#"  class="btn btn-sm btn-success center-block" role="button"  id="addCart2-{{$product->id}}">@lang('shop.AddToCart')</a>									
 								</div>
+
 							</div>
 
 							<!--DIV CLASS DISTRIBUTOR-->
