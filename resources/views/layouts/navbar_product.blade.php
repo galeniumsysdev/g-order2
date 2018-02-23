@@ -24,6 +24,15 @@
 	<!--<link href="{{ asset('css/app20170913.css') }}" rel="stylesheet">-->
 	<link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
 	<link rel="stylesheet" href="{{ URL::to('css/loading.css') }}">
+  @if(Auth::check())
+  <style type="text/css">
+  @media (max-width: 767px) {
+    body{
+      padding-top: 100px;
+    }
+  }
+  </style>
+  @endif
 @yield('css')
     <!-- Scripts -->
     <script>
@@ -40,7 +49,7 @@
     <div id="loader"></div><!-- ini loadingnya-->
     <div style="display:none;" id="myDiv" class="animate-bottom"><!-- ini id myDiv yang akan dihide ketika loading -->
       <div id="app">
-          <nav class="navbar navbar-default navbar-static-top header">
+          <nav class="navbar navbar-default navbar-fixed-top header">
               <div class="container">
                   <div class="navbar-header">
 
@@ -212,7 +221,7 @@
                                 </ul>
                               </li>
                               <li class="hidden-xs">
-                                <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart" aria-hidden="true"></i>&nbsp;@lang('label.shopcart')
+                                <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart" aria-hidden="true"></i>&nbsp;
                                   <span class="badge" id="shopcart">{{ isset($countbrg)?$countbrg:"" }}</span>
                                 </a>
                               </li>

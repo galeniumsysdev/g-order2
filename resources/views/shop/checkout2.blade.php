@@ -173,7 +173,7 @@
         </tr>
 			</tfoot>
 		</table>
-    @if(count($bonus))
+    @if($bonus->where('bonus','!=',0)->count()>0)
     <table class="table table-hover table-condensed">
       <caption align="center"><h4>Bonus Anda</h4></caption>
       <thead>

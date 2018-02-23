@@ -750,4 +750,24 @@ class CustomerController extends Controller
 
     }
 
+    public function searchCustomerOracle(Request $request)
+    {
+      $data = Customer::where("customer_number","LIKE",$request->input('query')."%")
+            ->whereNotNull("oracle_customer_id")
+            ->where('status','=','A')
+            ->whereExists(function($query){
+              $query->select(DB::raw(1))
+                    ->from('outlet_distributor as od')
+                    ->join('customers as dist', 'od.distributor_id','=','dist.id')
+                    ->join('users as u','u.customer_id','=','dist.id')
+                    ->join('role_user as ru','ru.user_id','=','u.id')
+                    ->join('roles as r','r.id','=','ru.role_id')
+                    ->whereraw("od.outlet_id= customers.id and r.name = 'Principal'");
+            });
+
+      $data = $data->select('id','customer_name','customer_number','oracle_customer_id','tax_reference');
+      $data = $data->orderBy('customer_name','asc')->get();
+      return response()->json($data);
+    }
+
 }

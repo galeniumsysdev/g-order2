@@ -69,7 +69,13 @@
                 <input type="hidden" id="hrg-{{$product->id}}" value="{{$product->harga}}">
                 <input type="hidden" id="disc-{{$product->id}}" value="{{$product->price_diskon}}">
                 <div class ="clearfix" id="addCart-{{$product->id}}">
-                  <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block"  role="button">@lang('shop.AddToCart')</a>
+                  @if((Auth::user()->can('Create PO')))
+                    @if($polineexist->where('product_id',$product->id)->count()>0)
+                       <span class="btn btn-sm btn-info btn-block"><i class="fa fa-shopping-cart" aria-hidden="true"></i> {{$polineexist->where('product_id',$product->id)->sum('qty_request')}}&nbsp; {{$polineexist->where('product_id',$product->id)->first()->uom}}</span>
+                    @else
+                       <a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block"  role="button" id="addCart2-{{$product->id}}">@lang('shop.AddToCart')</a>
+                    @endif
+                  @endif
                 </div>
                 <div class="info-product" id="info-product-{{$product->id}}">
 					@if(Auth::user()->hasRole('Distributor'))

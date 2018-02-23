@@ -20,12 +20,28 @@
         </li>
       </ul>
     </li>
-	  <li {{$menu=='product'?'class=active':''}}>
-        <a href="{{route('product.show')}}"><i class="fa fa-fw fa-table"></i> Product</a>
+    <li>
+      <a href="javascript:;" data-toggle="collapse" data-target="#product"><i class="fa fa-fw fa-table"></i> Product <i class="fa fa-fw fa-caret-down"></i></a>
+      @if($menu=='product' or $menu=='listprice' or $menu=='diskon' )
+      <ul id="product" class="collapse in">
+      @else
+      <ul id="product" class="collapse">
+      @endif
+        <li {{$menu=='product'?'class=active':''}}>
+            <a href="{{route('product.show')}}"><i class="fa fa-fw fa-table"></i> Product</a>
+        </li>
+        <li {{$menu=='listprice'?'class=active':''}}>
+            <a href="{{route('product.priceindex')}}"><i class="fa fa-fw fa-table"></i> Pricing</a>
+        </li>
+        <li {{$menu=='diskon'?'class=active':''}}>
+            <a href="{{route('product.searchDiskon')}}"><i class="fa fa-fw fa-table"></i> Diskon</a>
+        </li>
+        <li {{$menu=='pareto'?'class=active':''}}>
+            <a href="{{route('product.pareto')}}"><i class="fa fa-fw fa-star"></i> Pareto Product</a>
+        </li>
+      </ul>
     </li>
-    <li {{$menu=='pareto'?'class=active':''}}>
-        <a href="{{route('product.pareto')}}"><i class="fa fa-fw fa-star"></i> Pareto Product</a>
-    </li>
+
     <li {{$menu=='banner'?'class=active':''}}>
         <a href="{{route('admin.banner')}}"><i class="fa fa-fw fa-film"></i> Banner/Carousel</a>
     </li>

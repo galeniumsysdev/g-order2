@@ -38,6 +38,7 @@ Route::get('/ajax-subcat',function () {
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
 Route::post('/ajax/addMappingType', 'UserController@ajaxAddMappingType')->name('ajax.addmapping.type');
 Route::get('/ajax/getMappingType/{id?}', 'UserController@ajaxGetMappingType')->name('ajax.mapping.getdata');
+Route::get('/ajax/getPriceList', 'PriceController@ajaxPriceList')->name('ajax.price.getdata');
 
 Route::get('detail/{id}', [
   'uses' => 'ProductController@show'
@@ -161,6 +162,9 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   Route::get('/product/getParetoProduct','ProductController@getAjaxProduct')->name('product.getAjaxProduct');
   Route::post('/product/updatePareto','ProductController@updatePareto')->name('product.updatePareto');
   Route::delete('/product/updatePareto/{id}','ProductController@destroyPareto')->name('product.destroyPareto');
+  Route::get('/product/pricelist','PriceController@index')->name('product.priceindex');
+  Route::get('/product/searchdiskon','PriceController@searchDiskon')->name('product.searchDiskon');
+  Route::post('/product/diskonIndex','PriceController@diskonIndex')->name('product.diskonIndex');
 
   Route::get('masterProduct/{id}', [
   'uses' => 'ProductController@master'
@@ -207,6 +211,8 @@ Route::get('customer/searchOutlet', 'CustomerController@searchOutlet')->name('cu
 Route::get('customer/searchDistributor/{flag?}', 'CustomerController@searchDistributor')->name('customer.searchDistributor');
 Route::get('customer/searchOutletDistributor', 'CustomerController@searchOutletDistributor')->name('customer.searchOutletDistributor');
 Route::get('customer/searchOracleOutlet', 'CustomerController@searchOracleOutlet')->name('customer.oracle.searchoutlet');
+Route::get('customer/searchCustomerOracle', 'CustomerController@searchCustomerOracle')->name('customer.oracle.searchCustomer');
+Route::get('ajax/searchProduct', 'PriceController@ajaxSearchProduct')->name('oracle.searchProduct');
 
 
 
@@ -305,7 +311,7 @@ Route::get('/oracle/synchronizemodifier', 'BackgroundController@getModifierSumma
 
 
 
-Route::get('/oracle/getdiskon/{tglskrg}', 'BackgroundController@updateDiskonTable');
+Route::get('/oracle/getdiskon/{tglskrg?}', 'BackgroundController@getMasterDiscount')->name('oracle.synchronize.diskon');
 /*
 Route::get('/test',function () {
   dd (DB::connection('oracle')->select('select name from hr_all_organization_units haou '));

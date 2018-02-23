@@ -147,6 +147,15 @@
                             </div>
                           </div>
 
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="price">Pricelist :</label>
+                            <div class="col-sm-4">
+                              <select class="form-control" id="priceheader" name="price">
+                                <option value="">--</option>
+                              </select>
+                            </div>
+                          </div>
+
 
                           <div class="form-group" id="status">
                               <div class="col-sm-12">
@@ -338,6 +347,7 @@ var baseurl = window.Laravel.url;
 $(document).ready(function() {
   var baseurl = window.Laravel.url;
   ubahdc({{isset($customer->subgroup_dc_id)?$customer->subgroup_dc_id:0}});
+  getlistprice({{$customer->price_list_id}});
   });
   function ubahdc(old){
       var cat_id =$('#groupdc').val();
@@ -350,6 +360,24 @@ $(document).ready(function() {
               $('#subgroupdc').append('<option value="'+subcatObj.id+'" selected=selected>'+subcatObj.display_name+'</option>');
             }else{
               $('#subgroupdc').append('<option value="'+subcatObj.id+'">'+subcatObj.display_name+'</option>');
+            }
+
+          });
+
+      });
+  }
+
+  function getlistprice(old){
+      $.get(baseurl+'/ajax/getPriceList',function(data){
+          //console.log(data);
+            $('#priceheader').empty();
+            $('#priceheader').append('<option value="">--Pilih Salah Satu--</option>');
+          $.each(data,function(index,subcatObj){
+            if (subcatObj.list_header_id==old)
+            {
+              $('#priceheader').append('<option value="'+subcatObj.list_header_id+'" selected=selected>'+subcatObj.name+'</option>');
+            }else{
+              $('#priceheader').append('<option value="'+subcatObj.list_header_id+'">'+subcatObj.name+'</option>');
             }
 
           });

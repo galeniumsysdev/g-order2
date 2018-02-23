@@ -1,7 +1,7 @@
 var baseurl = window.Laravel.url; //$('#baseurl').val() ;
 function addCart(id)
 {
-  if(window.Laravel.auth.user)
+  if(window.Laravel.auth.user && parseFloat($('#qty-'+id).val())>0)
   {
     $('#addCart-'+id).hide();
     $.ajax({
@@ -18,8 +18,10 @@ function addCart(id)
              success: function(data) {
                if(data.result=="success")
                {
+                 $('#addCart-'+id).html("");
                  $('#shopcart').html(data.totline) ;
                  $('#shopcart2').html(data.totline) ;
+                 $('#addCart-'+id).html("<span class='btn btn-sm btn-info btn-block'><i class='fa fa-shopping-cart' aria-hidden='true'></i> "+$('#qty-'+id).val()+" "+$('#satuan-'+id).val()+"</span>");
                }else if(data.result=="exist"){
                  //alert("Item already exist in shopping cart");
                  swal ( "" ,  "Item already exist in shopping cart" ,  "error" );
@@ -27,14 +29,14 @@ function addCart(id)
                  //alert("Item already exist in shopping cart");
                  swal ( "" ,  "Distributor not exist for type "+data.jns ,  "error" );
                }
-
              }
          });
-    $('#addCart-'+id).show();
+         $('#addCart-'+id).show();
+  }else if(parseFloat($('#qty-'+id).val())<=0){
+    swal ( "" ,  "Qty harus lebih besar dari 0" ,  "error" );
   }else{
       window.location.href =  baseurl+'/login';
   }
-
   return false;
 }
 

@@ -195,7 +195,8 @@ class UserController extends Controller
 
     public function oracleIndex()
     {
-        $customers = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+        $customers = Customer::whereNotNull('oracle_customer_id')
+                    ->where('status','=','A')
                     ->orderBy('customer_name','asc')->get();
           /*$customers = DB::table('customers as c')->leftjoin('users as u','c.id','=','u.customer_id')->leftjoin('role_user as ru','u.id','=','ru.user_id')
                       ->leftjoin('roles as r','ru.role_id','=','r.id')
@@ -264,6 +265,7 @@ class UserController extends Controller
           $customer->pharma_flag = $request->pharma_flag;
           $customer->export_flag = $request->export_flag;
           $customer->tollin_flag = $request->tollin_flag;
+          $customer->price_list_id = $request->price;
           $customer->save();
           if($request->distributor!="")
           {
