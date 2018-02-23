@@ -746,7 +746,7 @@ class ProductController extends Controller
                           ],200);
           }
         }else{
-          if($tax) $taxamount = round($request->qty*floatval($request->disc)*0.1,0);else $taxamount=0;
+          if($tax) $taxamount = $request->qty*floatval($request->disc)*0.1;else $taxamount=0;
           $linepo = PoDraftLine::updateorCreate(
                       ['po_header_id'=>$headerpo->id,'product_id'=>$product->id],
                       ['qty_request'=>$request->qty
@@ -770,7 +770,7 @@ class ProductController extends Controller
         $headerpo->discount+= (floatval($request->hrg)-floatval($request->disc)) *$request->qty;
         if($tax)
         {
-            $headerpo->tax =($headerpo->subtotal-$headerpo->discount)*0.1;
+            $headerpo->tax =PoDraftLine::where('po_header_id','=',$headerpo->id)->sum('tax_amount');
         }else{
             $headerpo->tax =0;
         }
@@ -807,6 +807,12 @@ class ProductController extends Controller
         $headerpo->discount = $newline->discount;
         $headerpo->amount = $newline->subtotal-$newline->discount+$newline->tax_amount;
         $headerpo->save();
+        }else{
+          $headerpo->Tax = 0;
+          $headerpo->subtotal= 0;
+          $headerpo->discount = 0;
+          $headerpo->amount =0;
+          $headerpo->save();
         }
         DB::commit();
         /*$oldCart = Session::has('cart')?Session::get('cart'):null;
