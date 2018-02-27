@@ -1,6 +1,8 @@
 @extends('layouts.navbar_product')
+@section('css')
+<link href="{{ asset('css/table.css') }}" rel="stylesheet">
+@endsection
 @section('content')
-  <link href="{{ asset('css/table.css') }}" rel="stylesheet">
   @if($status= Session::get('msg'))
     <div class="alert alert-info">
         {{$status}}

@@ -313,6 +313,7 @@ class BackgroundController extends Controller
         }else{
           $lasttime = date_create("2017-07-01");
         }
+	 $lasttime = date_create("2017-07-01");
         echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
         $connoracle = DB::connection('oracle');
         if($connoracle){
@@ -324,10 +325,9 @@ class BackgroundController extends Controller
           echo "request id:".$newrequest."<br>";
           $this->getMasterItem($lasttime);
           $this->getConversionItem($lasttime);
-          //dd();
           //$price = $this->getPricelist($lasttime);
-          $this->getMasterDiscount($lasttime);
-
+          $price = $this->getMasterDiscount($lasttime);
+		
           $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
                             ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
                             ->where([['otta.transaction_type_code', '=', 'ORDER'],
@@ -449,6 +449,7 @@ class BackgroundController extends Controller
           }
 
         }
+ 	 DB::commit();
         return 1;
       }else{
         echo "Can't connect to oracle database";
@@ -1298,7 +1299,7 @@ class BackgroundController extends Controller
                 $insert_flag =true;
               }
             }
-
+		  DB::commit();
             /*if($insert_flag)
             {
               //notif ke sysadmin
@@ -1320,11 +1321,11 @@ class BackgroundController extends Controller
           $tglskrg = date_create($request);
           //echo"type:".gettype($lasttime);
         }else{
-          $tglskrg = date_create("2017-07-01");
+          $tglskrg = date_create("2017-01-01");
         }
       }
-      echo "lasttime:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
-      $this->getPricelist($tglskrg);
+      echo "lasttime discount:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
+      $vprice = $this->getPricelist($tglskrg);
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $connoracle->enableQueryLog();
@@ -1341,11 +1342,15 @@ class BackgroundController extends Controller
           $delqdiskon = QpPricingDiskon::whereIn('list_header_id',$listheader->pluck('list_header_id')->toArray())
                     ->delete();
         }
-        /*insert pricing diskon*/
+	echo"aaaa";
+	echo "insert pricing diskon:<br>";
+	 /*insert pricing diskon*/
         $modifiers = $connoracle->table('gpl_pricing_diskon_v')
                       ->whereraw('nvl(end_date_active,sysdate+1)>= trunc(sysdate)')
-                      ->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
+			->whereIn('list_header_id', ['22066'])
+                      //->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
                       ->get();
+       // dd($modifiers);
         if($modifiers){
           echo "<table><caption>Data Diskon</caption>";
           echo "<tr><th>Price Name</th><th>Product</th><th>Customer</th><th>Operand</th><th>Status</th></tr>";
@@ -1439,10 +1444,14 @@ class BackgroundController extends Controller
             echo"</tr>";
           }
         }
-
+	 dd($connoracle->getQueryLog());
         $del_line_diskon = QpPricingDiskon::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
                           ->delete();
-
+	 DB::commit();
+	 return 1;
+      }else {
+	echo "can't connect to oracle";
+	return 0;
       }
     }
 
@@ -1472,7 +1481,7 @@ class BackgroundController extends Controller
                       ->first();
           if($mysqlproduct) {
             echo"Product id :".$mysqlproduct->id."<br>";
-            $mysqlconversion = DB::table('uom_conversions')->where(['product_id'=>$mysqlproduct->id,
+            $mysqlconversion =UomConversion::where(['product_id'=>$mysqlproduct->id,
               'uom_code'=>$c->uom_code,
               'base_uom'=>$c->base_uom])->first();
             if($mysqlconversion)
@@ -1499,6 +1508,7 @@ class BackgroundController extends Controller
           }
 
         }
+		DB::commit();
        }
        return true;
     }
