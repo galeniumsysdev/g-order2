@@ -122,7 +122,7 @@
                   <div class="info-product" id="info-product-{{$product->id}}">
                     @if(Auth::user()->hasRole('Distributor'))
   										@php ($vrate = $satuan->rate)
-  										1{{$product->satuan_secondary." = ".(float)$vrate."/".$product->satuan_primary}}<br>
+  										1{{$product->satuan_secondary." = ".(float)$product->getConversion($product->satuan_secondary)."/".$product->satuan_primary}}<br>
   									@endif
           				</div>
                   <div class="info-product" id="info-product2-{{$product->id}}" style="color:blue;font-weight:bold;text-align:center">

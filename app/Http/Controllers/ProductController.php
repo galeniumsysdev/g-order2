@@ -358,6 +358,7 @@ class ProductController extends Controller
     {
       $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$dp->id)->select('uom_code')->get();
       $dp->uom=$uom;
+	$prg=collect([]);
       if(Auth::user()->customer->oracle_customer_id){
       $prg =DB::table('qp_pricing_discount as qpd')
           ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
@@ -726,7 +727,7 @@ class ProductController extends Controller
                           ],200);
           }
         }else{
-          if($tax) $taxamount = $request->qty*floatval($request->disc)*0.1;else $taxamount=0;
+          if($tax) $taxamount =  round($request->qty*floatval($request->disc)*0.1,0);else $taxamount=0;
           $linepo = PoDraftLine::updateorCreate(
                       ['po_header_id'=>$headerpo->id,'product_id'=>$product->id],
                       ['qty_request'=>$request->qty

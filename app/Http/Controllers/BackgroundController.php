@@ -1325,7 +1325,7 @@ class BackgroundController extends Controller
         }
       }
       echo "lasttime discount:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
-      $vprice = $this->getPricelist($tglskrg);
+      //$vprice = $this->getPricelist($tglskrg);
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $connoracle->enableQueryLog();
@@ -1342,12 +1342,12 @@ class BackgroundController extends Controller
           $delqdiskon = QpPricingDiskon::whereIn('list_header_id',$listheader->pluck('list_header_id')->toArray())
                     ->delete();
         }
-	echo"aaaa";
 	echo "insert pricing diskon:<br>";
 	 /*insert pricing diskon*/
         $modifiers = $connoracle->table('gpl_pricing_diskon_v')
                       ->whereraw('nvl(end_date_active,sysdate+1)>= trunc(sysdate)')
-			->whereIn('list_header_id', ['22066'])
+			->whereIn('list_header_id', ['7188'])
+			->whereNotNull('customer_number')
                       //->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
                       ->get();
        // dd($modifiers);
