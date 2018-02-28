@@ -97,7 +97,7 @@
 									<tr>
 										<td data-title="@lang('label.to')">{{Auth::User()->name}}</td>
 										<td data-title="@lang('label.type')">{{$notif->data['tipe']}}</td>
-										<td data-title="SUBJECT">		
+										<td data-title="SUBJECT">
                       <a href="{{$notif->data['href']}}">{{$notif->data['subject']}}</a>
 										</td>
 										<td data-title="@lang('label.sent')">{{$notif->created_at }}</td>
@@ -115,6 +115,7 @@
 								</tbody>
 							</table>
 						</div>
+            {{ $notifications->links() }}
 					</div>
 				</div>
 			</div>
