@@ -115,7 +115,7 @@
 								</tbody>
 							</table>
 						</div>
-            {{ $notifications->links() }}
+            <div class="pull-right">{{ $notifications->links() }}</div>
 					</div>
 				</div>
 			</div>
