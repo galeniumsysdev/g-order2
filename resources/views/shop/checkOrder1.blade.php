@@ -1,7 +1,9 @@
 @extends('layouts.navbar_product')
+@section('css')
+<link href="{{ asset('css/table.css') }}" rel="stylesheet">
+@endsection
 @section('content')
-  <!--untuk ke oracle-->
-  <link href="{{ asset('css/table.css') }}" rel="stylesheet">
+  <!--untuk ke oracle-->  
   @if($status= Session::get('message'))
     <div class="alert alert-info">
         {{$status}}
@@ -100,7 +102,7 @@
                   @endif
                     {{ csrf_field() }}
                       <input type="hidden" name="header_id" value="{{$header->id}}">
-                      <table  class="table">
+                      <table  class="table" id="tbl-order">
                   			<thead>
                   				<tr>
                   					<th style="width:35%;" class="text-center">@lang('shop.Product')</th>

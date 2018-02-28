@@ -326,7 +326,7 @@ class BackgroundController extends Controller
           $this->getConversionItem($lasttime);
           //dd();
           //$price = $this->getPricelist($lasttime);
-          $this->getMasterDiscount($lasttime);
+          $price = $this->getMasterDiscount($lasttime);
 
           $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
                             ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
@@ -449,6 +449,7 @@ class BackgroundController extends Controller
           }
 
         }
+        DB::commit();
         return 1;
       }else{
         echo "Can't connect to oracle database";
@@ -1324,7 +1325,7 @@ class BackgroundController extends Controller
         }
       }
       echo "lasttime:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
-      $this->getPricelist($tglskrg);
+      $vprice = $this->getPricelist($tglskrg);
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $connoracle->enableQueryLog();
@@ -1442,8 +1443,9 @@ class BackgroundController extends Controller
 
         $del_line_diskon = QpPricingDiskon::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
                           ->delete();
-
-      }
+        DB::commit();
+        return 1;
+      }else return 0;
     }
 
     public function getConversionItem($tglskrg){
