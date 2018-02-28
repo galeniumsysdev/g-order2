@@ -56,7 +56,7 @@
                           &nbsp;
                         </div>
                         <div class="col-md-10">
-                          {{ Form::submit('Submit', array('class'=>'btn btn-info', 'id'=>'btn-import')) }}
+                          {{ Form::submit('Submit', array('class'=>'btn btn-primary', 'id'=>'btn-import')) }}
                           <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">@lang('label.back')</a>
                         </div>
                       </div>

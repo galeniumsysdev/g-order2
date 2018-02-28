@@ -260,7 +260,7 @@ class ProductController extends Controller
     }else{
 
       $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
-      
+
       return view('shop.index',['products' => $products]);
     }
 
@@ -358,6 +358,7 @@ class ProductController extends Controller
     {
       $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$dp->id)->select('uom_code')->get();
       $dp->uom=$uom;
+      $prg=collect([]);
       if(Auth::user()->customer->oracle_customer_id){
       $prg =DB::table('qp_pricing_discount as qpd')
           ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
@@ -369,7 +370,7 @@ class ProductController extends Controller
           ->orderBy('pricing_group_sequence','asc')
           ->first();
       }
-      if($prg) $dp->promo = $prg;else $dp->promo=null;
+      if($prg->count()>0) $dp->promo = $prg;else $dp->promo=null;
     }
     //  $sqlproduct .= " limit 12";
     $products = collect($dataproduct);
