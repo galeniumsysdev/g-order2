@@ -392,7 +392,7 @@ class DPLController extends Controller {
 
 		$role_prev_approve = $prev_approver['name'];
 
-		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve);
+		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve,false);
 		if(!empty($notified_users)){
 			$check_count = 0;
 			foreach ($notified_users as $ind => $email) {
@@ -518,27 +518,29 @@ class DPLController extends Controller {
 		}
 	}
 
-	public function getArrayNotifiedEmail($suggest_no, $curr_pos = ''){
+	public function getArrayNotifiedEmail($suggest_no, $curr_pos = '',$vbreak=true){
 		$positions = [];
 		$dpl = DPLSuggestNo::select('dpl_suggest_no.*','email')
 							->join('users','users.id','dpl_suggest_no.mr_id')
 							->where('suggest_no', $suggest_no)
 							->first();
 		if($curr_pos == '')
-			{$positions['SPV'][] = $dpl['email']; return $positions;}
-
+			$positions['SPV'][] = $dpl['email'];
+		if($vbreak && !empty($positions)) return $positions;
 		$next_approver = OrgStructure::select('org_structure.*','email')
 									->join('users','users.id','org_structure.directsup_user_id')
 									->where('user_id', $dpl['mr_id'])
 									->first();
 		if($curr_pos == '' || ($curr_pos != 'ASM' && $curr_pos != 'Admin DPL' && $curr_pos != 'FSM' && $curr_pos != 'HSM'))
-			{$positions['ASM'][] = $next_approver['email']; return $positions;}
+			$positions['ASM'][] = $next_approver['email'];
+		if($vbreak && !empty($positions)) return $positions;
 
 		$next_approver = User::whereHas('roles', function($q){
 								    $q->where('name', 'Admin DPL');
 								})->first();
 		if($curr_pos == '' || ($curr_pos != 'Admin DPL' && $curr_pos != 'FSM' && $curr_pos != 'HSM'))
-			{$positions['Admin DPL'][] = $next_approver['email'];return $positions;}
+			$positions['Admin DPL'][] = $next_approver['email'];
+		if($vbreak && !empty($positions)) return $positions;
 
 		$next_approver = User::whereHas('roles', function($q){
 								    $q->where('name', 'FSM');
@@ -698,7 +700,7 @@ class DPLController extends Controller {
 
 			$role_prev_approve = $prev_approver['name'];
 
-			$notified_users = $this->getArrayNotifiedEmail($list->suggest_no, $role_prev_approve);
+			$notified_users = $this->getArrayNotifiedEmail($list->suggest_no, $role_prev_approve,false);
 			if(!empty($notified_users)){
 				foreach ($notified_users as $ind => $email) {
 					if(strpos($ind, $role) !== false){
@@ -717,7 +719,7 @@ class DPLController extends Controller {
 	}
 
 	public function dplreport(Request $request)
-    {			
+    {
       if ($request->method()=='GET')
       {
         return view('admin.dpl.dplReport');

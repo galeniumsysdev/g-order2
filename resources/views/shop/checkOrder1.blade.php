@@ -102,7 +102,7 @@
                   @endif
                     {{ csrf_field() }}
                       <input type="hidden" name="header_id" value="{{$header->id}}">
-                      <table  class="table">
+                      <table  class="table" id="tbl-order">
                   			<thead>
                   				<tr>
                   					<th style="width:35%;" class="text-center">@lang('shop.Product')</th>

@@ -29,7 +29,7 @@ class HomeController extends Controller
         return redirect()->route('product.index');
       }*/
         $request->status_read="0";
-        $notifications = Auth::User()->notifications()->whereNull('read_at')->get();
+        $notifications = Auth::User()->notifications()->whereNull('read_at')->paginate(10);
         $group = array_column(Auth::User()->notifications()->get()->pluck('data')->toArray(),'tipe');
         $jnsnotif= array_unique($group);
         return view('home', compact('notifications','request','jnsnotif'));
