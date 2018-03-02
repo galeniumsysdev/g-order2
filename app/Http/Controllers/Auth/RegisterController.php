@@ -386,24 +386,30 @@ class RegisterController extends Controller
           ->whereRaw("exists (select 1 from distributor_regency as dr where c.id = dr.distributor_id and dr.regency_id = '".$city."')");*/
       }
       $dist_id = $distributor->get()->pluck('id')->toArray();
+
       $groupmapping = DB::table("distributor_mappings")
                     ->whereIn('distributor_id',$dist_id)
                     ->groupBy('data')
                     ->select('data')
                     ->get();
-      foreach($groupmapping as $mapping)
-      {
-        if($mapping->data=="regencies")
-        {
-          $distributor =$distributor
-                      ->whereRaw("exists (select 1 from distributor_mappings where c.id = distributor_mappings.distributor_id
-                                          and distributor_mappings.data='".$mapping->data."' and distributor_mappings.data_id ='".$city."')");
-        }elseif($mapping->data=="category_outlets"){
-          $distributor =$distributor
-                      ->whereRaw("exists (select 1 from distributor_mappings where c.id = distributor_mappings.distributor_id
-                                          and distributor_mappings.data='".$mapping->data."' and distributor_mappings.data_id ='".$groupdc."')");
-        }
-      }
+      $distributor = $distributor->where (function($query) use ($groupdc, $city,$groupmapping){
+          $query->whereRaw("exists (select 1 from distributor_mapping_include as dmi where dmi.distributor_id=c.id
+                                                        and dmi.category_id ='".$groupdc."' and dmi.regency_id = '".$city."')");
+          $query->orwhere(function ($query2) use  ($groupdc, $city,$groupmapping){
+            foreach($groupmapping as $mapping)
+            {
+              if($mapping->data=="regencies")
+              {
+                $query2->whereRaw("exists (select 1 from distributor_mappings where c.id = distributor_mappings.distributor_id
+                                        and distributor_mappings.data='".$mapping->data."' and distributor_mappings.data_id ='".$city."')");
+              }elseif($mapping->data=="category_outlets"){
+                $query2 ->whereRaw("exists (select 1 from distributor_mappings where c.id = distributor_mappings.distributor_id
+                                        and distributor_mappings.data='".$mapping->data."' and distributor_mappings.data_id ='".$groupdc."')");
+              }
+            }
+          });
+
+      });      
       return $distributor;
     }
 
