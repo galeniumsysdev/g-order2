@@ -5,6 +5,9 @@
         <div class="pull-left">
             <h2>Organization Structure</h2>
         </div>
+        <div class="pull-right">
+            <a href="{{route('org.create')}}"  class="btn btn-success">Add Org Code</a>
+        </div>
     </div>
 </div>
 @if ($message = Session::get('success'))
@@ -12,6 +15,7 @@
     <p>{{ $message }}</p>
   </div>
 @endif
+
 <table class="table" id="table">
   <thead>
   <tr>
@@ -27,9 +31,9 @@
   <tr>
       <td>{{$user->user_code}}</td>
       <td>{{$user->email}}</td>
-      <td>{{$user->name}}</td>
+      <td>{{$user->description}}</td>
       <td>{{$user->sup_name}}</td>
-      <td><a class="btn btn-info btn-sm" href="{{route('org.setting',$user->user_id)}}">Setting</a></td>
+      <td><a class="btn btn-info btn-sm" href="{{route('org.setting',$user->id)}}">Setting</a></td>
   </tr>
   @empty
   <tr><td colspan="4">No User</td></tr>

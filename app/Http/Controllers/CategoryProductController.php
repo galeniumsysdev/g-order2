@@ -36,8 +36,7 @@ class CategoryProductController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-      dd($request->all());
+    {      
       $this->validate($request, [
          'code' => 'required|unique:categories,flex_value|max:5',
          'name' => 'required|unique:categories,description|max:191',

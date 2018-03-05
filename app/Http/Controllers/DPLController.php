@@ -1159,7 +1159,7 @@ class DPLController extends Controller {
 	}
 
 
-	public function getListSpvAsm(Request $request,$posisi){
+	public function getListSpvAsm(Request $request,$posisi='SPV'){
 		$id = $request->input('id');
 			$data = DB::table('users as u')
 					->join('role_user as ru','u.id','=','ru.user_id')
@@ -1194,7 +1194,7 @@ class DPLController extends Controller {
 
 				}
 			}
-			$data=$data->select('u.id','u.name')->orderBy('u.name','asc')->get();
+			$data=$data->select('u.id','u.name','u.email')->orderBy('u.name','asc')->get();
 			return response()->json($data);;
 	}
 

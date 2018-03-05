@@ -94,10 +94,9 @@ $(document).ready(function() {
                   return item.name;
               },
               afterSelect: function (item) {
-                $('#spv').val(item.name);
-                $('#spv-id').val(item.id);
-                $('#spv').attr('readonly','readonly');
-                $('#change-spv').show();
+                $('#user-name').val(item.name);
+                $('#user-id').val(item.id);
+                $('##user-name').attr('readonly','readonly');                
               }
           });
         },'json');

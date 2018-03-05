@@ -681,25 +681,33 @@ class UserController extends Controller
           }else{
             $data=$data->where('psc_flag','=',$dist->psc_flag)->where('pharma_flag','=',$dist->pharma_flag);
           }
+          $data = $data->where (function($query) use ($dist, $mappings){
+              $query->whereRaw("exists (select 1 from distributor_mapping_include as dmi,customer_sites as cs
+                                where cs.customer_id = customers.id
+                                  and dmi.category_id =customers.outlet_type_id and dmi.regency_id = cs.city_id
+                                  and dmi.distributor_id = '".$dist->id."')");
+              $query->orwhere(function ($query2) use  ($mappings){
 
-          foreach($mappings->groupBy('data') as $key=>$values)
-          {
-              $map1 = $values->pluck('data_id')->toArray();
-              //$map1 = $mappings->where('data',$key)->pluck('data_id')->toArray();
-              if($key == "regencies")
+              foreach($mappings->groupBy('data') as $key=>$values)
               {
-                $data = $data->whereExists(function ($query) use($map1) {
-                      $query->select(DB::raw(1))
-                            ->from('customer_sites as cs')
-                            ->whereraw('cs.customer_id=customers.id')
-                            ->whereIn('cs.city_id',$map1);
-                });
-              }elseif($key=="category_outlets"){
-                $data = $data->whereIn('customers.outlet_type_id',$map1);
+                  $map1 = $values->pluck('data_id')->toArray();
+                  //$map1 = $mappings->where('data',$key)->pluck('data_id')->toArray();
+                  if($key == "regencies")
+                  {
+                    $query2 = $query2->whereExists(function ($query3) use($map1) {
+                          $query3->select(DB::raw(1))
+                                ->from('customer_sites as cs')
+                                ->whereraw('cs.customer_id=customers.id')
+                                ->whereIn('cs.city_id',$map1);
+                    });
+                  }elseif($key=="category_outlets"){
+                    $query2 = $query2->whereIn('customers.outlet_type_id',$map1);
+                  }
               }
-          }
+            });
+          });
           $data=$data->select('customers.*','co.name as cat_name')->get();
-
+          //dd(DB::getQueryLog());
           foreach($data as $d)
           {
             $d->ada='T';

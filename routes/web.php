@@ -342,7 +342,7 @@ Route::group(['middleware' => ['role:Principal','prevent-back-history']], functi
 });
   Route::get('/dpl/report/','DPLController@dplreport')->name('dpl.report');
   Route::post('/dpl/report/','DPLController@dplreport')->name('dpl.reportdownload');
-  Route::get('/dpl/ajax/asmspv/{posisi}','DPLController@getListSpvAsm')->name('dpl.ajax.asmspv');
+  Route::get('/dpl/ajax/asmspv/{posisi?}','DPLController@getListSpvAsm')->name('dpl.ajax.asmspv');
 
 /**
 * created by WK Productions
@@ -379,6 +379,9 @@ Route::get('/dpl/cancel/outlet/{suggest_no?}/{notifid?}','DPLController@readNoti
 Route::get('/Organization','OrgStructureController@index')->name('org.list');
 Route::get('/Organization/{user_id}/setting','OrgStructureController@setting')->name('org.setting');
 Route::post('/Organization/{user_id}/setting/save','OrgStructureController@saveSetting')->name('org.saveSetting');
+Route::get('/Organization/create','OrgStructureController@create')->name('org.create');
+Route::post('/Organization/setting/add','OrgStructureController@addSetting')->name('org.postcreate');
+
 
 //Outlet Product and Stock
 //---Product---
