@@ -24,13 +24,9 @@
     <td>:</td>
     <td>
       <div class="input-group sm-12">
-        {{ Form::text('email',$org->email, array('class'=>'form-control','id'=>'email-spv','autocomplete'=>'off')) }}
-        <div class="input-group-append">
-          <div class="input-group-text" id="change-email">
-          <i class="fa fa-times" aria-hidden="true"></i>
-        </div>
-        </div>
-      </div>
+        {{ Form::text('email',$org->email, array('class'=>'form-control','id'=>'email-spv','autocomplete'=>'off','aria-describedby'=>"change-email")) }}
+        <span class="input-group-addon" id="basic-addon2"><i class="fa fa-times" aria-hidden="true"></i></span>
+      </div>      
     {{Form::hidden('user_id',$org->user_id, array('class'=>'form-control','id'=>'user-id')) }}
     @if ($errors->has('email'))
         <span class="help-block">
@@ -62,6 +58,10 @@
     </td>
   </tr>
 </table>
+<div class="input-group">
+  <input type="text" class="form-control" placeholder="Recipient's username" aria-describedby="basic-addon2">
+  <span class="input-group-addon" id="basic-addon2">@example.com</span>
+</div>
 @endsection
 @section('js')
 <script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>

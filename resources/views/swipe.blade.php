@@ -46,14 +46,14 @@
     <div class="container">
       <br>
       <h4><strong>{{$flexfield->description}}</strong></h4>
-      @if($flexfield->products->count()>10)
+      @if($flexfield->products->where('Enabled_Flag','Y')->count()>10)
       <p class="view-all"><a href="{{route('product.category',$flexfield->flex_value)}}">Lihat Semua &nbsp;</a><i class="fa fa-angle-right" aria-hidden="true"></i></p>
       @endif
       <legend></legend>
       <div class="row">
         <div class="large-12 columns">
           <div class="owl-carousel owl-theme owl-loaded owl-drag">
-            @foreach($flexfield->products->sortByDesc('pareto')->sortBy('title')->take(10) as $product)
+            @foreach($flexfield->products->where('Enabled_Flag','Y')->sortByDesc('pareto')->sortBy('title')->take(10) as $product)
             <div class="item">
               <div class="thumbnail">
                 @if($product->imagePath)
