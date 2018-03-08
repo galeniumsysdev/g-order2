@@ -25,7 +25,7 @@ return [
      'def_salesperson' => 'No Sales Credit',
      'def_warehouse_YMP' => 'YFJ',
      'def_warehouse_GPL' => 'GFG',
-     'price_rbp'=>7027,
-     'price_hna'=>7020,
+     'price_rbp'=>30163,
+     'price_hna'=>30153,
      'customer_yasa'=>'GPL1000001',
 ];
