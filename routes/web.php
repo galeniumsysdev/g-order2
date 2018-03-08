@@ -50,12 +50,13 @@ Route::match(['get', 'post'],'search_product', [
 ]);
 
 
-Route::get('product/category/{id}', [
-  'uses' => 'ProductController@category'
-  ,'as' => 'product.category'
-]);
+
 
 Route::group(['middleware'=>['auth','prevent-back-history']],function(){
+  Route::get('product/category/{id}', [
+    'uses' => 'ProductController@category'
+    ,'as' => 'product.category'
+  ]);
   Route::get('profile', 'ProfileController@profile')->name('profile.index');
   Route::post('profile/update', 'ProfileController@updateprofile')->name('profile.updateprofile');
   Route::post('profile', 'ProfileController@update_avatar')->name('profile.update');

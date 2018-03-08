@@ -463,7 +463,8 @@ class ProductController extends Controller
      $product = DB::select($sqlproduct, ['cust'=>$vid]);
      $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$product[0]->id)->select('uom_code')->get();
      $product[0]->uom=$uom;
-
+     $polineexist = collect([]);
+     $prg=null;
      if(Auth::check()){
        if(Auth::user()->customer->oracle_customer_id){
        $prg =DB::table('qp_pricing_discount as qpd')
@@ -475,11 +476,16 @@ class ProductController extends Controller
            ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
            ->orderBy('pricing_group_sequence','asc')
            ->first();
-        $dp->promo = $prg;
+        if(!empty($prg)) $product[0]->promo = $prg;else $product[0]->promo=null;
        }
+       $polineexist = DB::table('po_draft_lines')
+               ->join('po_draft_headers as pdh', 'po_draft_lines.po_header_id','=','pdh.id')
+               ->where('pdh.customer_id','=',Auth::user()->customer_id)
+               ->select('product_id','qty_request','uom')
+               ->get();
      }
 
-     return view('shop.detailProduct01',['product' => $product[0]]);
+     return view('shop.detailProduct01',['product' => $product[0],'polineexist'=>$polineexist]);
   }
 
   public function index()
