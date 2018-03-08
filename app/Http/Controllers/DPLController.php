@@ -34,6 +34,7 @@ class DPLController extends Controller {
 	}
 
 	public function getOutletDPL(){
+		//DB::enablequerylog();
 		$outlets = Customer::select('customers.id','customers.customer_name','cs.address1','cs.province','cs.city')
 			//->join('customers', 'customers.id', 'outlet_distributor.outlet_id')
 			->join('customer_sites as cs',function($join){
@@ -48,10 +49,16 @@ class DPLController extends Controller {
 			->whereIn('r.name',['Outlet','Apotik/Klinik'])
 			->where('customers.status','=','A')
 			->where('u.register_flag','=',1)
+			->WhereExists(function($query){
+				$query->select(DB::raw(1))
+						->from('org_structure as os')
+						->join('mapping_region_dpl as mrd','os.user_code','mrd.user_code')
+						->whereraw("os.user_id='".Auth::user()->id."' and mrd.regency_id=cs.city_id");
+			})
 			->groupBy('customers.id','customers.customer_name','cs.address1','cs.province','cs.city')
 			->orderBy('customers.customer_name')
 			->get();
-
+			//dd(DB::getquerylog());
 		return response()->json($outlets);
 	}
 
