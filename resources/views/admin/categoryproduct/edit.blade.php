@@ -6,12 +6,12 @@
       {{$status}}
   </div>
 @endif
-<form action="{{route('CategoryProduct.update',$category->id)}}" method="post" role="form">
+<form class="form-horizontal" action="{{ route('CategoryProduct.update',$category->flex_value) }}" method="post" role="form">
+  {{csrf_field()}}
   {{method_field('PATCH')}}
-  {{csrf_field()}}  
        <div class="form-group">
          <label for="name">Kode</label>
-         <input type="text" class="form-control" name="code" id="" placeholder="Kode Kategori Product" value="{{ old('code')?old('code'):$category->flex_value }}">
+         <input type="text" class="form-control" name="code" id="kode" placeholder="Kode Kategori Product" value="{{ old('code')?old('code'):$category->flex_value }}">
          @if ($errors->has('code'))
              <span class="help-block">
                  <strong>{{ $errors->first('code') }}</strong>
@@ -20,7 +20,7 @@
        </div>
      <div class="form-group">
        <label for="name">Nama Kategori Product</label>
-       <input type="text" class="form-control" name="name" id="" placeholder="Nama Kategori Product" value="{{ old('name')?old('name'):$category->description }}">
+       <input type="text" class="form-control" name="name" id="name" placeholder="Nama Kategori Product" value="{{ old('name')?old('name'):$category->description }}">
        @if ($errors->has('name'))
            <span class="help-block">
                <strong>{{ $errors->first('name') }}</strong>
@@ -34,6 +34,7 @@
          <option value="PHARMA" {{$category->parent=="PHARMA"?'selected':''}}>Pharma</option>
          <option value="PSC" {{$category->parent=="PSC"?'selected':''}}>PSC</option>
          <option value="INTERNATIONAL" {{$category->parent=="INTERNATIONAL"?'selected':''}}>INTERNATIONAL</option>
+         <option value="TollIn" {{$category->parent=="TollIn"?'selected':''}}>Toll-In</option>
        </select>
        @if ($errors->has('parent'))
            <span class="help-block">
