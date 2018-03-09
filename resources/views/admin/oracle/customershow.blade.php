@@ -314,6 +314,16 @@
                 </select>
   							<div class="help-block with-errors"></div>
   						</div>
+              <div class="form-group" id="province-div">
+  							<label class="control-label" for="title">Province:</label>
+  							<select name="Provinces" id="province" class="form-control" onchange="getvalueregencies()">
+                  <option value="-">Pilih Salah Satu</option>
+                  @foreach($provinces as $p)
+                  <option value="{{$p->id}}">{{$p->name}}</option>
+                  @endforeach
+                </select>
+  							<div class="help-block with-errors"></div>
+  						</div>
   						<div class="form-group">
   							<label class="control-label" for="title">Value:</label>
   							<select name="value[]" id="mapping-value" class="form-control" multiple>
