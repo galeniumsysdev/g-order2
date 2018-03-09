@@ -316,8 +316,9 @@ class UserController extends Controller
               DB::enableQueryLog();
                 $deletedata = DB::table('distributor_mappings')->whereraw("distributor_id='".$id."'")
                   ->whereraw("data='".$key."'")
-                  ->whereIn('data_id',$value)
+                  ->whereIn('id',$value)
                   ->delete();
+              //dd(DB::getQueryLog());
             }
             DB::commit();
             return redirect()->route('useroracle.show',$id)
@@ -749,7 +750,7 @@ class UserController extends Controller
 
       return Datatables::of($mappings)
             ->editColumn('id',function($mappings){
-              return '<input type="checkbox" class="chk-mapping" name="mapping[]" value='.$mappings->id.'>';
+              return '<input type="checkbox" class="chk-mapping" name="mapping['.$mappings->data.'][]" value='.$mappings->id.'>';
             })->rawColumns(['id'])
             ->make(true);
     }
