@@ -386,7 +386,7 @@ class UserController extends Controller
                                           ,'city_id'=>$request->city
                                           ,'district_id'=>$request->district
                                           ,'state_id'=>$request->subdistricts
-                                          ,'postal_code'=>$request->postal_code
+                                          ,'postalcode'=>$request->postal_code
                                           ,'country'=>'ID'
                                           ,'customer_id'=>$newcustomer->id
 
@@ -416,46 +416,161 @@ class UserController extends Controller
     public function cabangEdit($id)
     {
       $distcabang = Customer::where('id','=',$id)->first();
-      $alamat = CustomerSite::where([['customer_id','=',$id],['primary_flag','=','P']])->orderBy('created_at','asc')->first();
+      $alamat = CustomerSite::where([['customer_id','=',$id],['site_use_code','=','SHIP_TO']])->orderBy('created_at','asc')->first();
       $provinces = DB::table('provinces')->get();
+      $regencies = DB::table('regencies')->where('province_id','=',$alamat->province_id)->get();
+      $districts = DB::table('districts')->where('regency_id','=',$alamat->city_id)->get();
+      $villages = DB::table('villages')->where('district_id','=',$alamat->district_id)->get();
       $roles = DB::table('roles')->whereIn('name',['Distributor','Distributor Cabang'])->get();
-      return view('admin.oracle.cabangedit',['customer'=>$distcabang,'alamat'=>$alamat,'roles'=>$roles,'provinces'=>$provinces,'menu'=>'customer-cabang']);
+      return view('admin.oracle.cabangedit',['customer'=>$distcabang,'alamat'=>$alamat,'roles'=>$roles,'provinces'=>$provinces,'menu'=>'customer-cabang'
+                  ,'regencies'=>$regencies,'districts'=>$districts,'villages'=>$villages
+                    ]);
     }
 
     public function cabangUpdate(Request $request,$id)
     {
-      $this->validate($request, [
-          'customer_name' => 'required',
-          'email' => 'required|email|unique:users,email',
-          'address'=>'required',
-          'province'=>'required',
-          'city'=>'required',
-          'district'=>'required',
-          'subdistricts'=>'required',
-      ]);
-      $distcabang = Customer::where('id','=',$id)->first();
-      $distcabang->customer_name = $request->customer_name;
-      $province=DB::table('provinces')->where('id','=',$request->province)->first();
-      $city=DB::table('regencies')->where('id','=',$request->city)->first();
-      $district=DB::table('districts')->where('id','=',$request->district)->first();
-      $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
-      $alamat = CustomerSite::where([['customer_id','=',$id],['primary_flag','=','P']])
-              ->update(['province_id'=>$request->province
-                        ,'city_id'=>$request->city
-                        ,'district_id'=>$request->district
-                        ,'state_id'=>$request->state
-                        ,'address1'=>strtoupper($request->address)
-                        ,'state'=>$state->name
-                        ,'district'=>$district->name
-                        ,'city'=>$city->name
-                        ,'province'=>$province->name
-                        ,'postal_code'=>$request->postal_code
-              ]);
-      $user = User::where('customer_id','=',$id)->first();
-      if ($user->email!=$request->email)
-      {
-        $user = User::where('customer_id','=',$id)
-                  ->update(['email'=>$request->email]);
+      DB::beginTransaction();
+      try{
+        $user = User::where('customer_id','=',$id)->first();
+        $this->validate($request, [
+            'customer_name' => 'required',
+            'email' => 'required|email|unique:users,email,'.$user->id.',id',
+            'address'=>'required',
+            'province'=>'required',
+            'city'=>'required',
+            'district'=>'required',
+            'subdistricts'=>'required',
+        ]);
+        $distcabang = Customer::where('id','=',$id)->first();
+        $distcabang->customer_name = $request->customer_name;
+
+        $province=DB::table('provinces')->where('id','=',$request->province)->first();
+        $city=DB::table('regencies')->where('id','=',$request->city)->first();
+        $district=DB::table('districts')->where('id','=',$request->district)->first();
+        $state=DB::table('villages')->where('id','=',$request->subdistricts)->first();
+        if($request->role==6 and !in_array($request->role,$user->roles->pluck('id')->toArray())){
+          /*update dari Distributor Cabang ke Distributor*/
+          $user->roles()->detach();
+          $user->roles()->attach($request->role);
+          $distpusat = Customer::where('id','=',$distcabang->parent_dist)->where('status','A')->first();
+          if($distpusat){
+            $distcabang->customer_number = $distpusat->customer_number;
+            $distcabang->oracle_customer_id = $distpusat->oracle_customer_id;
+            $distcabang->primary_salesrep_id = $distpusat->primary_salesrep_id;
+            $distcabang->tax_reference = $distpusat->tax_reference;
+            $distcabang->price_list_id = $distpusat->price_list_id;
+            $distcabang->order_type_id = $distpusat->order_type_id;
+            $distcabang->payment_term_name = $distpusat->payment_term_name;
+            /*update customer site*/
+            if($distpusat->sites()->count()>1)
+            {
+                $shipto = $distpusat->sites()
+                          ->where('site_use_code','=','SHIP_TO')
+                          ->where('province_id','=',$request->province)
+                          ->where('city_id','=',$request->city)
+                          ->where('status','A')
+                          ->get();
+                if($shipto->count()>=1){
+                  $shipto_pusat = $shipto->first();
+                  $alamat = CustomerSite::where([['customer_id','=',$id]
+                                                ,['site_use_code','=','SHIP_TO']
+                                                ,['id','=',$request->siteid]])
+                          ->update(['province_id'=>$request->province
+                                    ,'city_id'=>$request->city
+                                    ,'district_id'=>$request->district
+                                    ,'state_id'=>$request->subdistricts
+                                    ,'address1'=>strtoupper($request->address)
+                                    ,'state'=>$state->name
+                                    ,'district'=>$district->name
+                                    ,'city'=>$city->name
+                                    ,'province'=>$province->name
+                                    ,'postalcode'=>$request->postal_code
+                                    ,'oracle_customer_id'=>$distpusat->oracle_customer_id
+                                    ,'cust_acct_site_id'=>$shipto_pusat->cust_acct_site_id
+                                    ,'site_use_id'=>$shipto_pusat->site_use_id
+                                    ,'primary_flag'=>$shipto_pusat->primary_flag
+                                    ,'status'=>$shipto_pusat->status
+                                    ,'bill_to_site_use_id'=>$shipto_pusat->bill_to_site_use_id
+                                    ,'payment_term_id'=>$shipto_pusat->payment_term_id
+                                    ,'price_list_id'=>$shipto_pusat->price_list_id
+                                    ,'order_type_id'=>$shipto_pusat->order_type_id
+                                    ,'org_id'=>$shipto_pusat->org_id
+                                    ,'warehouse'=>$shipto_pusat->warehouse
+                                    ,'area'=>$shipto_pusat->area
+                                    ,'last_update_by'=>Auth::user()->id
+                          ]);
+                  $billto = $distpusat->sites()
+                                    ->where('site_use_code','=','BILL_TO')
+                                    ->get();
+                  if($billto->count()>1)
+                  {
+                    if (!is_null($shipto_pusat->bill_to_site_use_id))
+                      $billto =$billto->where('site_use_id',$shipto_pusat->bill_to_site_use_id)->get();
+                    else
+                      $billto =$billto->where('province_id',$request->province)
+                              ->where('city_id',$request->city)
+                              ->get();
+                  }
+                  if($billto->count()>=1) $billto=$billto->first();
+                  $newsite = CustomerSite::create(['site_use_code'=>$billto->site_use_code
+                                                  ,'primary_flag'=>$billto->primary_flag
+                                                  ,'status'=>$billto->status
+                                                  ,'address1'=>strtoupper($billto->address1)
+                                                  ,'state'=>$billto->state
+                                                  ,'district'=>$billto->district
+                                                  ,'city'=>$billto->city
+                                                  ,'province'=>$billto->province
+                                                  ,'province_id'=>$billto->province_id
+                                                  ,'city_id'=>$billto->city_id
+                                                  ,'district_id'=>$billto->district_id
+                                                  ,'state_id'=>$billto->state_id
+                                                  ,'postalcode'=>$billto->postalcode
+                                                  ,'country'=>$billto->country
+                                                  ,'customer_id'=>$id
+                                                  ,'oracle_customer_id'=>$billto->oracle_customer_id
+                                                  ,'cust_acct_site_id'=>$billto->cust_acct_site_id
+                                                  ,'site_use_id'=>$billto->site_use_id
+                                                  ,'payment_term_id'=>$billto->payment_term_id
+                                                  ,'price_list_id'=>$billto->price_list_id
+                                                  ,'order_type_id'=>$billto->order_type_id
+                                                  ,'org_id'=>$billto->org_id
+                                                  ,'warehouse'=>$billto->warehouse
+                                                  ,'area'=>$billto->area
+                                                  ,'langitude'=>$billto->langitude
+                                                  ,'longitude'=>$billto->longitude
+
+                  ]);
+                }
+            }
+
+          }
+        }else{
+          $alamat = CustomerSite::where([['customer_id','=',$id],['id','=',$request->siteid]])
+                  ->update(['province_id'=>$request->province
+                            ,'city_id'=>$request->city
+                            ,'district_id'=>$request->district
+                            ,'state_id'=>$request->subdistricts
+                            ,'address1'=>strtoupper($request->address)
+                            ,'state'=>$state->name
+                            ,'district'=>$district->name
+                            ,'city'=>$city->name
+                            ,'province'=>$province->name
+                            ,'postalcode'=>$request->postal_code
+                            ,'last_update_by'=>Auth::user()->id
+                  ]);
+        }
+        $distcabang->save();
+
+
+        if ($user->email!=$request->email)
+        {
+          $user = User::where('customer_id','=',$id)
+                    ->update(['email'=>$request->email]);
+        }
+        DB::commit();
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
       }
       return redirect()->route('usercabang.edit',$id)->with('message','Successfully edit data');;
     }
