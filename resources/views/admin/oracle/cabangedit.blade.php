@@ -14,6 +14,7 @@
           <form action="{{route('usercabang.update',$customer->id)}}" class="form-horizontal" method="post" role="form">
             {{method_field('PATCH')}}
             {{ csrf_field() }}
+            <input type="hidden" name="siteid" value="{{$alamat->id}}">
             <div class="form-group">
               <label class="control-label col-sm-2" for="name">Distributor Pusat :</label>
               <div class="col-sm-10">
@@ -34,7 +35,7 @@
             <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
               <label class="control-label col-sm-2" for="email">@lang('label.email') :</label>
               <div class="col-sm-10">
-                <input type="text" class="form-control disabled" name="email" value="{{$customer->user->email}}">
+                <input type="text" class="form-control disabled" name="email" value="{{ old('email')?old('email'):$customer->user->email}}">
                 @if ($errors->has('email'))
                     <span class="help-block">
                         <strong>{{ $errors->first('email') }}</strong>
@@ -46,11 +47,9 @@
                 <label for="outlet" class="col-sm-2 control-label">*@lang('label.address')</label>
 
                 <div class="col-sm-8">
-                    <textarea id="address" rows="3" class="form-control" name="address" required>
-			@if($alamat)
-			{{ $alamat->address1 }}
-			@endif
-		     </textarea>
+                    <textarea id="address" rows="3" class="form-control" name="address" align="left" required>
+                      @if($alamat){{ trim($alamat->address1) }}@endif
+                    </textarea>
 
                     @if ($errors->has('address'))
                         <span class="help-block">
@@ -92,6 +91,9 @@
                 <div class="col-sm-8">
                   <select name="city" class="form-control" id="city" onchange="getListDistrict(this.value,{{$alamat?$alamat->district_id:''}})" required>
                     <option value="">--</option>
+                    @foreach($regencies as $reg)
+                    <option value="{{$reg->id}}" {{ ($reg->id==$alamat->city_id)?'selected=selected':''}}>{{$reg->name}}</option>
+                    @endforeach
                   </select>
                     <!--<input id="city" type="city" class="form-control" name="city" value="{{ old('city') }}" required>-->
 
@@ -110,6 +112,9 @@
                     <!--<input id="regency" type="regency" class="form-control" name="regency" value="{{ old('regency') }}" required>-->
                     <select name="district" class="form-control" id="district" onchange="getListSubdistrict(this.value,{{$alamat?$alamat->state_id:''}})" required>
                       <option value="">--</option>
+                      @foreach($districts as $d)
+                      <option value="{{$d->id}}" {{ ($d->id==$alamat->district_id)?'selected=selected':''}}>{{$d->name}}</option>
+                      @endforeach
                     </select>
 
                     @if ($errors->has('district'))
@@ -126,6 +131,9 @@
                 <div class="col-sm-8">
                   <select name="subdistricts" class="form-control" id="subdistricts" required>
                     <option value="">--</option>
+                    @foreach($villages as $v)
+                    <option value="{{$v->id}}" {{ ($v->id==$alamat->state_id)?'selected=selected':''}}>{{$v->name}}</option>
+                    @endforeach
                   </select>
                     <!--<input id="districts" type="districts" class="form-control" name="districts" value="{{ old('districts') }}">-->
 
@@ -141,7 +149,7 @@
                 <label for="postal_code" class="col-sm-2 control-label">@lang('label.postalcode')</label>
 
                 <div class="col-sm-8">
-                    <input id="postal_code" type="postal_code" class="form-control" name="postal_code" value="{{ old('postal_code') }}">
+                    <input id="postal_code" type="postal_code" class="form-control" name="postal_code" value="{{ old('postal_code')?old('postal_code'):$alamat->postalcode }}">
 
                     @if ($errors->has('postal_code'))
                         <span class="help-block">
@@ -186,9 +194,9 @@
 <script type="text/javascript">
 @if($alamat)
 $(document).ready(function() {
-  getListCity({{is_null($alamat->province_id)?0:$alamat->province_id}},{{is_null($alamat->city_id)?0:$alamat->city_id}});
+/*  getListCity({{is_null($alamat->province_id)?0:$alamat->province_id}},{{is_null($alamat->city_id)?0:$alamat->city_id}});
   getListDistrict({{is_null($alamat->city_id)?0:$alamat->city_id}},{{is_null($alamat->district_id)?0:$alamat->district_id}});
-  getListSubdistrict({{is_null($alamat->district_id)?0:$alamat->district_id}},{{is_null($alamat->state_id)?0:$alamat->state_id}});
+  getListSubdistrict({{is_null($alamat->district_id)?0:$alamat->district_id}},{{is_null($alamat->state_id)?0:$alamat->state_id}});*/
 });
 @endif
 </script>
