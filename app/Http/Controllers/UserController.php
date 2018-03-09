@@ -215,6 +215,7 @@ class UserController extends Controller
         $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
                     ->where('id','=',$id)
                     ->orderBy('customer_name','asc')->first();
+        $provinces = DB::table('provinces')->get();
         if(isset($customer->subgroup_dc_id)) $groupid =  $customer->subgroupdc->group_id;
         $customer_sites = CustomerSite::where('customer_id','=',$id)->get();
         $customer_contacts = CustomerContact::where('customer_id','=',$id)->get();
@@ -240,7 +241,9 @@ class UserController extends Controller
         return view('admin.oracle.customershow',['customer'=>$customer,'customer_sites'=>$customer_sites
                                                 ,'customer_contacts'=>$customer_contacts,'roles'=>$roles
                                                 ,'principals'=>$principals,'mappings'=>$mappings
-                                                ,'menu'=>'customer-oracle','groups'=>$group,'groupid'=>$groupid]);
+                                                ,'menu'=>'customer-oracle','groups'=>$group,'groupid'=>$groupid
+                                                , 'provinces'=>$provinces
+                                              ]);
     }
 
     public function oracleUpdate(Request $request,$id)

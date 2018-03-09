@@ -3,6 +3,7 @@ function getvaluemapping(){
   var tipe=$("#mapping-type").val();
   if(tipe=="regencies")
   {
+    $('#province-div').show();
     $('#mapping-value').empty();
     $.get(baseurl+'/ajax/getCity',function(data){
         $.each(data,function(index,subcatObj){
@@ -10,6 +11,7 @@ function getvaluemapping(){
         });
     });
   }else if(tipe=="category_outlets"){
+    $('#province-div').hide();
     $('#mapping-value').empty();
     $.get(baseurl+'/ajax/getCatOutlet?id='+$('#customer_id').val(),function(data){
         //console.log(data);
@@ -21,10 +23,23 @@ function getvaluemapping(){
 
   }else{
     $('#mapping-value').empty();
+    $('#province-div').hide();
   }
 }
-$(document).ready(function() {
 
+function getvalueregencies(){
+  var province=$("#province").val();
+    $('#province-div').show();
+    $('#mapping-value').empty();
+    $.get(baseurl+'/ajax/getCity',{id:province},function(data){
+        $.each(data,function(index,subcatObj){
+            $('#mapping-value').append('<option value="'+subcatObj.id+'">'+subcatObj.name+'</option>');
+        });
+    });
+
+}
+$(document).ready(function() {
+  $('#province-div').hide();
   var table=  $('#mapping-table').DataTable({
           "processing": true,
           //"serverSide": true,
@@ -76,6 +91,7 @@ $('#frm-addmapping').on('submit', function(event){
                     $('#form_output').html(data.success);
                     $('#frm-addmapping')[0].reset();
                     $('#mapping-value').empty();
+                    $('#province-div').hide();
                     $('#mapping-table').DataTable().ajax.reload();
                 }
             }
