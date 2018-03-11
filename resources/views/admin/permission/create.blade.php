@@ -11,7 +11,7 @@
 
      <div class="form-group">
        <label for="name">Name of permission</label>
-       <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}" placeholder="Name of role">
+       <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}" placeholder="Name of permission">
        @if ($errors->has('name'))
            <span class="help-block with-errors">
                <strong>{{ $errors->first('name') }}</strong>

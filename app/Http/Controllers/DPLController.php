@@ -246,7 +246,7 @@ class DPLController extends Controller {
 				$update_file = DPLSuggestNo::where('suggest_no',$suggest_no)
 											->update(array('file_sp'=>$path,'last_update_by'=>Auth::user()->id));
 			}
-			$so_header = SoHeader::where('notrx', $notrx)->update(array('distributor_id' => $distributor));
+			$so_header = SoHeader::where('notrx', $notrx)->update(array('distributor_id' => $distributor,'last_update_by'=>Auth::user()->id));
 
 			$input_note = DPLSuggestNo::where('suggest_no',$suggest_no)
 										->update(array('note'=>$note,'last_update_by'=>Auth::user()->id));
@@ -256,6 +256,7 @@ class DPLController extends Controller {
 					->update(array('discount' => ($disc ? $disc : 0),
 						'discount_gpl' => ($discount_gpl[$key] ? $discount_gpl[$key] : 0),
 						'bonus_gpl' => ($bonus_gpl[$key] ? $bonus_gpl[$key] : 0),
+						'last_update_by'=>Auth::user()->id,
 					));
 			}
 			$user_role = Auth::user()->roles;
@@ -531,14 +532,14 @@ class DPLController extends Controller {
 							->join('users','users.id','dpl_suggest_no.mr_id')
 							->where('suggest_no', $suggest_no)
 							->first();
-		if($curr_pos == '')
+		if($curr_pos == '' && $dpl)
 			$positions['SPV'][] = $dpl['email'];
 		if($vbreak && !empty($positions)) return $positions;
 		$next_approver = OrgStructure::select('org_structure.*','email')
 									->join('users','users.id','org_structure.directsup_user_id')
 									->where('user_id', $dpl['mr_id'])
 									->first();
-		if($curr_pos == '' || ($curr_pos != 'ASM' && $curr_pos != 'Admin DPL' && $curr_pos != 'FSM' && $curr_pos != 'HSM'))
+		if(($curr_pos == '' || ($curr_pos != 'ASM' && $curr_pos != 'Admin DPL' && $curr_pos != 'FSM' && $curr_pos != 'HSM'))&&!empty($next_approver))
 			$positions['ASM'][] = $next_approver['email'];
 		if($vbreak && !empty($positions)) return $positions;
 
@@ -959,7 +960,7 @@ class DPLController extends Controller {
 			$soheader->save();
 			$this->dplLog($suggest_no, 'Batalkan Pengajuan DPL #' . $suggest_no,$note);
 			$update = DPLSuggestNo::where('suggest_no',$suggest_no)
-								->update(array('note'=>$note,'active'=>0));
+								->update(array('note'=>$note,'active'=>0,'last_update_by'=>Auth::user()->id));
 			// Notif to outlet
 			$dpl = DPLSuggestNo::select('users.email','note')
 								->join('users','users.customer_id','dpl_suggest_no.outlet_id')
@@ -1025,7 +1026,7 @@ class DPLController extends Controller {
 	      try{
 					$suggest_no=$request->suggest_no;
 					SoLine::where('header_id','=',$so_header->id)
-					->update(['qty_confirm'=>null,'unit_price'=>DB::raw('list_price')]);
+					->update(['qty_confirm'=>null,'unit_price'=>DB::raw('list_price'),'last_update_by'=>Auth::user()->id]);
 					$this->dpllog($suggest_no,'Change Distributor');
 					/*$updateDPL = DPLNo::where('dpl_no',$so_header->dpl_no)
 																			->update(array('suggest_no'=>null));
@@ -1111,21 +1112,21 @@ class DPLController extends Controller {
 						 if($so_header->distributor_id!=$request->distributor){
 							 $newlines = SoLine::where('header_id','=',$so_header->id)
  	 	 						->whereIn('line_id',$request->lineid)
- 								->update(['header_id'=>$newheader->id,'qty_confirm'=>null]);
+ 								->update(['header_id'=>$newheader->id,'qty_confirm'=>null,'last_update_by'=>Auth::user()->id]);
 						 }else{
 							 $newlines = SoLine::where('header_id','=',$so_header->id)
  	 	 						->whereIn('line_id',$request->lineid)
- 								->update(['header_id'=>$newheader->id]);
+ 								->update(['header_id'=>$newheader->id,'last_update_by'=>Auth::user()->id]);
 						 }
 						 //dd("suggestno:" $suggest_no);
 						 $oldsuggestno = dplSuggestNo::where('suggest_no','=',$request->suggest_no)
 						 										->first();
 							if($oldsuggestno){
 							$updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
-			                                    ->update(array('notrx'=>$newnotrx,'mr_id'=>$oldsuggestno->mr_id,'kowil_mr'=>$oldsuggestno->kowil_mr,'file_sp'=>$oldsuggestno->file_sp));
+			                                    ->update(array('notrx'=>$newnotrx,'mr_id'=>$oldsuggestno->mr_id,'kowil_mr'=>$oldsuggestno->kowil_mr,'file_sp'=>$oldsuggestno->file_sp,'last_update_by'=>Auth::user()->id));
 							}else{
 								$updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
-				                                    ->update(array('notrx'=>$newnotrx));
+				                                    ->update(array('notrx'=>$newnotrx,'last_update_by'=>Auth::user()->id));
 							}
 							$this->dplLog($suggest_no, 'Split From Trx #' . $notrx);
 			          $notified_users = $this->getArrayNotifiedEmail($suggest_no,'');

@@ -5,11 +5,20 @@ function getvaluemapping(){
   {
     $('#province-div').show();
     $('#mapping-value').empty();
-    $.get(baseurl+'/ajax/getCity',function(data){
-        $.each(data,function(index,subcatObj){
-            $('#mapping-value').append('<option value="'+subcatObj.id+'">'+subcatObj.name+'</option>');
-        });
-    });
+    if($('#province').length){
+      $('#province-area').val($('#province').val());
+      $.get(baseurl+'/ajax/getCity',{id:$('#province').val()},function(data){
+          $.each(data,function(index,subcatObj){
+              $('#mapping-value').append('<option value="'+subcatObj.id+'">'+subcatObj.name+'</option>');
+          });
+      });
+    }else{
+      $.get(baseurl+'/ajax/getCity',function(data){
+          $.each(data,function(index,subcatObj){
+              $('#mapping-value').append('<option value="'+subcatObj.id+'">'+subcatObj.name+'</option>');
+          });
+      });
+    }
   }else if(tipe=="category_outlets"){
     $('#province-div').hide();
     $('#mapping-value').empty();
@@ -28,7 +37,7 @@ function getvaluemapping(){
 }
 
 function getvalueregencies(){
-  var province=$("#province").val();
+  var province=$("#province-area").val();
     $('#province-div').show();
     $('#mapping-value').empty();
     $.get(baseurl+'/ajax/getCity',{id:province},function(data){

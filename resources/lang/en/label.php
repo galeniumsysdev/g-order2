@@ -95,4 +95,5 @@ return [
     'change_to_inactive'=>'Change to inactive',
     'outlet_position' =>'Position Outlet',
     'PilihSalahSatu' => '--Choose One--',
+    'orgstructure' => 'Structure DPL',
 ];

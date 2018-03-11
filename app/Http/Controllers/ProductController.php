@@ -135,7 +135,7 @@ class ProductController extends Controller
 
     DB::beginTransaction();
     try{
-      $product=Product::where('id','=',$request->idpareto)->update(['pareto'=>1]);
+      $product=Product::where('id','=',$request->idpareto)->update(['pareto'=>1,'last_update_by'=>Auth::user()->id]);
       DB::commit();
       return redirect()->route('product.pareto')->withMessage('Product Updated');
     }catch (\Exception $e) {
@@ -148,7 +148,7 @@ class ProductController extends Controller
   {
     DB::beginTransaction();
     try{
-      $product=Product::where('id','=',$id)->update(['pareto'=>0]);
+      $product=Product::where('id','=',$id)->update(['pareto'=>0,'last_update_by'=>Auth::user()->id]);
       DB::commit();
       return redirect()->route('product.pareto')->withMessage('Product removed from pareto products');
     }catch (\Exception $e) {
@@ -1228,7 +1228,7 @@ class ProductController extends Controller
           $updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
                                     ->update(array('notrx'=>$notrx,'file_sp'=>$path,'last_update_by'=>Auth::user()->id));
 
-          $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($suggest_no,'');
+          $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($suggest_no,'');          
     			if(!empty($notified_users)){
     				$data = [
     					'title' => 'Pengajuan DPL',
