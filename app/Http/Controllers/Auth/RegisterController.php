@@ -135,6 +135,7 @@ class RegisterController extends Controller
             }
             $customer->longitude = $data['longitude'];
             $customer->langitude = $data['langitude'];
+            $customer->last_update_by = $user_check->id;
             $customer->save();
             /*getdistributor*/
             if(is_null($customer->oracle_customer_id)){
@@ -183,6 +184,8 @@ class RegisterController extends Controller
                     $sitesbillto->district_id=$shipto->district_id;
                     $sitesbillto->state_id=$shipto->state_id;
                     $sitesbillto->area=$shipto->area;
+                    $sitesbillto->created_by = $user_check->id;
+                    $sitesbillto->last_update_by = $user_check->id;
                     $sitesbillto->save();
                   }
                   $usernotif= User::where('customer_id','=',$customeryasa->id)
@@ -224,6 +227,7 @@ class RegisterController extends Controller
            $roleoutlet = Role::where('name','=','Outlet')->first();
            $user_check->roles()->attach($roleoutlet->id);
          }
+         $user_check->last_update_by=$user_check->id;
          $user_check->save();
          return $user_check;
        }else{
@@ -240,21 +244,9 @@ class RegisterController extends Controller
 
       $validator = $this->validator($input)->validate();
       if ($request->psc=="" and $request->pharma==""){
-        //$errors = new array(['error' => [trans('auth.pscflag')]]);
-	      //return Redirect::back()->withErrors('psc', trans('auth.pscflag'))->withInput();
         return redirect(route('register'))->withErrors(['psc'=> [trans('auth.pscflag')]])->withInput();
       }
-    /*  if($request->psc=="1" and (is_null($request->groupdc) or is_null($request->subgroupdc) ))
-      {
-        return redirect(route('register'))->withErrors(['groupdc'=> trans('auth.groupdcerror')])->withInput();
-      }*/
 
-      /*if($request->hasFile('imgphoto')) {
-        $validator = Validator::make($request->all(), [
-            'imgphoto' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ])->validate();
-
-      }*/
       $customer = Customer::create([
           'customer_name' => strtoupper($request->name),
           'status' => 'A',
@@ -330,29 +322,26 @@ class RegisterController extends Controller
              $custcontact3->save();
         }
 
-      //$user=$this->create($input);
       $user= new User();
       $user->id = Uuid::generate()->string;
       $user->name = strtoupper($request->name);
       $user->email = $request->email;
-      /*if($request->hasFile('imgphoto')) {
-        $avatar = $request->file('imgphoto');
-        $filename = time() . '.' . $avatar->getClientOriginalExtension();
-        Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
-        $user->avatar = $filename;
-      }*/
+      $user->created_by = $user->id;
+      $user->last_update_by= $user->id;
 
       $user->api_token =str_random(60);
       $customer->users()->save($user);
 
-
+      $customer->created_by=$user->id;
+      $customer->last_update_by=$user->id;
+      $customer->save();
+      $custsites->created_by=$user->id;
+      $custsites->last_update_by=$user->id;
+      $custsites->save();
+      $updatecontact = CustomerContact::where('customer_id',$customer->id)->update(['created_by'=>$user->id,'last_update_by'=>$user->id]);
 
       $data = $user->toArray();
       $user->notify(new VerificationUser($user));
-      /*Mail::send('emails.confirmation',$data,function($message) use($data){
-            $message->to($data['email']);
-            $message->subject('Registration Confirmation');
-        });*/
         return redirect(route('login'))->with('status',trans("passwords.confirm"));
     }
 
@@ -409,7 +398,7 @@ class RegisterController extends Controller
             }
           });
 
-      });      
+      });
       return $distributor;
     }
 

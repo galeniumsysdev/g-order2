@@ -316,7 +316,7 @@
   						</div>
               <div class="form-group" id="province-div">
   							<label class="control-label" for="title">Province:</label>
-  							<select name="Provinces" id="province" class="form-control" onchange="getvalueregencies()">
+  							<select name="Provinces" id="province-area" class="form-control" onchange="getvalueregencies()">
                   <option value="-">Pilih Salah Satu</option>
                   @foreach($provinces as $p)
                   <option value="{{$p->id}}">{{$p->name}}</option>

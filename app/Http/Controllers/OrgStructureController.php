@@ -6,6 +6,9 @@ use App\OrgStructure;
 use App\User;
 use DB;
 use Webpatser\Uuid\Uuid;
+use Datatables;
+use Carbon\Carbon;
+use Auth;
 
 use Illuminate\Http\Request;
 
@@ -57,7 +60,9 @@ class OrgStructureController extends Controller
   		$users_sup_list[$user->user_id] = $user->name;
   	}
 
-  	return view('admin.org.orgSetting', compact('org','users_sup_list','user_id','menu','role_list'));
+		$provinces =DB::table('provinces')->get();
+
+  	return view('admin.org.orgSetting', compact('org','users_sup_list','user_id','menu','role_list','provinces'));
   }
 
   public function saveSetting(Request $request, $user_id)
@@ -87,6 +92,9 @@ class OrgStructureController extends Controller
 					,'validate_flag'=>1
 					,'register_flag'=>1]
 				);
+				}else{
+					$user->password = bcrypt('123456');
+					$user->save();
 				$user->roles()->sync($request->role);
 			}
 			$org->user_id = $user->id;
@@ -180,4 +188,75 @@ class OrgStructureController extends Controller
 		}
 
 	}
+
+	public function ajaxOrgArea($id=null){
+		$area = DB::table('mapping_region_dpl')
+								->join('regencies as r','mapping_region_dpl.regency_id','r.id')
+								->join('provinces as p','p.id','r.province_id')
+								->join('org_structure as os','mapping_region_dpl.user_code','os.user_code')
+								->where('os.id','=',$id);
+		$area =$area->select('r.id','p.name as province','r.name as city');
+
+		return Datatables::of($area)
+					->editColumn('id',function($area){
+						return '<input type="checkbox" class="chk-mapping" name="mapping[]" value='.$area->id.'>';
+					})->rawColumns(['id'])
+					->make(true);
+	}
+
+	public function ajaxaddAreaDPL(Request $request)
+	{
+		$error_array = array();
+		$success_output = '';
+		$x=0;
+	 if($request->get('button_action')=="add")
+	 {
+		 $code=$request->get('code');
+		 foreach ($request->value as $nil){
+			 $ada = DB::table('mapping_region_dpl')->where('user_code',$code)
+			 				->where('regency_id',$nil)
+							->first();
+			 if(!$ada){
+			 		$insert = DB::table("mapping_region_dpl")
+								 ->insert(['user_code'=>$code
+													 ,'regency_id'=>$nil
+													 ,'created_at'=>Carbon::now()
+													 ,'updated_at'=>Carbon::now()
+													 ,'created_by'=>Auth::user()->id
+													 ,'last_update_by' => Auth::user()->id
+												 ]);
+					if($insert) $x++;
+
+			 }
+		 }
+		 if ($x >0) $success_output = '<div class="alert alert-success">'.$x.' data inserted</div>';
+		 else $error_array = 'No Data Inserted';
+	 }
+	 $output = array(
+				 'error'     =>  $error_array,
+				 'success'   =>  $success_output
+		 );
+	 echo json_encode($output);
+	}
+
+	public function deleteArea(Request $request,$user_id){
+		$org = OrgStructure::where('id',$user_id)->first();
+		if($org){
+			$user_code =$org->user_code;
+			DB::beginTransaction();
+			try{
+				if(is_array($request->mapping))
+						$deletedata = DB::table('mapping_region_dpl')->where("user_code",$user_code)
+							->whereIn('regency_id',$request->mapping)
+							->delete();
+				DB::commit();
+				return redirect()->route('org.setting',$user_id)
+												->with('success','Successfully delete data mapping');
+			}catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
+			}
+		}
+	}
+
 }

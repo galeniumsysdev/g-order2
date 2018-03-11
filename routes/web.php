@@ -39,6 +39,8 @@ Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
 Route::post('/ajax/addMappingType', 'UserController@ajaxAddMappingType')->name('ajax.addmapping.type');
 Route::get('/ajax/getMappingType/{id?}', 'UserController@ajaxGetMappingType')->name('ajax.mapping.getdata');
 Route::get('/ajax/getPriceList', 'PriceController@ajaxPriceList')->name('ajax.price.getdata');
+Route::get('/ajax/orgArea/{id?}', 'OrgStructureController@ajaxOrgArea')->name('ajax.area.orgpharma');
+Route::post('/ajax/addAreaDPL','OrgStructureController@ajaxaddAreaDPL');
 
 Route::get('detail/{id}', [
   'uses' => 'ProductController@show'
@@ -376,13 +378,15 @@ Route::get('/dpl/input/{suggest_no?}/{notifid?}','DPLController@readNotifDPLInpu
 Route::get('/dpl/cancel/{suggest_no?}/{notifid?}','DPLController@readNotifDPLCancel')->name('dpl.readNotifDPLCancel');
 Route::get('/dpl/cancel/outlet/{suggest_no?}/{notifid?}','DPLController@readNotifDPLCancelOutlet')->name('dpl.readNotifDPLCancelOutlet');
 
+Route::group(['middleware' => ['permission:OrgStructureDPL']], function () {
 //Organization Structure
 Route::get('/Organization','OrgStructureController@index')->name('org.list');
 Route::get('/Organization/{user_id}/setting','OrgStructureController@setting')->name('org.setting');
 Route::post('/Organization/{user_id}/setting/save','OrgStructureController@saveSetting')->name('org.saveSetting');
 Route::get('/Organization/create','OrgStructureController@create')->name('org.create');
 Route::post('/Organization/setting/add','OrgStructureController@addSetting')->name('org.postcreate');
-
+Route::post('/Organization/{user_id}/area/delete','OrgStructureController@deleteArea')->name('org.deleteArea');
+});
 
 //Outlet Product and Stock
 //---Product---

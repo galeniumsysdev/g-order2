@@ -52,16 +52,7 @@
     <li {{$menu=='permission'?'class=active':''}}>
         <a href="{{route('permission.index')}}"><i class="fa fa-fw fa-wrench"></i> Permission</a>
     </li>
-    <!--<li {{$menu=='CategoryOutlet'?'class=active':''}}>
-        <a href="{{route('CategoryOutlet.index')}}"><i class="fa fa-fw fa-desktop"></i> Categories Outlet</a>
-    </li>
-    <li>
-        <a href="{{route('customer.listNoo')}}"><i class="fa fa-fw fa-wrench"></i> Outlet/Distributor</a>
-    </li>-->
-    <li {{$menu=='OrgStructure'?'class=active':''}}>
-        <a href="{{route('org.list')}}"><i class="fa fa-fw fa-desktop"></i> Organization Structure</a>
-    </li>
-
+    
     <li>
         <a href="javascript:;" data-toggle="collapse" data-target="#category"><i class="fa fa-fw fa-arrows-v"></i> Category <i class="fa fa-fw fa-caret-down"></i></a>
         @if(in_array($menu,array("CategoryOutlet","CategoryProduct","GroupDatacenter","SubgroupDatacenter")) )

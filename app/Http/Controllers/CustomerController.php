@@ -278,7 +278,7 @@ class CustomerController extends Controller
           $customer->subgroup_dc_id =null;
           $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA");
         }
-        $distributor = $distributor->get();      
+        $distributor = $distributor->get();
         $olddistributor = $customer->hasDistributor;
         if($distributor)
         {

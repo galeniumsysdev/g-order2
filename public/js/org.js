@@ -1,4 +1,6 @@
-$(document).ready(function(){
+var baseurl = window.Laravel.url;
+
+$(document).ready(function(){  
   if($('#email-spv').length){
     $('#change-email').hide();
     $.get(window.Laravel.url+"/dpl/ajax/asmspv",
@@ -27,7 +29,9 @@ $(document).ready(function(){
         //  $('#user-name').val('');
           $('#user-id').val('');
       });
+
   }
+
   if($('#user-id').val()!='')
   {
     $('#change-email').show();

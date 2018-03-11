@@ -55,7 +55,7 @@ class OrderController extends Controller
       $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
       if($header->status==-99 and $header->fill_in==1 and $header->customer_id = Auth::user()->customer_id)
         return view('shop.dplorderupdate',compact('header','lines'));
-      if ($user_dist->hasRole('Principal') )    {        
+      if ($user_dist->hasRole('Principal') )    {
         return view('shop.checkOrder1',compact('header','lines','deliveryno'));
       }else {
         $print=Input::get('print','');
@@ -238,7 +238,7 @@ class OrderController extends Controller
               ['header_id','=',$request->header_id],
               ['line_id','=',$soline->line_id]
             ])
-            ->update(['qty_confirm' => $qty]);
+            ->update(['qty_confirm' => $qty,'last_update_by'=> Auth::user()->id]);
 
             /*if(!is_null($header->oracle_customer_id))
           {
@@ -291,7 +291,7 @@ class OrderController extends Controller
               //$nodpl= DPLNo::where('suggest_no', $header->suggest_no)->delete();
               $header->status=-99;
               $header->save();
-              $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);
+              $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);              
         			if(!empty($notified_users)){
         				$data = [
         					'title' => 'Resetting DPL',
@@ -389,10 +389,11 @@ class OrderController extends Controller
         }else{
           $update = DB::table('so_lines')
             ->where('header_id','=',$request->header_id)
-            ->update(['qty_confirm' => 0]);
+            ->update(['qty_confirm' => 0,'last_update_by'=>Auth::user()->id]);
           $header->status=-2;
           $header->alasan_tolak=$request->alasan;
           $header->tgl_approve=Carbon::now();
+          $header->last_update_by = Auth::user()->id;
           $header->save();
           $customer = Customer::where('id','=',$header->customer_id)->first();
           $content = "Mohon maaf, bersama ini kami informasikan bahwa PO anda No:".$header->customer_po." telah dibatalkan.";
@@ -463,7 +464,8 @@ class OrderController extends Controller
                   ['header_id','=',$request->header_id],
                   ['line_id','=',$soline->line_id]
                 ])
-                ->update(['qty_shipping' => intval($soline->qty_shipping)+$request->qtyshipping[$soline->line_id]]);
+                ->update(['qty_shipping' => intval($soline->qty_shipping)+$request->qtyshipping[$soline->line_id]
+                          ,'last_update_by'=>Auth::user()->id]);
             }
 
           }

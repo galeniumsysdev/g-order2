@@ -95,4 +95,5 @@ return [
     'change_to_inactive'=>'Klik untuk menonaktifkan',
     'outlet_position' =>'Lokasi Outlet',
     'PilihSalahSatu' => '--Pilih Salah Satu--',
+    'orgstructure' => 'Struktur DPL',
 ];
