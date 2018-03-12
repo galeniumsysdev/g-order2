@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
       \App\SoShipping::observe(new UserActionsObserver);
       \App\Product::observe(new UserActionsObserver);
       \App\DPLNo::observe(new UserActionsObserver);
+      \App\OrgStructure::observe(new UserActionsObserver);
       view()->composer(['layouts.navbar_product','shop.product','swipe'], function($view)
      {
         $product_flexfields = Category::where([//ProductFlexfield::where([

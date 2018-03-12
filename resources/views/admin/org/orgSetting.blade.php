@@ -35,7 +35,7 @@
               <td>
                 <div class="input-group sm-12">
                   {{ Form::text('email',$org->email, array('class'=>'form-control','id'=>'email-spv','autocomplete'=>'off','aria-describedby'=>"change-email")) }}
-                  <span class="input-group-addon" id="basic-addon2"><i class="fa fa-times" aria-hidden="true"></i></span>
+                  <span class="input-group-addon" id="change-email"><i class="fa fa-times" aria-hidden="true"></i></span>
                 </div>
               {{Form::hidden('user_id',$org->user_id, array('class'=>'form-control','id'=>'user-id')) }}
               @if ($errors->has('email'))

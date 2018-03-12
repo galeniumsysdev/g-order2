@@ -1,6 +1,6 @@
 var baseurl = window.Laravel.url;
 
-$(document).ready(function(){  
+$(document).ready(function(){
   if($('#email-spv').length){
     $('#change-email').hide();
     $.get(window.Laravel.url+"/dpl/ajax/asmspv",
@@ -15,7 +15,10 @@ $(document).ready(function(){
             afterSelect: function (item) {
               $('#email-spv').val(item.email);
               //$('#user-name').val(item.name);
-              $('#user-id').val(item.id);
+              if($('#user-id').val()=="")
+              {
+                $('#user-id').val(item.id);
+              }
               $('#email-spv').attr('readonly','readonly');
               //$('#user-name').attr('readonly','readonly');
                 $('#change-email').show();
@@ -27,7 +30,7 @@ $(document).ready(function(){
         //  $('#user-name').removeAttr('readonly').val('');
           $('#email-spv').removeAttr('readonly').val('');
         //  $('#user-name').val('');
-          $('#user-id').val('');
+          //$('#user-id').val('');
       });
 
   }

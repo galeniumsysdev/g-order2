@@ -69,45 +69,70 @@ class OrgStructureController extends Controller
   {
   	$user_code = $request->user_code;
   	$user_sup = $request->directsup;
-
-  	$org = OrgStructure::where('id',$user_id)->first();
-		if(!$org){
-  		$org = new OrgStructure;
-  	}
-		if($org->user_id!=$request->user_id and $request->user_id!='')
-		{
-			if($request->user_id=='')
-			$user =User::where('email',$request->email)->first();
-			else
-			$user =User::where('id',$request->user_id)->first();
-			if($user) $org->user_id = $user->id;
-		}elseif($request->email!=''){
-			$user =User::where('email',$request->email)->first();
-			if(!$user) {
-				$user = User::Create(
-					['id'=>Uuid::generate()->string
-					,'email'=>$request->email
-					,'name'=>$request->user_name
-					,'passswrod'=>bcrypt('123456')
-					,'validate_flag'=>1
-					,'register_flag'=>1]
-				);
-				}else{
-					$user->password = bcrypt('123456');
-					$user->save();
-				$user->roles()->sync($request->role);
+		DB::beginTransaction();
+		try{
+			if (!empty($request->user_id) and $request->email!=""){
+				$this->validate($request, [
+					 'email' => 'unique:users,email,'.$request->user_id.',id',
+					 'user_code' => 'required|unique:org_structure,user_code,'.$user_id.',id|max:16',
+				]);
+			}else{
+				$this->validate($request, [
+					 'user_code' => 'required|unique:org_structure,user_code,'.$user_id.',id|max:16',
+				]);
 			}
-			$org->user_id = $user->id;
-		}else{
-			$org->user_id =null;
-		}
-		$org->description = $request->user_name;
-  	$org->user_code = $user_code;
-  	$org->directsup_user_id = $user_sup;
-  	$org->save();
 
-  	return redirect()->route('org.list')
-  	                ->with('success','Setting saved successfully.');
+	  	$org = OrgStructure::where('id',$user_id)->first();
+			if(!$org){
+	  		$org = new OrgStructure;
+	  	}
+			/*jika ganti email*/
+			if (!empty($request->user_id) and $request->email!="")
+			{
+				$user =User::where('id',$request->user_id)->first();
+				if($user) {
+					$user->email = $request->email;
+					$user->save();
+					$org->user_id = $user->id;
+				}else{
+					return redirect()->back()->withInput()
+			  	                ->withErrors('email','user id not found');
+				}
+			}elseif(empty($org->user_id) and $request->email!=""){
+				$user = User::where('email',$request->email)
+								->wherenotexists(function($query) use($user_id){
+									$query->select(DB::raw(1))
+										->from('org_structure as os')
+										->whereraw("os.user_id = users.id and os.id!='".$user_id."'");
+								})->first();
+				if(!$user){
+					$user = User::Create(
+						['id'=>Uuid::generate()->string
+						,'email'=>$request->email
+						,'name'=>$request->user_name
+						,'passswrod'=>bcrypt('123456')
+						,'validate_flag'=>1
+						,'register_flag'=>1]
+					);
+				}
+				$user->roles()->detach();
+				$user->roles()->attach($request->role);
+				if($user) $org->user_id = $user->id; else $org->user_id=null;
+			}else{
+				$org->user_id=null;
+			}
+
+			$org->description = $request->user_name;
+	  	$org->user_code = $user_code;
+	  	$org->directsup_user_id = $user_sup;
+	  	$org->save();
+			DB::commit();
+	  	return redirect()->route('org.list')
+	  	                ->with('success','Setting saved successfully.');
+		}catch (\Exception $e) {
+			DB::rollback();
+			throw $e;
+		}
   }
 
 	public function create()
@@ -174,6 +199,7 @@ class OrgStructureController extends Controller
 		if($exists)
 		{
 			$exists->user_id = $request->user_id;
+			$exists->description = $request->user_name;
 			$exists->directsup_user_id =$request->directsup;
 			$exists->save();
 			return redirect()->route('org.create') ->with('success','Organization Structure updated successfully.');
