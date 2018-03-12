@@ -396,6 +396,7 @@ class DPLController extends Controller {
 
 		$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
 								->where('role_user.user_id',$dpl['approved_by'])
+								->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])
 								->first();
 
 		$role_prev_approve = $prev_approver['name'];
@@ -637,7 +638,7 @@ class DPLController extends Controller {
 			->join('role_user as ru','ru.user_id','users.id')
 			->join('roles as r','ru.role_id','r.id')
 			->where('suggest_no', $suggest_no)
-			->where('roles.name','not like','Marketing%')
+			->where('r.name','not like','Marketing%')
 			->orderBy('created_at','desc')
 			->get();
 
@@ -707,6 +708,7 @@ class DPLController extends Controller {
 
 			$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
 									->where('role_user.user_id',$list->approved_by)
+									->wherein('roles.name',['SPV','ASM','HSM','FSM','Admin DPL'])
 									->first();
 
 			$role_prev_approve = $prev_approver['name'];
