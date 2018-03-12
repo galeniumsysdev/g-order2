@@ -677,7 +677,10 @@ class DPLController extends Controller {
 				$join->on('fv.master','=',DB::raw("'status_po'"));
 			})
 			->leftjoin('customers as distributor', 'distributor.id', 'so_headers.distributor_id')
-			->whereIn('roles.name',['SPV','ASM','HSM','FSM','Admin DPL'])
+			->where(function($query1){
+				$query1->whereIn('roles.name',['SPV','ASM','HSM','FSM','Admin DPL'])
+					->orwhereNull('roles.name');
+			})
 			//->where('active', 1)
 			;
 
