@@ -256,6 +256,7 @@
                               <thead>
                                 <tr>
                                   <th>Name</th>
+                                  <th>Email</th>
                                   <th>Role</th>
                                   <th>Action</th>
                                 </tr>
@@ -264,6 +265,7 @@
                                 @forelse($customer->cabang as $cab)
                                 <tr>
                                   <td>{{$cab->customer_name}}</td>
+                                    <td>{{$cab->user()->first()->email}}</td>
                                   <td>
                                     @foreach($cab->user->roles as $v)
                           					     <label class="label label-success">{{ $v->display_name }}</label>
