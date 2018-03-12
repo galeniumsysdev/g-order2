@@ -703,7 +703,7 @@ class UserController extends Controller
                   /*product stock jika role Apotik/Klinik*/
                   if($user->hasRole('Apotik/Klinik')){
                     DB::table('outlet_products')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id,'last_update_by'=>Auth::user()->id]);
-                    DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id],'last_update_by'=>Auth::user()->id);
+                    DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id,'last_update_by'=>Auth::user()->id)];
                   }
                   /*Inactive old customer_id*/
                   $dataoldcustomer = Customer::where('id','=',$oldcustomer)->first();
