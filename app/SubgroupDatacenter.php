@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SubgroupDatacenter extends Model
 {
-    protected $fillable=['name','display_name','enabled_flag','group_id'];
+    protected $fillable=['name','display_name','enabled_flag','group_id','created_by','last_update_by'];
 
     public function groupdatacenter()
     {

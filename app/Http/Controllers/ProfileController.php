@@ -197,7 +197,7 @@ class ProfileController extends Controller
         if($site->primary_flag=="Y" and isset($request->langitude) and isset($request->longitude))
         {
           $updatecustomer =customer::where('id','=',$site->customer_id)
-          ->update(['langitude'=>$request->langitude,'longitude'=> $request->longitude]);
+          ->update(['langitude'=>$request->langitude,'longitude'=> $request->longitude,'last_update_by'=>Auth::user()->id]);
         }
         $site->save();
         if($site->province_id) $listcity = DB::table('regencies')->where('province_id','=',$site->province_id)->get();
@@ -295,7 +295,7 @@ class ProfileController extends Controller
             $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PSC")->get();
             if($distributor)
             {
-              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray(),['created_by'=>Auth::user()->id, 'last_update_by'=>Auth::user()->id]);
             }
           }
         }
@@ -306,7 +306,7 @@ class ProfileController extends Controller
             $distributor = app('App\Http\Controllers\Auth\RegisterController')->mappingDistributor($groupdc,$city,"PHARMA")->get();
             if($distributor)
             {
-              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+              $customer->hasDistributor()->attach($distributor->pluck('id')->toArray(),['last_update_by'=>Auth::user()->id,'created_by'=>Auth::user()->id]);
             }
           }
         }
