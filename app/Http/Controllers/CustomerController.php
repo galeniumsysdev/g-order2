@@ -284,7 +284,7 @@ class CustomerController extends Controller
         {
           $newdist = $distributor->whereNotIn('id',$customer->hasDistributor()->pluck('id')->toArray());
           /*attach distributor yang belum ada*/
-          $customer->hasDistributor()->attach($newdist->pluck('id')->toArray());
+          $customer->hasDistributor()->attach($newdist->pluck('id')->toArray(),['created_by'=>Auth::user()->id,'last_update_by'=>Auth::user()->id]);
         }
 
         if($customer->pharma_flag=="1" and $request->pharma_flag==""){
@@ -378,7 +378,7 @@ class CustomerController extends Controller
       $user = User::find($outletid);
       $outlet = Customer::find($user->customer_id);
     //  $distributor_user->notify(new NewoutletDistributionNotif($user,$distributor));
-      $outlet->hasDistributor()->attach($id);
+      $outlet->hasDistributor()->attach($id,['created_by'=>Auth::user()->id,'last_update_by'=>Auth::user()->id]);
       return Response::json($distributor);
     }
   }
@@ -391,7 +391,7 @@ class CustomerController extends Controller
               ['outlet_id','=',$request->id],
               ['distributor_id','=',Auth::User()->customer_id],
               ])
-            ->update(['approval' => true,'tgl_approve'=>Carbon::now()]);
+            ->update(['approval' => true,'tgl_approve'=>Carbon::now(),'last_update_by'=>Auth::user()->id]);
             //unreadmark notification
             Auth::User()->notifications()
                         ->where('id','=',$request->notif_id)
@@ -438,7 +438,7 @@ class CustomerController extends Controller
               ['outlet_id','=',$request->id],
               ['distributor_id','=',Auth::User()->customer_id],
               ])
-            ->update(['approval' => false,'keterangan'=>$request->alasan,'tgl_approve'=> Carbon::now(), 'updated_at'=>Carbon::now()  ]);
+            ->update(['approval' => false,'keterangan'=>$request->alasan,'tgl_approve'=> Carbon::now(), 'updated_at'=>Carbon::now() ,'last_update_by'=>Auth::user()->id ]);
         //unreadmark notification
         Auth::User()->notifications()
                     ->where('id','=',$request->notif_id)
@@ -732,7 +732,7 @@ class CustomerController extends Controller
               ['outlet_id','=',$request->customer_id],
               ['distributor_id','=',$request->distributor_id],
               ])
-            ->update(['inactive' => true,'end_date_active'=>Carbon::now(),'approval'=>false]);
+            ->update(['inactive' => true,'end_date_active'=>Carbon::now(),'approval'=>false,'last_update_by'=>Auth::user()->id]);
         $distributor=DB::table('customers')->where('id','=',$request->distributor_id)->select('customer_name')->first();
         $customer =DB::table('customers')->where('id','=',$request->customer_id)->select('customer_name')->first();
         return redirect()->route('customer.show',['id'=>$request->user_id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.inactive",["dist"=>$distributor->customer_name,"cust"=>$customer->customer_name]));
@@ -742,7 +742,7 @@ class CustomerController extends Controller
               ['outlet_id','=',$request->customer_id],
               ['distributor_id','=',$request->distributor_id],
               ])
-            ->update(['inactive' => false,'end_date_active'=>null,'approval'=>true]);
+            ->update(['inactive' => false,'end_date_active'=>null,'approval'=>true,'last_update_by'=>Auth::user()->id]);
         $distributor=DB::table('customers')->where('id','=',$request->distributor_id)->select('customer_name')->first();
         $customer =DB::table('customers')->where('id','=',$request->customer_id)->select('customer_name')->first();
         return redirect()->route('customer.show',['id'=>$request->user_id,'notif_id'=>$request->notif_id])->withMessage(trans("pesan.distributoractive",["dist"=>$distributor->customer_name,"cust"=>$customer->customer_name]));

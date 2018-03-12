@@ -35,12 +35,12 @@ class Customer extends Model
 
   public function hasDistributor()
   {
-    return $this->belongsToMany('App\Customer','outlet_distributor','outlet_id','distributor_id')->withTimestamps();
+    return $this->belongsToMany('App\Customer','outlet_distributor','outlet_id','distributor_id')->withTimestamps()->withPivot('created_by','last_update_by');
   }
 
   public function hasOutlet()
   {
-    return $this->belongsToMany('App\Customer','outlet_distributor','distributor_id','outlet_id')->withTimestamps();
+    return $this->belongsToMany('App\Customer','outlet_distributor','distributor_id','outlet_id')->withTimestamps()->withPivot('created_by','last_update_by');
   }
 
   public function subgroupdc()

@@ -153,7 +153,7 @@ class RegisterController extends Controller
               $distributor = $distributor->get();
 		          if($distributor)
               {
-                $customer->hasDistributor()->attach($distributor->pluck('id')->toArray());
+                $customer->hasDistributor()->attach($distributor->pluck('id')->toArray(),['created_by'=>$user_check->id,'last_update_by'=>$user_check->id]);
                 $customeryasa=$distributor->where('customer_number','=',config('constant.customer_yasa'))->first();
                 if($customeryasa)
                 {

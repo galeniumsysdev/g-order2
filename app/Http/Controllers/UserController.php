@@ -570,7 +570,7 @@ class UserController extends Controller
           if ($user->email!=$request->email)
           {
             $user = User::where('customer_id','=',$id)
-                      ->update(['email'=>$request->email]);
+                      ->update(['email'=>$request->email,'last_update_by'=>Auth::user()->id]);
           }
           DB::commit();
         }catch (\Exception $e) {
@@ -689,7 +689,9 @@ class UserController extends Controller
                                 ,'payment_term_id'=>$orasitebill->payment_term_id
                                 ,'oracle_ship_to'=>$orasiteship->site_use_id
                                 ,'oracle_bill_to'=>$orasitebill->site_use_id
-                                ,'oracle_customer_id'=>$oraclecustomer->oracle_customer_id]);
+                                ,'oracle_customer_id'=>$oraclecustomer->oracle_customer_id
+                                ,'last_update_by'=>Auth::user()->id
+                              ]);
                     }
                   }
 
@@ -700,8 +702,8 @@ class UserController extends Controller
                   if($distributor) $oraclecustomer->hasDistributor()->sync($distributor->pluck('distributor_id')->toArray());
                   /*product stock jika role Apotik/Klinik*/
                   if($user->hasRole('Apotik/Klinik')){
-                    DB::table('outlet_products')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
-                    DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id]);
+                    DB::table('outlet_products')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id,'last_update_by'=>Auth::user()->id]);
+                    DB::table('outlet_stock')->where('outlet_id','=',$oldcustomer)->update(['outlet_id'=>$oraclecustomer->id],'last_update_by'=>Auth::user()->id);
                   }
                   /*Inactive old customer_id*/
                   $dataoldcustomer = Customer::where('id','=',$oldcustomer)->first();

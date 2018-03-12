@@ -89,7 +89,7 @@ class BannerController extends Controller
     }
     public function publish($publish,$id)
     {
-        $banners = Banner::where('id','=',$id)->update(['publish_flag'=>$publish]);
+        $banners = Banner::where('id','=',$id)->update(['publish_flag'=>$publish,'last_update_by'=>Auth::user()->id]);
         return redirect()->route('admin.banner')->withMessage('Banner telah diupdate');
     }
     public function destroy($id)

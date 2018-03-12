@@ -356,7 +356,7 @@ class OutletProductController extends Controller
 
   public function deleteProduct($id)
   {
-    $delete = OutletProducts::where('id',$id)->update(array('enabled_flag'=>0));
+    $delete = OutletProducts::where('id',$id)->update(array('enabled_flag'=>0,'last_update_by'=>Auth::user()->id));
 
     if($delete){
       return redirect()->back()->with('msg','Product deleted successfully.');

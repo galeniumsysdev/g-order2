@@ -15,7 +15,7 @@ class Product extends Model
 
     public function categories()
     {
-       return $this->belongsToMany('App\Category','category_products','product_id','flex_value')->withTimestamps();
+       return $this->belongsToMany('App\Category','category_products','product_id','flex_value')->withTimestamps()->withPivot('created_by','last_update_by');
       /*return $this->hasManyThrough(
             'App\Category',
             'App\CategoryProduct',
