@@ -259,10 +259,10 @@ class DPLController extends Controller {
 						'last_update_by'=>Auth::user()->id,
 					));
 			}
-			$user_role = Auth::user()->roles;
+			$user_role = Auth::user()->roles->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])->first();
 
 			$dplno = DPLNo::where('suggest_no','=',$suggest_no)->first();
-			if(($user_role[0]->name == 'FSM' or $user_role[0]->name=='HSM') and ($dplno) )
+			if(($user_role->name == 'FSM' or $user_role->name=='HSM') and ($dplno) )
 			{
 					$this->sendDPLNo($suggest_no,$dplno->dpl_no);
 					$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
@@ -289,9 +289,9 @@ class DPLController extends Controller {
 								->first();
 
 
-			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
+			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role->name);
 			if(!empty($notified_users)){
-				if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+				if($user_role->name != 'FSM' && $user_role->name != 'HSM'){
 				$data = [
 					'title' => 'Permohonan Approval',
 					'message' => 'Permohonan Approval #'.$suggest_no,
@@ -315,7 +315,7 @@ class DPLController extends Controller {
 					];
 				}
 				foreach ($notified_users as $key => $email) {
-					if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+					if($user_role->name != 'FSM' && $user_role->name != 'HSM'){
 						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 							->update(array('fill_in' => 0,
 											'approved_by' => Auth::user()->id,
@@ -333,7 +333,7 @@ class DPLController extends Controller {
 					foreach ($email as $key2 => $mail) {
 						$data['email'] = $mail;
 						if($key == 'FSM_HSM'){
-							if($user_role[0]->name == 'Admin DPL')
+							if($user_role->name == 'Admin DPL')
 								$data['sendmail'] = 1;
 							else
 								$data['sendmail'] = 0;
@@ -392,7 +392,7 @@ class DPLController extends Controller {
 			return view('errors.403');
 		}
 
-		$user_role = Auth::user()->roles;
+		$user_role = Auth::user()->roles->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])->first();
 
 		$prev_approver = Role::join('role_user','role_user.role_id','roles.id')
 								->where('role_user.user_id',$dpl['approved_by'])
@@ -404,7 +404,7 @@ class DPLController extends Controller {
 		if(!empty($notified_users)){
 			$check_count = 0;
 			foreach ($notified_users as $ind => $email) {
-				if(strpos($ind, $user_role[0]->name) !== false && ($role_prev_approve != 'FSM' && $role_prev_approve != 'HSM')){
+				if(strpos($ind, $user_role->name) !== false && ($role_prev_approve != 'FSM' && $role_prev_approve != 'HSM')){
 					$check_count++;
 					break;
 				}
@@ -429,11 +429,11 @@ class DPLController extends Controller {
 		$suggest_no = $request->suggest_no;
 		$action = $request->action;
 		if ($action == 'Approve') {
-			$user_role = Auth::user()->roles;
+			$user_role = Auth::user()->roles->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])->first();
 
-			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role[0]->name);
+			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role->name);
 			if(!empty($notified_users)){
-				if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+				if($user_role->name != 'FSM' && $user_role->name != 'HSM'){
 					$data = [
 						'title' => 'Permohonan Approval',
 						'message' => 'Permohonan Approval #'.$suggest_no,
@@ -458,7 +458,7 @@ class DPLController extends Controller {
 					];
 				}
 				foreach ($notified_users as $key => $email) {
-					if($user_role[0]->name != 'FSM' && $user_role[0]->name != 'HSM'){
+					if($user_role->name != 'FSM' && $user_role->name != 'HSM'){
 						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 							->update(array('approved_by' => Auth::user()->id, 'next_approver' => $key,'last_update_by'=>Auth::user()->id));
 					}
@@ -466,7 +466,7 @@ class DPLController extends Controller {
 						$dpl = DPLSuggestNo::where('suggest_no', $suggest_no)
 							->update(array('approved_by' => Auth::user()->id, 'next_approver' => '','last_update_by'=>Auth::user()->id));
 						$dplno = DPLNo::where('suggest_no','=',$suggest_no)->first();
-						if(($user_role[0]->name == 'FSM' or $user_role[0]->name=='HSM') and ($dplno) )
+						if(($user_role->name == 'FSM' or $user_role->name=='HSM') and ($dplno) )
 						{
 								$this->sendDPLNo($suggest_no,$dplno->dpl_no);
 								return true;
@@ -477,7 +477,7 @@ class DPLController extends Controller {
 					foreach ($email as $key2 => $mail) {
 						$data['email'] = $mail;
 						if($key == 'FSM_HSM'){
-							if($user_role[0]->name == 'Admin DPL')
+							if($user_role->name == 'Admin DPL')
 								$data['sendmail'] = 1;
 							else
 								$data['sendmail'] = 0;
@@ -493,7 +493,7 @@ class DPLController extends Controller {
 			$this->dplLog($suggest_no, $action);
 
 		} else {
-			$user_role = Auth::user()->roles;
+			$user_role = Auth::user()->roles->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])->first();
 			$notified_users = $this->getArrayNotifiedEmail($suggest_no);
 			if(!empty($notified_users)){
 				$data = [
@@ -679,8 +679,9 @@ class DPLController extends Controller {
 			;
 
 
-		$user_role = Auth::user()->roles;
-		$role = $user_role[0]->name;
+		$user_role = Auth::user()->roles->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])->first();
+		$role = $user_role->name;
+
 		if($role=="SPV" or $role=="ASM")
 		{
 				$dpl =$dpl->where(function($query){
@@ -825,9 +826,9 @@ class DPLController extends Controller {
     }
 
 	public function dplNoInputForm($suggest_no) {
-		$user_role = Auth::user()->roles;
+		$user_role = Auth::user()->roles->whereIn('name','Admin DPL')->first();
 
-		if($user_role[0]->name != 'Admin DPL'){
+		if(!$user_role){
 			return view('errors.403');
 		}
 		$dpl = DPLSuggestNo::select('users.id as dpl_mr_id',
