@@ -637,6 +637,7 @@ class DPLController extends Controller {
 			->join('role_user as ru','ru.user_id','users.id')
 			->join('roles as r','ru.role_id','r.id')
 			->where('suggest_no', $suggest_no)
+			->where('roles.name','not like','Marketing%')
 			->orderBy('created_at','desc')
 			->get();
 
@@ -675,6 +676,7 @@ class DPLController extends Controller {
 				$join->on('fv.master','=',DB::raw("'status_po'"));
 			})
 			->leftjoin('customers as distributor', 'distributor.id', 'so_headers.distributor_id')
+			->whereIn('roles.name',['SPV','ASM','HSM','FSM','Admin DPL'])
 			//->where('active', 1)
 			;
 
