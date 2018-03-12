@@ -71,6 +71,12 @@ $('#check-all').click(function() {
     }
 });
 
+if($('#dist-table').length){
+  $('#dist-table').DataTable();
+    window.setTimeout(function(){
+        $(window).resize();
+    },2000);
+}
 
 
 
