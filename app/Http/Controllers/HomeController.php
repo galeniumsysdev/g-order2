@@ -65,7 +65,7 @@ class HomeController extends Controller
       }elseif($request->status_read=="1"){
         $notifications = $notifications->whereNotNull('read_at');
       }
-      $notifications = $notifications->get();
+      $notifications = $notifications->paginate(10);
     //  var_dump($notifications->pluck('data')->toArray());
       $group = array_column(Auth::User()->notifications()->pluck('data')->toArray(),'tipe');
       $jnsnotif= array_unique($group);
