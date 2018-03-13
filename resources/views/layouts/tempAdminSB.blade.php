@@ -45,7 +45,7 @@
             </div>
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
-                <li class="dropdown">
+              <!--  <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope"></i> <b class="caret"></b></a>
                     <ul class="dropdown-menu message-dropdown">
                         <li class="message-preview">
@@ -100,7 +100,7 @@
                             <a href="#">Read All New Messages</a>
                         </li>
                     </ul>
-                </li>
+                </li>-->
                 <notification class="dropdown-toggle" :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
                 <!--<li class="dropdown">
 
@@ -128,14 +128,14 @@
                       <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+                            <a href="{{route('profile.index')}}"><i class="fa fa-fw fa-user"></i> Profile</a>
                         </li>
-                        <li>
+                        <!--<li>
                             <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
-                        </li>
+                        </li>-->
                         <li class="divider"></li>
                         <li>
                           <a href="{{ route('logout') }}"
