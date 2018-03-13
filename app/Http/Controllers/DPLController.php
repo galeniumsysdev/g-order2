@@ -439,6 +439,9 @@ class DPLController extends Controller {
 									->select('roles.name','users.name as user_name')
 									->first();
 		$role_prev_approve = $prev_approver['name'];
+		if($role_prev_approve =="HSM" or $role_prev_approve=="FSM")
+			return response()->json(['status'=>'error', 'error' => trans('dpl.alreadyapproved',['suggestno'=>$suggest_no,'lastapprover'=>$prev_approver['user_name']])]);
+
 		$allow_approved=false;
 		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve,false);
 		if(!empty($notified_users)){
