@@ -37,7 +37,12 @@ class PriceController extends Controller
 
         if(isset($request->cust_id))
         {
-          $data = $data->where('qpd.customer_id','=',$request->cust_id);
+          $custid=$request->cust_id;
+          $data = $data->whereExists(function($cond) use($custid) {
+              $cond->select(DB::raw(1))
+                  ->from('customers')
+                  ->whereraw("customers.oracle_customer_id=qpd.customer_id and customers.id='".$custid."'");
+          });
         }
         if(isset($request->product_id))
         {
