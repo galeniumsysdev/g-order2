@@ -493,7 +493,7 @@ class DPLController extends Controller {
 						if(($user_role->name == 'FSM' or $user_role->name=='HSM') and ($dplno) )
 						{
 								$this->sendDPLNo($suggest_no,$dplno->dpl_no);
-								return true;
+								return response()->json(['status'=>'success', 'error' => '']);;
 								break;
 						}
 					}
