@@ -304,6 +304,7 @@ class UserController extends Controller
           if($request->save_customer=="Send")
           {
             $usercustomer->validate_flag=1;
+            if(empty($usercustomer->api_token)) $usercustomer->api_token =str_random(60);
             $usercustomer->save();
             $usercustomer->notify(new InvitationUser($usercustomer));
             return redirect()->route('useroracle.show',$id)
