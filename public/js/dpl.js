@@ -46,8 +46,17 @@ $(document).ready(function(){
 			reason_reject: ($(this).find('#reason-reject')) ? $(this).find('#reason-reject').val() : '',
 			note: $('#note').val()
 		}).done(function (result){
+			if(result.status=="error")
+			{
+				alert(result.error);
+				window.location.href = window.Laravel.url + '/dpl/list';
+			}else{
+				window.location.href = window.Laravel.url + '/dpl/list';
+			}
+		}).fail(function() {
+	    alert( "failed to approve" );
 			window.location.href = window.Laravel.url + '/dpl/list';
-		})
+	  })
 	})
 
 	if($('.product-container #outlet').length){

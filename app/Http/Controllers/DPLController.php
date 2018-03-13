@@ -429,9 +429,29 @@ class DPLController extends Controller {
 	public function discountApprovalSet(Request $request) {
 		$suggest_no = $request->suggest_no;
 		$action = $request->action;
+		$user_role = Auth::user()->roles->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])->first();
+		/*check apakah dapat approve atau tidak*/
+		$prev_approver =Role::join('role_user','role_user.role_id','roles.id')
+									->join('dpl_suggest_no as dsn','dsn.approved_by','role_user.user_id')
+									->join('users','users.id','dsn.approved_by')
+									->where('dsn.suggest_no',$suggest_no)
+									->wherein('roles.name',['SPV','ASM','HSM','FSM','Admin DPL'])
+									->select('roles.name','users.name as user_name')
+									->first();
+		$role_prev_approve = $prev_approver['name'];
+		$allow_approved=false;
+		$notified_users = $this->getArrayNotifiedEmail($suggest_no, $role_prev_approve,false);
+		if(!empty($notified_users)){
+			foreach ($notified_users as $ind => $email) {
+				if(strpos($ind, $user_role->name) !== false){
+					$allow_approved=true;
+					break;
+				}
+			}
+			if(!$allow_approved)
+			  return response()->json(['status'=>'error', 'error' => trans('dpl.alreadyapproved',['suggestno'=>$suggest_no,'lastapprover'=>$prev_approver['user_name']])]);
+		}
 		if ($action == 'Approve') {
-			$user_role = Auth::user()->roles->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])->first();
-
 			$notified_users = $this->getArrayNotifiedEmail($suggest_no, $user_role->name);
 			if(!empty($notified_users)){
 				if($user_role->name != 'FSM' && $user_role->name != 'HSM'){
@@ -494,7 +514,6 @@ class DPLController extends Controller {
 			$this->dplLog($suggest_no, $action);
 
 		} else {
-			$user_role = Auth::user()->roles->whereIn('name',['SPV','ASM','Admin DPL','FSM','HSM'])->first();
 			$notified_users = $this->getArrayNotifiedEmail($suggest_no);
 			if(!empty($notified_users)){
 				$data = [
@@ -525,6 +544,7 @@ class DPLController extends Controller {
 			$reason = $request->reason_reject;
 			$this->dplLog($suggest_no, $action, $reason);
 		}
+		return response()->json(['status'=>'success', 'error' => '']);
 	}
 
 	public function getArrayNotifiedEmail($suggest_no, $curr_pos = '',$vbreak=true){

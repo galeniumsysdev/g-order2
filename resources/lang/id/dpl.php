@@ -30,4 +30,5 @@ return [
     'confirmation' => 'Konfirmasi',
     'save'=>'Simpan',
     'attachSP'=>'Lampiran SP',
+    'alreadyapproved' => 'DPL Suggestion Number :suggestno has been approved by :lastapprover',
 ];
