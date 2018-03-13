@@ -1,4 +1,4 @@
-@extends('layouts.navbar_product')
+@extends(Auth::user()->hasRole('IT Galenium')?'layouts.tempAdminSB':'layouts.navbar_product')
 
 @section('content')
 <!--<link href='//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css' rel='stylesheet'/>-->

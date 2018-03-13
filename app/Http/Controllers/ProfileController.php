@@ -42,7 +42,8 @@ class ProfileController extends Controller
       $customer_sites ="";
       $customer_contacts ="";
     }
-    return view('auth.profile.index', ['customer'=>$customer,'customer_sites'=>$customer_sites,'customer_contacts'=>$customer_contacts]);
+    $menu='profile';
+    return view('auth.profile.index', ['customer'=>$customer,'customer_sites'=>$customer_sites,'customer_contacts'=>$customer_contacts,'menu'=>$menu]);
   }
 
   public function update_avatar(Request $request) {
