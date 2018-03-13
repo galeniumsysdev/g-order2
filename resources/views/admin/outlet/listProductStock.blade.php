@@ -36,7 +36,8 @@
                   <tr>
                     <th>@lang('outlet.productName')</th>
                     <th>@lang('outlet.stock')</th>
-                    <th>@lang('outlet.generic')</th>                    
+                    <th>@lang('outlet.generic')</th>
+                    <th></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -52,6 +53,7 @@
                         <a href="{{ route('outlet.deleteProduct',$cell['op_id']) }}" class="btn btn-danger" onclick="if(!confirm('Are you sure want to delete \'{{ $cell['title'] }}\' and its histories?')){return false;}">Delete</a>
                         @endif
                       </td>
+                      <td>{!! $cell['flag'] !!}</td>
                     </tr>
                   @endforeach
                 </tbody>

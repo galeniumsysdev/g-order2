@@ -3,7 +3,15 @@ $(document).ready(function() {
     var trx_list_datatable;
 
 	if($('#product-list').length){
-    	$('#product-list').DataTable();
+    	$('#product-list').DataTable({
+        "columnDefs": [
+           {
+               "targets": [ 4 ],
+               "visible": false
+           }
+       ],
+       "order": [[ 4, "asc" ]]
+      });
         window.setTimeout(function(){
             $(window).resize();
         },2000);
