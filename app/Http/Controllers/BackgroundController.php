@@ -82,7 +82,7 @@ class BackgroundController extends Controller
                       $sl->list_price=$oraSO->unit_list_price/$oraSO->ordered_quantity;
                       $sl->unit_price=$oraSO->amount/$oraSO->ordered_quantity;
                       $sl->tax_amount=$oraSO->tax_value;
-                      $sl->amount=$oraSO->amount;
+                      $sl->amount=$oraSO->unit_list_price;
                       $sl->disc_reg_amount = null;
                       $sl->disc_reg_percentage = null;
                       $sl->disc_product_amount = null;
@@ -104,8 +104,8 @@ class BackgroundController extends Controller
                         }else{
                           $sl->disc_product_amount += $adj->adjusted_amount*-1;
                         }
+                          $sl->save();
                       }
-                      $sl->save();
                     }
                   }//endforeach soline
                   //
@@ -950,6 +950,7 @@ class BackgroundController extends Controller
         {
           return $oraSO;
         }else{
+          echo "ga masuk oracle<br>";
           return null;
         }
       }
@@ -1064,7 +1065,7 @@ class BackgroundController extends Controller
                         ,'qty_confirm'=>$soline->ordered_quantity*$soline->conversion
                         ,'list_price'=>$soline->unit_list_price
                         , 'unit_price'=>$soline->unit_selling_price
-                        ,'amount'=>$soline->unit_selling_price*$soline->ordered_quantity
+                        ,'amount'=>$soline->unit_list_price*$soline->ordered_quantity
                         ,'tax_amount'=>$soline->tax_value
                         ,'oracle_line_id'=>$soline->line_id
                         ,'conversion_qty'=>$soline->conversion
