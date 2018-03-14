@@ -192,7 +192,7 @@ class OrderController extends Controller
       $trx = $trx->orderBy('tgl_order','desc');
       $trx = $trx->orderBy('notrx','desc');
       $trx = $trx->get();
-
+      
       return view('shop.listpo',compact('liststatus','trx','request'));
     }
 
@@ -291,7 +291,7 @@ class OrderController extends Controller
               //$nodpl= DPLNo::where('suggest_no', $header->suggest_no)->delete();
               $header->status=-99;
               $header->save();
-              $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);              
+              $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($header->suggest_no);
         			if(!empty($notified_users)){
         				$data = [
         					'title' => 'Resetting DPL',
