@@ -147,7 +147,7 @@ class BackgroundController extends Controller
 
 
                 }//endif status==0 (belum di booked)
-                elseif($h->status>0 and $h->status<3 )
+                elseif($h->status>0 and $h->status<=3 )
                 {
                   echo "status sudah booked belum kirim untuk notrx:".$h->notrx."<br>";
                   $jmlolddelivery = SoShipping::where('header_id','=',$h->id)->groupBy('deliveryno')->select('deliveryno')->get()->count();
@@ -166,13 +166,13 @@ class BackgroundController extends Controller
                     if($ship==1)
                     {
                       $jmlkirim = $sl->shippings()->sum('qty_shipping');
-                      $sl->qty_accept = $sl->shippings()->sum('qty_accept');
+                      if($sl->shippings()->sum('qty_accept')!=0) $sl->qty_accept = $sl->shippings()->sum('qty_accept');
                       $sl->save();
                       echo "jmlkirim:".$jmlkirim."<br>";
                       if ($jumshippingbefore != $jmlkirim)
                       {
                         $sl->qty_shipping = $jmlkirim;
-                        $sl->qty_accept = $sl->shippings()->sum('qty_accept');
+                        if($sl->shippings()->sum('qty_accept')!=0) $sl->qty_accept = $sl->shippings()->sum('qty_accept');
                         $sl->save();
                         $berubah=true;
                       }
