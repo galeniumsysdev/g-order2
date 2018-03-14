@@ -26,6 +26,11 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+        $schedule->call(function () {
+            DB::table('tbl_request')->where('event','SalesOrder')->delete();
+        })->dailyAt('00:20');
+        $schedule->call('App\Http\BackgroundController\synchronize_oracle')
+         ->dailyAt('01:00');
     }
 
     /**
