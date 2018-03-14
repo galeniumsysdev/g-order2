@@ -134,9 +134,16 @@ class OutletProductController extends Controller
 	    foreach ($data as $key => $value) {
         if(isset($value->id)){
     	    	$last_stock = OutletStock::where('product_id',$value->id)->where('outlet_id',Auth::user()->customer_id);
-            if(is_null($value->batch))$last_stock =$last_stock->whereNull('batch')->sum('qty');
-            else $last_stock =$last_stock->where('batch',$value->batch)->sum('qty');
+            if(is_null($value->batch)){
+              $expdate= null;
+              $last_stock =$last_stock->whereNull('batch')->sum('qty');
+            }else {
+              if($last_stock->where('batch',$value->batch)->count()>0) $expdate= $last_stock->where('batch',$value->batch)->first()->exp_date;else $expdate=null;
+              $last_stock =$last_stock->where('batch',$value->batch)->sum('qty');
+            }
     	    	$data[$key]['last_stock'] = $last_stock;
+            $data[$key]['last_expdate'] = $expdate;
+
 		        }else return redirect()->route('outlet.importProductStock')->with('msg','ID must be exists');
 	    }
 	  }
@@ -151,16 +158,18 @@ class OutletProductController extends Controller
   	$idx = 0;
   	foreach ($data as $key => $prod) {
       if($prod->last_stock!=0){
-	echo "id:".$prod->id."<br>";
       $stock[$idx]['trx_date'] = date('Y-m-d', time());
   		$stock[$idx]['product_id'] = $prod->id;
       $stock[$idx]['outlet_id'] = Auth::user()->customer_id;
   		$stock[$idx]['event'] = 'adjust';
   		$stock[$idx]['qty'] = ($prod->last_stock > 0) ? '-'.$prod->last_stock : $prod->last_stock;
   		$stock[$idx]['batch'] = $prod->batch;
-      $stock[$idx]['Exp_date'] = isset($prod->{'exp._datecth2017_01_31'}->date)?$prod->{'exp._datecth2017_01_31'}->date:null;
+      //$stock[$idx]['Exp_date'] = isset($prod->{'exp._datecth2017_01_31'}->date)?$prod->{'exp._datecth2017_01_31'}->date:null;
+      $stock[$idx]['Exp_date'] = isset($prod->last_expdate)?$prod->last_expdate:null;
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
+      $stock[$idx]['created_by'] =Auth::user()->id;
+      $stock[$idx]['last_update_by'] =Auth::user()->id;
   		$idx++;
       }
       $stock[$idx]['trx_date'] = date('Y-m-d', time());
@@ -169,11 +178,14 @@ class OutletProductController extends Controller
   		$stock[$idx]['event'] = 'add_upload';
   		$stock[$idx]['qty'] = $prod->stock;
   		$stock[$idx]['batch'] = $prod->batch;
-      $stock[$idx]['Exp_date'] =isset($prod->{'exp._datecth2017_01_31'}->date)?$prod->{'exp._datecth2017_01_31'}->date:null;
+      $stock[$idx]['Exp_date'] =isset($prod->{'exp._datecth2017_01_31'})?$prod->{'exp._datecth2017_01_31'}:null;
   		$stock[$idx]['created_at'] = date('Y-m-d H:i:s', time());
   		$stock[$idx]['updated_at'] = date('Y-m-d H:i:s', time());
+      $stock[$idx]['created_by'] =Auth::user()->id;
+      $stock[$idx]['last_update_by'] =Auth::user()->id;
   		$idx++;
   	}
+      //dd($stock);
   	$insert_stock = OutletStock::insert($stock);
 
   	return redirect('/outlet/product/import/stock')->with('msg','Stock imported successfully.');
@@ -419,7 +431,7 @@ class OutletProductController extends Controller
 	  		$trx[$count]['qty'] = $list->qty.' '.$list->unit;
 	  		$trx[$count]['batch'] = $list->batch;
         $trx[$count]['deliveryorder_no'] = $list->deliveryorder_no;
-        $trx[$count]['exp_date'] = $list->Exp_date;
+        $trx[$count]['exp_date'] = $list->exp_date;
 	  		$trx[$count]['trx_date'] = $list->trx_date;
 	  		$count++;
 	  	}
