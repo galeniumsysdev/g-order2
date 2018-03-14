@@ -63,6 +63,8 @@ class OutletProductController extends Controller
   		$product[$key]['enabled_flag'] = 'Y';
   		$product[$key]['created_at'] = date('Y-m-d H:i:s', time());
   		$product[$key]['updated_at'] = date('Y-m-d H:i:s', time());
+      $product[$key]['created_by'] = Auth::user()->id;
+      $product[$key]['last_update_by'] = Auth::user()->id;
   	}
   	$insert_product = OutletProducts::insert($product);
 
