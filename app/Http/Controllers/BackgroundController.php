@@ -1347,9 +1347,9 @@ class BackgroundController extends Controller
 	 /*insert pricing diskon*/
         $modifiers = $connoracle->table('gpl_pricing_diskon_v')
                       ->whereraw('nvl(end_date_active,sysdate+1)>= trunc(sysdate)')
-			->whereIn('list_header_id', ['7188'])
+			//->whereIn('list_header_id', ['7188'])
 			->whereNotNull('customer_number')
-                      //->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
+                      ->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
                       ->get();
        // dd($modifiers);
         if($modifiers){
@@ -1443,11 +1443,105 @@ class BackgroundController extends Controller
               echo "<td>duplicate</td>";
             }
             echo"</tr>";
-          }
+          }echo "</table>";
         }
-	      dd($connoracle->getQueryLog());
         $del_line_diskon = QpPricingDiskon::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
                           ->delete();
+        $priceheader = QpListHeaders::whereraw("ifnull(end_date_active,curdate()+interval 1 day) > curdate()")
+                      ->whereraw("list_type_code='PRO'")
+                      ->select('list_header_id')->get();
+        if($priceheader->count()>0){
+          $pricing_attr = $connoracle->table('qp_pricing_attr_get_v')
+                        //->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
+                        ->whereIn('list_header_id',$priceheader->pluck('list_header_id')->toArray())
+                        ->select('pricing_attribute_id', 'creation_date', 'last_update_date', 'list_line_id'
+                        , 'excluder_flag', 'product_attribute_context', 'product_attribute', 'product_attr_value', 'product_uom_code'
+    , 'pricing_attribute_datatype', 'product_attribute_datatype', 'list_header_id', 'list_line_no', 'list_line_type_code', 'arithmetic_operator', 'operand', 'benefit_limit'
+    , 'benefit_uom_code', 'automatic_flag', 'modifier_level_code', 'pricing_phase_id', 'benefit_price_list_line_id', 'benefit_qty', 'override_flag', 'rltd_modifier_grp_type'
+    , 'rltd_modifier_id', 'rltd_modifier_grp_no',  'parent_list_line_id', 'to_rltd_modifier_id')
+                        ->get();
+          if($pricing_attr->count()>0){
+
+            foreach ($pricing_attr as $attr)
+            {
+              echo "insert pricing attribute:<br>";
+              $updateattr = DB::table('qp_pricing_attr_get_v')
+                            ->where('pricing_attribute_id',$attr->pricing_attribute_id)
+                            ->first();
+              if($updateattr)
+              {
+                $updateattr = DB::table('qp_pricing_attr_get_v')
+                ->where('pricing_attribute_id',$attr->pricing_attribute_id)
+                ->update([
+                'created_at' =>$attr->creation_date
+                ,'updated_at'=>$attr->last_update_date
+                ,'list_line_id'=>$attr->list_line_id
+                ,'excluder_flag'=>$attr->excluder_flag
+                ,'product_attribute_context'=>$attr->product_attribute_context
+                ,'product_attribute'=>$attr->product_attribute
+                ,'product_attr_value'=>$attr->product_attr_value
+                ,'product_uom_code'=>$attr->product_uom_code
+                ,'pricing_attribute_datatype'=>$attr->pricing_attribute_datatype
+                ,'product_attribute_datatype'=>$attr->product_attribute_datatype
+                ,'list_header_id'=>$attr->list_header_id
+                ,'list_line_no'=>$attr->list_line_no
+                ,'list_line_type_code'=>$attr->list_line_type_code
+                ,'arithmetic_operator'=>$attr->arithmetic_operator
+                ,'operand'=>$attr->operand
+                ,'benefit_limit'=>$attr->benefit_limit
+                ,'benefit_uom_code'=>$attr->benefit_uom_code
+                ,'automatic_flag'=>$attr->automatic_flag
+                ,'modifier_level_code'=>$attr->modifier_level_code
+                ,'pricing_phase_id'=>$attr->pricing_phase_id
+                ,'benefit_price_list_line_id'=>$attr->benefit_price_list_line_id
+                ,'benefit_qty'=>$attr->benefit_qty
+                ,'override_flag'=>$attr->override_flag
+                ,'rltd_modifier_grp_type'=>$attr->rltd_modifier_grp_type
+                ,'rltd_modifier_id'=>$attr->rltd_modifier_id
+                ,'rltd_modifier_grp_no'=>$attr->rltd_modifier_grp_no
+                ,'parent_list_line_id'=>$attr->parent_list_line_id
+                ,'to_rltd_modifier_id'=>$attr->to_rltd_modifier_id
+                ]);
+                echo "update pricing attribute id:".$attr->pricing_attribute_id."<br>";
+              }
+              else{
+                $insertattr = DB::table('qp_pricing_attr_get_v')
+                          ->insert([
+                            'pricing_attribute_id'=>$attr->pricing_attribute_id
+                            ,'created_at' =>$attr->creation_date
+                            ,'updated_at'=>$attr->last_update_date
+                            ,'list_line_id'=>$attr->list_line_id
+                            ,'excluder_flag'=>$attr->excluder_flag
+                            ,'product_attribute_context'=>$attr->product_attribute_context
+                            ,'product_attribute'=>$attr->product_attribute
+                            ,'product_attr_value'=>$attr->product_attr_value
+                            ,'product_uom_code'=>$attr->product_uom_code
+                            ,'pricing_attribute_datatype'=>$attr->pricing_attribute_datatype
+                            ,'product_attribute_datatype'=>$attr->product_attribute_datatype
+                            ,'list_header_id'=>$attr->list_header_id
+                            ,'list_line_no'=>$attr->list_line_no
+                            ,'list_line_type_code'=>$attr->list_line_type_code
+                            ,'arithmetic_operator'=>$attr->arithmetic_operator
+                            ,'operand'=>$attr->operand
+                            ,'benefit_limit'=>$attr->benefit_limit
+                            ,'benefit_uom_code'=>$attr->benefit_uom_code
+                            ,'automatic_flag'=>$attr->automatic_flag
+                            ,'modifier_level_code'=>$attr->modifier_level_code
+                            ,'pricing_phase_id'=>$attr->pricing_phase_id
+                            ,'benefit_price_list_line_id'=>$attr->benefit_price_list_line_id
+                            ,'benefit_qty'=>$attr->benefit_qty
+                            ,'override_flag'=>$attr->override_flag
+                            ,'rltd_modifier_grp_type'=>$attr->rltd_modifier_grp_type
+                            ,'rltd_modifier_id'=>$attr->rltd_modifier_id
+                            ,'rltd_modifier_grp_no'=>$attr->rltd_modifier_grp_no
+                            ,'parent_list_line_id'=>$attr->parent_list_line_id
+                            ,'to_rltd_modifier_id'=>$attr->to_rltd_modifier_id
+                          ]);
+                echo "insert pricing attribute id:".$attr->pricing_attribute_id."<br>";
+              }
+            }
+          }
+        }
       	DB::commit();
       	return 1;
       }else {
