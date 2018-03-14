@@ -757,7 +757,8 @@ class OutletProductController extends Controller
     $stockOutlet=$stockOutlet->where('os.product_id',$request->product_code_out);
     if($request->batch_no_out) $stockOutlet=$stockOutlet->where('os.batch',$request->batch_no_out);
     //else $stockOutlet=$stockOutlet->whereNull('os.batch',$request->batch_no_out);
-    $stockOutlet=$stockOutlet->groupBy('op_id','unit','title','flag','batch','exp_date');
+    $stockOutlet=$stockOutlet->groupBy('op_id','unit','title','flag','batch','exp_date')
+                ->havingraw("sum(qty)>0");
 
     $stockAll = Product::select('products.id as op_id','products.satuan_primary as unit','title',DB::raw('sum(qty) as product_qty'),DB::raw('"galenium" as flag'),'batch','exp_date')
                               ->leftjoin('outlet_stock as os',function($join)
@@ -772,7 +773,7 @@ class OutletProductController extends Controller
 
     if($request->batch_no_out) $stockAll=$stockAll->where('os.batch',$request->batch_no_out);
     //else $stockOutlet=$stockOutlet->whereNull('os.batch',$request->batch_no_out);
-    $stockAll=$stockAll->groupBy('unit','op_id','title','flag','batch','exp_date')
+    $stockAll=$stockAll->groupBy('unit','op_id','title','flag','batch','exp_date')->havingraw("sum(qty)>0")
                               ->union($stockOutlet)
                               ->orderBy('title')
                               ->orderBy('exp_date')
