@@ -68,13 +68,13 @@
                 <tbody>
                   @foreach ($data as $key=>$trx)
                     <tr class="{{ $trx['class'] }}">
-                      <td align="center">{{ $trx['trx_date'] }}</td>
+                      <td align="center">{{ \Carbon\Carbon::parse($trx['trx_date'])->format('d-M-Y') }}</td>
                       <td>{{ $trx['title'] }}</td>
                       <td>{!! nl2br($trx['generic']) !!}</td>
                       <td align="center">{!! $trx['event'] !!}</td>
                       <td align="center">{!! $trx['qty'] !!}</td>
                       <td align="center">{{ $trx['batch'] }}</td>
-                      <td align="center">{{ $trx['exp_date'] }}</td>
+                      <td align="center">{{ \Carbon\Carbon::parse($trx['exp_date'])->format('d-M-Y') }}</td>
                       <!--<td align="center">{{ $trx['deliveryorder_no'] }}</td>-->
                     </tr>
                   @endforeach
