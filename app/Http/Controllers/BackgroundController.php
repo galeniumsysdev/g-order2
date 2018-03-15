@@ -1542,6 +1542,13 @@ class BackgroundController extends Controller
             }
           }
         }
+        $del_line_attr = DB::table('qp_pricing_attr_get_v')->whereExists(function($query){
+                              $query->select(DB::raw(1))
+                                  ->from('qp_list_headers as qlh')
+                                  ->where('qlh.list_header_id','=','qp_pricing_attr_get_v.list_header_id')
+                                  ->whereraw("list_type_code = 'PRO'")
+                                  ->whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()");
+                          })->delete();
       	DB::commit();
       	return 1;
       }else {
