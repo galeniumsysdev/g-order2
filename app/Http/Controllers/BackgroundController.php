@@ -1482,13 +1482,8 @@ class BackgroundController extends Controller
                                 and (qq.list_line_id =qms.list_line_id or qq.list_line_id=-1)
                                 and sysdate > nvl(qq.end_date_Active,sysdate+1)");
                     });
-        /*delete pricing diskon yang sudah tidak berlaku*/
-        /*$qp_bonus_exld =  $qp_bonus->select('qlh.name', 'qms.list_header_id', 'qms.list_line_no','qms.list_line_id','qms.list_line_type_code') ->get();
-        foreach($qp_bonus_exld as $q) {
-          $delete = QpPricingDiskon::where('list_line_type_code','=',$q->list_line_type_code)
-          ->where("concat(list_header_id,'-',list_line_id) not in  ")
-          ])->delete();
-        } */
+                    $tmpqpbonus = $qp_bonus;
+
         $qp_bonus=$qp_bonus->where(function ($query) use($tglskrg) {
                 $query->where('qlh.last_update_date','>=',$tglskrg)
                       ->orwhere('qms.last_update_date', '>=', $tglskrg);
@@ -1510,6 +1505,19 @@ class BackgroundController extends Controller
                                              ) AS last_update_date")
                               )
                     ->orderBy('qms.list_header_id','qms.list_line_id')->get();
+                    /*delete pricing diskon yang sudah tidak berlaku*/
+                    $exclude =  $tmpqpbonus->select( 'qms.list_header_id','qms.list_line_id')->groupBy('qms.list_header_id','qms.list_line_id')->get();
+                    //dd($exclude);
+                    if($exclude->count()>0) {
+                      $deletelist=$exclude->pluck('list_header_id','list_line_id')
+                                              ->map(function ($item, $key) {
+                                                    return "$item-$key";
+                                              })->toArray();
+                      //var_dump($deletelist);                        
+                      $delete = QpPricingDiskon::where('list_line_type_code','=','PRG')
+                      ->whereNotIn(DB::raw("concat(list_header_id,'-',list_line_id)"),$deletelist)
+                      ->delete();
+                    }
         if($qp_bonus->count()>0)
         {
           echo "<table><caption>Data Bonus</caption>";
