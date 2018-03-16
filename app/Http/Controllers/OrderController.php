@@ -192,7 +192,7 @@ class OrderController extends Controller
       $trx = $trx->orderBy('tgl_order','desc');
       $trx = $trx->orderBy('notrx','desc');
       $trx = $trx->get();
-      
+
       return view('shop.listpo',compact('liststatus','trx','request'));
     }
 
@@ -789,7 +789,7 @@ class OrderController extends Controller
                 //$sheet->appendRow(json_decode( json_encode($h), true));
                 $sheet->appendRow(array($h->customer_name,$h->customer_number,$h->transaction_name,$h->customer_po,$h->tgl_order
                                   ,$h->price_name,$h->oracle_ship_to,'','','',$h->currency,$h->oracle_bill_to
-                                  ,'','','ENT','','',$warehouse,'','','','*NB'));
+                                  ,'','','ENT','','','','','','','*NB'));
                 $line = DB::table('so_lines as sl')
                       ->join('products as p','sl.product_id','=','p.id')
                       ->wherenull('bonus_list_line_id')
