@@ -1326,7 +1326,7 @@ class BackgroundController extends Controller
         }
       }
       echo "lasttime:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
-      $vprice = $this->getPricelist($tglskrg);
+      //$vprice = $this->getPricelist($tglskrg);
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $connoracle->enableQueryLog();
@@ -1334,6 +1334,11 @@ class BackgroundController extends Controller
         $listheader = $connoracle->table('qp_list_headers')
                     ->where('list_type_code','!=','PRL')
                     ->whereraw('nvl(end_date_active,sysdate+1) < trunc(sysdate)')
+                    ->whereExists(function($query){
+                      $query->select(DB::raw(1))
+                        ->from('qp_qualifiers as qq')
+                        ->whereraw("qq.list_header_id =qp_list_headers.list_header_id and sysdate > nvl(qq.end_date_Active,sysdate+1)");
+                    })
                     ->select('list_header_id')
                     ->get();
         if($listheader->count()>0)
@@ -1347,7 +1352,7 @@ class BackgroundController extends Controller
 	 /*insert pricing diskon*/
         $modifiers = $connoracle->table('gpl_pricing_diskon_v')
                       ->whereraw('nvl(end_date_active,sysdate+1)>= trunc(sysdate)')
-			//->whereIn('list_header_id', ['7188'])
+			->whereNotIn('list_header_id', $listheader->pluck('list_header_id')->toArray())
 			->whereNotNull('customer_number')
                       ->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
                       ->get();
@@ -1413,7 +1418,7 @@ class BackgroundController extends Controller
               echo "<td>update</td>";
             }elseif($old_discount->count()==0){
               /*insert*/
-              $updatediscount = $olddiscount->insert([
+              $updatediscount = QpPricingDiskon::insert([
                 'list_header_id'=>$m->list_header_id
                 ,'list_line_id'=> $m->list_line_id
                 ,'item_id'=> $m->product_attr_val
@@ -1447,24 +1452,246 @@ class BackgroundController extends Controller
         }
         $del_line_diskon = QpPricingDiskon::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
                           ->delete();
+        $getpromo = $this->getPromoBonus($tglskrg);
+
+      	DB::commit();
+      	return 1;
+      }else {
+      	echo "can't connect to oracle";
+      	return 0;
+      }
+    }
+
+    public function getPromoBonus($tglskrg=null)
+    {
+      //$tglskrg = date_create("2017-01-01");
+      DB::beginTransaction();
+      try{
+        /*getPromo*/
+        $connoracle = DB::connection('oracle');
+        $connoracle->enableQueryLog();
+        $qp_bonus = $connoracle->table('qp_list_headers as qlh')
+                    ->join('qp_modifier_summary_v as qms','qlh.list_header_id','qms.list_header_id')
+                    ->whereraw("qlh.list_type_code='PRO'")
+                    ->whereraw("sysdate between nvl(qlh.start_date_active,'01-jan-2017') and nvl(qlh.end_date_Active,sysdate+1)")
+                    ->whereraw("sysdate between nvl(qms.start_date_active,'01-jan-2017') and nvl(qms.end_date_Active,sysdate+1)")
+                    ->wherenotexists(function($query){
+                      $query->select(DB::raw(1))
+                        ->from('qp_qualifiers as qq')
+                        ->whereraw("qq.list_header_id =qms.list_header_id
+                                and (qq.list_line_id =qms.list_line_id or qq.list_line_id=-1)
+                                and sysdate > nvl(qq.end_date_Active,sysdate+1)");
+                    });
+        /*delete pricing diskon yang sudah tidak berlaku*/
+        /*$qp_bonus_exld =  $qp_bonus->select('qlh.name', 'qms.list_header_id', 'qms.list_line_no','qms.list_line_id','qms.list_line_type_code') ->get();
+        foreach($qp_bonus_exld as $q) {
+          $delete = QpPricingDiskon::where('list_line_type_code','=',$q->list_line_type_code)
+          ->where("concat(list_header_id,'-',list_line_id) not in  ")
+          ])->delete();
+        } */
+        $qp_bonus=$qp_bonus->where(function ($query) use($tglskrg) {
+                $query->where('qlh.last_update_date','>=',$tglskrg)
+                      ->orwhere('qms.last_update_date', '>=', $tglskrg);
+                })->select('qlh.name', 'qms.list_header_id', 'qms.list_line_no','qms.list_line_id', 'list_line_type_code', 'modifier_level_code',
+                               'qms.product_attr_val', 'qms.operand', 'qms.arithmetic_operator'
+                              ,DB::raw("LEAST (NVL (qlh.start_date_active, qms.start_date_active),
+                                           NVL (qms.start_date_active, qlh.start_date_active)
+                                          ) as start_date_active"),
+                                    DB::raw("LEAST (NVL (qlh.end_date_active, qms.end_date_active),
+                                           NVL (qms.end_date_active, qlh.end_date_active)
+                                          ) as end_date_active"),
+                                    'qms.product_uom_code', 'qms.comparison_operator_code',
+                                    'qms.pricing_attribute_context', 'qms.pricing_attr',
+                                    'qms.pricing_attr_value_from', 'qms.pricing_attr_value_to',
+                                    'qms.pricing_group_sequence', 'qlh.orig_org_id',
+                                    'qms.price_break_type_code',
+                                    DB::raw("GREATEST (qlh.last_update_date,
+                                              qms.last_update_date
+                                             ) AS last_update_date")
+                              )
+                    ->orderBy('qms.list_header_id','qms.list_line_id')->get();
+        if($qp_bonus->count()>0)
+        {
+          echo "<table><caption>Data Bonus</caption>";
+          echo "<tr><th>Price Name</th><th>Product</th><th>Customer</th><th>Operand</th><th>Status</th></tr>";
+          /*kondisi untuk qualifier header terlebih dahulu*/
+          $customer = Customer::where('status','A')->whereNotNull('oracle_customer_id');
+          //dd($qp_bonus->groupBy('list_header_id'));
+          foreach($qp_bonus->groupBy('list_header_id') as $headerkey=>$header)
+          {
+            $getqualifier =$connoracle->table("qp_qualifiers as qq")
+                            ->where('list_header_id','=',$headerkey)
+                            ->whereraw("list_line_id =-1")
+                            ->whereraw("active_flag = 'Y' and qualifier_context ='CUSTOMER'")
+                            ->select('qualifier_grouping_no', 'qualifier_attribute', 'qualifier_attr_value'
+                              , 'comparison_operator_code' ,'qual_attr_value_from_number', 'qual_attr_value_to_number')
+                            ->orderBy('qualifier_grouping_no')
+                            ->get();
+                  //  dd($connoracle->getQueryLog());
+            if($getqualifier->count()>0){
+              $mustcondition = $getqualifier->where('qualifier_grouping_no',-1);
+              foreach($mustcondition  as $mc)
+              {
+                $customer =$customer->where(function($query) use($mc){
+                  $query = $this->getCondition($mc,$query,'and');
+                });
+              }
+              $getqualifier = $getqualifier->where('qualifier_grouping_no','!=',-1);
+              $customer =$customer->where(function($query1) use($getqualifier){
+                  foreach($getqualifier->groupBy('qualifier_grouping_no') as $key=>$grouping_no){
+                    /*setiap grouping no dipisahkan dengan or*/
+                      $query1 = $query1->orwhere(function($query2) use ($grouping_no){
+                        foreach($grouping_no as $group){/*untuk sama grouping no pake and */
+                          $query2 = $this->getCondition($group,$query2,'and');
+                        }
+                      });
+                  }
+              });
+
+            }
+            /*setiap item bonus*/
+            foreach($qp_bonus->where('list_header_id',$headerkey) as $bonus)
+            {
+              $product_name =null;
+              $product = Product::where('inventory_item_id','=',$bonus->product_attr_val)->first();
+              if($product) $product_name = $product->title;
+              $customerlines =$customer;
+                /*getQualifier lines */
+              $getlinequalifier =$connoracle->table("qp_qualifiers as qq")
+                              ->where('list_header_id','=',$bonus->list_header_id)
+                              ->where("list_line_id",'=',$bonus->list_line_id)
+                              ->whereraw("active_flag = 'Y' and qualifier_context ='CUSTOMER'")
+                              ->select('qualifier_grouping_no', 'qualifier_attribute', 'qualifier_attr_value'
+                                , 'comparison_operator_code' ,'qual_attr_value_from_number', 'qual_attr_value_to_number')
+                              ->orderBy('qualifier_grouping_no')
+                              ->get();
+              if($getlinequalifier->count()>0)
+              {
+                $mustcondition = $getqualifier->where('qualifier_grouping_no',-1);
+                foreach($mustcondition  as $mc)
+                {
+                  $customer =$customerlines->where(function($query) use($mc){
+                    $query = $this->getCondition($mc,$query,'and');
+                  });
+                }
+                $getqualifier = $getqualifier->where('qualifier_grouping_no','!=',-1);
+                $customerlines =$customerlines->where(function($query1) use($getqualifier){
+                    foreach($getqualifier->groupBy('qualifier_grouping_no') as $key=>$grouping_no){
+                      /*setiap grouping no dipisahkan dengan or*/
+                        $query1 = $query1->orwhere(function($query2) use ($grouping_no){
+                          foreach($grouping_no as $group){/*untuk sama grouping no pake and */
+                            $query2 = $this->getCondition($group,$query2,'and');
+                          }
+                        });
+                    }
+                });
+              }
+              $customerlines=$customerlines->select('oracle_customer_id','customer_name','customer_number','id')
+                      ->get();
+              //print_r($customer->getBindings() );
+              //dd(DB::getQueryLog());
+              //dd($customerlines);
+              if($customerlines->count()>0){
+                foreach($customerlines as $cl)
+                {
+                  echo "<tr>";
+                  echo "<td>".$bonus->name."-".$bonus->list_header_id."</td>";
+                  echo "<td>".$product_name."</td>";
+                  echo "<td>".$cl->customer_name."</td>";
+                  echo "<td>".$bonus->pricing_attr_value_from." ".$bonus->product_uom_code."(".$bonus->price_break_type_code.")</td>";
+
+                  $olddiscount =  QpPricingDiskon::where([
+                    ['list_header_id','=',$bonus->list_header_id],
+                    ['list_line_id','=',$bonus->list_line_id],
+                    ['item_id','=',$bonus->product_attr_val],
+                    ['customer_id','=',$cl->oracle_customer_id]
+                  ]);
+                  $old_discount = $olddiscount->get();
+                  if($old_discount->count()==1)
+                  {
+                    $updatediscount = $olddiscount->update([
+                      'list_line_type_code'  =>$bonus->list_line_type_code
+                      ,'list_line_no' =>$bonus->list_line_no
+                      ,'modifier_level_code'=>$bonus->modifier_level_code
+                      ,'operand'=>$bonus->operand
+                      ,'arithmetic_operator_code'=>$bonus->arithmetic_operator
+                      ,'start_date_active'=>$bonus->start_date_active
+                      ,'end_date_active'=>$bonus->end_date_active
+                      ,'uom_code'=>$bonus->product_uom_code
+                      ,'comparison_operator_code'=>$bonus->comparison_operator_code
+                      ,'pricing_attribute_context'=>$bonus->pricing_attribute_context
+                      ,'pricing_attr'=>$bonus->pricing_attr
+                      ,'pricing_attr_value_from'=>$bonus->pricing_attr_value_from
+                      ,'pricing_attr_value_to'=>$bonus->pricing_attr_value_to
+                      ,'pricing_group_sequence'=>$bonus->pricing_group_sequence
+                      ,'orig_org_id'=>$bonus->orig_org_id
+                      ,'price_break_type_code'=>$bonus->price_break_type_code
+                    ]);
+                    echo "<td>update</td>";
+                  }elseif($old_discount->count()==0){
+                    /*insert*/
+                    $updatediscount = QpPricingDiskon::insert([
+                      'list_header_id'=>$bonus->list_header_id
+                      ,'list_line_id'=> $bonus->list_line_id
+                      ,'item_id'=> $bonus->product_attr_val
+                      ,'customer_id' => $cl->oracle_customer_id
+                      ,'ship_to_id'=>null
+                      ,'bill_to_id'=>null
+                      ,'list_line_type_code'  =>$bonus->list_line_type_code
+                      ,'list_line_no' =>$bonus->list_line_no
+                      ,'modifier_level_code'=>$bonus->modifier_level_code
+                      ,'operand'=>$bonus->operand
+                      ,'arithmetic_operator_code'=>$bonus->arithmetic_operator
+                      ,'start_date_active'=>$bonus->start_date_active
+                      ,'end_date_active'=>$bonus->end_date_active
+                      ,'uom_code'=>$bonus->product_uom_code
+                      ,'comparison_operator_code'=>$bonus->comparison_operator_code
+                      ,'pricing_attribute_context'=>$bonus->pricing_attribute_context
+                      ,'pricing_attr'=>$bonus->pricing_attr
+                      ,'pricing_attr_value_from'=>$bonus->pricing_attr_value_from
+                      ,'pricing_attr_value_to'=>$bonus->pricing_attr_value_to
+                      ,'pricing_group_sequence'=>$bonus->pricing_group_sequence
+                      ,'orig_org_id'=>$bonus->orig_org_id
+                      ,'price_break_type_code'=>$bonus->price_break_type_code
+                    ]);
+                    echo "<td>insert</td>";
+                  }
+                  echo "</tr>";
+                }
+
+                /*delete pricing yang todal ada dalam kondisi*/
+                $delete =QpPricingDiskon::where([
+                  ['list_header_id','=',$bonus->list_header_id],
+                  ['list_line_id','=',$bonus->list_line_id],
+                  ['item_id','=',$bonus->product_attr_val]
+                ])->whereNotIn('customer_id',$customerlines->pluck('oracle_customer_id')->toArray())
+                ->delete();
+              }
+
+            }
+            echo "</table>";
+
+          }
+        }
+        /*insert qp_pricing_attr_get_v*/
         $priceheader = QpListHeaders::whereraw("ifnull(end_date_active,curdate()+interval 1 day) > curdate()")
-                      ->whereraw("list_type_code='PRO'")
-                      ->select('list_header_id')->get();
-        if($priceheader->count()>0){
+                    ->whereraw("list_type_code='PRO'")
+                    ->select('list_header_id')->get();
+        if($priceheader->count()>0)
+        {
           $pricing_attr = $connoracle->table('qp_pricing_attr_get_v')
-                        //->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
+                        ->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
                         ->whereIn('list_header_id',$priceheader->pluck('list_header_id')->toArray())
                         ->select('pricing_attribute_id', 'creation_date', 'last_update_date', 'list_line_id'
                         , 'excluder_flag', 'product_attribute_context', 'product_attribute', 'product_attr_value', 'product_uom_code'
-    , 'pricing_attribute_datatype', 'product_attribute_datatype', 'list_header_id', 'list_line_no', 'list_line_type_code', 'arithmetic_operator', 'operand', 'benefit_limit'
-    , 'benefit_uom_code', 'automatic_flag', 'modifier_level_code', 'pricing_phase_id', 'benefit_price_list_line_id', 'benefit_qty', 'override_flag', 'rltd_modifier_grp_type'
-    , 'rltd_modifier_id', 'rltd_modifier_grp_no',  'parent_list_line_id', 'to_rltd_modifier_id')
+                        , 'pricing_attribute_datatype', 'product_attribute_datatype', 'list_header_id', 'list_line_no', 'list_line_type_code', 'arithmetic_operator', 'operand', 'benefit_limit'
+                        , 'benefit_uom_code', 'automatic_flag', 'modifier_level_code', 'pricing_phase_id', 'benefit_price_list_line_id', 'benefit_qty', 'override_flag', 'rltd_modifier_grp_type'
+                        , 'rltd_modifier_id', 'rltd_modifier_grp_no',  'parent_list_line_id', 'to_rltd_modifier_id')
                         ->get();
           if($pricing_attr->count()>0){
-
+            echo "insert pricing attribute:<br>";
             foreach ($pricing_attr as $attr)
             {
-              echo "insert pricing attribute:<br>";
               $updateattr = DB::table('qp_pricing_attr_get_v')
                             ->where('pricing_attribute_id',$attr->pricing_attribute_id)
                             ->first();
@@ -1549,12 +1776,37 @@ class BackgroundController extends Controller
                                   ->whereraw("list_type_code = 'PRO'")
                                   ->whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()");
                           })->delete();
-      	DB::commit();
-      	return 1;
-      }else {
-      	echo "can't connect to oracle";
-      	return 0;
+        DB::commit();
+        return 1;
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
+        return 0;
       }
+    }
+
+    public function getcondition($qualifier,$query,$cond)
+    {
+      $kondisi="";
+      if($qualifier->comparison_operator_code=="="){
+        $kondisi = "='".$qualifier->qualifier_attr_value."'";
+      }elseif($qualifier->comparison_operator_code=="NOT ="){
+        $kondisi = "!='".$qualifier->qualifier_attr_value."'";
+      }elseif($qualifier->comparison_operator_code=="BETWEEN"){
+        $kondisi = "between '".$qualifier->qual_attr_value_from_number."' and '".$qualifier->qual_attr_value_to_number."'";
+      }
+      if($cond=='and'){
+        if ($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE1")
+          $query->whereraw("customer_class_code ".$kondisi);
+        elseif($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE2")
+          $query->whereraw("oracle_customer_id ".$kondisi);
+      }else{
+        if ($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE1")
+          $query->orwhereraw("customer_class_code ".$kondisi);
+        elseif($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE2")
+          $query->orwhereraw("oracle_customer_id ".$kondisi);
+      }
+      return $query;
     }
 
     public function getConversionItem($tglskrg){
