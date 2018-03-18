@@ -1021,7 +1021,7 @@ class UserController extends Controller
     public function sendEmailInvitation()
     {
       $allcustomer =User::wherenotNull('customer_id')
-                  ->whereExists(function use($query){
+                  ->whereExists(function ($query){
                     $query->select(DB::raw(1))
                         ->from('role_user as ru')
                         ->join('roles as r','ru.role_id','r.id')
