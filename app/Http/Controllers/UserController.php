@@ -19,7 +19,7 @@ use App\Notifications\InvitationUser;
 use Auth;
 use Datatables;
 use Carbon\Carbon;
-
+use Validator;
 
 
 class UserController extends Controller
@@ -189,7 +189,7 @@ class UserController extends Controller
                         ->where('distributor_mappings.distributor_id','=',$id);
               });
       }
-      $kategori=$kategori->get();
+      $kategori=$kategori->select('id','name')->get();
       return Response::json($kategori);
     }
 
@@ -331,6 +331,11 @@ class UserController extends Controller
             return redirect()->back()->withInput()
                             ->withErrors('mapping','Pilih salah satu!');
           }
+        }elseif($request->action_mapping == "delete-join")
+        {
+          $balikan = $this->DeleteMappingInclude($request);
+          if($balikan) return redirect()->route('useroracle.show',$id)
+                          ->with('success','Successfully delete data mapping');
         }
       }catch (\Exception $e) {
         DB::rollback();
@@ -608,6 +613,16 @@ class UserController extends Controller
 
     }
 
+    public function DeleteMappingInclude(Request $request){
+      //dd($request);
+      $delete = DB::table('distributor_mapping_include')
+      ->whereIn('id',$request->kombinasi)
+      ->where('distributor_id',$request->customer_id)
+      ->delete();
+      DB::commit();
+      if($delete) return true;else return false;
+    }
+
     public function CustYasaNonOracle()
     {
       $customers = Customer::join('outlet_distributor as od','od.outlet_id','=','customers.id')
@@ -745,19 +760,56 @@ class UserController extends Controller
        $success_output = '';
       if($request->get('button_action')=="add")
       {
-        $customerid=$request->get('customerid');
-        $datatype = $request->get('type');
-        foreach ($request->value as $nil){
-          $insert = DB::table("distributor_mappings")
-                    ->insert(['distributor_id'=>$customerid
-                              ,'data'=>$datatype
-                              ,'data_id'=>$nil
-                              ,'created_at'=>Carbon::now()
-                              ,'updated_at'=>Carbon::now()
-                              ,'created_by'=>Auth::user()->id
-                            ]);
+        if($request->get('jenis')=="cross"){
+          $customerid=$request->get('customerid');
+          $datatype = $request->get('type');
+          foreach ($request->value as $nil){
+            $insert = DB::table("distributor_mappings")
+                      ->insert(['distributor_id'=>$customerid
+                                ,'data'=>$datatype
+                                ,'data_id'=>$nil
+                                ,'created_at'=>Carbon::now()
+                                ,'updated_at'=>Carbon::now()
+                                ,'created_by'=>Auth::user()->id
+                              ]);
+          }
+          $success_output = '<div class="alert alert-success">Data Inserted</div>';
+        }elseif($request->get('jenis')=="kombinasi"){
+          $validator = Validator::make($request->all(), [
+            'customerid' => 'required',
+            'category' => 'required',
+            'value'=>'required',
+            ]);
+            //dd($validator->errors());
+          if ($validator->fails()) {
+                $error_array = $validator->errors();//->toArray();
+                $output = array(
+                      'error'     =>  $error_array,
+                      'success'   =>  ''
+                  );
+                //return Response::json($output);
+                return json_encode($output);
+          }
+          foreach ($request->value as $nil){
+            $exists = DB::table('distributor_mapping_include')->where('distributor_id',$request->get('customerid'))
+                      ->where('category_id',$request->get('category'))
+                      ->where('regency_id',$nil)
+                      ->first();
+            $x=0;
+            if(!$exists){
+              $insert = DB::table('distributor_mapping_include')
+                        ->insert([
+                          'distributor_id'=>$request->get('customerid')
+                          ,'category_id'=>$request->get('category')
+                          ,'regency_id'=>$nil
+                          ,'created_by'=>Auth::user()->id
+                          ,'last_update_by'=>Auth::user()->id
+                        ]);
+              $x+=1;
+            }
+          }
+          if($x>0) $success_output = '<div class="alert alert-success">Data Inserted</div>';
         }
-        $success_output = '<div class="alert alert-success">Data Inserted</div>';
       }
       $output = array(
             'error'     =>  $error_array,
@@ -786,6 +838,25 @@ class UserController extends Controller
       return Datatables::of($mappings)
             ->editColumn('id',function($mappings){
               return '<input type="checkbox" class="chk-mapping" name="mapping['.$mappings->data.'][]" value='.$mappings->id.'>';
+            })->rawColumns(['id'])
+            ->make(true);
+    }
+
+    public function ajaxGetMappingInclude($id=null)
+    {
+      $mappings = DB::table('distributor_mapping_include')
+                  ->join('regencies as r','distributor_mapping_include.regency_id','=','r.id')
+                  ->join('category_outlets as co','distributor_mapping_include.category_id','=','co.id')
+                  ->join('provinces as p','p.id','=','r.province_id');
+
+      if(!is_null($id))
+      $mappings =$mappings->where('distributor_id','=',$id);
+
+      $mappings =$mappings->select('distributor_mapping_include.id','co.name as category','p.name as province','r.name as regency');
+
+      return Datatables::of($mappings)
+            ->editColumn('id',function($mappings){
+              return '<input type="checkbox" class="chk-mapping1" name="kombinasi[]" value='.$mappings->id.'>';
             })->rawColumns(['id'])
             ->make(true);
     }
@@ -945,5 +1016,26 @@ class UserController extends Controller
         throw $e;
       }
 
+    }
+
+    public function sendEmailInvitation()
+    {
+      $allcustomer =User::wherenotNull('customer_id')
+                  ->whereExists(function use($query){
+                    $query->select(DB::raw(1))
+                        ->from('role_user as ru')
+                        ->join('roles as r','ru.role_id','r.id')
+                        ->whereraw('ru.user_id = users.id')
+                        ->whereIn('r.name',['Distributor','Distributor Cabang']);
+                  })->where('validate_flag','0')
+                  ->where('register_flag','0')
+                  ->get();
+      foreach($allcustomer as $usercustomer)
+      {
+        $usercustomer->validate_flag=1;
+        $usercustomer->api_token =str_random(60);
+        $usercustomer->save();
+        $usercustomer->notify(new InvitationUser($usercustomer));
+      }
     }
 }

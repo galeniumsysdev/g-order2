@@ -41,6 +41,7 @@ Route::get('/ajax/getMappingType/{id?}', 'UserController@ajaxGetMappingType')->n
 Route::get('/ajax/getPriceList', 'PriceController@ajaxPriceList')->name('ajax.price.getdata');
 Route::get('/ajax/orgArea/{id?}', 'OrgStructureController@ajaxOrgArea')->name('ajax.area.orgpharma');
 Route::post('/ajax/addAreaDPL','OrgStructureController@ajaxaddAreaDPL');
+Route::get('/ajax/getMappngInclude/{id?}', 'UserController@ajaxGetMappingInclude')->name('ajax.mapping.include');
 
 Route::get('detail/{id}', [
   'uses' => 'ProductController@show'
@@ -422,3 +423,4 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
 
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');
+Route::get('sendEmailInvitation', 'UserController@sendEmailInvitation');

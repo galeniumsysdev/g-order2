@@ -1326,7 +1326,7 @@ class BackgroundController extends Controller
         }
       }
       echo "lasttime:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
-      //$vprice = $this->getPricelist($tglskrg);
+      $vprice = $this->getPricelist($tglskrg);
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $connoracle->enableQueryLog();
@@ -1513,7 +1513,7 @@ class BackgroundController extends Controller
                                               ->map(function ($item, $key) {
                                                     return "$item-$key";
                                               })->toArray();
-                      //var_dump($deletelist);                        
+                      //var_dump($deletelist);
                       $delete = QpPricingDiskon::where('list_line_type_code','=','PRG')
                       ->whereNotIn(DB::raw("concat(list_header_id,'-',list_line_id)"),$deletelist)
                       ->delete();

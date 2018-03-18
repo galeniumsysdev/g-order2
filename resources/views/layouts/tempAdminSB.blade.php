@@ -16,6 +16,7 @@
      <!-- Custom FONTS-->
     <link href="{{asset('font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type="text/css">
     <link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
+    @yield('css')
     <!-- Scripts -->
     <script>
     window.Laravel = {
