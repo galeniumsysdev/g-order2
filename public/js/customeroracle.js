@@ -1,4 +1,24 @@
 var baseurl = window.Laravel.url;
+$(function() {
+    $('#addMapping').on("show.bs.modal", function (e) {
+      if($(e.relatedTarget).data('id')=="kombinasi"){
+         $("#div-tipe").hide();
+         getAllCategories();
+         $('#mapping-value').empty();
+         $("#div-category").show();
+         $('#province-div').show();
+         $('#myModalLabel').html('Add New Combination Mapping');
+         $('#jenis').val('kombinasi');
+       }else{
+         $('#mapping-value').empty();
+         $("#div-tipe").show();
+         $("#div-category").hide();
+         $('#province-div').hide();
+         $('#myModalLabel').html('Add New Mapping');
+       }
+         $('#hidden-jenis').val($(e.relatedTarget).data('id'));
+    });
+});
 function getvaluemapping(){
   var tipe=$("#mapping-type").val();
   if(tipe=="regencies")
@@ -47,6 +67,16 @@ function getvalueregencies(){
     });
 
 }
+function getAllCategories(){
+  if(!$('#category-outlet option').length){
+    $.get(baseurl+'/ajax/getCatOutlet',function(data){
+        $.each(data,function(index,subcatObj){
+            $('#category-outlet').append('<option value="'+subcatObj.id+'">'+subcatObj.name+'</option>');
+        });
+    });
+
+  }
+}
 $(document).ready(function() {
   $('#province-div').hide();
   var table=  $('#mapping-table').DataTable({
@@ -62,6 +92,20 @@ $(document).ready(function() {
             { "width": "15", "targets": 0 ,}
           ]
        });
+   var table2=  $('#kombinasi-table').DataTable({
+           "processing": true,
+           //"serverSide": true,
+           "ajax": baseurl+"/ajax/getMappngInclude/"+$("#customer_id").val(),
+           "columns":[
+               { "data": "id" , "orderable":false, "searchable":false, "name":"ID" },
+               { "data": "category" },
+               { "data": "province" },
+               { "data": "regency" },
+           ],
+           "columnDefs": [
+             { "width": "15", "targets": 0 ,}
+           ]
+        });
 
 $('#check-all').click(function() {
     if ($(this).prop('checked')) {
@@ -71,13 +115,20 @@ $('#check-all').click(function() {
     }
 });
 
+$('#check-all1').click(function() {
+    if ($(this).prop('checked')) {
+        $('.chk-mapping1').prop('checked', true);
+    } else {
+        $('.chk-mapping1').prop('checked', false);
+    }
+});
+
 if($('#dist-table').length){
   $('#dist-table').DataTable();
     window.setTimeout(function(){
         $(window).resize();
     },2000);
 }
-
 
 
 $('#frm-addmapping').on('submit', function(event){
@@ -92,22 +143,28 @@ $('#frm-addmapping').on('submit', function(event){
             dataType:"json",
             success:function(data)
             {
-                if(data.error.length > 0)
+              console.log(data);
+                if(data.error)
                 {
                     var error_html = '';
                     for(var count = 0; count < data.error.length; count++)
                     {
                         error_html += '<div class="alert alert-danger">'+data.error[count]+'</div>';
                     }
-                    $('#form_output').html(error_html);
+                    $('#form_output').html("error"+error_html);
                 }
                 else
                 {
+                  var tmp=$('#hidden-jenis').val();
                     $('#form_output').html(data.success);
-                    $('#frm-addmapping')[0].reset();
-                    $('#mapping-value').empty();
-                    $('#province-div').hide();
-                    $('#mapping-table').DataTable().ajax.reload();
+                    if (tmp =="kombinasi"){
+                      $('#kombinasi-table').DataTable().ajax.reload();
+                    }else{
+                      $('#frm-addmapping')[0].reset();
+                      $('#mapping-value').empty();
+                      $('#province-div').hide();
+                      $('#mapping-table').DataTable().ajax.reload();
+                    }
                 }
             }
         })
