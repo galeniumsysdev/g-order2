@@ -29,10 +29,10 @@ class Kernel extends ConsoleKernel
         //          ->hourly();
         $schedule->call(function () {
             DB::table('tbl_request')->where('event','SalesOrder')->delete();
-        })->dailyAt('00:20');
+        })->cron('* * * * *');//->dailyAt('00:20');
         $schedule->call('App\Http\BackgroundController\synchronize_oracle')
          ->dailyAt('01:00');
-        $schedule->call('App\Http\BackgroundController\getStatusOrderOracle')          
+        $schedule->call('App\Http\BackgroundController\getStatusOrderOracle')
          ->everyFiveMinutes();
     }
 
