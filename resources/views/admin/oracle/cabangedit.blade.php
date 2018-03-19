@@ -48,6 +48,7 @@
               <ul class="nav nav-tabs" role="tablist">
                   <li role="presentation" class="active"><a href="#address" aria-controls="Address" role="tab" data-toggle="tab">@lang('label.address')</a></li>
                   <li role="presentation"><a href="#mapping_distributor" aria-controls="mapping_distributor" role="tab" data-toggle="tab">Mapping Distributor</a></li>
+                  <li role="presentation"><a href="#gabungan_mapping" aria-controls="gabungan_mapping" role="tab" data-toggle="tab">Other Kombinasi Mapping</a></li>
               </ul>
               <div class="tab-content">
                   <div role="tabpanel" class="tab-pane active" id="address">
@@ -192,7 +193,7 @@
                               @lang('label.save')
                           </button>
                       </div>
-                  </div>
+                    </div>
                   </div>
                   <div role="tabpanel" class="tab-pane" id="mapping_distributor">
                     <br>
@@ -208,11 +209,32 @@
                         <tbody>
 
                         </tbody>
-                      </table>                      
+                      </table>
                       <div class="pull">
                           <button type="button" class="btn btn-sm btn-success"  class="add-mapping" data-toggle="modal" data-target="#addMapping"> Add New Mapping</button>
                           <button class="btn btn-sm btn-danger" name="action_mapping" value="delete">Delete</button>
                         <!--  <a href="{{route('customer.mappingOutlet',$customer->id)}}" target="_blank" class="btn btn-sm btn-primary">Preview Outlet</a>-->
+                      </div>
+                    </div>
+                  </div>
+                  <div role="tabpanel" class="tab-pane" id="gabungan_mapping">
+                    <div class="table-responsive">
+                      <table id="kombinasi-table" class="display responsive"  width="100%">
+                        <thead>
+                          <tr>
+                            <th width="15px"><input type="checkbox" name="all" id="check-all1">All</th>
+                            <th width="30%">Kategori</th>
+                            <th width="30%">Propinsi</th>
+                            <th width="30%">Kabupaten</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                      </table>
+                      <div class="pull">
+                          <button type="button" class="btn btn-sm btn-success"  class="add-gab-mapping" data-toggle="modal" data-target="#addMapping" data-id="kombinasi"> Add New Combnation</button>
+                          <button class="btn btn-sm btn-danger" name="action_mapping" value="delete-join">Delete</button>
                       </div>
                     </div>
                   </div>
@@ -228,18 +250,25 @@
       <form data-toggle="validator" id="frm-addmapping"  method="POST">
           {{csrf_field()}}
           <input type="hidden" value="{{$customer->id}}" name="customerid">
+          <input type="hidden" value="" name="jenis" id="hidden-jenis">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
           <h4 class="modal-title" id="myModalLabel">Add New Mapping</h4>
         </div>
         <div class="modal-body">
           <span id="form_output"></span>
-          <div class="form-group">
+          <div class="form-group" id="div-tipe">
             <label class="control-label" for="title">Tipe:</label>
             <select name="type" id="mapping-type" class="form-control" onchange="getvaluemapping()">
               <option value="-">Pilih Salah Satu</option>
               <option value="regencies">Regencies</option>
               <option value="category_outlets">Category Outlet</option>
+            </select>
+            <div class="help-block with-errors"></div>
+          </div>
+          <div class="form-group" id="div-category">
+            <label class="control-label" for="title">Category:</label>
+            <select name="category" id="category-outlet" class="form-control">
             </select>
             <div class="help-block with-errors"></div>
           </div>
