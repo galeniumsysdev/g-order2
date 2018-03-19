@@ -214,7 +214,7 @@
                         </tbody>
                       </table>
                       <div class="pull">
-                          <button type="button" class="btn btn-sm btn-success"  class="add-mapping" data-toggle="modal" data-target="#addMapping"> Add New Mapping</button>
+                          <button type="button" class="btn btn-sm btn-success"  class="add-mapping" data-toggle="modal" data-target="#addMapping" data-id="cross"> Add New Mapping</button>
                           <button class="btn btn-sm btn-danger" name="action_mapping" value="delete">Delete</button>
                         <!--  <a href="{{route('customer.mappingOutlet',$customer->id)}}" target="_blank" class="btn btn-sm btn-primary">Preview Outlet</a>-->
                       </div>
