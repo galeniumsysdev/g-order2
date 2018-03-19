@@ -232,51 +232,56 @@ input[type="text"]:readonly {
 
                           </div>
                         </div>
-                        <div role="tabpanel" class="tab-pane" id="mapping_distributor">
-                          <div class="table-responsive">
-                            <table id="mapping-table" class="display responsive"  width="100%">
-                              <thead>
-                                <tr>
-                                  <th width="15px"><input type="checkbox" name="all" id="check-all">All</th>
-                                  <th width="45%">Tipe</th>
-                                  <th width="50%">Value</th>
-                                </tr>
-                              </thead>
-                              <tbody>
+                        @if($customer->user)
+                          @if($customer->user->ability(array('Distributor','Distributor Cabang','Principal'),''))
+                            <div role="tabpanel" class="tab-pane" id="mapping_distributor">
+                              <div class="table-responsive">
+                                <table id="mapping-table" class="display responsive"  width="100%">
+                                  <thead>
+                                    <tr>
+                                      <th width="15px"><input type="checkbox" name="all" id="check-all">All</th>
+                                      <th width="45%">Tipe</th>
+                                      <th width="50%">Value</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
 
-                              </tbody>
-                            </table>
-                            <div class="pull">
-                                <button type="button" class="btn btn-sm btn-success"  class="add-mapping" data-toggle="modal" data-target="#addMapping" data-id="cross"> Add New Mapping</button>
-                  	            <button class="btn btn-sm btn-danger" name="action_mapping" value="delete">Delete</button>
-                                <a href="{{route('customer.mappingOutlet',$customer->id)}}" target="_blank" class="btn btn-sm btn-primary">Preview Outlet</a>
-                  	        </div>
-                          </div>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="gabungan_mapping">
-                          <div class="table-responsive">
-                            <table id="kombinasi-table" class="display responsive"  width="100%">
-                              <thead>
-                                <tr>
-                                  <th width="15px"><input type="checkbox" name="all" id="check-all1">All</th>
-                                  <th width="30%">Kategori</th>
-                                  <th width="30%">Propinsi</th>
-                                  <th width="30%">Kabupaten</th>
-                                </tr>
-                              </thead>
-                              <tbody>
+                                  </tbody>
+                                </table>
+                                <div class="pull">
+                                    <button type="button" class="btn btn-sm btn-success"  class="add-mapping" data-toggle="modal" data-target="#addMapping" data-id="cross"> Add New Mapping</button>
+                      	            <button class="btn btn-sm btn-danger" name="action_mapping" value="delete">Delete</button>
+                                    <a href="{{route('customer.mappingOutlet',$customer->id)}}" target="_blank" class="btn btn-sm btn-primary">Preview Outlet</a>
+                      	        </div>
+                              </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="gabungan_mapping">
+                              <div class="table-responsive">
+                                <table id="kombinasi-table" class="display responsive"  width="100%">
+                                  <thead>
+                                    <tr>
+                                      <th width="15px"><input type="checkbox" name="all" id="check-all1">All</th>
+                                      <th width="30%">Kategori</th>
+                                      <th width="30%">Propinsi</th>
+                                      <th width="30%">Kabupaten</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
 
-                              </tbody>
-                            </table>
-                            <div class="pull">
-                                <button type="button" class="btn btn-sm btn-success"  class="add-gab-mapping" data-toggle="modal" data-target="#addMapping" data-id="kombinasi"> Add New Combnation</button>
-                  	            <button class="btn btn-sm btn-danger" name="action_mapping" value="delete-join">Delete</button>
-                  	        </div>
-                          </div>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="distributor_cabang">
-                          <div class="table-responsive">
-                            <table id="dist-table" class="table table-striped">
+                                  </tbody>
+                                </table>
+                                <div class="pull">
+                                    <button type="button" class="btn btn-sm btn-success"  class="add-gab-mapping" data-toggle="modal" data-target="#addMapping" data-id="kombinasi"> Add New Combnation</button>
+                      	            <button class="btn btn-sm btn-danger" name="action_mapping" value="delete-join">Delete</button>
+                      	        </div>
+                              </div>
+                            </div>
+                          @endif
+                        @endif
+                        @if($customer->user->hasRole('Distributor'))
+                          <div role="tabpanel" class="tab-pane" id="distributor_cabang">
+                            <div class="table-responsive">
+                            <table {{$customer->cabang->count()>0?"id='dist-table'":''}}  class="table table-striped">
                               <thead>
                                 <tr>
                                   <th>Name</th>
@@ -301,7 +306,7 @@ input[type="text"]:readonly {
                                 </tr>
                                 @empty
                                   <tr>
-                                    <td>No Data Found</td>
+                                    <td align="center" colspan="4">No Data Available in Table</td>
                                   </tr>
                                 @endforelse
                               </tbody>
@@ -310,9 +315,8 @@ input[type="text"]:readonly {
                   	            <a class="btn btn-primary" href="{{route('usercabang.create',$customer->id)}}"> Create Distributor Cabang</a>
                   	        </div>
                           </div>
-                        </div>
-
-
+                          </div>
+                        @endif
                     </div>
                   </div>
               </form>

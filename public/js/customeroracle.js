@@ -143,8 +143,8 @@ $('#frm-addmapping').on('submit', function(event){
             dataType:"json",
             success:function(data)
             {
-              console.log(data);
-                if(data.error)
+              //console.log(data);
+                if(data.error.length)
                 {
                     var error_html = '';
                     for(var count = 0; count < data.error.length; count++)
@@ -167,7 +167,7 @@ $('#frm-addmapping').on('submit', function(event){
                     }
                 }
             }
-        })
+        });
     });
 
 });
