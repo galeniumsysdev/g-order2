@@ -1,6 +1,6 @@
 <ul class="nav navbar-nav side-nav">
     <li>
-        <a href="index.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+        <a href="{{route('admin.index')}}"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
     </li>
     <li>
       <a href="javascript:;" data-toggle="collapse" data-target="#user"><i class="fa fa-fw fa-user"></i> User <i class="fa fa-fw fa-caret-down"></i></a>
@@ -52,7 +52,7 @@
     <li {{$menu=='permission'?'class=active':''}}>
         <a href="{{route('permission.index')}}"><i class="fa fa-fw fa-wrench"></i> Permission</a>
     </li>
-    
+
     <li>
         <a href="javascript:;" data-toggle="collapse" data-target="#category"><i class="fa fa-fw fa-arrows-v"></i> Category <i class="fa fa-fw fa-caret-down"></i></a>
         @if(in_array($menu,array("CategoryOutlet","CategoryProduct","GroupDatacenter","SubgroupDatacenter")) )
