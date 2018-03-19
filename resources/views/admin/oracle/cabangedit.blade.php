@@ -192,6 +192,9 @@
                           <button type="submit" name="save" value="update" class="btn btn-primary">
                               @lang('label.save')
                           </button>
+                          @if(isset($customer->parent_dist))
+                            <a href="{{route('useroracle.show',$customer->parent_dist)}}" class="btn btn-warning">Distributor Pusat</a>
+                          @endif
                       </div>
                     </div>
                   </div>
