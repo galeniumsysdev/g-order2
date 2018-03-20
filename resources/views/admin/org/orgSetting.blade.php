@@ -1,6 +1,6 @@
-@extends('layouts.navbar_product')
+@extends(Auth::user()->hasRole('IT Galenium')?'layouts.tempAdminSB':'layouts.navbar_product')
 @section('content')
-<div class="container">
+<div class="container-fluid">
 <div class="row">
     <div class="col-lg-12 margin-tb">
         <div class="pull-left">
