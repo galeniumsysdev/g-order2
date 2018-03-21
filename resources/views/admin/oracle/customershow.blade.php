@@ -13,7 +13,7 @@ input[type="text"]:readonly {
     			<div class="alert alert-info">
     				{{$status}}
     			</div>
-    			@endif
+    			@endif          
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">Customer Oracle</div>
@@ -116,6 +116,27 @@ input[type="text"]:readonly {
                             </div>
                           </div>
 
+                          @if($customer->customer_class_code=="OUTLET")
+                          <div class="form-group" id="divkategori">
+                              <label for="kategori" class="control-label col-sm-2"><strong>@lang('label.category') :</strong></label>
+                              <div class="col-sm-10">
+                                  <select class="form-control" name="categoryoutlet" required>
+                                    @foreach($categories as $category)
+                                                          @if($customer->outlet_type_id==$category->id)
+                                      <option selected='selected' value="{{$category->id}}">{{$category->name}}</option>
+                                                          @else
+                                      <option value="{{$category->id}}">{{$category->name}}</option>
+                                                          @endif
+                                    @endforeach
+                                  </select>
+                                  @if ($errors->has('kategori'))
+                                    <span class="help-block">
+                                      <strong>{{ $errors->first('kategori') }}</strong>
+                                    </span>
+                                  @endif
+                              </div>
+                          </div>
+
                           <div class="form-group" id="divkategoridc">
                             <label for="kategori" class="control-label col-sm-2"><strong>@lang('label.categorydc') :</strong></label>
                             <div class="col-sm-4">
@@ -149,6 +170,7 @@ input[type="text"]:readonly {
                                 @endif
                             </div>
                           </div>
+                          @endif
 
                           <div class="form-group">
                             <label class="control-label col-sm-2" for="price">Pricelist :</label>
@@ -277,45 +299,46 @@ input[type="text"]:readonly {
                               </div>
                             </div>
                           @endif
-                        @endif
-                        @if($customer->user->hasRole('Distributor'))
-                          <div role="tabpanel" class="tab-pane" id="distributor_cabang">
-                            <div class="table-responsive">
-                            <table {{$customer->cabang->count()>0?"id='dist-table'":''}}  class="table table-striped">
-                              <thead>
-                                <tr>
-                                  <th>Name</th>
-                                  <th>Email</th>
-                                  <th>Role</th>
-                                  <th>Action</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                @forelse($customer->cabang as $cab)
-                                <tr>
-                                  <td>{{$cab->customer_name}}</td>
-                                    <td>{{$cab->user()->first()->email}}</td>
-                                  <td>
-                                    @foreach($cab->user->roles as $v)
-                          					     <label class="label label-success">{{ $v->display_name }}</label>
-                          				  @endforeach
-                                  </td>
-                                  <td>
-                                    <a href="{{route('usercabang.edit',$cab->id)}}" class="btn btn-sm btn-primary">Edit</a>
-                                  </td>
-                                </tr>
-                                @empty
+
+                          @if($customer->user->hasRole('Distributor'))
+                            <div role="tabpanel" class="tab-pane" id="distributor_cabang">
+                              <div class="table-responsive">
+                              <table {{$customer->cabang->count()>0?"id='dist-table'":''}}  class="table table-striped">
+                                <thead>
                                   <tr>
-                                    <td align="center" colspan="4">No Data Available in Table</td>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Action</th>
                                   </tr>
-                                @endforelse
-                              </tbody>
-                            </table>
-                            <div class="pull">
-                  	            <a class="btn btn-primary" href="{{route('usercabang.create',$customer->id)}}"> Create Distributor Cabang</a>
-                  	        </div>
-                          </div>
-                          </div>
+                                </thead>
+                                <tbody>
+                                  @forelse($customer->cabang as $cab)
+                                  <tr>
+                                    <td>{{$cab->customer_name}}</td>
+                                      <td>{{$cab->user()->first()->email}}</td>
+                                    <td>
+                                      @foreach($cab->user->roles as $v)
+                            					     <label class="label label-success">{{ $v->display_name }}</label>
+                            				  @endforeach
+                                    </td>
+                                    <td>
+                                      <a href="{{route('usercabang.edit',$cab->id)}}" class="btn btn-sm btn-primary">Edit</a>
+                                    </td>
+                                  </tr>
+                                  @empty
+                                    <tr>
+                                      <td align="center" colspan="4">No Data Available in Table</td>
+                                    </tr>
+                                  @endforelse
+                                </tbody>
+                              </table>
+                              <div class="pull">
+                    	            <a class="btn btn-primary" href="{{route('usercabang.create',$customer->id)}}"> Create Distributor Cabang</a>
+                    	        </div>
+                            </div>
+                            </div>
+                          @endif
                         @endif
                     </div>
                   </div>

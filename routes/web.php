@@ -391,6 +391,7 @@ Route::post('/Organization/{user_id}/area/delete','OrgStructureController@delete
 
 //Outlet Product and Stock
 //---Product---
+Route::group(['middleware' => ['role:Apotik/Klinik']], function () {
 Route::get('/outlet/product/download/template/product','OutletProductController@downloadTemplateProduct')->name('outlet.downloadTemplateProduct');
 Route::get('/outlet/product/import','OutletProductController@importProduct')->name('outlet.importProduct');
 Route::post('/outlet/product/import/view','OutletProductController@importProductView')->name('outlet.importProductView');
@@ -416,6 +417,7 @@ Route::get('/outlet/transaction','OutletProductController@outletTrx')->name('out
 Route::get('/outlet/transaction/list','OutletProductController@outletTrxList')->name('outlet.trxList');
 Route::post('/outlet/transaction/in/process','OutletProductController@outletTrxInProcess')->name('outlet.trxInProcess');
 Route::post('/outlet/transaction/out/process','OutletProductController@outletTrxOutProcess')->name('outlet.trxOutProcess');
+});
 /*
 *
 */
