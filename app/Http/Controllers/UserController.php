@@ -221,6 +221,7 @@ class UserController extends Controller
         $customer_contacts = CustomerContact::where('customer_id','=',$id)->get();
         $roles = Role::whereIn('name',['Distributor','Distributor Cabang','Principal','Outlet','Apotik/Klinik'])->get();
         $group = DB::table('Group_DataCenters')->where('enabled_flag','1')->get();
+        $categories = DB::table('category_outlets')->where('enable_flag','Y')->get();
         $principals = DB::table('users as u')->join('role_user as ru','ru.user_id','=','u.id')
                       ->join('roles as r','r.id','=','ru.role_id')
                       ->where('r.name','=','Principal')
@@ -242,7 +243,7 @@ class UserController extends Controller
                                                 ,'customer_contacts'=>$customer_contacts,'roles'=>$roles
                                                 ,'principals'=>$principals,'mappings'=>$mappings
                                                 ,'menu'=>'customer-oracle','groups'=>$group,'groupid'=>$groupid
-                                                , 'provinces'=>$provinces
+                                                , 'provinces'=>$provinces,'categories'=>$categories
                                               ]);
     }
 
@@ -261,8 +262,10 @@ class UserController extends Controller
           {
             $this->validate($request, [
                 'subgroupdc' => 'required',
+                'categoryoutlet' =>'required',
             ]);
             $customer->subgroup_dc_id = $request->subgroupdc;
+            $customer->outlet_type_id = $request->categoryoutlet;
           }
           $customer->psc_flag = $request->psc_flag;
           $customer->pharma_flag = $request->pharma_flag;
