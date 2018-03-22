@@ -43,6 +43,9 @@
     @foreach($product_flexfields as $flexfield)
     @php ($price=0)
     @php ($disc=0)
+    @php($flexfield->products = $flexfield->products->filter(function($p){
+      return $p->getRealPrice(Auth::user()->id,$p->satuan_primary)>0;
+    }))
     <div class="container">
       <br>
       <h4><strong>{{$flexfield->description}}</strong></h4>
@@ -54,6 +57,7 @@
         <div class="large-12 columns">
           <div class="owl-carousel owl-theme owl-loaded owl-drag">
             @foreach($flexfield->products->where('Enabled_Flag','Y')->sortByDesc('pareto')->sortBy('title')->take(10) as $product)
+            @if($product->getRealPrice(Auth::user()->id,$product->satuan_primary)!=0)
             <div class="item">
               <div class="thumbnail">
                 @if($product->imagePath)
@@ -135,6 +139,7 @@
                   @endif
               </div>
             </div>
+            @endif
             @endforeach
 
           </div>

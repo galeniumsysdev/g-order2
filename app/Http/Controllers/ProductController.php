@@ -162,9 +162,9 @@ class ProductController extends Controller
     if(Auth::check()){
       if(Auth::user()->hasRole('Distributor'))
       {
-          $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_secondary,1 ) price_diskon, p.pareto from products as p where enabled_flag='Y' ";
+          $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_secondary,1 ) price_diskon, p.pareto from products as p where enabled_flag='Y' and getProductPrice ( :cust3, p.id, p.satuan_secondary  ) >0";
       }else{
-          $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_primary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_primary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_primary,1 ) price_diskon,p.pareto from products as p where enabled_flag='Y' ";
+          $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_primary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_primary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_primary,1 ) price_diskon,p.pareto from products as p where enabled_flag='Y' and getProductPrice ( :cust3, p.id, p.satuan_secondary  ) >0 ";
       }
 
       if(isset(Auth::user()->customer_id)){
@@ -352,7 +352,7 @@ class ProductController extends Controller
       $vid='';
     }
     $sqlproduct .= " order by pareto desc, title asc";
-    $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid]);
+    $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid,'cust3'=>$vid]);
 
     foreach($dataproduct as $dp)
     {
@@ -413,7 +413,7 @@ class ProductController extends Controller
         $vid='';
       }
       $sqlproduct .= " order by pareto desc, title asc";
-      $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid]);
+      $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid,'cust3'=>$vid]);
 
       foreach($dataproduct as $dp)
       {
