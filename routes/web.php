@@ -425,4 +425,4 @@ Route::post('/outlet/transaction/out/process','OutletProductController@outletTrx
 Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClients');
 
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');
-Route::get('sendEmailInvitation', 'UserController@sendEmailInvitation');
+Route::get('/sendEmailInvitation', 'UserController@sendEmailInvitation');

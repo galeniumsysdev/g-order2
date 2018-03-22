@@ -787,7 +787,7 @@ class OrderController extends Controller
                 //$sheet->fromArray($h, null, 'A1', false, false);
                 //$sheet->row($i,json_decode( json_encode($h), true));
                 //$sheet->appendRow(json_decode( json_encode($h), true));
-                $sheet->appendRow(array($h->customer_name,$h->customer_number,$h->transaction_name,$h->customer_po,$h->tgl_order
+                $sheet->appendRow(array('',$h->customer_number,$h->transaction_name,$h->customer_po,$h->tgl_order
                                   ,$h->price_name,$h->oracle_ship_to,'','','',$h->currency,$h->oracle_bill_to
                                   ,'','','ENT','','','','','','','*NB'));
                 $line = DB::table('so_lines as sl')

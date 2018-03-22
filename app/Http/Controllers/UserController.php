@@ -442,7 +442,8 @@ class UserController extends Controller
 
     public function cabangUpdate(Request $request,$id)
     {
-      if($request->save=="update"){
+      if($request->save=="update")
+      {
         DB::beginTransaction();
         try{
           $user = User::where('customer_id','=',$id)->first();
@@ -475,6 +476,8 @@ class UserController extends Controller
               $distcabang->price_list_id = $distpusat->price_list_id;
               $distcabang->order_type_id = $distpusat->order_type_id;
               $distcabang->payment_term_name = $distpusat->payment_term_name;
+              $distcabang->customer_class_code = $distpusat->customer_class_code;
+              $distcabang->customer_category_code = $distpusat->customer_category_code;
               /*update customer site*/
               if($distpusat->sites()->count()>1)
               {
@@ -556,7 +559,13 @@ class UserController extends Controller
                     ]);
                   }
               }
+              if($distpusat->hasDistributor()->count()>1)
+              {
+                //$mappingdistributor =$distpusat->hasDistributor;
+                $distributor = DB::table('outlet_distributor')->where('outlet_id','=',$distpusat->id)->select('distributor_id')->get();
 
+                if($distributor) $distcabang->hasDistributor()->attach($distributor->pluck('distributor_id')->toArray());
+              }
             }
           }else{
             $alamat = CustomerSite::where([['customer_id','=',$id],['id','=',$request->siteid]])
@@ -1039,6 +1048,7 @@ class UserController extends Controller
         $usercustomer->api_token =str_random(60);
         $usercustomer->save();
         $usercustomer->notify(new InvitationUser($usercustomer));
+        echo $usercustomer->name."-".$usercustomer->email."berhasil dikirim<br>";
       }
     }
 }
