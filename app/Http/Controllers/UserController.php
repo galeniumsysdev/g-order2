@@ -415,6 +415,7 @@ class UserController extends Controller
                                   ,'name'=>strtoupper($request->customer_name)
                                   ,'customer_id'=>$newcustomer->id
                                   ,'api_token'=>str_random(60)
+                                  ,'validate_flag'=>1
                     ]);
           //$newuser = User::where('id','=','ebf4e3f0-c6f9-11e7-9af5-8b1784dd6434')->first();
           $roleoutlet = Role::where('name','=','Distributor Cabang')->first();
@@ -558,8 +559,8 @@ class UserController extends Controller
 
                     ]);
                   }
-              }
-              if($distpusat->hasDistributor()->count()>1)
+              }              
+              if($distpusat->hasDistributor()->count()>0)
               {
                 //$mappingdistributor =$distpusat->hasDistributor;
                 $distributor = DB::table('outlet_distributor')->where('outlet_id','=',$distpusat->id)->select('distributor_id')->get();
