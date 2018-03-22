@@ -161,7 +161,7 @@
 
         <div id="page-wrapper">
 
-            <div class="container-fluid">              
+            <div class="container-fluid">
                 <!-- Page Heading -->
                   @yield('content')
                 <!-- /.row -->
@@ -175,6 +175,11 @@
      <!-- /. WRAPPER  -->
     <!-- SCRIPTS -AT THE BOTOM TO REDUCE THE LOAD TIME-->
     <!-- JQUERY SCRIPTS -->
+    <script type="text/javascript">
+    function redirectToHome() {
+      window.location.href = "{{url('/')}}"+'/home';
+    }
+    </script>
     <script src="{{asset('js/jquery.js')}}"></script>
       <!-- BOOTSTRAP SCRIPTS -->
     <!--<script src="{{asset('js/bootstrap.min.js')}}"></script>-->
