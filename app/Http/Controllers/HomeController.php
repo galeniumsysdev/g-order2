@@ -28,15 +28,17 @@ class HomeController extends Controller
       {
         return redirect()->route('product.index');
       }*/
+      $menu="";
         $request->status_read="0";
         $notifications = Auth::User()->notifications()->whereNull('read_at')->paginate(10);
         $group = array_column(Auth::User()->notifications()->get()->pluck('data')->toArray(),'tipe');
         $jnsnotif= array_unique($group);
-        return view('home', compact('notifications','request','jnsnotif'));
+        return view('home', compact('notifications','request','jnsnotif','menu'));
     }
 
     public function search(Request $request)
     {
+      $menu="";
       $notifications = Auth::User()->notifications();
       if (isset($request->tipe))
       {
@@ -69,7 +71,7 @@ class HomeController extends Controller
     //  var_dump($notifications->pluck('data')->toArray());
       $group = array_column(Auth::User()->notifications()->pluck('data')->toArray(),'tipe');
       $jnsnotif= array_unique($group);
-      return view('home', compact('notifications','request','jnsnotif'));
+      return view('home', compact('notifications','request','jnsnotif','menu'));
 
     }
 }

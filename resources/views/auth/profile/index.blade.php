@@ -42,20 +42,24 @@
 <div class="container">
 	<div class="row">
 		<div class="col-md-10 col-md-offset-1">
-			<!--<div class="form-horizontal col-sm-12">
-				<div class="form-group">
-					<label class="col-sm-2 control-label">Email:</label>
-					<div class="col-sm-4">
-						<input type="text" class="form-control" name="email" value="{{ $customer->email }}" readonly>
-					</div>
-				</div>
-			</div>-->
-			<h5><strong><u>Email</u></U></strong> : {{ $customer->email }}</h5>
 
-				<form class="form-horizontal" action="{{route('profile.updateprofile')}}"  method="POST">
-					{{csrf_field()}}
+			<form class="form-horizontal" action="{{route('profile.updateprofile')}}"  method="POST">
+				{{csrf_field()}}
+			<div class="form-inline row">
+				<label class="col-sm-3 col-form-label" for="email"><strong>Email</strong> </label>
+				<div class="col-sm-8">
+					<input type="text" name="email" value="{{ $customer->email }}" class="form-control" style="width:100%" placeholder="Tax Number">				
+				</div>
+			</div>
+
+
 					@if(!is_null(Auth::user()->customer_id))
-					<h5><strong><u>Category</u></strong> : {{$customer->tipeoutlet}}</h5>
+					<div class="form-inline row">
+						<label class="col-sm-3 col-form-label" for="category"><strong>Category</strong> </label>
+						<div class="col-sm-4">
+							<input type="text" name="kategori" value="{{$customer->tipeoutlet}}" class="form-control form-control-sm" placeholder="Category" readonly>
+						</div>
+					</div>
 					<div class="form-inline row">
 						<label class="col-sm-3 col-form-label" for="tax"><strong>Tax ID</strong> </label>
 						<div class="col-sm-4">
@@ -63,25 +67,27 @@
 						</div>
 					</div>
 						@if($customer->psc_flag=="1" or $customer->pharma_flag=="1")
-							<div class="form-check form-check-inline">
-								<label class="form-check-label"><strong>Product</strong> : </label>
-								<label class="form-check-label ">
+						<div class="form-inline row">
+							<label class="col-sm-3 col-form-label" for="product"><strong>Product</strong> </label>
+							<div class="col-sm-4">
+
 									@if($customer->psc_flag=="1")
-									  <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="psc_flag" value="1" checked disabled> PSC
+									  <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="1" checked disabled> PSC
 										<input type="hidden" name="psc_flag" value="1">
 									@else
 										<input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="psc_flag" value="1"> PSC
 									@endif
-								</label>
-								<label class="form-check-label">
+
+
 									@if($customer->pharma_flag=="1")
-									    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="pharma_flag" value="1" checked disabled> Pharma
+									    <input class="form-check-input" type="checkbox" id="inlineCheckbox1"  value="1" checked disabled> Pharma
 											<input type="hidden" name="pharma_flag" value="1">
 									@else
 									    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="pharma_flag" value="1"> Pharma
 									@endif
-								</label>
 							</div>
+						</div>
+
 						@endif
 					@endif
 					<div class="form-inline row">

@@ -1,8 +1,8 @@
-@extends('layouts.navbar_product')
+@extends(Auth::user()->hasRole('IT Galenium')?'layouts.tempAdminSB':'layouts.navbar_product')
 
 @section('content')
 <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.css" rel="stylesheet">-->
-<div class="container">
+<!--<div class="container">-->
     <div class="row">
         <div class="col-md-10 col-sm-offset-1">
             <div class="panel panel-default">
@@ -120,7 +120,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	<!--</div>-->
 @endsection
 @section('js')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>

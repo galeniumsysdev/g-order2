@@ -270,6 +270,16 @@ class ProfileController extends Controller
       if(!is_null($request->current_pswd) and !is_null($request->new_pswd))
         $changepswd = $this->changePassword($request);
       if($changepswd) $pesanchangepswd = "Password berhasil diubah! ";else return redirect()->back();*/
+      if($request->email!=Auth::user()->email)
+      {
+        $this->validate($request, [
+            'email' => 'required|email|unique:users,email,'.Auth::user()->id
+        ]);
+        $user= Auth::user();
+        $user->email = $request->email;
+        $user->save();
+      }
+
       if(!is_null(Auth::user()->customer_id))
       {
         $customer=Auth::user()->customer;
@@ -311,10 +321,11 @@ class ProfileController extends Controller
             }
           }
         }
+
         $customer->psc_flag = $request->psc_flag;
         $customer->pharma_flag = $request->pharma_flag;
         $customer->save();
-        return redirect(route('profile.index'))->with('message',$pesanchangepswd.trans("pesan.update"));
+        return redirect(route('profile.index'))->with('message',trans("pesan.update"));
       }
     }elseif($request->Save=="ChangePassword")
     {

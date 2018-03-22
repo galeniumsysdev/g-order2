@@ -13,7 +13,7 @@ input[type="text"]:readonly {
     			<div class="alert alert-info">
     				{{$status}}
     			</div>
-    			@endif          
+    			@endif
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">Customer Oracle</div>
@@ -35,6 +35,11 @@ input[type="text"]:readonly {
                       <input type="text" class="form-control disabled" name="email" value="{{$customer->user->email}}">
                       @else
                       <input type="text" class="form-control disabled" name="email" value="">
+                      @endif
+                      @if ($errors->has('email'))
+                          <span class="help-block">
+                              <strong>{{ $errors->first('email') }}</strong>
+                          </span>
                       @endif
                     </div>
                   </div>
