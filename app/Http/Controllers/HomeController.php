@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Auth;
+use DB;
 
 class HomeController extends Controller
 {
@@ -73,5 +74,26 @@ class HomeController extends Controller
       $jnsnotif= array_unique($group);
       return view('home', compact('notifications','request','jnsnotif','menu'));
 
+    }
+
+    public function indexAdmin()
+    {
+      $userdist =\App\User::where('register_flag',1)->where('validate_flag',1)
+                ->whereExists(function($query){
+                  $query->select(DB::raw(1))
+                        ->from('role_user as ru')
+                        ->join('roles as r', 'r.id','ru.role_id')
+                        ->whereraw('ru.user_id=users.id')
+                        ->wherein('r.name',['Distributor','Distributor Cabang']);
+                })->count();
+      $useroutlet =\App\User::where('register_flag',1)->where('validate_flag',1)
+                ->whereExists(function($query){
+                  $query->select(DB::raw(1))
+                        ->from('role_user as ru')
+                        ->join('roles as r', 'r.id','ru.role_id')
+                        ->whereraw('ru.user_id=users.id')
+                        ->wherein('r.name',['Outlet','Apotik/Klinik']);
+                })->count();      
+      return view('admin.index',['menu'=>'blank','jmldist'=>$userdist,'jmloutlet'=>$useroutlet]);
     }
 }
