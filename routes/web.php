@@ -141,10 +141,7 @@ Route::group(['middleware' => ['role:IT Galenium','prevent-back-history']], func
   ]);
   Route::resource('permission',  'PermissionController');
   Route::get('/admin',  [
-    'uses' => function () {
-        return view('admin.index',['menu'=>'blank']);
-        //
-    },
+    'uses' => 'HomeController@indexAdmin',
     'middleware' => ['role:IT Galenium'],
     'as' => 'admin.index'
   ]);

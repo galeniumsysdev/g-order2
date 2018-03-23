@@ -6,7 +6,7 @@
 	            <h2>Customer Oracle</h2>
 	        </div>
 					<div class="pull-right">
-	            <a href="{{route('oracle.synchronize.customer')}}" target="_blank" class="btn btn-success">Synchronize Customer Oracle</a>	            
+	            <a href="{{route('oracle.synchronize.customer')}}" target="_blank" class="btn btn-success">Synchronize Customer Oracle</a>
 	        </div>
 	    </div>
 	</div>
@@ -27,6 +27,17 @@
   			<th>Action</th>
   		</tr>
     </thead>
+		<tfoot>
+        <tr>
+					<th>Customer Number</th>
+	  			<th>Customer Name</th>
+	  			<th>Email</th>
+	  			<th>Roles</th>
+					<th>Register</th>
+					<th>Invite Email</th>
+					<th></th>
+        </tr>
+    </tfoot>
     <tbody>
     	@foreach ($customers as $cust)
     	<tr>
@@ -78,17 +89,32 @@
     href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css">
     <script>
       $(document).ready(function() {
-        $('#table').DataTable({
+				$('#table tfoot th').each( function () {
+		        var title = $(this).text();
+						if (title!="")
+		        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+		    } );
+        var tablecust =$('#table').DataTable({
           'columnDefs' : [
                             {
                                'searchable'    : true,
-                               'targets'       : [0,1,2,3]
+                               'targets'       : [0,1,2,3,4,5]
                             },{
                                'orderable'    : true,
                                'targets'       : [0,1,2,3]
                             }
                         ]
         });
+				tablecust.columns().every( function () {
+		        var that = this;
+		        $( 'input', this.footer() ).on( 'keyup change', function () {
+		            if ( that.search() !== this.value ) {
+		                that
+		                    .search( this.value )
+		                    .draw();
+		            }
+		        } );
+		    } );
     } );
      </script>
 @endsection
