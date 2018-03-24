@@ -27,6 +27,9 @@ use App\qp_qualifiers;
 use App\QpPricingDiskon;
 use App\Product;
 use App\UomConversion;
+use Mail;
+use Maatwebsite\Excel\Writers\LaravelExcelWriter;
+//use App\Mail\CustumerInterfaceBg;
 
 class BackgroundController extends Controller
 {
@@ -309,25 +312,30 @@ class BackgroundController extends Controller
         if($request)
         {
           $lasttime = date_create($request);
-          echo"type:".gettype($lasttime);
         }else{
           $lasttime = date_create("2017-07-01");
         }
-	 $lasttime = date_create("2017-07-01");
+        $sheetArray = [];
         echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
         $connoracle = DB::connection('oracle');
         if($connoracle){
+          $tgloracle = $connoracle->selectone("select sysdate as tgl from dual");
+          if(!empty($tgloracle)) $tgloracle=date_create($tgloracle->tgl); else $tgloracle = Carbon::now();
           $newrequest= DB::table('tbl_request')->insertGetId([
-            'created_at'=>Carbon::now(),
-            'updated_at'=>Carbon::now(),
+            'created_at'=>$tgloracle,
+            'updated_at'=>$tgloracle,
             'event'=>'synchronize',
           ]);
           echo "request id:".$newrequest."<br>";
-          $this->getMasterItem($lasttime);
-          $this->getConversionItem($lasttime);
-          //$price = $this->getPricelist($lasttime);
-          $price = $this->getMasterDiscount($lasttime);
+          $masteritem = $this->getMasterItem($lasttime);
+          if(count($masteritem) > 1) $sheetArray['product']=$masteritem;
+          $datakonversi = $this->getConversionItem($lasttime);
+          if(count($datakonversi)>1) $sheetArray['conversion']=$datakonversi;
+          $datacustomer = $this->getCustomer($lasttime,true);
+          $sheetArray = array_merge($sheetArray,$datacustomer);
 
+          $price = $this->getMasterDiscount($lasttime,true);
+          if(count($price)>0) $sheetArray = array_merge($sheetArray,$price);
           $transactiontype = $connoracle->table('oe_transaction_types_all as otta')
                             ->join('oe_transaction_types_tl as ottt','otta.transaction_type_id','=','ottt.transaction_type_id')
                             ->where([['otta.transaction_type_code', '=', 'ORDER'],
@@ -337,19 +345,71 @@ class BackgroundController extends Controller
                               , 'warehouse_id', 'org_id' )
                       ->where('otta.last_update_date','>=',$lasttime)
                       ->get();
-          foreach($transactiontype as $ott)
-          {
-              echo "transaction_type_id:".$ott->transaction_type_id."<br>";
-            $mytransactiontype = OeTransactionType::updateOrCreate(
-              ['transaction_type_id'=>$ott->transaction_type_id],
-              ['name'=>$ott->name,'description=>$ott->description','start_date_active'=>$ott->start_date_active
-              ,'end_date_active'=>$ott->end_date_active,'currency_code'=>$ott->currency_code,'price_list_id'=>$ott->price_list_id
-              ,'warehouse_id'=>$ott->warehouse_id,'org_id'=>$ott->org_id
-              ]
-            );
+          if($transactiontype->count()>0){
+            $tipetransaksi=[];
+            $tipetransaksi[]=['transaction type id','name','start_date','end_date','org_id'];
+            foreach($transactiontype as $ott)
+            {
+                //echo "transaction_type_id:".$ott->transaction_type_id."<br>";
+              $mytransactiontype = OeTransactionType::updateOrCreate(
+                ['transaction_type_id'=>$ott->transaction_type_id],
+                ['name'=>$ott->name,'description=>$ott->description','start_date_active'=>$ott->start_date_active
+                ,'end_date_active'=>$ott->end_date_active,'currency_code'=>$ott->currency_code,'price_list_id'=>$ott->price_list_id
+                ,'warehouse_id'=>$ott->warehouse_id,'org_id'=>$ott->org_id
+                ]
+              );
+              $tipetransaksi[]=[$ott->transaction_type_id,$ott->name,$ott->start_date_active,$ott->end_date_active,$ott->org_id];
+            }
+            $sheetArray['tipe transaksi']=$tipetransaksi;
           }
-          $this->getCustomer($lasttime);
-
+          //dd($sheetArray);
+          if(count($sheetArray)>0)
+          {
+            $file = Excel::create("sync_gorder".date_format($tgloracle,'Ymd His'),function($excel) use ($sheetArray) {
+              $excel->setTitle('Synchronize DB gOrder');
+              $excel->setCreator('Shanty')
+              ->setCompany('Solinda');
+              foreach($sheetArray as $key=>$vArray)
+              {
+                if(count($vArray)>1){
+                  $excel->sheet($key, function($sheet) use ($vArray) {
+                    $sheet->fromArray($vArray, null, 'A1', true,false);
+                    $sheet->row(1, function($row) {
+                      $row->setBackground('#6495ED');
+                      $row->setFontWeight('bold');
+                      $row->setAlignment('center');
+                    });
+                  });
+                }
+              }
+            });
+            $userit = User::whereexists(function($query){
+              $query->select(DB::raw(1))
+                    ->from('role_user as ru')
+                    ->join('roles as r','ru.role_id','r.id')
+                    ->whereraw('ru.user_id = users.id')
+                    ->wherein('r.name',['IT Galenium']);
+            })->select('email','name','id')->get();
+            foreach($userit as $u){
+              \Mail::send('emails.customerinterface',["user"=>$u],function($m) use($file,$u){
+                  $m->to(trim($u->email), $u->name)->subject('Synchronize DB gOrder');
+                  $m->attach($file->store("xlsx",false,true)['full']);
+              });
+            }
+          }else{
+            $userit = User::whereexists(function($query){
+              $query->select(DB::raw(1))
+                    ->from('role_user as ru')
+                    ->join('roles as r','ru.role_id','r.id')
+                    ->whereraw('ru.user_id = users.id')
+                    ->wherein('r.name',['IT Galenium']);
+            })->select('email','name','id')->get();
+            foreach($userit as $u){
+              \Mail::send('emails.nointerface',["user"=>$u],function($m) use($file,$u){
+                  $m->to(trim($u->email), $u->name)->subject('Synchronize DB gOrder');
+              });
+            }
+          }
           //$customrsite =
           DB::table('tbl_request')->where('id','=',$newrequest)->update(['tgl_selesai'=>Carbon::now()]);
         }
@@ -360,8 +420,10 @@ class BackgroundController extends Controller
       }
     }
 
-    public function getPricelist($lasttime=null)
+    public function getPricelist($lasttime=null,$bgprocess=false)
     {
+      $data=[];
+      $sheetarray=[];
       if(is_null($lasttime))
       {
         $request= DB::table('tbl_request')->where('event','=','synchronize')
@@ -374,7 +436,7 @@ class BackgroundController extends Controller
           $lasttime = date_create("2017-07-01");
         }
       }
-      echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
+      //echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $qp_listheader = $connoracle->table('qp_list_headers')
@@ -383,18 +445,23 @@ class BackgroundController extends Controller
                     , 'start_date_active', 'end_date_active', 'automatic_flag', 'list_type_code', 'terms_id', 'rounding_factor'
                     , 'discount_lines_flag', 'active_flag', 'orig_org_id', 'global_flag')->get();
         //dd($qp_listheader);
-        foreach($qp_listheader as $ql){
-            echo "list header id:".$ql->list_header_id.":".$ql->name."<br>";
-          $mylistheader = QpListHeaders::updateOrCreate (
-            ['list_header_id'=>$ql->list_header_id],
-            ['name'=>$ql->name,'description'=>$ql->description,'version_no'=>$ql->version_no,'currency_code'=>$ql->currency_code
-            ,'start_date_active'=>$ql->start_date_active,'end_date_active'=>$ql->end_date_active,'automatic_flag'=>$ql->automatic_flag
-            ,'list_type_code'=>$ql->list_type_code,'discount_lines_flag'=>$ql->discount_lines_flag,'active_flag'=>$ql->active_flag
-            ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
-            ]
-          );
+        if($qp_listheader->count()>0){
+          $sheetarray[]=['List header id','Name','start_date_active','end_date_active','list_type_code'];
+          foreach($qp_listheader as $ql){
+              //echo "list header id:".$ql->list_header_id.":".$ql->name."<br>";
+            $mylistheader = QpListHeaders::updateOrCreate (
+              ['list_header_id'=>$ql->list_header_id],
+              ['name'=>$ql->name,'description'=>$ql->description,'version_no'=>$ql->version_no,'currency_code'=>$ql->currency_code
+              ,'start_date_active'=>$ql->start_date_active,'end_date_active'=>$ql->end_date_active,'automatic_flag'=>$ql->automatic_flag
+              ,'list_type_code'=>$ql->list_type_code,'discount_lines_flag'=>$ql->discount_lines_flag,'active_flag'=>$ql->active_flag
+              ,'orig_org_id'=>$ql->orig_org_id,'global_flag'=>$ql->global_flag
+              ]
+            );
+            $sheetarray[]=[$ql->list_header_id,$ql->name,$ql->start_date_active,$ql->end_date_active,$ql->list_type_code];
+          }
         }
-
+        if(count($sheetarray)>1) $data['price header'] = $sheetarray;
+        $linearray = [];
         $qp_listlines =$connoracle->table('qp_list_lines_v as qll')
                         ->join('qp_list_headers_all qlh','qll.list_headeR_id','=','qlh.list_header_id')
                         ->where('qll.last_update_date','>=',$lasttime)
@@ -406,8 +473,9 @@ class BackgroundController extends Controller
                         ->get();
         if($qp_listlines)
         {
-          echo "<h2>Data Priceline Oracle</h2>";
-          echo "<table><tr><th>Price Name</th><th>Line Id</th><th>Products</th><th>Operand</th><th>Start Date</th><th>End Date</th></tr>";
+          $linearray[]=['Price Name','Line Id','Product','Operand','Start Date','End Date'];
+          //echo "<h2>Data Priceline Oracle</h2>";
+          //secho "<table><tr><th>Price Name</th><th>Line Id</th><th>Products</th><th>Operand</th><th>Start Date</th><th>End Date</th></tr>";
 
           foreach($qp_listlines as $ql)
           {
@@ -426,18 +494,18 @@ class BackgroundController extends Controller
             ]);
             $product = Product::where('inventory_item_id','=',$ql->product_attr_value)->select('title')->first();
             if(isset($product)) $nmproduct = $product->title;else $nmproduct = $ql->product_attr_value;
-
-            echo "<tr>";
+            $linearray[]=[$ql->name,$ql->list_line_id,$nmproduct,$ql->operand,$ql->start_date_active,$ql->end_date_active];
+            /*echo "<tr>";
             echo "<td>".$ql->name."</td>";
             echo "<td>".$ql->list_line_id."</td>";
             echo "<td>".$nmproduct."</td>";
             echo "<td>".$ql->operand."</td>";
             echo "<td>".$ql->start_date_active."</td>";
             echo "<td>".$ql->end_date_active."</td>";
-            echo "</tr>";
+            echo "</tr>";*/
           }
-          echo "</table><br>";
-          echo "Delete data<br>";
+          /*echo "</table><br>";*/
+          if(count($linearray)>1) $data['price lines'] = $linearray;
           $dellistline = QpListLine::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
                         ->delete();
           $oralistlines =$connoracle->table('qp_list_lines_v as qll')
@@ -450,14 +518,40 @@ class BackgroundController extends Controller
 
         }
         DB::commit();
-        return 1;
+        if($bgprocess) return $data;
+        else{
+          if(count($data)>0){
+          $file = Excel::create("sync_pricing".date('Ymd His'),function($excel) use ($data) {
+              $excel->setTitle('Interface Pricing');
+              $excel->setCreator('Shanty')
+              ->setCompany('Solinda');
+              foreach($data as $key=>$vArray)
+              {
+                if(count($vArray)>1){
+                  $excel->sheet($key, function($sheet) use ($vArray) {
+                    $sheet->fromArray($vArray, null, 'A1', true,false);
+                    $sheet->row(1, function($row) {
+                      $row->setBackground('#6495ED');
+                      $row->setFontWeight('bold');
+                      $row->setAlignment('center');
+                    });
+                  });
+                }
+              }
+            })->download('xlsx');
+          }else{
+            echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
+            echo "Tidak ada data yang diproses<br>";
+          }
+        }
+        return $data;
       }else{
         echo "Can't connect to oracle database";
         return 0;
       }
     }
 
-    public function getCustomer($lasttime = null)
+    public function getCustomer($lasttime = null,$bgprocess = false)
     {
       DB::beginTransaction();
       try{
@@ -468,19 +562,22 @@ class BackgroundController extends Controller
           if($request)
           {
             $lasttime = date_create($request);
-            echo"type:".gettype($lasttime);
+            //echo"type:".gettype($lasttime);
           }else{
             $lasttime = date_create("2017-01-01");
           }
-          echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
+          //echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
         }
+        $sheetcustomer = [];
         $connoracle = DB::connection('oracle');
+        $tglskrg = $connoracle->selectone("select sysdate as tgl from dual");
+        if(!empty($tglskrg)) $tglskrg=$tglskrg->tgl; else $tglskrg = Carbon::now();
         $newrequestcust= DB::table('tbl_request')->insertGetId([
-          'created_at'=>Carbon::now(),
-          'updated_at'=>Carbon::now(),
+          'created_at'=>$tglskrg,
+          'updated_at'=>$tglskrg,
           'event'=>'customer',
         ]);
-        echo "request id:".$newrequestcust."<br>";
+        //echo "request id:".$newrequestcust."<br>";
         $customers = $connoracle->table('ar_customers as ac')
                     ->leftjoin('HZ_CUSTOMER_PROFILES as hcp','ac.customer_id', 'hcp.cust_Account_id')
                     ->leftjoin('ra_terms as rt','hcp.STANDARD_TERMS','rt.term_id')
@@ -498,14 +595,15 @@ class BackgroundController extends Controller
                     ->orderBy('customer_number','asc')
                     ->get();
         if(count($customers)){
-          echo "<h2>Data Customer Oracle</h2>";
-          echo "<table><tr><th>Customer Number</th><th>Customer Name</th></tr>";
+          $sheetcustomer[] = ['customer_id','customer_number','customer_name','status'];
+          //echo "<h2>Data Customer Oracle</h2>";
+          //echo "<table><tr><th>Customer Number</th><th>Customer Name</th></tr>";
           foreach($customers as $c)
           {
-            echo"<tr>";
-            echo "<td>".$c->customer_number."</td>";
-            echo "<td>".$c->customer_name."</td>";
-            echo "</tr>";
+            //echo"<tr>";
+            //echo "<td>".$c->customer_number."</td>";
+            //echo "<td>".$c->customer_name."</td>";
+            //echo "</tr>";
             $psc_flag=null;
             $pharma_flag=null;
             $export_flag=null;
@@ -525,7 +623,7 @@ class BackgroundController extends Controller
 
 
             if($existscustomer){
-              echo "insert customer oracle to customer id:" . $c->orig_system_reference."<br>";
+              //echo "insert customer oracle to customer id:" . $c->orig_system_reference."<br>";
               $mycustomer = Customer::updateOrCreate(
                 ['id'=>$c->orig_system_reference],
                 ['oracle_customer_id'=>$c->customer_id, 'customer_name'=>$c->customer_name,'customer_number'=>$c->customer_number,'status'=>$c->status
@@ -536,6 +634,7 @@ class BackgroundController extends Controller
                 ,
                 ]
               );
+              $sheetcustomer[]=[$c->customer_id,$c->customer_number,$c->customer_name,'merge with'.$existscustomer->id];
             }else{
               $mycustomer = Customer::updateOrCreate(
                 ['oracle_customer_id'=>$c->customer_id],
@@ -546,6 +645,7 @@ class BackgroundController extends Controller
                 ,'payment_term_name'=>$c->payment_term,'psc_flag'=>$psc_flag,'pharma_flag'=>$pharma_flag,'export_flag'=>$export_flag,'tollin_flag'=>$tollin_flag
                 ]
               );
+              $sheetcustomer[]=[$c->customer_id,$c->customer_number,$c->customer_name,'update/insert'];
             }
             if($c->status=='I'){
               $updateuser = User::where('customer_id','=',$c->customer_id)
@@ -563,12 +663,42 @@ class BackgroundController extends Controller
               }
             }
           }
-          echo"</table>";
+          //echo"</table>";
         }
+        $sheetArray=[];
+        if(count($sheetcustomer)>1) $sheetArray['customer'] = $sheetcustomer;
         $customersite = $this->getCustomerSites($lasttime);
         $customercontacts = $this->getCustomerContacts($lasttime);
+        if(count($customersite)>1) $sheetArray['customer sites'] = $customersite;
+        if(count($customercontacts)>1) $sheetArray['customer contact'] = $customercontacts;
         DB::table('tbl_request')->where('id','=',$newrequestcust)->update(['tgl_selesai'=>Carbon::now()]);
         DB::commit();
+        if($bgprocess) return $sheetArray;
+        else{
+          if(count($sheetArray)>0){
+          $file = Excel::create("sync_cust".date('Ymd His'),function($excel) use ($sheetArray) {
+              $excel->setTitle('Interface customer');
+              $excel->setCreator('Shanty')
+              ->setCompany('Solinda');
+              foreach($sheetArray as $key=>$vArray)
+              {
+                if(count($vArray)>1){
+                  $excel->sheet($key, function($sheet) use ($vArray) {
+                    $sheet->fromArray($vArray, null, 'A1', true,false);
+                    $sheet->row(1, function($row) {
+                      $row->setBackground('#6495ED');
+                      $row->setFontWeight('bold');
+                      $row->setAlignment('center');
+                    });
+                  });
+                }
+              }
+            })->download('xlsx');
+          }else{
+            echo "lasttime:".date_format($lasttime,"Y/m/d H:i:s")."<br>";
+            echo "Tidak ada data yang diproses<br>";
+          }
+        }
       }catch (\Exception $e) {
         DB::rollback();
         throw $e;
@@ -578,6 +708,7 @@ class BackgroundController extends Controller
     public function getCustomerSites($lasttime)
     {
       $connoracle = DB::connection('oracle');
+      $sitesheet=[];
       if($connoracle){
         $sites = $connoracle->table('HZ_CUST_ACCT_SITES_ALL hcas')
                     ->join('hz_party_sites hps','hcas.PARTY_SITE_ID', '=', 'hps.party_site_id')
@@ -611,19 +742,21 @@ class BackgroundController extends Controller
                     ->get();
         if(count($sites))
         {
-          echo "<h2>Data Customer Site Oracle</h2>";
+          $sitesheet[]=['Customer Number','Customer Name','Site Use Code','Address','Province','City','Status'];
+          /*echo "<h2>Data Customer Site Oracle</h2>";
           echo "<table><tr><th>Customer Number</th><th>Customer Name</th>";
-          echo "<th>Site Use Code</th><th>Address</th><th>Province</th><th>City</th><th>Status</th></tr>";
+          echo "<th>Site Use Code</th><th>Address</th><th>Province</th><th>City</th><th>Status</th></tr>";*/
           foreach ($sites as $site)
           {
               //echo "Sites:".$site->cust_account_id."<br>";
-              echo "<tr>";
+              /*echo "<tr>";
               echo "<td>".$site->customer_number."</td>";
               echo "<td>".$site->customer_name."</td>";
               echo "<td>".$site->site_use_code."</td>";
               echo "<td>".$site->address1."</td>";
               echo "<td>".$site->province."</td>";
-              echo "<td>".$site->city."</td>";
+              echo "<td>".$site->city."</td>";*/
+
               $province_id=null;
               $city_id=null;
               $desa_id=null;
@@ -686,6 +819,7 @@ class BackgroundController extends Controller
                               ,'oracle_bill_to'=>$site->site_use_id
                               ,'oracle_customer_id'=>$customer->oracle_customer_id]);
                   }
+                  $sitestatus = "merge";
 
 
 
@@ -715,22 +849,25 @@ class BackgroundController extends Controller
                     ,'city_id'=>$city_id,'province_id'=>$province_id,'district_id'=>$kecamatan_id,'state_id'=>$desa_id,'area'=>$site->wilayah
                     ]
                   );
+                  $sitestatus = "tambah/insert";
                 }
-                echo "<td>Sites berhasil ditambah/update</td>";
-                echo "</tr>";
+                $sitesheet[]=[$site->customer_number,$site->customer_name,$site->site_use_code,$site->address1,$site->province,$site->city,$sitestatus];
+              //  echo "<td>Sites berhasil ditambah/update</td>";
+                //echo "</tr>";
               }
 
           }
-          echo"</table>";
-          return true;
+          //echo"</table>";
+          return $sitesheet;
         }
       }else{
-        return false;
+        return $sitesheet;
       }
     }
 
     public function getCustomerContacts($lasttime)
     {
+      $sheetcontact = [];
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $contacts = $connoracle->table('hz_cust_accounts hca')
@@ -757,19 +894,20 @@ class BackgroundController extends Controller
                     ->get();
         if(count($contacts))
         {
-          echo "<h2>Data Customer Contact Oracle</h2>";
+          $sheetcontact[]=['Customer Number','Customer Name','Contact Name','Contact Point Type','Contact','Line type','Status'];
+        /*  echo "<h2>Data Customer Contact Oracle</h2>";
           echo "<table><tr><th>Customer Number</th><th>Customer Name</th>";
-          echo "<th>Contact Name</th><th>Contact Point Type</th><th>Contact</th><th>Line type</th><th>Status</th></tr>";
+          echo "<th>Contact Name</th><th>Contact Point Type</th><th>Contact</th><th>Line type</th><th>Status</th></tr>";*/
           foreach ($contacts as $contact)
           {
               //echo "Sites:".$site->cust_account_id."<br>";
-              echo "<tr>";
+              /*echo "<tr>";
               echo "<td>".$contact->customer_number."</td>";
               echo "<td>".$contact->customer_name."</td>";
               echo "<td>".$contact->contact_name."</td>";
               echo "<td>".$contact->contact_point_type."</td>";
               echo "<td>".$contact->contact."</td>";
-              echo "<td>".$contact->phone_line_type."</td>";
+              echo "<td>".$contact->phone_line_type."</td>";*/
 
               $customer = Customer::where('oracle_customer_id','=',$contact->cust_account_id)->first();
 
@@ -780,16 +918,17 @@ class BackgroundController extends Controller
                   ['account_number'=>$contact->customer_number,'contact_name'=>$contact->contact_name,'contact_type'=>$contact->contact_point_type
                   ]
                 );
-                echo "<td>Contact berhasil ditambah/update</td>";
-                echo "</tr>";
+                $sheetcontact[]=[$contact->customer_number,$contact->customer_name,$contact->contact_name,$contact->contact_point_type,$contact->contact,$contact->phone_line_type,'insert/update'];
+                /*echo "<td>Contact berhasil ditambah/update</td>";
+                echo "</tr>";*/
               }
 
           }
-          echo"</table>";
-          return true;
+          //echo"</table>";
+          return $sheetcontact;
         }
       }else{
-        return false;
+        return $sheetcontact;
       }
     }
     public function getShippingSO($notrx,$lineid,$lasttime, $productid,$headerid)
@@ -1256,6 +1395,7 @@ class BackgroundController extends Controller
     public function getMasterItem($tglskrg)
     {
       $connoracle = DB::connection('oracle');
+      $sheetproduct=[];
       if($connoracle){
         $master_products = $connoracle->table('mtl_system_items as msi')
             ->where('customer_order_enabled_flag','=','Y')
@@ -1273,9 +1413,10 @@ class BackgroundController extends Controller
 
         if($master_products){
           $insert_flag=false;
+          $sheetproduct[]=['itemcode','description','satuan_primary','satuan_secondary','conversion','enabled_flag','status'];
             foreach($master_products as $mp)
             {
-              echo ('Product:'.$mp->segment1."<br>");
+              //echo ('Product:'.$mp->segment1."<br>");
               $query1 = Product::where('inventory_item_id','=',$mp->inventory_item_id)->first();
               if($query1){//update
                 $update = Product::updateOrCreate(
@@ -1287,6 +1428,7 @@ class BackgroundController extends Controller
                         ,'conversion'=>$mp->conversion
                         ,'enabled_flag'=>$mp->enabled_flag
                       ]);
+                $sheetproduct[]=[$mp->segment1,$mp->description,$mp->primary_uom_code,$mp->secondary_uom_code,$mp->conversion,$mp->enabled_flag,'update'];
               }else{//insert
                 $insert = Product::Create(
                       ['inventory_item_id'=>$mp->inventory_item_id
@@ -1297,6 +1439,7 @@ class BackgroundController extends Controller
                         ,'conversion'=>$mp->conversion
                         ,'enabled_flag'=>$mp->enabled_flag
                       ]);
+                $sheetproduct[]=[$mp->segment1,$mp->description,$mp->primary_uom_code,$mp->secondary_uom_code,$mp->conversion,$mp->enabled_flag,'insert'];
                 $insert_flag =true;
               }
             }
@@ -1306,13 +1449,14 @@ class BackgroundController extends Controller
               //notif ke sysadmin
 
             }*/
-            return true;
+            return $sheetproduct;
         }
 
       }
     }
 
-    public function getMasterDiscount($tglskrg=null){
+    public function getMasterDiscount($tglskrg=null,$bgprocess=false){
+      $sheetarray=[];
       if(is_null($tglskrg))
       {
         $request= DB::table('tbl_request')->where('event','=','synchronize')
@@ -1325,10 +1469,11 @@ class BackgroundController extends Controller
           $tglskrg = date_create("2017-01-01");
         }
       }
-      echo "lasttime:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
-      $vprice = $this->getPricelist($tglskrg);
+      $vprice = $this->getPricelist($tglskrg,true);
+      if(count($vprice)>0) $sheetarray = array_merge($sheetarray,$vprice);
       $connoracle = DB::connection('oracle');
       if($connoracle){
+        $datadiskon=[];
         $connoracle->enableQueryLog();
         /*delete data yg end_date_active berakhir*/
         $listheader = $connoracle->table('qp_list_headers')
@@ -1348,7 +1493,7 @@ class BackgroundController extends Controller
           $delqdiskon = QpPricingDiskon::whereIn('list_header_id',$listheader->pluck('list_header_id')->toArray())
                     ->delete();
         }
-	echo "insert pricing diskon:<br>";
+	//echo "insert pricing diskon:<br>";
 	 /*insert pricing diskon*/
         $modifiers = $connoracle->table('gpl_pricing_diskon_v')
                       ->whereraw('nvl(end_date_active,sysdate+1)>= trunc(sysdate)')
@@ -1358,16 +1503,17 @@ class BackgroundController extends Controller
                       ->get();
        // dd($modifiers);
         if($modifiers){
-          echo "<table><caption>Data Diskon</caption>";
-          echo "<tr><th>Price Name</th><th>Product</th><th>Customer</th><th>Operand</th><th>Status</th></tr>";
+          //echo "<table><caption>Data Diskon</caption>";
+          //echo "<tr><th>Price Name</th><th>Product</th><th>Customer</th><th>Operand</th><th>Status</th></tr>";
+          $datadiskon[]=['Price Name','Product','Customer','Operand','Status'];
           foreach($modifiers as $m)
           {
             $product_name =null;
             $product = Product::where('inventory_item_id','=',$m->product_attr_val)->first();
             if($product) $product_name = $product->title;
-            echo "<tr>";
-            echo "<td>".$m->name."-".$m->list_header_id."</td>";
-            echo "<td>".$product_name."</td>";
+            //echo "<tr>";
+            //echo "<td>".$m->name."-".$m->list_header_id."</td>";
+            //echo "<td>".$product_name."</td>";
             $customer=collect([]);
             if(!is_null($m->customer_number))
               $customer = Customer::where('oracle_customer_id','=',$m->customer_number)->select('customer_name','customer_number')->first();
@@ -1380,10 +1526,11 @@ class BackgroundController extends Controller
 
             if($customer)
             {
-              echo "<td>".$customer->customer_number."-".$customer->customer_name."</td>";
-            }else echo "<td></td>";
+              $nmcustomer = $customer->customer_number."-".$customer->customer_name;
+              //echo "<td>".$customer->customer_number."-".$customer->customer_name."</td>";
+            }else $nmcustomer="";//echo "<td></td>";
 
-            echo "<td>".$m->operand."</td>";
+            //echo "<td>".$m->operand."</td>";
             $olddiscount =  QpPricingDiskon::where([
               ['list_header_id','=',$m->list_header_id],
               ['list_line_id','=',$m->list_line_id],
@@ -1415,7 +1562,8 @@ class BackgroundController extends Controller
                 ,'orig_org_id'=>$m->orig_org_id
                 ,'price_break_type_code'=>$m->price_break_type_code
               ]);
-              echo "<td>update</td>";
+              $status="update";
+              //echo "<td>update</td>";
             }elseif($old_discount->count()==0){
               /*insert*/
               $updatediscount = QpPricingDiskon::insert([
@@ -1442,29 +1590,60 @@ class BackgroundController extends Controller
                 ,'orig_org_id'=>$m->orig_org_id
                 ,'price_break_type_code'=>$m->price_break_type_code
               ]);
-              echo "<td>insert</td>";
+              //echo "<td>insert</td>";
+              $status = "insert";
             }else{
               /*duplicate*/
-              echo "<td>duplicate</td>";
+              //echo "<td>duplicate</td>";
+              $status="duplicate";
             }
-            echo"</tr>";
-          }echo "</table>";
+            $datadiskon[]=[$m->name."-".$m->list_header_id,$product_name,$nmcustomer,$m->operand,$status];
+            //echo"</tr>";
+          }//echo "</table>";
         }
+        if(count($datadiskon)>0) $sheetarray['diskon'] = $datadiskon;
         $del_line_diskon = QpPricingDiskon::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
                           ->delete();
         $getpromo = $this->getPromoBonus($tglskrg);
-
+        if(count($getpromo)>0) $sheetarray = array_merge($sheetarray,$getpromo);
       	DB::commit();
-      	return 1;
+        if($bgprocess) return $sheetarray;
+        else{
+          if(count($sheetarray)>0){
+          $file = Excel::create("sync_diskon".date('Ymd His'),function($excel) use ($sheetarray) {
+              $excel->setTitle('Interface Diskon');
+              $excel->setCreator('Shanty')
+              ->setCompany('Solinda');
+              foreach($sheetarray as $key=>$vArray)
+              {
+                if(count($vArray)>1){
+                  $excel->sheet($key, function($sheet) use ($vArray) {
+                    $sheet->fromArray($vArray, null, 'A1', true,false);
+                    $sheet->row(1, function($row) {
+                      $row->setBackground('#6495ED');
+                      $row->setFontWeight('bold');
+                      $row->setAlignment('center');
+                    });
+                  });
+                }
+              }
+            })->download('xlsx');
+          }else{
+            echo "lasttime:".date_format($tglskrg,"Y/m/d H:i:s")."<br>";
+            echo "Tidak ada data yang diproses<br>";
+          }
+        }
       }else {
       	echo "can't connect to oracle";
-      	return 0;
+      	return $sheetarray;
       }
     }
 
     public function getPromoBonus($tglskrg=null)
     {
       //$tglskrg = date_create("2017-01-01");
+      $sheetarray=[];
+      $databonus=[];
       DB::beginTransaction();
       try{
         /*getPromo*/
@@ -1520,8 +1699,9 @@ class BackgroundController extends Controller
                     }
         if($qp_bonus->count()>0)
         {
-          echo "<table><caption>Data Bonus</caption>";
-          echo "<tr><th>Price Name</th><th>Product</th><th>Customer</th><th>Operand</th><th>Status</th></tr>";
+          $databonus[]=['Price Name','Product','Customer','Operand','Status'];
+          //echo "<table><caption>Data Bonus</caption>";
+          //echo "<tr><th>Price Name</th><th>Product</th><th>Customer</th><th>Operand</th><th>Status</th></tr>";
           /*kondisi untuk qualifier header terlebih dahulu*/
           $customer = Customer::where('status','A')->whereNotNull('oracle_customer_id');
           //dd($qp_bonus->groupBy('list_header_id'));
@@ -1602,11 +1782,11 @@ class BackgroundController extends Controller
               if($customerlines->count()>0){
                 foreach($customerlines as $cl)
                 {
-                  echo "<tr>";
+                  /*echo "<tr>";
                   echo "<td>".$bonus->name."-".$bonus->list_header_id."</td>";
                   echo "<td>".$product_name."</td>";
                   echo "<td>".$cl->customer_name."</td>";
-                  echo "<td>".$bonus->pricing_attr_value_from." ".$bonus->product_uom_code."(".$bonus->price_break_type_code.")</td>";
+                  echo "<td>".$bonus->pricing_attr_value_from." ".$bonus->product_uom_code."(".$bonus->price_break_type_code.")</td>";*/
 
                   $olddiscount =  QpPricingDiskon::where([
                     ['list_header_id','=',$bonus->list_header_id],
@@ -1635,7 +1815,7 @@ class BackgroundController extends Controller
                       ,'orig_org_id'=>$bonus->orig_org_id
                       ,'price_break_type_code'=>$bonus->price_break_type_code
                     ]);
-                    echo "<td>update</td>";
+                    $status="update";
                   }elseif($old_discount->count()==0){
                     /*insert*/
                     $updatediscount = QpPricingDiskon::insert([
@@ -1662,9 +1842,11 @@ class BackgroundController extends Controller
                       ,'orig_org_id'=>$bonus->orig_org_id
                       ,'price_break_type_code'=>$bonus->price_break_type_code
                     ]);
-                    echo "<td>insert</td>";
+                    //echo "<td>insert</td>";
+                    $status="insert";
                   }
-                  echo "</tr>";
+                  //echo "</tr>";
+                  $databonus[]=[$bonus->list_header_id,$bonus->name,$product_name,$cl->customer_name,$bonus->pricing_attr_value_from." ".$bonus->product_uom_code."(".$bonus->price_break_type_code.")",$status];
                 }
 
                 /*delete pricing yang todal ada dalam kondisi*/
@@ -1677,10 +1859,12 @@ class BackgroundController extends Controller
               }
 
             }
-            echo "</table>";
+            //echo "</table>";
 
           }
         }
+        if(count($databonus)>0) $sheetarray['bonus']=$databonus;
+        //$attrarray=[];
         /*insert qp_pricing_attr_get_v*/
         $priceheader = QpListHeaders::whereraw("ifnull(end_date_active,curdate()+interval 1 day) > curdate()")
                     ->whereraw("list_type_code='PRO'")
@@ -1697,7 +1881,8 @@ class BackgroundController extends Controller
                         , 'rltd_modifier_id', 'rltd_modifier_grp_no',  'parent_list_line_id', 'to_rltd_modifier_id')
                         ->get();
           if($pricing_attr->count()>0){
-            echo "insert pricing attribute:<br>";
+            //echo "insert pricing attribute:<br>";
+            //$attrarray[]=['Pricing Attr ID','list_header_id',''];
             foreach ($pricing_attr as $attr)
             {
               $updateattr = DB::table('qp_pricing_attr_get_v')
@@ -1737,7 +1922,7 @@ class BackgroundController extends Controller
                 ,'parent_list_line_id'=>$attr->parent_list_line_id
                 ,'to_rltd_modifier_id'=>$attr->to_rltd_modifier_id
                 ]);
-                echo "update pricing attribute id:".$attr->pricing_attribute_id."<br>";
+                //echo "update pricing attribute id:".$attr->pricing_attribute_id."<br>";
               }
               else{
                 $insertattr = DB::table('qp_pricing_attr_get_v')
@@ -1772,7 +1957,7 @@ class BackgroundController extends Controller
                             ,'parent_list_line_id'=>$attr->parent_list_line_id
                             ,'to_rltd_modifier_id'=>$attr->to_rltd_modifier_id
                           ]);
-                echo "insert pricing attribute id:".$attr->pricing_attribute_id."<br>";
+                //echo "insert pricing attribute id:".$attr->pricing_attribute_id."<br>";
               }
             }
           }
@@ -1785,11 +1970,11 @@ class BackgroundController extends Controller
                                   ->whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()");
                           })->delete();
         DB::commit();
-        return 1;
+        return $sheetarray;
       }catch (\Exception $e) {
         DB::rollback();
         throw $e;
-        return 0;
+        return $sheetarray;
       }
     }
 
@@ -1818,6 +2003,7 @@ class BackgroundController extends Controller
     }
 
     public function getConversionItem($tglskrg){
+      $sheetarray = [];
       $connoracle = DB::connection('oracle');
       if($connoracle){
         $conversions = $connoracle->table('mtl_uom_conversions as muc')
@@ -1836,43 +2022,65 @@ class BackgroundController extends Controller
                               ,'mum.uom_code as base_uom','muc.width','muc.height','muc.dimension_uom')
                     ->get();
         //dd($conversions->toSQL());
-        foreach($conversions as $c){
-          echo ('konversi'.$c->inventory_item_id.'dari '.$c->uom_code.' ke '.$c->base_uom."<br>");
-          $mysqlproduct = Product::where('inventory_item_id','=',$c->inventory_item_id)
-                      ->select('id')
-                      ->first();
-          if($mysqlproduct) {
-            echo"Product id :".$mysqlproduct->id."<br>";
-            $mysqlconversion =UomConversion::where(['product_id'=>$mysqlproduct->id,
-              'uom_code'=>$c->uom_code,
-              'base_uom'=>$c->base_uom])->first();
-            if($mysqlconversion)
-            {
-              $mysqlconversion->uom_class = $c->uom_class;
-              $mysqlconversion->rate = $c->conversion_rate;
-              $mysqlconversion->width = $c->width;
-              $mysqlconversion->height = $c->height;
-              $mysqlconversion->dimension_uom = $c->dimension_uom;
-              $mysqlconversion->save();
-            } else{
-              DB::table('uom_conversions')->insert([
-                  'product_id'=>$mysqlproduct->id,
-                  'uom_code'=>$c->uom_code,
-                  'base_uom'=>$c->base_uom,
-                  'uom_class'=>$c->uom_class
-                  ,'rate'=>$c->conversion_rate
-                  ,'width'=>$c->width
-                  ,'height'=>$c->height
-                  ,'dimension_uom'=>$c->dimension_uom
-              ]);
+        if($conversions->count()>0){
+          $sheetarray[]=['Item Code','description','from uom','to uom','konversi','status'];
+          foreach($conversions as $c){
+            //echo ('konversi'.$c->inventory_item_id.'dari '.$c->uom_code.' ke '.$c->base_uom."<br>");
+            $mysqlproduct = Product::where('inventory_item_id','=',$c->inventory_item_id)
+                        ->select('id')
+                        ->first();
+            if($mysqlproduct) {
+              //echo"Product id :".$mysqlproduct->id."<br>";
+              $mysqlconversion =UomConversion::where(['product_id'=>$mysqlproduct->id,
+                'uom_code'=>$c->uom_code,
+                'base_uom'=>$c->base_uom])->first();
+              if($mysqlconversion)
+              {
+                $mysqlconversion->uom_class = $c->uom_class;
+                $mysqlconversion->rate = $c->conversion_rate;
+                $mysqlconversion->width = $c->width;
+                $mysqlconversion->height = $c->height;
+                $mysqlconversion->dimension_uom = $c->dimension_uom;
+                $mysqlconversion->save();
+                $sheetarray[]=[$mysqlproduct->itemcode,$mysqlproduct->title,$c->uom_code,$c->base_uom,$c->conversion_rate,'update'];
+              } else{
+                DB::table('uom_conversions')->insert([
+                    'product_id'=>$mysqlproduct->id,
+                    'uom_code'=>$c->uom_code,
+                    'base_uom'=>$c->base_uom,
+                    'uom_class'=>$c->uom_class
+                    ,'rate'=>$c->conversion_rate
+                    ,'width'=>$c->width
+                    ,'height'=>$c->height
+                    ,'dimension_uom'=>$c->dimension_uom
+                ]);
+                $sheetarray[]=[$mysqlproduct->itemcode,$mysqlproduct->title,$c->uom_code,$c->base_uom,$c->conversion_rate,'insert'];
+              }
+
             }
 
           }
-
         }
-		DB::commit();
+		    DB::commit();
        }
-       return true;
+       return $sheetarray;
+    }
+
+    public function sendEmailInterface($template, LaravelExcelWriter $file)
+    {
+      $userit = User::whereexists(function($query){
+        $query->select(DB::raw(1))
+              ->from('role_user as ru')
+              ->join('roles as r','ru.role_id','r.id')
+              ->whereraw('ru.user_id = users.id')
+              ->wherein('r.name',['IT Galenium']);
+      })->select('email','name','id')->get();
+      foreach($userit as $u){
+        \Mail::send($template,["user"=>$u],function($m) use($file,$u){
+            $m->to(trim($u->email), $u->name)->subject('Customer Interface gOrder');
+            $m->attach($file->store("xls",false,true)['full']);
+        });
+      }
     }
 
 }
