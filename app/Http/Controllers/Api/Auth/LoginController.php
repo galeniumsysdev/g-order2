@@ -117,7 +117,7 @@ class LoginController extends Controller
         'password' => $request->password,
         'validate_flag' => 1
     ];
-    if ( ! Auth::attempt($credentials))
+    if ( ! Auth::attempt($credentials, $remember = true))
     {
         return response()->json([
           'message' => 'User has not been verified',
