@@ -29,5 +29,6 @@
                 });
             });
         </script>
+        @include('utils.adsblock')
     </body>
 </html>
