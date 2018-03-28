@@ -976,7 +976,8 @@ class BackgroundController extends Controller
                     )
                   ->get();
             //var_dump($oraship);echo"<br>";
-        if($oraship->count()>0){
+        if($oraship->count()>0)
+        {
           //var_dump($oraship->pluck('delivery_no','delivery_detail_id')->toArray());echo"<br>";
           $deletedelivery=$oraship->pluck('delivery_no','delivery_detail_id')
                                   ->map(function ($item, $key) {
@@ -990,74 +991,86 @@ class BackgroundController extends Controller
                         ->whereNotIn(DB::raw("concat(delivery_detail_id,'-',deliveryno)"),$deletedelivery)
                         ->update(['qty_backorder'=>DB::raw('qty_request_primary'),'qty_shipping'=>0,'qty_accept'=>0]);
                       //  dd(DB::getQueryLog());
-        foreach($oraship as $ship)
-        {
-          //echo "delivery detail id-delivery_no".$ship->delivery_detail_id."-".$ship->delivery_no."<br>";
-          $my_so_ship = SoShipping::where('delivery_detail_id','=',$ship->delivery_detail_id)
-            ->where('deliveryno','=',$ship->delivery_no)
-            ->where('product_id','=',$productid)
+          foreach($oraship as $ship)
+          {
+            //echo "delivery detail id-delivery_no".$ship->delivery_detail_id."-".$ship->delivery_no."<br>";
+            $my_so_ship = SoShipping::where('delivery_detail_id','=',$ship->delivery_detail_id)
+              ->where('deliveryno','=',$ship->delivery_no)
+              ->where('product_id','=',$productid)
+              ->where('line_id','=',$lineid)
+              ->where('header_id','=',$headerid)
+              ->first();
+            if($my_so_ship){
+              if($ship->released_status=="C")/*closing*/
+              {
+                $my_so_ship->qty_backorder = intval($my_so_ship->qty_backorder)+$my_so_ship->qty_shipping - $ship->picked_quantity;
+                $my_so_ship->qty_shipping = $ship->picked_quantity;
+                $my_so_ship->batchno = $ship->lot_number;
+                $my_so_ship->qty_accept = $ship->shipped_quantity;
+                $my_so_ship->qty_shipconfirm = $ship->shipped_quantity;
+                $my_so_ship->waybill=$ship->waybill;
+                $my_so_ship->save();
+              }elseif(is_null($my_so_ship->qty_accept)){
+                //$productid = Product::where('inventory_item_id','=',$ship->inventory_item_id)->select('id')->first();
+                $my_so_ship =SoShipping::updateOrCreate(
+                  ['delivery_detail_id'=>$ship->delivery_detail_id,'deliveryno'=>$ship->delivery_no],
+                  ['source_header_id'=>$ship->source_header_id
+                  ,'source_line_id'=>$ship->source_line_id,'product_id'=>$productid
+                  ,'uom'=>$ship->src_requested_quantity_uom,'qty_request'=>$ship->src_requested_quantity
+                  ,'uom_primary'=>$ship->primary_uom,'qty_request_primary'=>$ship->requested_quantity
+                  ,'qty_shipping'=>$ship->picked_quantity
+                  ,'batchno'=>$ship->lot_number
+                  ,'split_source_id'=>$ship->split_from_delivery_detail_id
+                  ,'tgl_kirim'=>$ship->transaction_date
+                  ,'conversion_qty'=>$ship->convert_qty
+                  ,'header_id' =>$headerid
+                  ,'line_id'=>$lineid
+                  ,'waybill'=>$ship->waybill
+                  ,'qty_shipconfirm'=>$ship->shipped_quantity
+                  ]
+                );
+              }elseif($ship->waybill!=$my_so_ship->waybill){
+                $my_so_ship->batchno = $ship->lot_number;
+                $my_so_ship->waybill=$ship->waybill;
+                $my_so_ship->save();
+              }
+            } else{
+              $newsoship = new SoShipping;
+              $newsoship->delivery_detail_id = $ship->delivery_detail_id;
+              $newsoship->deliveryno = $ship->delivery_no;
+              $newsoship->source_header_id = $ship->source_header_id;
+              $newsoship->source_line_id = $ship->source_line_id;
+              $newsoship->product_id = $productid;
+              $newsoship->uom = $ship->src_requested_quantity_uom;
+              $newsoship->qty_request = $ship->src_requested_quantity;
+              $newsoship->uom_primary = $ship->primary_uom;
+              $newsoship->qty_request_primary = $ship->requested_quantity;
+              $newsoship->qty_shipping = $ship->picked_quantity;
+              $newsoship->batchno = $ship->lot_number;
+              $newsoship->split_source_id = $ship->split_from_delivery_detail_id;
+              $newsoship->tgl_kirim = $ship->transaction_date;
+              $newsoship->conversion_qty = $ship->convert_qty;
+              $newsoship->header_id = $headerid;
+              $newsoship->line_id = $lineid;
+              $newsoship->waybill=$ship->waybill;
+              $newsoship->save();
+            }
+
+          }
+          //var_dump(DB::getQueryLog());
+          return 1;
+        }else{/*tidak ada di shipping so karena backorder full*/
+          $my_so_ship = SoShipping::where('product_id','=',$productid)
             ->where('line_id','=',$lineid)
             ->where('header_id','=',$headerid)
-            ->first();
-          if($my_so_ship){
-            if($ship->released_status=="C")/*closing*/
-            {
-              $my_so_ship->qty_backorder = intval($my_so_ship->qty_backorder)+$my_so_ship->qty_shipping - $ship->picked_quantity;
-              $my_so_ship->qty_shipping = $ship->picked_quantity;
-              $my_so_ship->batchno = $ship->lot_number;
-              $my_so_ship->qty_accept = $ship->shipped_quantity;
-              $my_so_ship->qty_shipconfirm = $ship->shipped_quantity;
-              $my_so_ship->waybill=$ship->waybill;
-              $my_so_ship->save();
-            }elseif(is_null($my_so_ship->qty_accept)){
-              //$productid = Product::where('inventory_item_id','=',$ship->inventory_item_id)->select('id')->first();
-              $my_so_ship =SoShipping::updateOrCreate(
-                ['delivery_detail_id'=>$ship->delivery_detail_id,'deliveryno'=>$ship->delivery_no],
-                ['source_header_id'=>$ship->source_header_id
-                ,'source_line_id'=>$ship->source_line_id,'product_id'=>$productid
-                ,'uom'=>$ship->src_requested_quantity_uom,'qty_request'=>$ship->src_requested_quantity
-                ,'uom_primary'=>$ship->primary_uom,'qty_request_primary'=>$ship->requested_quantity
-                ,'qty_shipping'=>$ship->picked_quantity
-                ,'batchno'=>$ship->lot_number
-                ,'split_source_id'=>$ship->split_from_delivery_detail_id
-                ,'tgl_kirim'=>$ship->transaction_date
-                ,'conversion_qty'=>$ship->convert_qty
-                ,'header_id' =>$headerid
-                ,'line_id'=>$lineid
-                ,'waybill'=>$ship->waybill
-                ,'qty_shipconfirm'=>$ship->shipped_quantity
-                ]
-              );
-            }elseif($ship->waybill!=$my_so_ship->waybill){
-              $my_so_ship->batchno = $ship->lot_number;
-              $my_so_ship->waybill=$ship->waybill;
-              $my_so_ship->save();
-            }
-          } else{
-            $newsoship = new SoShipping;
-            $newsoship->delivery_detail_id = $ship->delivery_detail_id;
-            $newsoship->deliveryno = $ship->delivery_no;
-            $newsoship->source_header_id = $ship->source_header_id;
-            $newsoship->source_line_id = $ship->source_line_id;
-            $newsoship->product_id = $productid;
-            $newsoship->uom = $ship->src_requested_quantity_uom;
-            $newsoship->qty_request = $ship->src_requested_quantity;
-            $newsoship->uom_primary = $ship->primary_uom;
-            $newsoship->qty_request_primary = $ship->requested_quantity;
-            $newsoship->qty_shipping = $ship->picked_quantity;
-            $newsoship->batchno = $ship->lot_number;
-            $newsoship->split_source_id = $ship->split_from_delivery_detail_id;
-            $newsoship->tgl_kirim = $ship->transaction_date;
-            $newsoship->conversion_qty = $ship->convert_qty;
-            $newsoship->header_id = $headerid;
-            $newsoship->line_id = $lineid;
-            $newsoship->waybill=$ship->waybill;
-            $newsoship->save();
+            ->get();
+          if($my_so_ship->count()>0){
+            $upd_so_ship = SoShipping::where('product_id','=',$productid)
+                          ->where('line_id','=',$lineid)
+                          ->where('header_id','=',$headerid)
+                          ->update(['qty_backorder'=>DB::raw('qty_request_primary'),'qty_shipping'=>0,'qty_accept'=>0]);
           }
 
-        }
-        //var_dump(DB::getQueryLog());
-        return 1;
         }
       }else{
         return 0;
