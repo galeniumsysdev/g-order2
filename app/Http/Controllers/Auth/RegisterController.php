@@ -522,6 +522,11 @@ class RegisterController extends Controller
 
     }
 
+    public function contactview (Request $request)
+    {
+      return view('auth.contact.contactview');
+    }
+    
     protected function redirectTo()
     {
         return route('product.buy');
