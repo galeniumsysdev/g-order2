@@ -1042,7 +1042,7 @@ class ProductController extends Controller
       if($request->hasFile('filepo'))
       {
         $validator = Validator::make($request->all(), [
-            'filepo' => 'required|mimes:jpeg,jpg,png,pdf|max:10240',
+            'filepo' => 'required|mimes:jpeg,jpg,png,pdf,xls,xlsx,doc,docx,zip|max:10240',
         ])->validate();
         $path = $request->file('filepo')->storeAs(
             'PO', $notrx.".".$request->file('filepo')->getClientOriginalExtension()

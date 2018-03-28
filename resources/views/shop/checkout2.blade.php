@@ -97,8 +97,8 @@
             <div class="form-group {{ $errors->has('filepo') ? ' has-error' : '' }}">
               <label class="control-label col-sm-3" for="filepo">@lang('shop.documentPO') :</label>
               <div class="col-sm-8">
-                  <input type="file" accept="application/pdf, image/*" name="filepo" id="filepo" >
-                  <span style="font-size:10px">File: PDF,jpeg,png, or jpg</span>
+                  <input type="file" accept="application/pdf, image/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" name="filepo" id="filepo" >
+                  <span style="font-size:10px">File: PDF,jpeg,png,jpg,xls,xlsx,doc,docx</span>
                   @if ($errors->has('filepo'))
     									<span class="help-block with-errors">
     											<strong>{{ $errors->first('filepo') }}</strong>

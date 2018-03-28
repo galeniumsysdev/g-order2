@@ -682,3 +682,23 @@ border-radius: 0%;
 #target {
   width: 345px;
 }
+
+
+.contact {
+  margin-left: 35px;
+}
+
+.panel-contact {
+	margin-left: 30px;
+	margin-right: 30px;
+	margin-top: 20px;
+}
+
+.view-contact {
+	margin-left: 20px;
+}
+
+.address-contact {
+	margin-left: 20px;
+	margin-top: 20px;
+}

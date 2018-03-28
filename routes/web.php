@@ -113,6 +113,7 @@ Route::get('/shopping-cart',[
 
 Route::group(['middleware' => ['web']],function(){
   Auth::routes();
+  Route::get('/contact','Auth\RegisterController@contactview')->name('contact');
   //Route::get('/home', 'HomeController@index');
 });
 
