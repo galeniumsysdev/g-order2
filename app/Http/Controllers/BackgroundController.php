@@ -1063,12 +1063,14 @@ class BackgroundController extends Controller
           $my_so_ship = SoShipping::where('product_id','=',$productid)
             ->where('line_id','=',$lineid)
             ->where('header_id','=',$headerid)
+            ->whereNull('qty_backorder')
             ->get();
           if($my_so_ship->count()>0){
             $upd_so_ship = SoShipping::where('product_id','=',$productid)
                           ->where('line_id','=',$lineid)
                           ->where('header_id','=',$headerid)
                           ->update(['qty_backorder'=>DB::raw('qty_request_primary'),'qty_shipping'=>0,'qty_accept'=>0]);
+            return 1;
           }
 
         }
