@@ -975,15 +975,15 @@ class BackgroundController extends Controller
                       ,'wdd.released_status'
                     )
                   ->get();
-          //  var_dump($oraship);
+            //var_dump($oraship);echo"<br>";
         if($oraship->count()>0){
-          //var_dump($oraship->pluck('delivery_detail_id','delivery_no')->toArray());
-          $deletedelivery=$oraship->pluck('delivery_detail_id','delivery_no')
+          //var_dump($oraship->pluck('delivery_no','delivery_detail_id')->toArray());echo"<br>";
+          $deletedelivery=$oraship->pluck('delivery_no','delivery_detail_id')
                                   ->map(function ($item, $key) {
-                                        return "$item-$key";
+                                        return "$key-$item";
                                   })->toArray();
         //  echo "new deletedelivery<br>";
-          //var_dump($deletedelivery);
+          var_dump($deletedelivery);
           $upd_so_ship = SoShipping::where('product_id','=',$productid)
                         ->where('line_id','=',$lineid)
                         ->where('header_id','=',$headerid)
@@ -1028,7 +1028,7 @@ class BackgroundController extends Controller
                 ,'qty_shipconfirm'=>$ship->shipped_quantity
                 ]
               );
-            }else{
+            }elseif($ship->waybill!=$my_so_ship->waybill){
               $my_so_ship->batchno = $ship->lot_number;
               $my_so_ship->waybill=$ship->waybill;
               $my_so_ship->save();
