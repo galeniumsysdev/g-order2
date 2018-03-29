@@ -44,6 +44,9 @@
 					@if($cust->users->count()>0)
     			<a class="btn btn-info" href="{{route('customer.show',['id'=>$cust->user->id,'notif_id'=>null])}}">Show</a>
 					@endif
+					@if($cust->users->count()>0 and Auth::user()->can('SuperUser'))
+						<a class="btn btn-warning" href="{{route('users.logOnAs',$cust->user->id)}}" title="Log On As"><i class="fa fa-sign-in" aria-hidden="true"></i></a>
+					@endif
     		</td>
     	</tr>
     	@endforeach

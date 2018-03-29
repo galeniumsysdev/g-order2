@@ -424,3 +424,6 @@ Route::post('ExportClients', 'ExcelController@ExportClients')->name('ExportClien
 
 //Route::get('checkImageProduct', 'ExcelController@checkImageProduct')->name('getProdukImage');
 Route::get('/sendEmailInvitation', 'UserController@sendEmailInvitation');
+Route::group(['middleware' => ['permission:SuperUser']], function () {
+Route::get('/users/LogOnAs/{id}','UserController@logOn')->name('users.logOnAs');
+});
