@@ -20,6 +20,7 @@ use Auth;
 use Datatables;
 use Carbon\Carbon;
 use Validator;
+//use Session;
 
 
 class UserController extends Controller
@@ -559,7 +560,7 @@ class UserController extends Controller
 
                     ]);
                   }
-              }              
+              }
               if($distpusat->hasDistributor()->count()>0)
               {
                 //$mappingdistributor =$distpusat->hasDistributor;
@@ -1052,4 +1053,26 @@ class UserController extends Controller
         echo $usercustomer->name."-".$usercustomer->email."berhasil dikirim<br>";
       }
     }
+
+    public function logOn($id)
+    {
+      $new_user = User::where('id',$id)->first();
+      //Session::put( 'orig_user', Auth::id() );
+      Auth::login( $new_user );
+      return $this->redirecthome();
+    }
+
+    public function redirecthome()
+    {
+      if(Auth::user()->hasRole('IT Galenium')) {
+          return redirect('/admin');
+      }elseif(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik') ) {
+            return redirect('/product/buy');
+      }elseif(Auth::user()->hasRole('KurirGPL'))      {
+            return redirect()->route('order.shippingSO');
+      }else{/*if(Auth::user()->hasRole('Marketing PSC') || Auth::user()->hasRole('Marketing Pharma')) {*/
+          return redirect('/home');
+      }
+    }
+
 }

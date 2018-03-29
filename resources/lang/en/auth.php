@@ -25,4 +25,5 @@ return [
     'groupdcerror' => "Category Datacenter must be fill if need product=PSC",
     'notmatchpswd'=>"Your current password does not matches with the password you provided. Please try again.",
     'diffchangepwsd'=>"New Password cannot be same as your current password. Please choose a different password.",
+    'notregistered'=>"This user has not been registered. Please check your email and click button verification email",
 ];
