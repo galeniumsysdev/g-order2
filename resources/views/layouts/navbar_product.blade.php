@@ -75,8 +75,7 @@
                             <!--<a href="{{url('/home')}}" title="@lang('label.showall') Notification"><i class="fa fa-bell fa-lg"></i>
                             &nbsp;<span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
                           </a>-->
-                          {{--*/ $routehome = 'heleh' /*--}}
-                          <notification :homeurl="{{$routehome}}" :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
+                          <notification :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
                           </li>
                         </ul>
                       @endif
