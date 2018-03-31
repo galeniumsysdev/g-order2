@@ -405,7 +405,7 @@ class BackgroundController extends Controller
                     ->wherein('r.name',['IT Galenium']);
             })->select('email','name','id')->get();
             foreach($userit as $u){
-              \Mail::send('emails.nointerface',["user"=>$u],function($m) use($file,$u){
+              \Mail::send('emails.nointerface',["user"=>$u],function($m) use($u){
                   $m->to(trim($u->email), $u->name)->subject('Synchronize DB gOrder');
               });
             }
@@ -1616,7 +1616,7 @@ class BackgroundController extends Controller
             //echo"</tr>";
           }//echo "</table>";
         }
-        if(count($datadiskon)>0) $sheetarray['diskon'] = $datadiskon;
+        if(count($datadiskon)>1) $sheetarray['diskon'] = $datadiskon;
         $del_line_diskon = QpPricingDiskon::whereraw("ifnull(end_date_active,curdate()+interval 1 day) < curdate()")
                           ->delete();
         $getpromo = $this->getPromoBonus($tglskrg);
@@ -2046,17 +2046,20 @@ class BackgroundController extends Controller
                         ->first();
             if($mysqlproduct) {
               //echo"Product id :".$mysqlproduct->id."<br>";
-              $mysqlconversion =UomConversion::where(['product_id'=>$mysqlproduct->id,
+              $mysqlconversion =DB::table('uom_conversions')->where(['product_id'=>$mysqlproduct->id,
                 'uom_code'=>$c->uom_code,
                 'base_uom'=>$c->base_uom])->first();
               if($mysqlconversion)
               {
-                $mysqlconversion->uom_class = $c->uom_class;
-                $mysqlconversion->rate = $c->conversion_rate;
-                $mysqlconversion->width = $c->width;
-                $mysqlconversion->height = $c->height;
-                $mysqlconversion->dimension_uom = $c->dimension_uom;
-                $mysqlconversion->save();
+                DB::table('uom_conversions')
+                ->where(['product_id'=>$mysqlproduct->id,
+                  'uom_code'=>$c->uom_code,
+                  'base_uom'=>$c->base_uom
+                  ,'rate'=>$c->conversion_rate
+                  ,'width'=>$c->width
+                  ,'height'=>$c->height
+                  ,'dimension_uom'=>$c->dimension_uom
+                ]);
                 $sheetarray[]=[$mysqlproduct->itemcode,$mysqlproduct->title,$c->uom_code,$c->base_uom,$c->conversion_rate,'update'];
               } else{
                 DB::table('uom_conversions')->insert([
