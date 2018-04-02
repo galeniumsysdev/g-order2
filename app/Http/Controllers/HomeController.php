@@ -56,10 +56,10 @@ class HomeController extends Controller
       */
       if (isset($request->tgl_aw_kirim))
       {
-        $notifications = $notifications->where('created_at','>=',$request->tgl_aw_kirim);
+        $notifications = $notifications->wheredate('created_at','>=',$request->tgl_aw_kirim);
       }elseif (isset($request->tgl_ak_kirim))
       {
-        $notifications = $notifications->where('created_at','<=',$request->tgl_aw_kirim);
+        $notifications = $notifications->wheredate('created_at','<=',$request->tgl_aw_kirim);
       }
 
       if($request->status_read=="0")
@@ -93,7 +93,7 @@ class HomeController extends Controller
                         ->join('roles as r', 'r.id','ru.role_id')
                         ->whereraw('ru.user_id=users.id')
                         ->wherein('r.name',['Outlet','Apotik/Klinik']);
-                })->count();      
+                })->count();
       return view('admin.index',['menu'=>'blank','jmldist'=>$userdist,'jmloutlet'=>$useroutlet]);
     }
 }

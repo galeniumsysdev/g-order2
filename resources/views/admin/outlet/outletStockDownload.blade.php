@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -92,7 +92,7 @@
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="qty-in">@lang('outlet.province')</label>
+                            <label for="qty-in">@lang('label.province')</label>
                           </div>
                         </div>
                         <div class="col-md-4 province-container">
