@@ -1,5 +1,13 @@
 @extends(Auth::user()->hasRole('IT Galenium')?'layouts.tempAdminSB':'layouts.navbar_product')
-
+@section('css')
+<style>
+#password + .glyphicon {
+   cursor: pointer;
+   pointer-events: all;
+	 right:10px;
+ }
+</style>
+@endsection
 @section('content')
 <!--<link href='//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css' rel='stylesheet'/>-->
 <div class="container">
@@ -43,12 +51,12 @@
 	<div class="row">
 		<div class="col-md-10 col-md-offset-1">
 
-			<form class="form-horizontal" action="{{route('profile.updateprofile')}}"  method="POST">
+			<form class="form-horizontal" id="form-profile" action="{{route('profile.updateprofile')}}"  method="POST">
 				{{csrf_field()}}
 			<div class="form-inline row">
 				<label class="col-sm-3 col-form-label" for="email"><strong>Email</strong> </label>
 				<div class="col-sm-8">
-					<input type="text" name="email" value="{{ $customer->email }}" class="form-control" style="width:100%" placeholder="Tax Number">				
+					<input type="text" name="email" value="{{ $customer->email }}" class="form-control" style="width:100%" placeholder="Tax Number">
 				</div>
 			</div>
 
@@ -92,20 +100,23 @@
 					@endif
 					<div class="form-inline row">
 						<label class="col-sm-3 col-form-label" for="current_password"><strong>@lang('label.currentpass')</strong> </label>
-						<div class="col-sm-4">
-							<input type="text" name="current_pswd" class="form-control form-control-sm" placeholder="@lang('label.currentpass')">
+						<div class="col-sm-8">
+							<input type="password" id="password" name="current_pswd" class="form-control form-control-sm" placeholder="@lang('label.currentpass')" style="width:100%">
+							<span class="glyphicon glyphicon-eye-open form-control-feedback" id="current_pswd"></span>
 						</div>
 					</div>
 					<div class="form-inline row">
 						<label class="col-sm-3 col-form-label" for="new_pswd"><strong>@lang('label.newpassword')</strong> </label>
-						<div class="col-sm-4">
-							<input type="text" name="new_pswd" class="form-control form-control-sm" placeholder="@lang('label.newpassword')">
+						<div class="col-sm-8">
+							<input type="password" id="password" name="new_pswd" class="form-control form-control-sm" placeholder="@lang('label.newpassword')" style="width:100%">
+							<span class="glyphicon glyphicon-eye-open form-control-feedback" id="new_pswd"></span>
 						</div>
 					</div>
 					<div class="form-inline row">
 						<label class="col-sm-3 col-form-label" for="confirm_new_pswd"><strong>@lang('label.newconfpass')</strong></label>
-						<div class="col-sm-4">
-							<input type="text" name="confirm_new_pswd" class="form-control form-control-sm" placeholder="@lang('label.newconfpass')">
+						<div class="col-sm-8">
+							<input type="password" id="password" name="confirm_new_pswd" class="form-control form-control-sm" placeholder="@lang('label.newconfpass')" style="width:100%">
+							<span class="glyphicon glyphicon-eye-open form-control-feedback" id="confirm_new_pswd"></span>
 						</div>
 					</div>
 
@@ -237,6 +248,15 @@ $(document).ready(function(){
 });
 </script>
 	<script type="text/javascript">
+		$('#password + .glyphicon').on('click', function() {
+		  $(this).toggleClass('glyphicon-eye-close').toggleClass('glyphicon-eye-open'); // toggle our classes for the eye icon
+			var v_input=$("input[name="+$(this).attr("id")+"]");
+			if (v_input.attr("type") == "password") {
+		    v_input.attr("type", "text");
+		  } else {
+		    v_input.attr("type", "password");
+		  }
+		});
 		function changeProfile() {
 		$('#fileavatar').click();
 		}
