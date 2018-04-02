@@ -1,5 +1,8 @@
 @extends(Auth::user()->hasRole('IT Galenium')?'layouts.tempAdminSB':'layouts.navbar_product')
-
+@section('css')
+<link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
+<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+@endsection
 @section('content')
 <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.css" rel="stylesheet">-->
 <!--<div class="container">-->
@@ -123,11 +126,14 @@
 	<!--</div>-->
 @endsection
 @section('js')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
+<script src="{{ asset('js/moment-with-locales.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datetimepicker.min.js') }}"></script>
+<script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
+
 <script type="text/javascript">
-    $('.date').datepicker({
-       format: 'yyyy-mm-dd',
-       defaultDate: new Date()
-     });
+          $('.date').datetimepicker({
+              format: "YYYY-MM-DD",
+          });
 </script>
+
 @endsection
