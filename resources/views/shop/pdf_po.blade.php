@@ -12,26 +12,26 @@
         <div class="panel panel-default">
           <div class="panel-heading"><strong>Order Product</strong></div>
           <div class="panel-body">
-            <table>
-              <tr>
+            <table class="table-condensed">
+              <tr valign="top">
                 <td>No.Trx</td>
                 <td>{{$header->notrx}}</td>
                 <td>Nomor PO</td>
                 <td>{{$header->customer_po}}</td>
               </tr>
-              <tr>
+              <tr valign="top">
                 <td>Distributor</td>
                 <td>{{$header->distributor_name}}</td>
                 <td>Customer</td>
                 <td>{{$header->customer_name}}</td>
               </tr>
-              <tr>
+              <tr valign="top">
                 <td>Tanggal Order</td>
                 <td>{{date('d-M-Y',strtotime($header->tgl_order))}}</td>
-                <td rowspan="2">Alamat Pengiriman</td>
+                <td rowspan="2" valign="top">Alamat Pengiriman</td>
                 <td rowspan="2">  {{$header->ship_to_addr}}</td>
               </tr>
-              <tr>
+              <tr valign="top">
                 <td>Status</td>
                 <td>{{$header->status_name}}</td>
               </tr>
@@ -66,7 +66,7 @@
       					</td>
 
       					<td data-th="@lang('shop.SubTotal')" class="xs-only-text-left text-right">
-                    {{  number_format($line->amount,2) }}
+                    {{  number_format($line->amount_confirm,2) }}
                 </td>
       				</tr>
                 @endforeach
@@ -80,7 +80,7 @@
                   @elseif($header->currency=='USD')
                   @php($curr = "$")
                   @endif
-                  {{ $curr.number_format($header->amount,2) }}</strong></td>
+                  {{ $curr.number_format($header->amount_confirm,2) }}</strong></td>
       				</tr>
               <tr>
       					<td colspan="4" class="text-right">Tax: </td>
