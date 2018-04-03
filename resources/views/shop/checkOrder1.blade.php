@@ -30,6 +30,10 @@
                       @if(isset($header->file_po))
                         <a href="{{url('/download/'.$header->file_po)}}" title="@lang('shop.download') file PO"><i class="glyphicon glyphicon-download-alt"></i></a>
                       @endif
+                      @if($header->status==0)
+                      &nbsp;
+                      <a href="{{route('order.checkPO',$header->id)}}?print=yes" class="btn btn-primary">@lang('shop.print') PO</a>
+                      @endif
                     </label>
                 </div>
               </div>

@@ -55,17 +55,17 @@ class OrderController extends Controller
       $user_dist = User::where('customer_id','=',$header->distributor_id)->first();
       if($header->status==-99 and $header->fill_in==1 and $header->customer_id = Auth::user()->customer_id)
         return view('shop.dplorderupdate',compact('header','lines'));
+      $print=Input::get('print','');
+      if ($print=="yes"){
+        $pdf = PDF::loadView('shop.pdf_po',compact('header','lines','deliveryno'));
+        $pdf->setPaper('a4','portrait');
+        //return $pdf->stream();
+        return $pdf->download($header->notrx.'.pdf');
+            //return view('shop.pdf_po',compact('header','lines'));
+      }  
       if ($user_dist->hasRole('Principal') )    {
         return view('shop.checkOrder1',compact('header','lines','deliveryno'));
       }else {
-        $print=Input::get('print','');
-        if ($print=="yes"){
-          $pdf = PDF::loadView('shop.pdf_po',compact('header','lines','deliveryno'));
-          $pdf->setPaper('a4','portrait');
-          //return $pdf->stream();
-          return $pdf->download($header->notrx.'.pdf');
-              //return view('shop.pdf_po',compact('header','lines'));
-        }
         return view('shop.checkOrder',compact('header','lines','deliveryno'));
       }
     }
