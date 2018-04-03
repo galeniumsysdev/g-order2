@@ -17,8 +17,7 @@ class FlexvalueController extends Controller
 
     public function create()
     {
-      $group = DB::table('flexvalue')
-               ->whereIn('master',['PHARMA_PRODUCT','PSC_PRODUCT'])->select('master')->groupBy('master')->orderBy('master','asc')->get();
+      $group = array(''=>'--Pilih Salah Satu--','PHARMA_PRODUCT'=>'Pharma Product','PSC_PRODUCT'=>'PSC Product');
       return view('admin.flexvalue.create',['menu'=>$this->menu,'group'=>$group]);
     }
 

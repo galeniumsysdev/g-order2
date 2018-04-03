@@ -8,6 +8,8 @@
   <link href="{{ asset('font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
   <link href="{{ asset('css/table.css') }}" rel="stylesheet">
   <link href="{{ asset('css/dpl.css') }}" rel="stylesheet">
+  <link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
+  <link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
   @if($status= Session::get('msg'))
     <div class="alert alert-info">
         {{$status}}
@@ -20,6 +22,21 @@
         <div class="panel panel-default">
           <div class="panel-heading"><strong>@lang('dpl.suggestNoList')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
+            <div class="row">
+              {!! Form::open(['url' => route('dpl.list'), 'class'=>'form-horizontal']) !!}
+              <div class="col-md-2">
+                <div class="form-label">
+                  <label for="outlet">Period</label>
+                </div>
+              </div>
+              <div class="col-md-2">
+                {{ Form::text('period', $period,array('id'=>'period_dpl','class'=>'form-control input-sm','style'=>'text-align:right')) }}
+              </div>
+              <div class="col-md-1">
+                {{ Form::submit('Search', array('class'=>'btn btn-sm btn-primary','id'=>'search-btn-dpl')) }}
+              </div>
+              {{ Form::close() }}
+            </div>
             <div class="table-responsive">
               <table id="dpl-list" class="display responsive nowrap" width="100%">
                 <thead>
@@ -92,6 +109,13 @@
 <script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
 <link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css">
+<script src="{{ asset('js/moment-with-locales.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datetimepicker.min.js') }}"></script>
 <script src="{{ asset('js/dpl.js') }}"></script>
-
+<script type="text/javascript">
+$('#period_dpl').datetimepicker({
+    format: "MMM YYYY",
+    locale: "en",
+});
+</script>
 @endsection
