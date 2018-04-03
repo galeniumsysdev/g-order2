@@ -668,7 +668,7 @@ class DPLController extends Controller {
 		return view('admin.dpl.dplHistory', array('dpl' => $dpl));
 	}
 
-	public function dplList() {
+	public function dplList(Request $request) {
 		$dpl = DPLSuggestNo::select('mr.id as dpl_mr_id',
 			'mr.name as dpl_mr_name',
 			'org_structure.user_code as dpl_mr_code',
@@ -722,6 +722,14 @@ class DPLController extends Controller {
 									});
 				});
 		}
+		if(!empty($request->period))	{
+			$dpl=$dpl->whereraw("date_format(dpl_suggest_no.created_at,'%b %Y')='".$request->period."'");
+			$period = $request->period;
+		}else{
+			$dpl=$dpl->whereraw("date_format(dpl_suggest_no.created_at,'%b %Y')='".date('M Y')."'");
+			$period = date('M Y');
+		}
+		//dd($dpl->toSQL());
 		$dpl =$dpl->orderby('dpl_suggest_no.created_at','desc')->get();
 		$dpl_show = array();
 		foreach ($dpl as $key => $list) {
@@ -754,7 +762,7 @@ class DPLController extends Controller {
 			array_push($dpl_show, $dpl[$key]);
 		}
 
-		return view('admin.dpl.dplList', array('dpl' => $dpl_show));
+		return view('admin.dpl.dplList', array('dpl' => $dpl_show,'period'=>$period));
 	}
 
 	public function dplreport(Request $request)
