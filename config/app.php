@@ -11,7 +11,7 @@ return [
 		    | any other location as required by the application or its packages.
 	*/
 
-	'name' => env('APP_NAME', 'Laravel'),
+	'name' => env('APP_NAME', 'g-Order'),
 
 	/*
 		    |--------------------------------------------------------------------------
@@ -184,6 +184,7 @@ return [
 		Yajra\Oci8\Oci8ServiceProvider::class,
 		Maatwebsite\Excel\ExcelServiceProvider::class,
 		NotificationChannels\PusherPushNotifications\PusherPushNotificationsServiceProvider::class,
+		Yajra\Datatables\DatatablesServiceProvider::class,
 	],
 
 	/*
@@ -240,6 +241,7 @@ return [
 		'Image' => Intervention\Image\Facades\Image::class,
 		'Uuid' => Webpatser\Uuid\Uuid::class,
 		'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+		'Datatables' => Yajra\Datatables\Facades\Datatables::class,
 	],
 
 ];

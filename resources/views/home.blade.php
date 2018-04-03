@@ -1,8 +1,11 @@
-@extends('layouts.navbar_product')
-
+@extends(Auth::user()->hasRole('IT Galenium')?'layouts.tempAdminSB':'layouts.navbar_product')
+@section('css')
+<link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
+<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+@endsection
 @section('content')
 <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.css" rel="stylesheet">-->
-<div class="container">
+<!--<div class="container">-->
     <div class="row">
         <div class="col-md-10 col-sm-offset-1">
             <div class="panel panel-default">
@@ -19,11 +22,15 @@
               							<div class="col-md-10" >
               								<select name="tipe" class="form-control">
               									<option value="" >--</option>
-              									<option value="Register Outlet" {{$request->tipe=="Register Outlet"?"selected=selected":""}}>Register Outlet</option>
+                                @foreach($jnsnotif as $key=>$val)
+                                  <option value="{{$val}}" {{$request->tipe==$val?"selected=selected":""}}>{{$val}}</option>
+                                @endforeach
+              									<!--<option value="Register Outlet" {{$request->tipe=="Register Outlet"?"selected=selected":""}}>Register Outlet</option>
               									<option value="Reject Outlet" {{$request->tipe=="Reject Outlet"?"selected=selected":""}}>Reject Outlet</option>
                                 @if(Auth::User()->can('CheckStatusSO'))
                                 <option value="New PO" {{$request->tipe=="New PO"?"selected=selected":""}}>New PO</option>
                                 @endif
+                              -->
               								</select>
               							</div>
               					</div>
@@ -94,7 +101,7 @@
 										<td data-title="@lang('label.to')">{{Auth::User()->name}}</td>
 										<td data-title="@lang('label.type')">{{$notif->data['tipe']}}</td>
 										<td data-title="SUBJECT">
-                      <a href="{{$notif->data['href']}}">{{$notif->data['subject']}}</a>										
+                      <a href="{{$notif->data['href']}}">{{$notif->data['subject']}}</a>
 										</td>
 										<td data-title="@lang('label.sent')">{{$notif->created_at }}</td>
 										<td data-title="@lang('label.read')">
@@ -111,18 +118,22 @@
 								</tbody>
 							</table>
 						</div>
+            <div class="pull-right">{{ $notifications->links() }}</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	<!--</div>-->
 @endsection
 @section('js')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
+<script src="{{ asset('js/moment-with-locales.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datetimepicker.min.js') }}"></script>
+<script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
+
 <script type="text/javascript">
-    $('.date').datepicker({
-       format: 'yyyy-mm-dd',
-       defaultDate: new Date()
-     });
+          $('.date').datetimepicker({
+              format: "YYYY-MM-DD",
+          });
 </script>
+
 @endsection

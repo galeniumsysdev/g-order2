@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -15,9 +15,9 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-md-10 col-sm-offset-1">
+      <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Import Stock</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.importStock')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="panel panel-default">
               <div class="form-wrapper">
@@ -27,20 +27,20 @@
                       <div class="col-md-12">
                         <div class="default-value">
                           <label for="outlet">
-                            [ <a href="/outlet/product/download/template/stock">Download Template</a> ]
+                            [ <a href="{{route('outlet.downloadTemplateStock')}}">Download Template</a> ]
                           </label>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                {!! Form::open(['url' => '/outlet/product/import/stock/view', 'files'=>'true']) !!}
+                {!! Form::open(['url' => route('outlet.importProductStockView'), 'files'=>'true']) !!}
                   <div class="form-group">
                     <div class="container-fluid">
                       <div class="row">
                         <div class="col-md-2">
                           <div class="form-label">
-                            <label for="file-import">Choose File</label>
+                            <label for="file-import">@lang('outlet.chooseFile')</label>
                           </div>
                         </div>
                         <div class="col-md-10">
@@ -56,7 +56,8 @@
                           &nbsp;
                         </div>
                         <div class="col-md-10">
-                          {{ Form::submit('Submit', array('class'=>'btn btn-info', 'id'=>'btn-import')) }}
+                          {{ Form::submit('Submit', array('class'=>'btn btn-primary', 'id'=>'btn-import')) }}
+                          <a href="{{ route('outlet.listProductStock') }}" class="btn btn-default">@lang('label.back')</a>
                         </div>
                       </div>
                     </div>
@@ -67,22 +68,29 @@
                   <div class="container-fluid">
                     <div class="row">
                       <div class="col-md-2">
-                        <div class="form-label">
-                          <label for="outlet">Confirmation</label>
+                        <div class="form-label pull-left">
+                          <label for="outlet">@lang('dpl.confirmation')</label>
                         </div>
                       </div>
-                      <div class="col-md-10">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-md-12">
                         <span class="default-value">
                           <div class="table-responsive">
-                            <table id="import-stock" class="display responsive nowrap" width="100%">
+                            <table id="import-stock" class="display responsive" width="100%">
                               <thead>
                                 <tr>
-                                  <th>Title</th>
-                                  <th>Stok Terakhir</th>
-                                  <th>Stok Baru</th>
-                                  <th>Satuan</th>
+                                  <th>@lang('outlet.productName')</th>
+                                  <th>@lang('outlet.lastStock')</th>
+                                  <th>@lang('outlet.currentStock')</th>
+                                  <th>@lang('outlet.unit')</th>
+                                  <th>@lang('outlet.batchNo')</th>
+                                  <th>@lang('outlet.ExpDate')</th>
                                   <th>ID</th>
-                                  <th>Batch</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -92,16 +100,17 @@
                                   <td>{{ $cell['last_stock'] }}</td>
                                   <td>{{ $cell['stock'] }}</td>
                                   <td>{{ $cell['satuan'] }}</td>
-                                  <td>{{ $cell['id'] }}</td>
                                   <td>{{ (string)$cell['batch'] }}</td>
+                                  <td>{{ !is_null($cell['exp._datecth2017_01_31'])?date_format(date_create($cell['exp._datecth2017_01_31']),'Y-m-d'):null}}</td>
+                                  <td>{{ $cell['id'] }}</td>
                                 </tr>
                               @endforeach
                               </tbody>
                             </table>
                           </div>
-                          {!! Form::open(['url' => '/outlet/product/import/stock/process']) !!}
+                          {!! Form::open(['url' => route('outlet.importProductStockProcess')]) !!}
                           {{ Form::hidden('data',$data) }}
-                          {{ Form::submit('Execute', array('class'=>'btn btn-primary')) }}
+                          {{ Form::submit(Lang::get('outlet.execute'), array('class'=>'btn btn-primary')) }}
                           {{ Form::close() }}
                         </span>
                       </div>

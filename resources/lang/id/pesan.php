@@ -17,6 +17,8 @@ return [
     'delete' => 'Data telah dihapus.',
     'adddistributor' => 'Jangan lupa tambahkan distributor.',
     'approve'=>"Outlet diterima",
+    'inactive'=>"Distributor :dist telah di inactive dari customer :cust",
+    'distributoractive'=>"Distributor :dist diaktifkan kembali ke customer :cust",
     'reject'=>"Outlet ditolak",
     'successaddaddress' => 'Alamat berhasil ditambahkan',
     'notfound'=> 'Data tidak ditemukan',
@@ -33,5 +35,7 @@ return [
     'successupload' => 'File berhasil terupload',
     'alreadyupload' => 'File telah terupload!',
     'notmatchdpl' => 'No Pengajuan DPL tidak cocok',
-    'itemexist' => 'Item sudah terdapat dalam keranjan'
+    'itemexist' => 'Item sudah terdapat dalam keranjang',
+    'nosplitline' => 'Pilih minimal 1 product yang ingin di split!',
+    'errsplitall' => 'Gagal Split. Line so terpilih semua!'
 ];

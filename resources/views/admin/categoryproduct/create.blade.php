@@ -33,6 +33,7 @@
          <option value="Pharma">Pharma</option>
          <option value="PSC">PSC</option>
          <option value="INTERNATIONAL">INTERNATIONAL</option>
+         <option value="TollIn">Toll-In</option>
        </select>
        @if ($errors->has('parent'))
            <span class="help-block">

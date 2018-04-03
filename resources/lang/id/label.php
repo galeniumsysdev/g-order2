@@ -12,14 +12,14 @@ return [
     |
     */
 
-    'login' => 'Silahkan Masuk',
-    'logout' => 'K E L U A R',
+    'login' => 'SILAHKAN MASUK',
+    'logout' => 'KELUAR',
     'home' => 'Beranda',
-    'register' => 'Daftar',
+    'register' => 'DAFTAR',
     'email'=>'Alamat Email',
     'outlet' => 'Nama Outlet',
     'address' => 'Alamat',
-    'province' => 'Propinsi',
+    'province' => 'Provinsi',
     'city_regency' => 'Kota / Kabupaten',
     'subdistrict' => 'Kecamatan',
     'urban_village' => 'Kelurahan',
@@ -34,6 +34,7 @@ return [
     'confpass' => 'Pengulangan Kata Sandi',
     'newpassword' => 'Kata Sandi Baru',
     'newconfpass' => 'Pengulangan Kata Sandi Baru',
+    'currentpass' => 'Kata Sandi saat ini',
     'cp' => 'Nama kontak',
     'forgotpassword' => 'Lupa Kata Sandi?',
     'pwdminlength'=>'Minimum password berisi 6 karakter',
@@ -85,5 +86,14 @@ return [
     'year' => 'Tahun',
     'month' => 'Bulan',
     'none' => 'Belum diproses',
-    'donthaveaccount' => "Belum punya akun?"
+    'donthaveaccount' => "Belum punya akun?",
+    'shipping' => 'Pengiriman',
+	'channel' => 'Channel',
+	'distributor' => 'Distributor',
+	'download' => 'Unduh Excel',
+    'change_to_active'=>'Klik untuk aktifkan',
+    'change_to_inactive'=>'Klik untuk menonaktifkan',
+    'outlet_position' =>'Lokasi Outlet',
+    'PilihSalahSatu' => '--Pilih Salah Satu--',
+    'orgstructure' => 'Struktur DPL',
 ];

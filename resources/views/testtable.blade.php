@@ -1,226 +1,142 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
-<head>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Places Searchbox</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
 
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+      }
 
-    <title>{{ config('app.name', 'G-Order') }}</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{{ URL::to('img/logoe.jpg')}}" />
-    <!-- Styles -->
-    <!--<link rel="stylesheet" href="{{ asset('font-awesome/css/font-awesome4.7.0.min.css') }}">-->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="{{ URL::to('css/mystyle.css') }}">
-</head>
-<body>
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
 
-  <!-- begin snippet: js hide: false -->
-<!-- language: lang-css -->
+      .pac-container {
+        font-family: Roboto;
+      }
 
-<style type="text/css">
-@media only screen and (max-width: 800px) {
-        /* Force table to not be like tables anymore */
-        #no-more-tables table,
-        #no-more-tables thead,
-        #no-more-tables tbody,
-        #no-more-tables th,
-        #no-more-tables td,
-        #no-more-tables tr {
-        display: block;
-        }
+      #type-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        padding: 5px 11px 0px 11px;
+      }
 
-        /* Hide table headers (but not display: none;, for accessibility) */
-        #no-more-tables thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-        }
+      #type-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+      #target {
+        width: 345px;
+      }
+    </style>
+  </head>
+  <body>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
+    <script>
 
-        #no-more-tables tr { border: 1px solid #ccc; }
+      function initAutocomplete() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -33.8688, lng: 151.2195},
+          zoom: 13,
+          mapTypeId: 'roadmap'
+        });
 
-        #no-more-tables td {
-        /* Behave like a "row" */
-        border: none;
-        border-bottom: 1px solid #eee;
-        position: relative;
-        padding-left: 50%;
-        white-space: normal;
-        text-align:left;
-        }
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('pac-input');
+        var searchBox = new google.maps.places.SearchBox(input);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
-        #no-more-tables td:before {
-        /* Now like a table header */
-        position: absolute;
-        /* Top/left values mimic padding */
-        top: 6px;
-        left: 6px;
-        width: 45%;
-        padding-right: 10px;
-        white-space: nowrap;
-        text-align:left;
-        font-weight: bold;
-        }
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
 
-        /*
-        Label the data
-        */
-        #no-more-tables td:before { content: attr(data-title); }
-</style>
+        var markers = [];
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
 
-      <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h2 class="text-center">
-                    Timetable
-                </h2>
-            </div>
-            <div id="no-more-tables">
-                <table class="col-sm-12 table-bordered table-striped table-condensed cf">
-                <thead class="cf">
-                  <tr>
-                <th>      </th>
-                    <th>Monday</th>
-                    <th>Tuesday</th>
-                    <th>Wednesday</th>
-                    <th>Thursday</th>
-                    <th>Friday</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                <td data-title="      ">07:45 |1| 08:35</td>
-                    <td data-title="Monday">Lesson</td>
-                    <td data-title="Tuesday">Lesson</td>
-                    <td data-title="Wednesday">Lesson</td>
-                    <td data-title="Thursday">Lesson</td>
-                    <td data-title="Friday">Lesson</td>
-                  </tr>
-                  <tr>
-                <td data-title="      ">08:35 |2| 09:25</td>
-                    <td data-title="Monday">Lesson</td>
-                    <td data-title="Tuesday">Lesson</td>
-                    <td data-title="Wednesday">Lesson</td>
-                    <td data-title="Thursday">Lesson</td>
-                    <td data-title="Friday">Lesson</td>
-                  </tr>
-                  <tr>
-                <td data-title="      ">09:30 |3| 10:20</td>
-                    <td data-title="Monday">Lesson</td>
-                    <td data-title="Tuesday">Lesson</td>
-                    <td data-title="Wednesday">Lesson</td>
-                    <td data-title="Thursday">Lesson</td>
-                    <td data-title="Friday">Lesson</td>
-                  </tr>
-                  <tr>
-                <td data-title="      ">10:35 |4| 11:25</td>
-                    <td data-title="Monday">Lesson</td>
-                    <td data-title="Tuesday">Lesson</td>
-                    <td data-title="Wednesday">Lesson</td>
-                    <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-              <tr>
-            <td data-title="      ">11:30 |5| 12:20</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>            
-              <td data-title="Friday">Lesson</td>
-              <tr>
-            <td data-title="      ">12:20 |6| 13:10</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-              <tr>
-            <td data-title="      ">13:10 |7| 14:00</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-              <tr>
-            <td data-title="      ">14:00 |8| 14:50</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-              <tr>
-            <td data-title="      ">15:00 |9| 15:50</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-              <tr>
-            <td data-title="      ">15:55 |10| 16:45	</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-              <tr>
-            <td data-title="      ">16:50 |11| 17:40	</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-          <tr>
-            <td data-title="      ">17:40 |12| 18:30	</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-          <tr>
-            <td data-title="      ">18:55 |13| 19:40	</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-          <tr>
-            <td data-title="      ">19:40 |14| 20:25	</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-          <tr>
-            <td data-title="      ">20:30 |15| 21:15	</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-          <tr>
-            <td data-title="      ">21:15 |16| 22:00	</td>
-                <td data-title="Monday">Lesson</td>
-                <td data-title="Tuesday">Lesson</td>
-                <td data-title="Wednesday">Lesson</td>
-                <td data-title="Thursday">Lesson</td>
-                <td data-title="Friday">Lesson</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-</body>
+          if (places.length == 0) {
+            return;
+          }
+
+          // Clear out the old markers.
+          markers.forEach(function(marker) {
+            marker.setMap(null);
+          });
+          markers = [];
+
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+            var icon = {
+              url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+
+            // Create a marker for each place.
+            markers.push(new google.maps.Marker({
+              map: map,
+              icon: icon,
+              title: place.name,
+              position: place.geometry.location,
+              draggable:true,
+            }));
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+        });
+      }
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDh9yEKw9W4sFrlTFFw_cZjvnAYSeMSa2w&language=id&libraries=places&callback=initAutocomplete"
+         async defer></script>
+  </body>
+</html>

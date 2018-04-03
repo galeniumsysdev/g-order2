@@ -184,16 +184,10 @@
                                           <h3><strong>Produk Personal Skin Care ( PSC )</strong></h3>
                                           <div>
                                               <ul>
-                                                  <li style="font-size:18px;">Caladine</li>
+                                                @foreach($pscproducts as $psc)
+                                                  <li style="font-size:18px;">{{$psc->name}}</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Oilum</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">V-Mina</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Bellsoap</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">JFSulfur</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                @endforeach
                                               </ul>
                                               <button class="md-close">Close</button>
                                           </div>
@@ -208,22 +202,22 @@
                                       </div>
                                   </div>
                                   <div class="md-overlay"></div>
-                                  <div style="font-size:8pt; margin-top:5px;">(Caladine, Oilum, v-mina, Bellsoap, JFSulfur)</div></label>
+                                  <div style="font-size:8pt; margin-top:5px;">({{implode(",",$pscproducts->pluck('name')->toArray())}})</div></label>
                                </div>
 
                                <!---->
 
                                <div class="checkbox">
                                  <label>
-                                   @if( old('psc')=="1")
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc" checked="checked">
+                                   @if( old('pharma')=="1")
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma" checked="checked">
                                    @else
-                                     <input type="checkbox" id="blankCheckbox" value="1" name="psc">
+                                     <input type="checkbox" id="blankCheckbox" value="1" name="pharma">
                                    @endif
 
-                                   @if ($errors->has('psc'))
+                                   @if ($errors->has('pharma'))
                                    <span class="help-block">
-                                       <strong>{{ $errors->first('psc') }}</strong>
+                                       <strong>{{ $errors->first('pharma') }}</strong>
                                    </span>
                                    @endif
 
@@ -232,26 +226,10 @@
                                           <h3><strong>Produk Pharma ( NON PSC )</strong></h3>
                                           <div>
                                               <ul>
-                                                  <li style="font-size:18px;">Scabimite CReam</li>
+                                                @foreach($pharmaproducts as $pharma)
+                                                  <li style="font-size:18px;">{{$pharma->name}}</li>
                                                   <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Laxadine Emulsi</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Haemocaine Ointment</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Mycorine</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Acne Feldine Lotion</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Pyravit Syrup</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Laxarec Rektal Tube</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Solare</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Soft U Derm Cream</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
-                                                  <li style="font-size:18px;">Topsy Cream</li>
-                                                  <hr style="margin-top:10px; margin-bottom:10px;">
+                                                @endforeach
                                               </ul>
                                               <button class="md-close">Close</button>
                                           </div>
@@ -270,7 +248,7 @@
                                </div>
                             </div>
                         </div>
-
+                        <!--
                         <div class="form-group{{ $errors->has('groupdc') ? ' has-error' : '' }}" id="divkategoridc">
                           <label for="kategori" class="control-label col-sm-4">**<strong>@lang('label.categorydc') </strong></label>
                           <div class="col-sm-3">
@@ -303,7 +281,7 @@
                                 </span>
                               @endif
                           </div>
-                         </div>
+                         </div>-->
 
                     </div>
                     <div class="form-horizontal col-sm-6">
@@ -320,7 +298,7 @@
                           <label for="outlet" class="col-sm-4 control-label">*@lang('label.address')</label>
 
                           <div class="col-sm-8">
-                              <textarea id="address" rows="3" class="form-control" name="address" required>{{ old('address') }}</textarea>
+                              <textarea id="address" rows="3" class="form-control" name="address" id="address" required>{{ old('address') }}</textarea>
 
                               @if ($errors->has('address'))
                                   <span class="help-block">
@@ -459,6 +437,9 @@
     $(document).ready(function() {
         $('#name').keyup(function(){
           $("#name").val(($("#name").val()).toUpperCase());
+        });
+        $('#address').keyup(function(){
+          $("#address").val(($("#address").val()).toUpperCase());
         });
 
       getListCity({{is_null(old('province'))?0:old('province')}},{{is_null(old('city'))?0:old('city')}});

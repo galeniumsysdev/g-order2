@@ -38,8 +38,8 @@ class CategoryProductController extends Controller
     public function store(Request $request)
     {
       $this->validate($request, [
-         'code' => 'required|unique:category_outlets,flex_value|max:5',
-         'name' => 'required|unique:category_outlets,description|max:191',
+         'code' => 'required|unique:categories,flex_value|max:5',
+         'name' => 'required|unique:categories,description|max:191',
          'parent'=> 'required',
       ]);
       if ($request->status<>'Y')
@@ -52,7 +52,7 @@ class CategoryProductController extends Controller
         'flex_value'=>$request->code,
         'description'=>$request->name,
         'parent'=>$request->parent,
-        'enable_flag'=>$request->status,
+        'enabled_flag'=>$request->status,
       ]);
       return redirect()->route('CategoryProduct.index')->withMessage('Category product berhasil disimpan');
     }
@@ -90,15 +90,16 @@ class CategoryProductController extends Controller
      */
     public function update(Request $request, $id)
     {
+
       if ($request->status<>'Y')
       {
         $request->status = 'N';
       }
-      //dd($request->all());
+
       try{
         $category=Category::find($id);
-        $category->name = $request->name;
-        $category->enable_flag = $request->status;
+        $category->description = $request->name;
+        $category->enabled_flag = $request->status;
         $category->save();
           return redirect()->route('CategoryProduct.edit',$id)->withMessage('Category Product Updated');
       }

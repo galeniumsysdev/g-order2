@@ -74,7 +74,7 @@
   </table>
 </div>
 <legend></legend>
-<a href="{{route('banner.create')}}"<button type="button" class="btn btn-success"><i class="fa fa-plus fa-fw"></i>Tambah</button></a>
+<a href="{{route('banner.create')}}"><button type="button" class="btn btn-success"><i class="fa fa-plus fa-fw"></i>Tambah</button></a>
 
 @endsection
 @section('js')

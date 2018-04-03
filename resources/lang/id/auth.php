@@ -22,5 +22,8 @@ return [
     'registerfailed' => 'Aktivasi account gagal dilakukan',
     'noaccess' => "Error! Tidak punya hak akses",
     'alreadyregistered' => 'Akun anda telah teregistrasi. Silahkan login.',
-    'groupdcerror' => "Kategori Datacenter harus diisi jika produk=PSC"
+    'groupdcerror' => "Kategori Datacenter harus diisi jika produk=PSC",
+    'notmatchpswd'=>"Kata Sandi tidak sesuai.",
+    'diffchangepwsd'=>"Kata sandi baru tidak boleh sama dengan kata sandi saat ini. Harap ubah kata sandi baru anda.",
+    'notregistered'=>"User belum terregistrasi. Cek email Anda dan klik tombol Verifikasi email",
 ];

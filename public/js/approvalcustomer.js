@@ -63,3 +63,38 @@ $('#reject-customer').on('click',function(){
   }
   return false;
 });
+
+if($('#customer-number').length){
+  $('#change-custnum').hide();
+  $('#data-oracle').hide();
+    $.get(window.Laravel.url+'/customer/searchOracleOutlet',
+        function (data) {
+            $('#customer-number').typeahead({
+                source: data,
+                items: 10,
+                showHintOnFocus: 'all',
+                displayText: function (item) {
+                    return item.customer_number+"-"+item.customer_name;
+                },
+                afterSelect: function (item) {
+                    $('#customer-number').val(item.customer_number);
+                    $('#customer-name').val(item.customer_name);
+                    $('#customer-id').val(item.oracle_customer_id);
+                    $('#customer-number').attr('readonly','readonly');
+                    $('#data-oracle').show();
+                    $('#change-custnum').show();
+                    $('#cust-name').text(item.customer_name);
+                }
+            });
+    }, 'json');
+}
+
+$('#change-custnum').click(function(){
+    $(this).hide();
+    $('#customer-number').removeAttr('readonly').val('');
+    $('#customer-number').val('');
+    $('#customer-name').val();
+    $('#customer-id').val();
+    $('#data-oracle').hide();
+    $('#cust-name').text($("#old-cust-name").val());
+});

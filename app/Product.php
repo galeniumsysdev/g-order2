@@ -11,11 +11,11 @@ class Product extends Model
   use Uuids;
 
     public $incrementing = false;
-    protected $fillable = ['imagePath','title','description','description_en','price','satuan_primary','satuan_secondary','inventory_item_id','itemcode','Enabled_Flag','pareto','tipe_dot','long_description'];
+    protected $fillable = ['imagePath','title','description','description_en','price','satuan_primary','satuan_secondary','inventory_item_id','itemcode','Enabled_Flag','pareto','tipe_dot','long_description','conversion'];
 
     public function categories()
     {
-       return $this->belongsToMany('App\Category','category_products','product_id','flex_value')->withTimestamps();
+       return $this->belongsToMany('App\Category','category_products','product_id','flex_value')->withTimestamps()->withPivot('created_by','last_update_by');
       /*return $this->hasManyThrough(
             'App\Category',
             'App\CategoryProduct',
@@ -40,6 +40,11 @@ class Product extends Model
         return $this->hasMany('App\SoLine','product_id');
     }
 
+    public function podraftlines()
+    {
+        return $this->hasMany('App\PoDraftLine','product_id');
+    }
+
     public function getPrice($id,$uom)
     {
       $hargadiskon = DB::select("select getDiskonPrice ( :cust, :prod, :uom, 1 ) AS harga from dual", ['cust'=>$id,'prod'=>$this->id,'uom'=>$uom]);
@@ -55,7 +60,7 @@ class Product extends Model
     public function getRealPrice($id,$uom)
     {
       $harga = DB::select("select getProductPrice ( :cust, :prod, :uom ) AS harga from dual", ['cust'=>$id,'prod'=>$this->id,'uom'=>$uom]);
-      return $harga[0]->harga;
+      if($harga) return $harga[0]->harga;else return 0;
     }
 
     public function getConversion($uom)
@@ -79,6 +84,24 @@ class Product extends Model
               ->groupBy('pricing_group_sequence')
               ->get();
       return $diskon;
+    }
+
+    public function getPromo()
+    {
+      $prg=null;
+      if(Auth::user()->customer->oracle_customer_id){
+      $prg =DB::table('qp_pricing_discount as qpd')
+          ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
+          ->where('qpd.list_line_type_code', '=','PRG')
+          ->where('customer_id','=',Auth::user()->customer->oracle_customer_id)
+          ->where('item_id','=',$this->inventory_item_id)
+          ->whereraw("current_date between ifnull(start_date_active,date('2017-01-01')) and ifnull(end_date_active,DATE_ADD(CURRENT_DATE,INTERVAL 1 day))")
+          ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
+          ->orderBy('pricing_group_sequence','asc')
+          ->first();
+      }
+      return $prg;
+
     }
 
 

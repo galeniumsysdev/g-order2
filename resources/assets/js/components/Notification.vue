@@ -4,7 +4,7 @@
           Notifications
           <span class="badge">{{notifCount}}</span>
         </a>
-        <a href="/home" class="dropdown-toggle visible-xs"><i class="fa fa-bell"></i>
+        <a href="#" class="dropdown-toggle visible-xs" onclick="redirectToHome()"><i class="fa fa-bell"></i>
           <span class="badge">{{notifCount}}</span>
         </a>
         <ul class="dropdown-menu alert-dropdown dropdown-notif" role="menu" v-if="unreadNotifications.length">
@@ -14,6 +14,17 @@
                 <span class="item-left">
                   <span class="item-info">
                     {{item.data.subject}}
+                  </span>
+                </span>
+              </span>
+            </a>
+          </li>
+          <li id="readmore-notif" v-if="notifCount > 5">
+            <a href="#" onclick="redirectToHome()">
+              <span class="item">
+                <span class="item-left">
+                  <span class="item-info">
+                    [ Read More ]
                   </span>
                 </span>
               </span>
@@ -63,7 +74,10 @@
             this.unreadNotifications = this.notif;
             Echo.channel(this.email)
                 .listen('.notif', (notification) => {
-                    this.unreadNotifications.push({
+                    if(this.unreadNotifications.length == 5){
+                      this.unreadNotifications.splice(4,1);
+                    }
+                    this.unreadNotifications.unshift({
                       data: {
                         subject: notification.message,
                         href: notification.href
@@ -73,7 +87,7 @@
                     Notification.requestPermission( permission => {
                       let notif = new Notification(notification.title || 'Judul', {
                         body: notification.message, // content for the alert
-                        icon: "https://pusher.com/static_logos/320x320.png" // optional image url
+                        icon: window.Laravel.url+"/img/logo/pusher-g-order.png" // optional image url
                       });
                       // link to page on clicking the notification
                       notif.onclick = () => {

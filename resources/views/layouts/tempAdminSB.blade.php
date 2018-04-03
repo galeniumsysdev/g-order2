@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Galenium Markeplace for order">
     <meta name="author" content="Pt. Solusi Integrasi Persada">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Simple Responsive Admin</title>
 	<!-- BOOTSTRAP STYLES-->
     <link href="{{asset('css/bootstrap.min.css')}}" rel="stylesheet" />
@@ -15,15 +16,20 @@
      <!-- Custom FONTS-->
     <link href="{{asset('font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type="text/css">
     <link rel='stylesheet prefetch' href='http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.css'>
+    @yield('css')
     <!-- Scripts -->
     <script>
     window.Laravel = {
                    csrfToken: '{{csrf_token()}}',
-                   url: "{{url('/')}}"
+                   url: "{{url('/')}}",
+                   auth: {
+                       user: '{{auth()->user()}}'
+                   }
                 }
     </script>
 </head>
 <body>
+  <div id="app">
   <div id="wrapper">
 
         <!-- Navigation -->
@@ -40,7 +46,7 @@
             </div>
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
-                <li class="dropdown">
+              <!--  <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope"></i> <b class="caret"></b></a>
                     <ul class="dropdown-menu message-dropdown">
                         <li class="message-preview">
@@ -95,34 +101,23 @@
                             <a href="#">Read All New Messages</a>
                         </li>
                     </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
+                </li>-->
+                <notification class="dropdown-toggle" :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
+                <!--<li class="dropdown">
+
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="badge">{{json_encode(count(Auth::user()->unreadNotifications))}}</b></a>
                     <ul class="dropdown-menu alert-dropdown">
+                      @foreach(Auth::user()->unreadNotifications as $notif)
                         <li>
-                            <a href="#">Alert Name <span class="label label-default">Alert Badge</span></a>
+
                         </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-primary">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-success">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-info">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-warning">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-danger">Alert Badge</span></a>
-                        </li>
+                      @endforeach
                         <li class="divider"></li>
                         <li>
                             <a href="#">View All</a>
                         </li>
                     </ul>
-                </li>
+                </li>-->
                 <li class="dropdown">
 
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>
@@ -134,14 +129,14 @@
                       <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+                            <a href="{{route('profile.index')}}"><i class="fa fa-fw fa-user"></i> Profile</a>
                         </li>
-                        <li>
+                        <!--<li>
                             <a href="#"><i class="fa fa-fw fa-envelope"></i> Inbox</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
-                        </li>
+                        </li>-->
                         <li class="divider"></li>
                         <li>
                           <a href="{{ route('logout') }}"
@@ -167,25 +162,29 @@
         <div id="page-wrapper">
 
             <div class="container-fluid">
-
                 <!-- Page Heading -->
                   @yield('content')
                 <!-- /.row -->
-
             </div>
             <!-- /.container-fluid -->
 
         </div>
         <!-- /#page-wrapper -->
-
+      </div>
     </div>
      <!-- /. WRAPPER  -->
     <!-- SCRIPTS -AT THE BOTOM TO REDUCE THE LOAD TIME-->
     <!-- JQUERY SCRIPTS -->
+    <script type="text/javascript">
+    function redirectToHome() {
+      window.location.href = "{{url('/')}}"+'/home';
+    }
+    </script>
     <script src="{{asset('js/jquery.js')}}"></script>
       <!-- BOOTSTRAP SCRIPTS -->
-    <script src="{{asset('js/bootstrap.min.js')}}"></script>
+    <!--<script src="{{asset('js/bootstrap.min.js')}}"></script>-->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.0.1/sweetalert.min.js"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
 
     @yield('js')
 

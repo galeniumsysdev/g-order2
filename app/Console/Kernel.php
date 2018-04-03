@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use DB;
 
 class Kernel extends ConsoleKernel
 {
@@ -26,6 +27,13 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+        $schedule->call(function () {
+            DB::table('tbl_request')->where('event','SalesOrder')->delete();
+        })->cron('* * * * *');//->dailyAt('00:20');
+        $schedule->call('App\Http\BackgroundController\synchronize_oracle')
+         ->dailyAt('01:00');
+        $schedule->call('App\Http\BackgroundController\getStatusOrderOracle')
+         ->everyFiveMinutes();
     }
 
     /**

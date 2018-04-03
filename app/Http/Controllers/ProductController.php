@@ -69,7 +69,7 @@ class ProductController extends Controller
                   ],200);
   }
 
-  public function getDistributor()
+  /*public function getDistributor()
   {
     if(isset(Auth::user()->customer_id)){
       $customer = Customer::find(Auth::user()->customer_id);
@@ -98,7 +98,31 @@ class ProductController extends Controller
         }
       }
     }
+  }*/
+
+  public function getDistributor($jns)
+  {
+    $dist = Auth::user()->customer->hasDistributor()->whereRaw("ifnull(inactive,0)!=1")->get();
+
+    if(in_array('PHARMA',$jns))
+    {
+      $dist=$dist->where('pharma_flag','=','1');
+    }
+    if(in_array('PSC',$jns))
+    {
+      $dist=$dist->where('psc_flag','=','1');
+    }
+    if(in_array('INTERNATIONAL',$jns))
+    {
+      $dist=$dist->where('export_flag','=','1');
+    }
+    if(in_array('TollIn',$jns))
+    {
+      $dist=$dist->where('tollin_flag','=','1');
+    }
+    return $dist;
   }
+
   public function getAjaxProduct(Request $request)
   {
     $products =Product::where([['enabled_flag','=','Y'],['title','like',$request->input('query')."%"]]);
@@ -109,95 +133,137 @@ class ProductController extends Controller
   public function updatePareto(Request $request)
   {
 
-  /*  if($request->isMethod('post'))
-    {*/
-      $product=Product::where('id','=',$request->idpareto)->update(['pareto'=>1]);
+    DB::beginTransaction();
+    try{
+      $product=Product::where('id','=',$request->idpareto)->update(['pareto'=>1,'last_update_by'=>Auth::user()->id]);
+      DB::commit();
       return redirect()->route('product.pareto')->withMessage('Product Updated');
-    /*}elseif($request->isMethod('DELETE')){
-      $product=Product::where('id','=',$id)->update(['pareto'=>0]);
-      return redirect()->route('product.pareto')->withMessage('Product Removed');
-    }*/
-
+    }catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    }
 
   }
   public function destroyPareto($id)
   {
-    $product=Product::where('id','=',$id)->update(['pareto'=>0]);
-    return redirect()->route('product.pareto')->withMessage('Product removed from pareto products');
+    DB::beginTransaction();
+    try{
+      $product=Product::where('id','=',$id)->update(['pareto'=>0,'last_update_by'=>Auth::user()->id]);
+      DB::commit();
+      return redirect()->route('product.pareto')->withMessage('Product removed from pareto products');
+    }catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    }
   }
 
   public function getSqlProduct()
   {
-    if(Auth::user()->hasRole('Distributor'))
-    {
-        $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_secondary,1 ) price_diskon from products as p where enabled_flag='Y' ";
-    }else{
-        $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_primary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_primary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_primary,1 ) price_diskon from products as p where enabled_flag='Y' ";
-    }
+    if(Auth::check()){
+      if(Auth::user()->hasRole('Distributor'))
+      {
+          $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_secondary,1 ) price_diskon, p.pareto from products as p where enabled_flag='Y' and getProductPrice ( :cust3, p.id, p.satuan_secondary  ) >0";
+      }else{
+          $sqlproduct = "select id, title, imagePath,satuan_secondary,satuan_primary, inventory_item_id, getProductPrice ( :cust, p.id, p.satuan_primary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_primary, p.id) as rate, getDiskonPrice(:cust1, p.id, p.satuan_primary,1 ) price_diskon,p.pareto from products as p where enabled_flag='Y' and getProductPrice ( :cust3, p.id, p.satuan_secondary  ) >0 ";
+      }
 
-    if(isset(Auth::user()->customer_id)){
-      $customer = Customer::find(Auth::user()->customer_id);
-      /*$oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
-      if(!is_null($oldDisttributor)){*/
-        if($customer->psc_flag!="1" )
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products  as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'PSC')";
-        }
-        if($customer->pharma_flag!="1")
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'PHARMA')";
-        }
-        if($customer->export_flag!="1")
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.parent not like 'INTERNATIONAL')";
-        }
-        if(Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))
-        {
-          $sqlproduct .= " and exists (select 1
-              from category_products as cp
-                ,categories cat
-              where cp.product_id = p.id
-                and cp.flex_value = cat.flex_value
-                and cat.description <> 'BPJS')";
-          if(isset(Auth::user()->customer->outet_type_id) and $customer->pharma_flag=="1")
+      if(isset(Auth::user()->customer_id)){
+        $customer = Customer::find(Auth::user()->customer_id);
+        /*$oldDisttributor = Session::has('distributor_to')?Session::get('distributor_to'):null;
+        if(!is_null($oldDisttributor)){*/
+          if($customer->psc_flag!="1" )
           {
-            if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik']))
-            {
-              $sqlproduct .= " and p.tipe_dot != ('Merah')";
-            }
-            if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik','Toko Obat Berijin']))
-            {
-              $sqlproduct .= " and p.tipe_dot != ('Biru')";
-            }
+            $sqlproduct .= " and exists (select 1
+                from category_products  as cp
+                  ,categories cat
+                where cp.product_id = p.id
+                  and cp.flex_value = cat.flex_value
+                  and cat.parent not like 'PSC')";
+          }
+          if($customer->pharma_flag!="1")
+          {
+            $sqlproduct .= " and exists (select 1
+                from category_products as cp
+                  ,categories cat
+                where cp.product_id = p.id
+                  and cp.flex_value = cat.flex_value
+                  and cat.parent not like 'PHARMA')";
+          }
+          if($customer->export_flag!="1")
+          {
+            $sqlproduct .= " and exists (select 1
+                from category_products as cp
+                  ,categories cat
+                where cp.product_id = p.id
+                  and cp.flex_value = cat.flex_value
+                  and cat.parent not like 'INTERNATIONAL')";
           }
 
-        }
+          if($customer->tollin_flag=="1")
+          {
+            $sqlproduct .= " and exists (select 1
+                from qp_list_lines_v qll
+                where qll.product_attr_value = p.inventory_item_id
+                  and qll.list_header_id = '".$customer->price_list_id."')";
+          }else{
+            $sqlproduct .= " and exists (select 1
+                from category_products as cp
+                  ,categories cat
+                where cp.product_id = p.id
+                  and cp.flex_value = cat.flex_value
+                  and cat.parent not like 'TollIn')";
+          }
+
+          if(Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))
+          {
+            $sqlproduct .= " and exists (select 1
+                from category_products as cp
+                  ,categories cat
+                where cp.product_id = p.id
+                  and cp.flex_value = cat.flex_value
+                  and cat.description <> 'BPJS')";
+            if(isset(Auth::user()->customer->outet_type_id) and $customer->pharma_flag=="1")
+            {
+              if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik']))
+              {
+                $sqlproduct .= " and p.tipe_dot != ('Merah')";
+              }
+              if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik','Toko Obat Berijin']))
+              {
+                $sqlproduct .= " and p.tipe_dot != ('Biru')";
+              }
+            }
+
+          }
 
 
-      //}
-    }
+        //}
+      }
+
+   }
+   //var_dump($sqlproduct);
     return $sqlproduct;
   }
 
   public function getIndex()
   {
-    $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
-    return view('shop.index',['products' => $products]);
+    if(Auth::check()){
+        if(Auth::user()->hasRole('IT Galenium')) {
+            return redirect('/admin');
+        }elseif(Auth::user()->hasRole('Distributor') || Auth::user()->hasRole('Outlet') || Auth::user()->hasRole('Apotik/Klinik') ) {
+              return redirect('/product/buy');
+        }elseif(Auth::user()->hasRole('KurirGPL'))      {
+              return redirect()->route('order.shippingSO');
+        }else{/*if(Auth::user()->hasRole('Marketing PSC') || Auth::user()->hasRole('Marketing Pharma')) {*/
+            return redirect('/home');
+        }
+    }else{
+
+      $products = Product::where([['enabled_flag','=','Y'],['pareto','=',1]])->get();
+
+      return view('shop.index',['products' => $products]);
+    }
+
   }
 
   public function displayProduct(Request $request)
@@ -222,8 +288,8 @@ class ProductController extends Controller
       }
     */
 
-    $sqlproduct = $this->getSqlProduct();
-
+    /*$sqlproduct = $this->getSqlProduct();
+    $sqlproduct .= " order by pareto desc, title asc";
     //var_dump($sqlproduct);
 
       if (isset(Auth::user()->customer_id))
@@ -240,33 +306,37 @@ class ProductController extends Controller
     {
       $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$dp->id)->select('uom_code')->get();
       $dp->uom=$uom;
+      $prg=null;
+      if(Auth::user()->customer->oracle_customer_id){
+      $prg =DB::table('qp_pricing_discount as qpd')
+          ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
+          ->where('qpd.list_line_type_code', '=','PRG')
+          ->where('customer_id','=',Auth::user()->customer->oracle_customer_id)
+          ->where('item_id','=',$dp->inventory_item_id)
+          ->whereraw("current_date between ifnull(start_date_active,date('2017-01-01')) and ifnull(end_date_active,DATE_ADD(CURRENT_DATE,INTERVAL 1 day))")
+          ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
+          ->orderBy('pricing_group_sequence','asc')
+          ->first();
+      }
+      if($prg) $dp->promo = $prg;else $dp->promo=null;
     }
 
-    $products = collect($dataproduct);
-
+    $products = collect($dataproduct);*/
 
     /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
     $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
 
   //  dd($products);
     $products ->setPath(url()->current());*/
-
-    return view('shop.product',['products' => $products]);
+    return view('swipe');
+    //return view('shop.product',['products' => $products]);
   }
 
   public function search(Request $request)
   {
     $perPage = 12; // Item per page
     $currentPage = Input::get('page') - 1;
-    $oldDisttributor = $this->getDistributor();
 
-    if(!is_null($oldDisttributor))
-    {
-      if(!is_array($oldDisttributor))
-      {
-        return view('shop.sites',['distributors' => $oldDisttributor]);
-      }
-    }
     $sqlproduct = $this->getSqlProduct();
 
     if(isset($request->search_product))
@@ -281,20 +351,39 @@ class ProductController extends Controller
     }else{
       $vid='';
     }
-    $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid]);
+    $sqlproduct .= " order by pareto desc, title asc";
+    $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid,'cust3'=>$vid]);
 
     foreach($dataproduct as $dp)
     {
       $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$dp->id)->select('uom_code')->get();
       $dp->uom=$uom;
+      $prg=collect([]);
+      if(Auth::user()->customer->oracle_customer_id){
+      $prg =DB::table('qp_pricing_discount as qpd')
+          ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
+          ->where('qpd.list_line_type_code', '=','PRG')
+          ->where('customer_id','=',Auth::user()->customer->oracle_customer_id)
+          ->where('item_id','=',$dp->inventory_item_id)
+          ->whereraw("current_date between ifnull(start_date_active,date('2017-01-01')) and ifnull(end_date_active,DATE_ADD(CURRENT_DATE,INTERVAL 1 day))")
+          ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
+          ->orderBy('pricing_group_sequence','asc')
+          ->first();
+      }
+      if(!empty($prg)) $dp->promo = $prg;else $dp->promo=null;
     }
     //  $sqlproduct .= " limit 12";
     $products = collect($dataproduct);
+    $polineexist = DB::table('po_draft_lines')
+            ->join('po_draft_headers as pdh', 'po_draft_lines.po_header_id','=','pdh.id')
+            ->where('pdh.customer_id','=',Auth::user()->customer_id)
+            ->select('product_id','qty_request','uom')
+            ->get();
     /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
     $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
     $products->appends($_REQUEST)->render();
     $products ->setPath(url()->current());*/
-    return view('shop.index',['products' => $products]);
+    return view('shop.index',['products' => $products,'polineexist'=>$polineexist]);
   }
 
   public function category($id)
@@ -302,7 +391,7 @@ class ProductController extends Controller
       $kategory = Category::find($id);
       //$products = $kategory->products()->paginate(12);
       $perPage = 30; // Item per page
-      $oldDisttributor = $this->getDistributor();
+    /*  $oldDisttributor = $this->getDistributor();
 
       if(!is_null($oldDisttributor))
       {
@@ -310,7 +399,7 @@ class ProductController extends Controller
         {
           return view('shop.sites',['distributors' => $oldDisttributor]);
         }
-      }
+      }*/
       $sqlproduct = $this->getSqlProduct();
       $currentPage = Input::get('page') - 1;
       $sqlproduct .= " and exists (select 1
@@ -323,26 +412,46 @@ class ProductController extends Controller
       }else{
         $vid='';
       }
-      //  $sqlproduct .= " limit 12";
-      $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid]);
+      $sqlproduct .= " order by pareto desc, title asc";
+      $dataproduct = DB::select($sqlproduct, ['cust'=>$vid,'cust1'=>$vid,'cust3'=>$vid]);
 
       foreach($dataproduct as $dp)
       {
         $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$dp->id)->select('uom_code')->get();
         $dp->uom=$uom;
+        $prg=null;
+        if(Auth::user()->customer->oracle_customer_id){
+        $prg =DB::table('qp_pricing_discount as qpd')
+            ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
+            ->where('qpd.list_line_type_code', '=','PRG')
+            ->where('customer_id','=',Auth::user()->customer->oracle_customer_id)
+            ->where('item_id','=',$dp->inventory_item_id)
+            ->whereraw("current_date between ifnull(start_date_active,date('2017-01-01')) and ifnull(end_date_active,DATE_ADD(CURRENT_DATE,INTERVAL 1 day))")
+            ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
+            ->orderBy('pricing_group_sequence','asc')
+            ->first();
+
+        }
+        if(isset($prg)) $dp->promo = $prg;else $dp->promo=null;
       }
       //  $sqlproduct .= " limit 12";
       $products = collect($dataproduct);
+      $polineexist = DB::table('po_draft_lines')
+              ->join('po_draft_headers as pdh', 'po_draft_lines.po_header_id','=','pdh.id')
+              ->where('pdh.customer_id','=',Auth::user()->customer_id)
+              ->select('product_id','qty_request','uom')
+              ->get();
+      //dd($products);
       /*$pagedData = $products->slice($currentPage * $perPage, $perPage)->all();
       $products= new LengthAwarePaginator($pagedData, count($products), $perPage);
       $products ->setPath(url()->current());*/
-    return view('shop.index',['products' => $products,'nama_kategori'=>$kategory->description]);
+    return view('shop.index',['products' => $products,'nama_kategori'=>$kategory->description,'polineexist'=>$polineexist]);
   }
 
   public function show($id)
   {
     //$product=Product::find($id);
-    $sqlproduct = "select id, title, imagePath,description, description_en,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate  from products as p where p.id = '".$id."'";
+    $sqlproduct = "select id, title, imagePath,description, description_en,satuan_secondary,satuan_primary, inventory_item_id, getItemPrice ( :cust, p.id, p.satuan_secondary  ) AS harga, substr(itemcode,1,2) as item,getitemrate(p.satuan_primary, p.satuan_secondary, p.id) as rate, pareto  from products as p where p.id = '".$id."'";
     //$sqlproduct = $this->getSqlProduct();
     if (isset(Auth::user()->customer_id))
     {
@@ -354,8 +463,29 @@ class ProductController extends Controller
      $product = DB::select($sqlproduct, ['cust'=>$vid]);
      $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$product[0]->id)->select('uom_code')->get();
      $product[0]->uom=$uom;
+     $polineexist = collect([]);
+     $prg=null;
+     if(Auth::check()){
+       if(Auth::user()->customer->oracle_customer_id){
+       $prg =DB::table('qp_pricing_discount as qpd')
+           ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
+           ->where('qpd.list_line_type_code', '=','PRG')
+           ->where('customer_id','=',Auth::user()->customer->oracle_customer_id)
+           ->where('item_id','=',$product[0]->inventory_item_id)
+           ->whereraw("current_date between ifnull(start_date_active,date('2017-01-01')) and ifnull(end_date_active,DATE_ADD(CURRENT_DATE,INTERVAL 1 day))")
+           ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit')
+           ->orderBy('pricing_group_sequence','asc')
+           ->first();
+        if(!empty($prg)) $product[0]->promo = $prg;else $product[0]->promo=null;
+       }
+       $polineexist = DB::table('po_draft_lines')
+               ->join('po_draft_headers as pdh', 'po_draft_lines.po_header_id','=','pdh.id')
+               ->where('pdh.customer_id','=',Auth::user()->customer_id)
+               ->select('product_id','qty_request','uom')
+               ->get();
+     }
 
-     return view('shop.detailProduct01',['product' => $product[0]]);
+     return view('shop.detailProduct01',['product' => $product[0],'polineexist'=>$polineexist]);
   }
 
   public function index()
@@ -383,6 +513,8 @@ class ProductController extends Controller
 
   public function update(Request $request,$id)
   {
+    DB::beginTransaction();
+    try{
     $product=Product::find($id);
     $image = $request->file('input_img');
     $this->validate($request, [
@@ -405,21 +537,22 @@ class ProductController extends Controller
           }
         }
       }
+      //echo("<br>Product:".$product->imagePath);
+      if(is_null($product->imagePath) or $product->imagePath=="")
+      {
+        $this->validate($request, [
+            'input_img' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $input['imagename'] = time().'.'.$image->getClientOriginalExtension();
+        $destinationPath = public_path('img');
+      //  dd($destinationPath);
+        $image->move($destinationPath, $input['imagename']);
+        $product->imagePath = $input['imagename'] ;
+      }
     }
 
-    //echo("<br>Product:".$product->imagePath);
-    if(is_null($product->imagePath) or $product->imagePath=="")
-    {
-      $this->validate($request, [
-          'input_img' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-      ]);
 
-      $input['imagename'] = time().'.'.$image->getClientOriginalExtension();
-      $destinationPath = public_path('img');
-    //  dd($destinationPath);
-      $image->move($destinationPath, $input['imagename']);
-      $product->imagePath = $input['imagename'] ;
-    }
     //dd('stop');
     //$product=Product::find($id);
     $product->title =  $request->nama;
@@ -427,47 +560,71 @@ class ProductController extends Controller
     $product->enabled_flag = $request->enabledflag;
     $product->description =$request->id_descr;
     $product->description_en =$request->en_descr;
+    $product->long_description = $request->generik;
     $product->save();
-    //$product->categories()->detach();
-    //$product->categories()->attach($request->category);
-  //  $product->categories()->sync([$request->category]);
+    if($request->category){
+      $product->categories()->detach();
+      $product->categories()->attach($request->category);
+      //$product->categories()->sync([$request->category]);
+    }
+    DB::commit();
+  }catch (\Exception $e) {
+    DB::rollback();
+    throw $e;
+  }
+
 
     return redirect()->route('product.master',$id)->withMessage('Product Updated');
   }
 
   //show cart
     public function getCart(){
-      if (!Session::has('cart')){
+      /*if (!Session::has('cart')){
         //Session::forget('cart');
         return view('shop.shopping-cart',['products'=>null]);
-      }
-
-      /*$dist = Session::get('distributor_to','');
-      if(is_null($dist))
-      {
-        $this->getDistributor();
-        dd($oldDisttributor);
       }*/
-      $dist = Auth::user()->customer->hasDistributor;
-
-      $oldCart = Session::get('cart');
-      $cart =  new Cart($oldCart);
-
-      //dd($alamat);
-      return view('shop.shopping-cart',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'distributor'=>$dist]);
+      /*$oldCart = Session::get('cart');
+      $cart =  new Cart($oldCart);*/
+      $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id]);
+      $linepo = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
+      if($linepo->count()==0) $linepo=null;
+      $jns = PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
+//	$jns = $jns->toArray();
+      $jns=$jns->pluck('jns')->toArray();
+      //$jns = array_unique(array_pluck($cart->items,'jns'));
+      $dist=$this->getDistributor($jns);
+      //return view('shop.shopping-cart',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'distributor'=>$dist]);
+      return view('shop.shopping-cart2',['products'=>$linepo, 'headerpo'=>$headerpo ,'distributor'=>$dist]);
     }
 
-    public function checkOut($distributorid){
-      if (!Session::has('cart')){
+    public function checkOut(Request $request){
+      /*if (!Session::has('cart')){
         //Session::forget('cart');
         return view('shop.shopping-cart',['products'=>null]);
       }
-      $oldCart = Session::get('cart');
-      //$dist = Session::get('distributor_to','');
+      $oldCart = Session::get('cart');*/
+      $distributorid = $request->dist;
+      if($distributorid=='')
+      {
+        return redirect()->back()->withInput()->withErrors(['dist'=>'Distributor is required']);
+      }
+      $headerpo = PoDraftHeader::where('customer_id','=',Auth::user()->customer_id)->first();
+      if($headerpo){
+        $linepo  = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
+        if($linepo->count()==0){
+            return view('shop.shopping-cart',['products'=>null]);
+        }
+        $jns= PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
+        $jns = $jns->pluck('jns')->toArray();
+      }
       $dist = Customer::where('id','=',$distributorid)->first();
-      //dd($oldCart);
-
-      $cart =  new Cart($oldCart);
+      $pharma=false;
+      //$cart =  new Cart($oldCart);
+      //$jns = array_unique(array_pluck($cart->items,'jns'));
+      if(in_array('PHARMA',$jns))
+      {
+        $pharma=true;
+      }
       $alamat = DB::table("customer_sites as c")
           ->select("id", DB::raw("concat(c.address1,
 												IF(c.state IS NULL, '', concat(',',c.state)),
@@ -477,8 +634,10 @@ class ProductController extends Controller
           ->where('customer_id','=',auth()->user()->customer_id)
           ->where('site_use_code','=','SHIP_TO')
           ->where('status','=','A')
+          ->orderBy('c.primary_flag','desc')
           ->get();
       $billto=null;
+      $bonus =collect([]);
       if ($dist!='')
       {
         $userdist = User::where('customer_id','=',$distributorid)->first();
@@ -494,13 +653,36 @@ class ProductController extends Controller
               ->where('customer_id','=',auth()->user()->customer_id)
               ->where('site_use_code','=','BILL_TO')
               ->where('status','=','A')
+              ->orderBy('c.primary_flag','desc')
               ->get();
+
+          $bonus =DB::table('qp_pricing_discount as qpd')
+              ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
+              ->join('po_draft_lines as pdl','pdl.inventory_item_id','=','qpd.item_id')
+              ->join('products as p', 'qpa.product_attr_value','=','p.inventory_item_id')
+              ->where('qpd.list_line_type_code', '=','PRG')
+              ->where('qpd.price_break_type_code','=','RECURRING')
+              ->where('qpd.customer_id','=',Auth::user()->customer->oracle_customer_id)
+              ->where('pdl.po_header_id','=',$headerpo->id)
+              ->whereraw("current_date between ifnull(start_date_active,date('2017-01-01')) and ifnull(end_date_active,DATE_ADD(CURRENT_DATE,INTERVAL 1 day))")
+              ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit'
+                        ,'p.title','p.imagePath','p.id as product_id')
+              ->selectRaw("(case when pdl.uom = qpa.benefit_uom_code then
+       floor(pdl.qty_request/CONVERT(qpd.pricing_attr_value_from, UNSIGNED INTEGER))
+      when  pdl.primary_uom = qpa.benefit_uom_code then
+      	floor(pdl.qty_request_primary/CONVERT(qpd.pricing_attr_value_from, UNSIGNED INTEGER))
+       end) as bonus")
+              ->orderBy('pricing_group_sequence','asc')
+              ->get();
+              //dd($bonus);
         }
         //dd($billto);
       }
 
+
       //dd($alamat);
-      return view('shop.checkout',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'addresses'=> $alamat,'billto'=>$billto,'distributor'=>$dist]);
+      //return view('shop.checkout',['products'=>$cart->items, 'totalPrice'=>$cart->totalPrice,'totalDiscount'=>$cart->totalDiscount,'totalAmount'=>$cart->totalAmount, 'tax'=>$cart->totalTax ,'addresses'=> $alamat,'billto'=>$billto,'distributor'=>$dist,'pharma'=>$pharma]);
+      return view('shop.checkout2',['products'=>$linepo, 'headerpo'=>$headerpo ,'addresses'=> $alamat,'billto'=>$billto,'distributor'=>$dist,'pharma'=>$pharma,'bonus'=>$bonus]);
 
     }
 
@@ -510,38 +692,52 @@ class ProductController extends Controller
         $product = Product::where('id','=',$id)->select('id','title','imagePath','satuan_primary','satuan_secondary','inventory_item_id')->first();
         $uom = DB::table('mtl_uom_conversions_v')->where('product_id','=',$id)->select('uom_code')->get();
         $product->uom=$uom;
-        $oldCart = Session::has('cart')?Session::get('cart'):null;
-        if(!is_null($oldCart))
-        {
-          if(array_key_exists($id.'-'.$request->satuan, $oldCart->items)){
+        $product->jns=$product->categories()->first()->parent;
+
+        $tax=false;
+        $headerpo = PoDraftHeader::firstorCreate(['customer_id'=>Auth::user()->customer_id]);
+        if($headerpo){
+          $jns = PoDraftLine::where('po_header_id','=',$headerpo->id)->select('jns')->groupBy('jns')->get();
+          $jns=$jns->pluck('jns')->toArray();
+          array_push($jns,$product->jns);
+          if($this->getDistributor($jns)->count()==0)
+          {
             return response()->json([
-                            'result' => 'exist',
-                            'totline' => $oldCart->totalQty,
+                            'result' => 'errdist',
+                            'jns'=>implode(",",$jns),
                           ],200);
           }
         }
-        $cart = new Cart($oldCart);
-        $cart->add($product,$id,$request->qty,$request->satuan,floatval($request->hrg),floatval($request->disc) );
-        /*$headerpo = PoDraftHeader::firstorCreate(
-                              ['customer_id'=>Auth::user()->customer_id]
-                            );
+        if(Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
+        and Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M")
+        {
+            $tax=true;
+        }
+        //$cart = new Cart($oldCart);
+        //$cart->add($product,$id,$request->qty,$request->satuan,floatval($request->hrg),floatval($request->disc) );
+
         $linepo  = PoDraftLine::where(
-                    [['po_header_id','=',$headerpo->id],['product_id','=',$product->id],['uom','=',$request->satuan]])->first();
+                    [['po_header_id','=',$headerpo->id],['product_id','=',$product->id]])->first();
         if($linepo)
         {
-          $linepo->qty_request += $request->qty;
-          $linepo->conversion_qty = $product->getConversion($request->satuan);
-          $linepo->qty_request_primary=$linepo->conversion_qty*$request->qty;
-          $linepo->primary_uom = $product->satuan_primary;
-          $linepo->listprice  = floatval($request->hrg);
-          $linepo->unit_price = floatval($request->disc);
-          $linepo->amount = $linepo->qty_request*floatval($request->hrg);
-          $linepo->discount = floatval($request->hrg)-floatval($request->disc);
-          $linepo->save();
+          if($linepo->uom!=$request->satuan)
+          {
+            return response()->json([
+                            'result' => 'exist',
+                            'totline' => $headerpo->lines()->count(),
+                          ],200);
+          }else{
+            return response()->json([
+                            'result' => 'exist',
+                            'totline' => $headerpo->lines()->count(),
+                          ],200);
+          }
         }else{
+          if($tax) $taxamount =  round($request->qty*floatval($request->disc)*0.1,0);else $taxamount=0;
           $linepo = PoDraftLine::updateorCreate(
-                      ['po_header_id'=>$headerpo->id,'product_id'=>$product->id,'uom'=>$request->satuan],
+                      ['po_header_id'=>$headerpo->id,'product_id'=>$product->id],
                       ['qty_request'=>$request->qty
+                      ,'uom'=>$request->satuan
                       ,'qty_request_primary'=>$product->getConversion($request->satuan)*$request->qty
                       ,'primary_uom'=>$product->satuan_primary
                       ,'conversion_qty'=>$product->getConversion($request->satuan)
@@ -549,45 +745,81 @@ class ProductController extends Controller
                       ,'list_price'=>floatval($request->hrg)
                       ,'unit_price'=>floatval($request->disc)
                       ,'amount'=>$request->qty*floatval($request->hrg)
-                      ,'discount'=>floatval($request->hrg)-floatval($request->disc)
+                      ,'discount'=>round($request->qty*floatval($request->hrg),0)-round($request->qty*floatval($request->disc),0)
+                      ,'tax_amount'=>$taxamount
+                      ,'jns'=>$product->jns
                       ]
             );
 
         }
 
         $headerpo->subtotal +=($request->qty*floatval($request->hrg));
-        $headerpo->discount+= (floatval($request->hrg)-floatval($request->disc)) *$request->qty;
-        if(Auth::user()->customer->customer_category_code=="PKP")
+        $headerpo->discount+= round($request->qty*floatval($request->hrg),0)-round($request->qty*floatval($request->disc),0);
+        if($tax)
         {
-          $headerpo->tax =($headerpo->subtotal-$headerpo->discount)*0.1;
+            $headerpo->tax =PoDraftLine::where('po_header_id','=',$headerpo->id)->sum('tax_amount');
         }else{
             $headerpo->tax =0;
         }
 
-        $headerpo->Amount= $headerpo->subtotal - $headerpo->discount - $headerpo->tax;
-        $headerpo->save();*/
+        $headerpo->Amount= $headerpo->subtotal - $headerpo->discount + $headerpo->tax;
+        $headerpo->save();
 
-        $request->session()->put('cart',$cart);
+        //$request->session()->put('cart',$cart);
         return response()->json([
                         'result' => 'success',
-                        'totline' => $cart->totalQty,
+                        'totline' => $headerpo->lines()->count(),
                       ],200);
         //return redirect()->route('product.index');
 
       }
 
     public function getRemoveItem($id){
-      $oldCart = Session::has('cart')?Session::get('cart'):null;
-      $cart = new Cart($oldCart);
-      $cart->removeItem($id);
+      DB::beginTransaction();
+      DB::enableQueryLog();
+      try{
+        $headerpo = PoDraftHeader::where('customer_id','=',Auth::user()->customer_id)->first();
+        $removeitem = PoDraftLine::where('po_header_id','=',$headerpo->id)
+                    ->where('product_id','=',$id)->delete();
+        $newline = PoDraftLine::where('po_header_id','=',$headerpo->id)
+                  ->select(DB::raw("sum(discount) as discount")
+                        , DB::raw("sum(tax_amount) as tax_amount")
+                        , DB::raw("sum(amount) as subtotal")
+                        , 'po_header_id'
+                        )->groupBy('po_header_id')->first();
+        //dd(DB::getQueryLog());
+        if($newline){
+          $headerpo->Tax = $newline->tax_amount;
+          $headerpo->subtotal= $newline->subtotal;
+          $headerpo->discount = $newline->discount;
+          $headerpo->amount = $newline->subtotal-$newline->discount+$newline->tax_amount;
+          $headerpo->save();
+        }else{
+          $headerpo->Tax = 0;
+          $headerpo->subtotal= 0;
+          $headerpo->discount = 0;
+          $headerpo->amount =0;
+          $headerpo->save();
+        }
+        DB::commit();
+        /*$oldCart = Session::has('cart')?Session::get('cart'):null;
+        $cart = new Cart($oldCart);
+        $cart->removeItem($id);
 
-      if (count($cart->items)>0){
-        Session::put('cart',$cart);
-      }else{
-        Session::forget('cart');
-        Session::forget('distributor_to');
+        if (count($cart->items)>0){
+          Session::put('cart',$cart);
+        }else{
+          Session::forget('cart');
+          Session::forget('distributor_to');
+        }*/
+        return redirect()->route('product.shoppingCart');
+      }catch (\Exception $e) {
+        DB::rollback();
+        throw $e;
+      } catch (\Throwable $e) {
+          DB::rollback();
+          throw $e;
       }
-      return redirect()->route('product.shoppingCart');
     }
 
     public function getEditToCart(Request $request,$id){
@@ -606,9 +838,54 @@ class ProductController extends Controller
         if($disc){
             $request->disc = $disc[0]->harga;
         }else{$request->disc = $request->hrg;}
+        if(Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
+        and Auth::user()->customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M")
+        {
+            $tax=true;
+        }
+        DB::beginTransaction();
+        try{
+          $headerpo = PoDraftHeader::where('customer_id','=',Auth::user()->customer_id)->first();
+          $line = PoDraftLine::where('po_header_id','=',$headerpo->id)->where('product_id','=',$request->product)
+              ->where('uom','=',$uom)
+              ->first();
+          if($line)
+          {
+            $product = Product::where('id','=',$request->product)->select('id','title','imagePath','satuan_primary','satuan_secondary','inventory_item_id')->first();
+            $konversi =$product->getConversion($request->satuan);
+            $line->uom = $request->satuan;
+            $line->qty_request = $request->qty;
+            $line->conversion_qty = $konversi;
+            $line->qty_request_primary = $request->qty * $konversi;
+            $line->primary_uom = $product->satuan_primary;
+            $line->list_price = $request->hrg;
+            $line->unit_price = $request->disc;
+            $line->discount = round($request->qty * $request->hrg,0) - round($request->qty *$request->disc,0);
+            $line->amount = $request->qty *$request->hrg;
+            if($tax) $taxamount = round($request->qty*floatval($request->disc)*0.1,0);else $taxamount=0;
+            if($tax) $line->tax_amount = round(0.1 * ($request->qty * $request->disc),0);else $line->tax_amount = 0;
+            $line->jns = $product->categories()->first()->parent;
+            $line->save();
+          }
+          $newline = PoDraftLine::where('po_header_id','=',$headerpo->id)
+                    ->select(DB::raw("sum(discount) as discount")
+                          , DB::raw("sum(tax_amount) as tax_amount")
+                          , DB::raw("sum(amount) as subtotal")
+                          , 'po_header_id'
+                          )->groupBy('po_header_id')->first();
+          //dd(DB::getQueryLog());
+          $headerpo->Tax = $newline->tax_amount;
+          $headerpo->subtotal= $newline->subtotal;
+          $headerpo->discount = $newline->discount;
+          $headerpo->amount = $newline->subtotal-$newline->discount+$newline->tax_amount;
+          $headerpo->save();
+          DB::commit();
 
-
-        $oldCart = Session::has('cart')?Session::get('cart'):null;
+        }catch (\Exception $e) {
+          DB::rollback();
+          throw $e;
+        }
+        /*$oldCart = Session::has('cart')?Session::get('cart'):null;
         $cart = new Cart($oldCart);
         if($uom!=$request->satuan)
         {
@@ -619,49 +896,46 @@ class ProductController extends Controller
           //$this->getAddToCart($request,$request->product);
           $cart->add($product,$request->product,$request->qty,$request->satuan,floatval($request->hrg), floatval($request->disc) );
         }else{
-          /*$headerpo = PoDraftHeader::where(['customer_id','=',Auth::user()->customer_id]) ->first();
-          $linepo = PoDraftLine::where([['po_header_id','=',$headerpo->id],
-                        ['product_id','=',$request->product]
-                        ['uom','=',$uom]
-                    ])->get();
-          $linepo->qty          */
+
           $cart->editItem($id,$request->qty,$request->satuan,$request->id,$request->hrg,$request->disc);
 
         }
-        Session::put('cart',$cart);
+        Session::put('cart',$cart);*/
         return response()->json([
                         'result' => 'success',
                         'price' => number_format($request->hrg,2),
                         'disc' => number_format($request->disc,2),
                         'amount' => number_format($request->hrg*$request->qty,2),
-                        'subtotal' => number_format($cart->totalPrice,2),
-                        'disctot' => number_format($cart->totalDiscount,2),
-                        'tax' => number_format($cart->totalTax,2),
-                        'total' => number_format($cart->totalAmount,2),
+                        'subtotal' => number_format($headerpo->subtotal,2),
+                        'disctot' => number_format($headerpo->discount,2),
+                        'tax' => number_format($headerpo->Tax,2),
+                        'total' => number_format($headerpo->amount,2),
                       ],200);
         //return redirect()->route('product.index');
 
     }
 
     public function postOrder(Request $request){
-      if(!Session::has('cart'))
+      /*if(!Session::has('cart'))
       {
         return view('shop.shopping-cart',['products'=>null]);
       }
       $oldCart = Session::has('cart')?Session::get('cart'):null;
-      $cart = new Cart($oldCart);
+      $cart = new Cart($oldCart);*/
       $billid=null;
       $shipid=null;
       $orgid=null;
       $warehouseid=null;
+      $ordertypeid=null;
       $check_dpl =null;
+      $statusso=0;
       if(isset($request->coupon_no))
       {
         $check_dpl = DPLSuggestNo::where('outlet_id',Auth::user()->customer_id)
                       ->where('suggest_no',$request->coupon_no)
                       ->whereNull('notrx')
-                      ->get();
-        if($check_dpl->isEmpty())
+                      ->count();
+        if(!$check_dpl)
         {
           return redirect()->back()
                        ->withErrors(['coupon_no'=>trans('pesan.notmatchdpl')])
@@ -669,13 +943,10 @@ class ProductController extends Controller
         }
         $statusso = -99;
       }
-
-      //dd($check_dpl);
-      /*if(!Session::has('distributor_to'))
-      {
-        return view('shop.shopping-cart',['products'=>null])->withMessage('Pilih distributor terlebih dahulu');
-      }else{*/
-        //$oldDisttributor =  $request->session()->get('distributor_to');
+      DB::beginTransaction();
+      try {
+        $headerpo = PoDraftHeader::where('customer_id','=',Auth::user()->customer_id)->first();
+        $linepo = PoDraftLine::where('po_header_id','=',$headerpo->id)->get();
         $distributor = Customer::find($request->dist_id);
         $customer =  Customer::find(auth()->user()->customer_id);
         if($customer->export_flag=="1")
@@ -685,7 +956,25 @@ class ProductController extends Controller
             $currency='IDR';
         }
 
-        $tipetax=$customer->customer_category_code;
+        if($customer->tax_reference!=$request->npwp)
+        {
+            if(isset($request->npwp) and is_null($customer->tax_reference))
+            {
+              $customer->tax_reference=$request->npwp;
+              $customer->save();
+            }elseif(is_null($request->npwp) and isset($customer->tax_reference)){
+              $request->npwp = $customer->tax_reference;
+            }elseif($request->npwp!=$customer->tax_reference){
+              $customer->tax_reference=$request->npwp;
+              $customer->save();
+            }
+        }
+
+        //$tipetax=$customer->customer_category_code;
+        if($customer->sites->where('primary_flag','=','Y')->first()->Country=="ID"
+        and $customer->sites->where('primary_flag','=','Y')->first()->city!="KOTA B A T A M"){
+          $tipetax ="10%";
+        }else $tipetax= null;
         $userdistributor = User::where('customer_id','=',$request->dist_id)->first();
         if($userdistributor->hasRole('Principal')) /*jika ke gpl atau YMP maka data oracle harus diisi*/
         {
@@ -693,10 +982,11 @@ class ProductController extends Controller
               'alamat' => 'required|numeric',
               'billto' => 'required|numeric',
            ])->validate();
-          $oracleshipid = CustomerSite::where('id','=',$request->alamat)->select('site_use_id','org_id','warehouse')->first();
+          $oracleshipid = CustomerSite::where('id','=',$request->alamat)->select('site_use_id','org_id','warehouse','order_type_id')->first();
           if($oracleshipid)
           {
             $shipid = $oracleshipid->site_use_id;
+            $ordertypeid = $oracleshipid->order_type_id;
             if(is_null($oracleshipid->org_id))
             {
               $orgid = config('constant.org_id');
@@ -706,7 +996,7 @@ class ProductController extends Controller
 
             if(is_null($oracleshipid->warehouse))
             {
-              if($orgid==106)
+              if($orgid==config('constant.org_id'))
               {
                   $warehouseid = config('constant.warehouseid_YMP');
               }else{$warehouseid = config('constant.warehouseid_GPL');}
@@ -734,7 +1024,6 @@ class ProductController extends Controller
           }
         }
       //}
-      $statusso=0;
       $thn = date('Y');
       $bln=date('m');
       $tmpnotrx = DB::table('tmp_notrx')->where([
@@ -753,14 +1042,12 @@ class ProductController extends Controller
       if($request->hasFile('filepo'))
       {
         $validator = Validator::make($request->all(), [
-            'filepo' => 'required|mimes:jpeg,jpg,png,pdf|max:10240',
+            'filepo' => 'required|mimes:jpeg,jpg,png,pdf,xls,xlsx,doc,docx,zip|max:10240',
         ])->validate();
         $path = $request->file('filepo')->storeAs(
             'PO', $notrx.".".$request->file('filepo')->getClientOriginalExtension()
         );
       }
-
-
 
        Validator::make($request->all(), [
            'no_order' => 'required|unique:so_headers,customer_po,null,null,customer_id,'.Auth::user()->customer_id.'|max:50',
@@ -784,7 +1071,7 @@ class ProductController extends Controller
           'currency'=> $currency,
           'payment_term_id'=> null,
           'price_list_id'=> $customer->price_list_id,
-          'order_type_id'=> $customer->order_type_id,
+          'order_type_id'=> $ordertypeid,
           'oracle_ship_to'=> $shipid,
           'oracle_bill_to'=> $billid,
           'oracle_customer_id' =>$customer->oracle_customer_id,
@@ -792,8 +1079,8 @@ class ProductController extends Controller
           'status' => $statusso,
           'org_id' => $orgid,
           'warehouse' =>$warehouseid,
-          'suggest_no'=>$request->coupon_no
-
+          'suggest_no'=>$request->coupon_no,
+          'npwp'=>$request->npwp
         ]);
       if($header){
         if($tmpnotrx==0){
@@ -811,107 +1098,155 @@ class ProductController extends Controller
         }
 
         $total =0;
-        foreach($cart->items as $product)
+        foreach($linepo as $product)
         {
-          /*if($product['uom']!=$product['item']['satuan_primary'])
-          {
-            $rate = DB::select("select p.satuan_primary, getItemRate ( p.satuan_primary, :uom, p.id ) AS rate, p.itemcode from products as p where id = :id", ['id'=>$product['item']['id'],'uom'=>$product['uom']]);
-            if($rate)
-            {
-              $konversi = $rate[0]->rate;
-              $qtyprimary = $product['qty']*$konversi;
-            }else{
-              $qtyprimary = null;
-              $konversi=null;
-            }
-          }else{
-            $konversi=1;
-            $qtyprimary = $product['qty'];
-          }*/
-          $item = Product::where('id','=',$product['item']['id'])->first();
-          $konversi = $item->getConversion($product['uom']);
-          $qtyprimary = $product['qty']*$konversi;
+          $item = $product->item;
+
+          /*$konversi = $item->getConversion($product->uom);
+          $qtyprimary = $product->qty_request*$konversi;
           if($konversi==0)
           {
             $konversi=1;
             $qtyprimary=$product['qty'];
-          }
-          $tmpprice = $product['price'];
-          $operand_reg =$item->getRateDiskon()->where('pricing_group_sequence','=',1)->first();
-          if($operand_reg)
-          {
-            $disc1 =$operand_reg->operand;
-            $amountdisc1=$tmpprice*$disc1/100;
-            $tmpprice =$tmpprice-$amountdisc1;
-          }else{
-            $disc1 = 0;
-            $amountdisc1=0;
-          }
-          $operand_product = $item->getRateDiskon()->where('pricing_group_sequence','=',2)->first();
-          if($operand_product)
-          {
-            $disc2 =$operand_product->operand;
-            $amountdisc2=$tmpprice*$disc2/100;
-            $tmpprice =$tmpprice-$amountdisc2;
-          }else{
-            $disc2 =0;
-            $amountdisc2=0;
-          }
+          }*/
+          $tmpprice = $product->list_price;
+          if(isset(Auth::user()->customer->oracle_customer_id)){
+            $operand_reg =$item->getRateDiskon()->where('pricing_group_sequence','=',1)->first();
+            if($operand_reg)
+            {
+              $disc1 =$operand_reg->operand;
+              $amountdisc1=$tmpprice*$disc1/100;
+              $tmpprice =$tmpprice-$amountdisc1;
+              //echo "tempprice".$tmpprice."<br>";
+            }else{
+              $disc1 = 0;
+              $amountdisc1=0;
+            }
+            $operand_product = $item->getRateDiskon()->where('pricing_group_sequence','=',2)->first();
+            if($operand_product)
+            {
+              $disc2 =$operand_product->operand;
+              $amountdisc2=$tmpprice*$disc2/100;
+              $tmpprice =$tmpprice-$amountdisc2;
+              echo "tempprice2".$tmpprice."<br>";
+            }else{
+              $disc2 =0;
+              $amountdisc2=0;
+            }
 
-
-          $amount = ($product['price'] - $product['disc']) * $product['qty'];
-
-          if($tipetax=="PKP")
-          {
-            $taxamount = ($product['price'] - $product['disc']) * $product['qty'] *0.1;
+            if($tmpprice!=$product->unit_price)
+            {
+              DB::rollback();
+              return redirect()->back()
+                           ->with('msg','Please check price again!');
+            }
           }else{
-            $taxamount = 0;
+            $disc1=null;
+            $disc2=null;
+            $amountdisc1=null;
+            $amountdisc2=null;
           }
-          $total += ($amount+$taxamount);
+          $amount = ($product->amount - $product->discount);
+          $total += ($amount+$product->tax_amount);
 
           SoLine::Create([
             'header_id'=> $header->id,
-            'product_id'=> $product['item']['id'],
-            'uom'=> $product['uom'],
-            'qty_request' => $product['qty'],
-            'list_price' => $product['price'],
-            'unit_price' =>$product['price'] - $product['disc'],
-            'amount' => $amount,
-            'inventory_item_id'=> $product['item']['inventory_item_id'],
-            'uom_primary' => $product['item']['satuan_primary'],
-            'qty_request_primary' => $qtyprimary,
-            'conversion_qty' => $konversi,
+            'product_id'=> $product->product_id,
+            'uom'=> $product->uom,
+            'qty_request' => $product->qty_request,
+            'list_price' => $product->list_price,
+            'unit_price' =>$product->unit_price,
+            'amount' => $product->amount,
+            'inventory_item_id'=> $product->inventory_item_id,
+            'uom_primary' => $product->primary_uom,
+            'qty_request_primary' => $product->qty_request_primary,
+            'conversion_qty' => $product->conversion_qty,
             'tax_type'=>$tipetax,
-            'tax_amount'=>$taxamount
+            'tax_amount'=>$product->tax_amount
             ,'disc_reg_percentage'=>$disc1
             ,'disc_product_percentage'=>$disc2
             ,'disc_reg_amount'=>$amountdisc1
             ,'disc_product_amount'=>$amountdisc2
           ]);
         }
+        $bonus =DB::table('qp_pricing_discount as qpd')
+            ->join('qp_pricing_attr_get_v as qpa','qpd.list_line_id','=' , 'qpa.parent_list_line_id')
+            ->join('po_draft_lines as pdl','pdl.inventory_item_id','=','qpd.item_id')
+            //->join('products as p', 'qpa.product_attr_value','=','p.inventory_item_id')
+            ->where('qpd.list_line_type_code', '=','PRG')
+            ->where('qpd.price_break_type_code','=','RECURRING')
+            ->where('qpd.customer_id','=',Auth::user()->customer->oracle_customer_id)
+            ->where('pdl.po_header_id','=',$headerpo->id)
+            ->whereraw("current_date between ifnull(start_date_active,date('2017-01-01')) and ifnull(end_date_active,DATE_ADD(CURRENT_DATE,INTERVAL 1 day))")
+            ->select('qpd.item_id',  'qpd.ship_to_id', 'qpd.bill_to_id','qpd.pricing_attr_value_from', 'qpd.price_break_type_code','qpa.product_attr_value', 'qpa.benefit_qty', 'qpa.benefit_uom_code', 'qpa.benefit_limit'
+                      ,'qpa.list_line_id')
+            ->selectRaw("(case when pdl.uom = qpa.benefit_uom_code then
+     floor(pdl.qty_request/CONVERT(qpd.pricing_attr_value_from, UNSIGNED INTEGER))
+    when  pdl.primary_uom = qpa.benefit_uom_code then
+      floor(pdl.qty_request_primary/CONVERT(qpd.pricing_attr_value_from, UNSIGNED INTEGER))
+     end) as bonus")
+            ->orderBy('pricing_group_sequence','asc')
+            ->get();
+        if($bonus)
+        {
+          $bonus = $bonus->where('bonus','>',0);
+          foreach( $bonus as $getpromo)
+          {
+            $productbonus = Product::where('inventory_item_id','=',$getpromo->product_attr_value)->first();
+            $konversi =$productbonus->getConversion($getpromo->benefit_uom_code);
+            if($konversi==0)
+            {
+              $konversi=1;
+            }
+            SoLine::Create([
+              'header_id'=> $header->id,
+              'product_id'=> $productbonus->id,
+              'uom'=> $getpromo->benefit_uom_code,
+              'qty_request' => $getpromo->bonus,
+              'list_price' => 0,
+              'unit_price' =>0,
+              'amount' => 0,
+              'inventory_item_id'=> $productbonus->inventory_item_id,
+              'uom_primary' => $productbonus->satuan_primary,
+              'qty_request_primary' => $getpromo->bonus * $konversi,
+              'conversion_qty' =>$konversi,
+              'tax_type'=>$tipetax,
+              'tax_amount'=>0
+              ,'bonus_list_line_id'=>$getpromo->list_line_id
+            ]);
+          }
+        }
+
+        $delpoline = DB::table('po_draft_lines')->where('po_header_id','=',$headerpo->id)->delete();
+        $delpoheader = DB::table('po_draft_headers')->where('customer_id','=',Auth::user()->customer_id)
+                        ->where('id','=',$headerpo->id)->delete();
 
         if($statusso==-99)/*jika DPL notify ke SPV dan selanjutnya*/
         {
           $suggest_no=$request->coupon_no;
-          $notified_users = app('App\Http\Controllers\DplController')->getArrayNotifiedEmail($suggest_no,'');
+
+          $updateDPL = DPLSuggestNo::where('suggest_no',$suggest_no)
+                                    ->update(array('notrx'=>$notrx,'file_sp'=>$path,'last_update_by'=>Auth::user()->id));
+
+          $notified_users = app('App\Http\Controllers\DPLController')->getArrayNotifiedEmail($suggest_no,'');
     			if(!empty($notified_users)){
     				$data = [
     					'title' => 'Pengajuan DPL',
     					'message' => 'Pengajuan DPL #'.$request->coupon_no,
     					'id' => $suggest_no,
     					'href' => route('dpl.readNotifApproval'),
-    					'email' => [
-    						'markdown'=>'',
-    						'attribute'=> array()
+    					'mail' => [
+    						'greeting'=>'Pengajuan DPL #'.$request->coupon_no,
+    						'content'=> 'Pengajuan DPL #'.$request->coupon_no,
     					]
     				];
     				foreach ($notified_users as $key => $email) {
-    					foreach ($email as $key => $mail) {
-    						event(new PusherBroadcaster($data, $mail));
+    					foreach ($email as $key2 => $mail) {
+                $data['email'] = $mail;
     						$apps_user = User::where('email',$mail)->first();
-    						$apps_user->notify(new PushNotif($data));
+                if(!empty($apps_user))
+    						  $apps_user->notify(new PushNotif($data));
     					}
-    					break;
     				}
     			}
 
@@ -925,7 +1260,7 @@ class ProductController extends Controller
     				'message' => 'New PO '.$notrx.' From '.auth()->user()->customer->customer_name,
     				'id' => $header->id,
     				'href' => route('order.notifnewpo')
-            ,'email' => [ 'greeting'=> "",
+            ,'mail' => [ 'greeting'=> "",
                             'content' => "",
                     		    'markdown'=> "emails.orders.create",
                     		    'attribute'=>	["so_headers"=>$header
@@ -934,23 +1269,25 @@ class ProductController extends Controller
                                           ,'customer'=>auth()->user()->customer->customer_name]
                         ]
     			];
-          event(new PusherBroadcaster($data, $userdistributor->email));
+          $data['email'] = $userdistributor->email;
           $userdistributor->notify(new PushNotif($data));
         }
         //notification to distributor
 
         Mail::to(Auth::user())->send(new CreateNewPo($header));
       }
-
-
-      //foreach($distributor->users as $u)
-      //{
-
-      //}
+    } catch (\Exception $e) {
+      DB::rollback();
+      throw $e;
+    } catch (\Throwable $e) {
+        DB::rollback();
+        throw $e;
+    }
+    DB::commit();
 
       //lepas session
-      Session::forget('cart');
-      Session::forget('distributor_to');
+      /*Session::forget('cart');
+      Session::forget('distributor_to');*/
       return redirect()->route('order.listPO');
     }
 

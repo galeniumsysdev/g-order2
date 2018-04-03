@@ -1,7 +1,7 @@
 var baseurl = window.Laravel.url; //$('#baseurl').val() ;
 function addCart(id)
 {
-  if(window.Laravel.auth.user)
+  if(window.Laravel.auth.user && parseFloat($('#qty-'+id).val())>0)
   {
     $('#addCart-'+id).hide();
     $.ajax({
@@ -18,20 +18,25 @@ function addCart(id)
              success: function(data) {
                if(data.result=="success")
                {
+                 $('#addCart-'+id).html("");
                  $('#shopcart').html(data.totline) ;
                  $('#shopcart2').html(data.totline) ;
+                 $('#addCart-'+id).html("<span class='btn btn-sm btn-info btn-block'><i class='fa fa-shopping-cart' aria-hidden='true'></i> "+$('#qty-'+id).val()+" "+$('#satuan-'+id).val()+"</span>");
                }else if(data.result=="exist"){
                  //alert("Item already exist in shopping cart");
                  swal ( "" ,  "Item already exist in shopping cart" ,  "error" );
+               }else if(data.result=="errdist"){
+                 //alert("Item already exist in shopping cart");
+                 swal ( "" ,  "Distributor not exist for type "+data.jns ,  "error" );
                }
-
              }
          });
-    $('#addCart-'+id).show();
+         $('#addCart-'+id).show();
+  }else if(parseFloat($('#qty-'+id).val())<=0){
+    swal ( "" ,  "Qty harus lebih besar dari 0" ,  "error" );
   }else{
       window.location.href =  baseurl+'/login';
   }
-
   return false;
 }
 
@@ -99,41 +104,32 @@ function getPrice(id){
     v_itemcode = data.itemcode;
     if(v_uom!=data.uomprimary || data.konversi!=1)
     {
-      if(v_itemcode.substr(0,2)=='43')
-      {
-        $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
-        if(data.price!=data.diskon)
-        {
-          $('#hrgcoret-'+id).html('');
-        }else{
-            $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
-        }
-
-      }else{
-        $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom+' ('+ data.konversi+' '+data.uomprimary+')');
-        if(data.price!=data.diskon)
-        {
-          $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
-        }else{
-          $('#hrgcoret-'+id).html('');
-        }
-      }
-
-      $('#hrg-'+id).val(data.price);
-      $('#disc-'+id).val(data.diskon);
+      $('#info-product-'+id).html('1 '+v_uom +' = '+data.konversi+' '+data.uomprimary);
     }else{
-      if(v_itemcode.substr(0,2)=='43')
-      {
-        $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom);
-        $('#hrgcoret-'+id).html('$ '+rupiah(data.price));
-      }else {
-        $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom);
-        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price));
-      }
-      $('#hrg-'+id).val(data.price);
-      $('#disc-'+id).val(data.diskon);
+      $('#info-product-'+id).html('');
     }
-      });
+    if(v_itemcode.substr(0,2)=='43')
+    {
+      $('#lblhrg-'+id).html('$ '+rupiah(data.diskon)+'/'+v_uom);
+      if(data.price!=data.diskon)
+      {
+          $('#hrgcoret-'+id).html('$ '+rupiah(data.price)+'/'+v_uom);
+      }else{
+          $('#hrgcoret-'+id).html('');
+      }
+
+    }else{
+      $('#lblhrg-'+id).html('Rp. '+rupiah(data.diskon)+'/'+v_uom);
+      if(data.price!=data.diskon)
+      {
+        $('#hrgcoret-'+id).html('Rp. '+rupiah(data.price)+'/'+v_uom);
+      }else{
+        $('#hrgcoret-'+id).html('');
+      }
+    }
+    $('#hrg-'+id).val(data.price);
+    $('#disc-'+id).val(data.diskon);
+  });
       $('#addCart-'+id).show();
 }
 
@@ -201,7 +197,6 @@ function inputreason()
   }
   return false;
 }
-
 
 /*
 $('#reject_PO').on('click',function(){

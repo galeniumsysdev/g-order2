@@ -42,6 +42,9 @@
     			{!! Form::open(['method' => 'DELETE','route' => ['users.destroy', $user->id],'style'=>'display:inline']) !!}
                 {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
             	{!! Form::close() !!}
+					@if(!empty($user->email) and Auth::user()->can('SuperUser'))
+						<a class="btn btn-warning" href="{{route('users.logOnAs',$user->id)}}" title="Log On As"><i class="fa fa-sign-in" aria-hidden="true"></i></a>
+					@endif
     		</td>
     	</tr>
     	@endforeach

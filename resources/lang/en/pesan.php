@@ -17,6 +17,8 @@ return [
     'delete' => 'Data has been removed.',
     'adddistributor' => "Don't forget to add Distributor!",
     'approve'=>"Outlet has been approved",
+    'inactive'=>"Distributor :dist has been inactive to customer :cust",
+    'distributoractive'=>"Distributor :dist has been active to customer :cust",
     'reject'=>"Outlet has been rejected",
     'successaddaddress' => 'Add address has been success',
     'successaddcontact' => 'Add contact has been success',
@@ -34,5 +36,7 @@ return [
     'successupload' => 'File successfully uploaded',
     'alreadyupload' => 'File has been uploaded!',
     'notmatchdpl' => 'Suggestion DPL No not match',
-    'itemexist' => 'item already exist in shopping cart'
+    'itemexist' => 'item already exist in shopping cart',
+    'nosplitline' => 'Please select min:1 line to be split!',
+    'errsplitall' => 'Failed to Split. To Split cannot select all line.'
 ];

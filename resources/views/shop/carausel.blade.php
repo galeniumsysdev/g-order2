@@ -1,12 +1,10 @@
-
 <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
-
 
   <!-- Wrapper for slides -->
   <div class="carousel-inner">
     @php ($i=0)
     @foreach($banners as $banner)
-    @php($i+=1)
+    @php ($i+=1)
     <div class="item {{$i==1?'active':''}}">
       <img src="{{asset($banner->image_path)}}" alt="Solusi Kemudahan Perawatan Kesehatan Anda" class="box">
       <div class="carousel-caption">
@@ -23,4 +21,5 @@
 	  <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
 		  <span class="fa fa-angle-right" aria-hidden="true"></span>
 	  </a>
-</div><!-- Carousel -->
+  </div><!-- Carousel -->
+</div>  

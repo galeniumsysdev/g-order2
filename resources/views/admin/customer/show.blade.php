@@ -1,4 +1,4 @@
-@extends('layouts.home')
+@extends('layouts.navbar_product')
 
 @section('content')
 <div class="container">
@@ -8,7 +8,7 @@
             <div class="panel panel-primary">
                 <div class="panel-heading">Customer</div>
                 <div class="panel-body">
-                      <form action="{{$notif_id}}" class="form-horizontal" method="post" role="form">
+                      <form action="{{route('customer.update',$user->id)}}" class="form-horizontal" method="post" role="form">
                           {{method_field('PATCH')}}
                           {{csrf_field()}}
                           <input type="hidden" value="{{$customer->id}}" id="customer_id">
@@ -17,7 +17,8 @@
                           <div class="form-group">
                             <label class="control-label col-sm-2" for="name">@lang('label.outlet') :</label>
                             <div class="col-sm-10">
-                              <p class="form-control">{{$customer->customer_name}}</p>
+                              <p class="form-control" id="cust-name">{{$customer->customer_name}}</p>
+                              <input type="hidden" id="old-cust-name" value="{{$customer->customer_name}}">
                             </div>
                           </div>
                           <div class="form-group">
@@ -65,12 +66,37 @@
                                       </div>
                                   </div>
                                   @endif
+                                  @if(Auth::user()->hasRole('Principal'))
+                                    <div class="form-group{{ $errors->has('c_number') ? ' has-error' : '' }}">
+                                        <label for="kategori" class="control-label col-sm-2">Oracle Customer No. :</label>
+
+                                        <div class="col-sm-10">
+                                          <div class="input-group col-sm-10">
+                                            <input type="text" name="c_number" id="customer-number" class="form-control" value="{{$customer->customer_number}}" autocomplete="off">
+                                            <span class="input-group-addon" id="change-custnum">
+                                              <i class="fa fa-times" aria-hidden="true"></i>
+                                            </span>
+                                            <input type="hidden" name="c_id" id="customer-id" class="form-control" value="{{$customer->oracle_customer_id}}">
+                                          </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id='data-oracle'>
+                                        <label for="c_name" class="control-label col-sm-2">Oracle Customer Name. :</label>
+
+                                        <div class="col-sm-10">
+                                          <input type="text" name="c_name" id="customer-name" class="form-control" value="{{$customer->customer_name}}" readonly='readonly'>
+                                        </div>
+                                    </div>
+                                  @endif
 
                                   <div class="form-group" id="status">
                                       @if(is_null($outletdist->approval))
                                       <div class="col-sm-12">
-                                        <button type="submit" id="reject-customer" class="btn btn-warning">@lang('label.reject')</button>
-                                        <button type="submit" id="approve-customer" class="btn btn-primary">@lang('label.approve')</button>
+                                        <!--<button type="button" name="save" value="reject" id="reject-customer" class="btn btn-warning">@lang('label.reject')</button>
+                                        <button type="button" name="save" value="approve" id="approve-customer" class="btn btn-primary">@lang('label.approve')</button>-->
+                                        @if(Auth::user()->hasRole('Principal'))
+                                        <button type="submit" name="save" value="save" id="save-customer" class="btn btn-primary">@lang('label.save')</button>
+                                        @endif
                                       </div>
 
                                       @elseif($outletdist->approval)
@@ -89,8 +115,8 @@
                                       <thead>
                                         <tr>
                                           <th width="60%">@lang('label.address')</th>
-                                          <th width="10%">@lang('label.city')</th>
-                                          <th width="5%">@lang('label.state')</th>
+                                          <th width="10%">@lang('label.city_regency')</th>
+                                          <th width="5%">@lang('label.urban_village')</th>
                                           <th width="5%">@lang('label.postalcode')</th>
                                         </tr>
                                       </thead>
@@ -151,5 +177,7 @@
 </div>
 @endsection
 @section('js')
+<script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
+<script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
 <script src="{{ asset('js/approvalcustomer.js') }}"></script>
 @endsection

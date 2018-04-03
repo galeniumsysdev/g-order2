@@ -9,8 +9,8 @@
   <form class="form" action="{{route('banner.store')}}" enctype="multipart/form-data" method="post" role="form" >
        {{csrf_field()}}
      <div class="form-group">
-       <label for="teks">Caption Teks</label>
-       <input type="text" class="form-control" name="caption" value="" placeholder"Teks yang mau ditampilkan.." required>
+       <label for="caption">Caption Teks</label>
+       <input type="text" class="form-control" name="caption" value="" placeholder="Teks yang mau ditampilkan.." required>
        @if ($errors->has('caption'))
            <span class="help-block">
                <strong>{{ $errors->first('caption') }}</strong>

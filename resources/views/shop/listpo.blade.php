@@ -1,4 +1,8 @@
 @extends('layouts.navbar_product')
+@section('css')
+<link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
+<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+@endsection
 @section('content')
 <div class="container">
   @if($status= Session::get('message'))
@@ -45,7 +49,7 @@
           </div>
           <div  class="form-group">
             <input type="submit" name="search" value="Search" class="btn btn-primary form-control">
-            @if($request->jns==2 and $request->status==1 and Auth::user()->hasRole('Principal'))
+            @if($request->jns==2  and Auth::user()->hasRole('Principal'))
               <input type="submit" name="excel" value="Create Excel" class="btn btn-success form-control">
             @endif
           </div>
@@ -58,13 +62,13 @@
 
             <h6 class="card-subtitle mb-2 text-muted">
                 @if($request->jns==1)
-                  Distibutor: <strong>{{$t->distributor_name}}</strong>
+                  @lang('shop.supplier'): <strong>{{$t->distributor_name}}</strong>
                 @elseif($request->jns==2)
                   Customer: <strong>{{$t->customer_name}}</strong>
                 @endif
             </h6>
             <p class="card-text"> @lang('shop.orderdate'):
-              <strong>{{date('d-M-Y',strtotime($t->tgl_order))}}</strong> | Amount: <strong>{{number_format($t->total_amount,2)}}</strong> | Status: <strong class="text-success">
+              <strong>{{date('d-M-Y',strtotime($t->tgl_order))}}</strong> | Amount: <strong>{{number_format($t->amount_confirm+$t->tax_amount,2)}}</strong> | Status: <strong class="text-success">
               @if($t->status==0 and $t->approve==1 and Auth::user()->hasRole('Principal'))
                 Menunggu Booked dari Oracle
               @else
@@ -87,11 +91,14 @@
 </div>
 @endsection
 @section('js')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
+<script src="{{ asset('js/moment-with-locales.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datetimepicker.min.js') }}"></script>
+<script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
+
 <script type="text/javascript">
-    $('.date').datepicker({
-       format: 'yyyy-mm-dd',
-       defaultDate: new Date()
-     });
+          $('.date').datetimepicker({
+              format: "YYYY-MM-DD",
+              
+          });
 </script>
 @endsection

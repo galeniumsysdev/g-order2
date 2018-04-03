@@ -105,6 +105,18 @@ function load_data(query,id)
 
   $(document).ready(function() {
     checkrole();
+    if($('#listdistributor').length){
+      	$('#listdistributor').DataTable({
+                  "fnDrawCallback": function(oSettings) {
+                      if (oSettings._iDisplayLength > oSettings.fnRecordsDisplay()) {
+                          $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                      }
+                  }
+              });
+          window.setTimeout(function(){
+              $(window).resize();
+          },2000);
+      }
     $('#search_text').keyup(function(){
       var search = $(this).val();
       var id = $('#user_id').val();
@@ -163,6 +175,22 @@ $('#reject-customer').on('click',function(){
   }
   return false;
 });
+
+function activedist(id)
+{
+  $('#distributor_id').val(id);
+  $('#action').val('active');
+  $( "#formcustomer" ).attr('action',baseurl+ "/customer/inactiveDistributor");
+  $( "#formcustomer" ).submit();
+}
+
+function inactivedist(id){
+  $('#distributor_id').val(id);
+  $('#action').val('inactive');
+   $( "#formcustomer" ).attr('action',baseurl+ "/customer/inactiveDistributor");
+   $( "#formcustomer" ).submit();
+}
+
 
 /*$('#edit-customer').on('click',function(){
   $.ajax({

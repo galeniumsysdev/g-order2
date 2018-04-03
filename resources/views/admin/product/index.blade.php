@@ -31,7 +31,9 @@
       <td>{{$product->title}}</td>
       <td>{{$product->satuan_primary}}</td>
       <td>
+        @if($product->categories->first())
         {{$product->categories->first()->description}}
+        @endif
       </td>
       <td><a class="btn btn-info btn-sm" href="{{route('product.master',$product->id)}}">Edit</a></td>
   </tr>

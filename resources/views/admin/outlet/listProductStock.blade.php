@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -17,16 +17,16 @@
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Product List</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.productList')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div class="product-list-buttons">
               <div class="row">
                 <div class="col-xs-6">
-                  <a href="{{ route('outlet.formProduct') }}" class="btn btn-default">Add Product</a>
-                  <a href="{{ route('outlet.importProduct') }}" class="btn btn-default">Import Product</a>
+                  <a href="{{ route('outlet.formProduct') }}" class="btn btn-default">@lang('outlet.addProduct')</a>
+                  <a href="{{ route('outlet.importProduct') }}" class="btn btn-default">@lang('outlet.importProduct')</a>
                 </div>
                 <div class="col-xs-6">
-                  <a href="{{ route('outlet.importProductStock') }}" class="btn btn-info pull-right">Import Stock</a>
+                  <a href="{{ route('outlet.importProductStock') }}" class="btn btn-info pull-right">@lang('outlet.importStock')</a>
                 </div>
               </div>
             </div>
@@ -34,9 +34,10 @@
               <table id="product-list" class="display responsive nowrap" width="100%">
                 <thead>
                   <tr>
-                    <th>Title</th>
-                    <th>Stok</th>
-                    <th>ID</th>
+                    <th>@lang('outlet.productName')</th>
+                    <th>@lang('outlet.stock')</th>
+                    <th>@lang('outlet.generic')</th>
+                    <th></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -45,13 +46,14 @@
                     <tr>
                       <td>{{ $cell['title'] }}</td>
                       <td>{!! $cell['stock'] !!}</td>
-                      <td>{{ $cell['op_id'] }}</td>
+                      <td>{!! $cell['generic'] !!}</td>
                       <td align="center">
                         @if ($cell['flag'] == 'outlet')
                         <a href="{{ route('outlet.formProduct',$cell['op_id']) }}" class="btn btn-primary">Edit</a>
                         <a href="{{ route('outlet.deleteProduct',$cell['op_id']) }}" class="btn btn-danger" onclick="if(!confirm('Are you sure want to delete \'{{ $cell['title'] }}\' and its histories?')){return false;}">Delete</a>
                         @endif
                       </td>
+                      <td>{!! $cell['flag'] !!}</td>
                     </tr>
                   @endforeach
                 </tbody>

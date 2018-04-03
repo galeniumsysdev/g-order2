@@ -1,7 +1,7 @@
-<!-- 
+<!--
 /**
 * created by WK Productions
-*/ 
+*/
 -->
 @extends('layouts.navbar_product')
 @section('content')
@@ -15,28 +15,33 @@
         {{$status}}
     </div>
   @endif
+  @if($status= Session::get('err'))
+    <div class="alert alert-warning">
+        {{$status}}
+    </div>
+  @endif
 
   <div class="container">
     <div class="row">
       <div class="col-md-12">
         <div class="panel panel-default">
-          <div class="panel-heading"><strong>Transaction</strong></div>
+          <div class="panel-heading"><strong>@lang('outlet.transaction')</strong></div>
           <div class="panel-body" style="overflow-x:auto;">
             <div id="tabs" class="simple-tabs">
               <ul>
-                <li><a href="#trx-in">Transaction In</a></li>
-                <li><a href="#trx-out">Transaction Out</a></li>
+                <li><a href="#trx-in">@lang('outlet.trxIn')</a></li>
+                <li><a href="#trx-out">@lang('outlet.trxOut')</a></li>
               </ul>
               <!-- Transaction In -->
-              <div id="trx-in"> 
+              <div id="trx-in">
                 <div class="form-wrapper">
-                  {!! Form::open(['url' => '/outlet/transaction/in/process', 'class'=>'form-trx']) !!}
+                  {!! Form::open(['url' => route('outlet.trxInProcess'), 'class'=>'form-trx']) !!}
                     <div class="form-group">
                       <div class="container-fluid">
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="trx-in-date">Transaction Date</label>
+                              <label for="trx-in-date">@lang('outlet.trxDate')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -66,7 +71,35 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-in">Quantity</label>
+                              <label for="batch-no">@lang('outlet.batchNo')</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            {{ Form::text('batch_no_in', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-in')) }}
+                          </div>                          
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-md-2">
+                            <div class="form-label">
+                              <label for="exp-date">@lang('outlet.ExpDate')</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            {{ Form::text('exp_date_in', '', array('class'=>'form-control exp_date','autocomplete'=>'off', 'id'=>'exp-date-in')) }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-md-2">
+                            <div class="form-label">
+                              <label for="qty-in">@lang('outlet.qty')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -74,6 +107,20 @@
                               {{ Form::number('qty_in', '', array('class'=>'form-control qty','autocomplete'=>'off', 'id'=>'qty-in', 'min'=>1, 'required'=>'required')) }}
                               <span class="add-on input-group-addon unit-sell" id="unit-sell-in"></span>
                             </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-md-2">
+                            <div class="form-label">
+                              <label for="qty-in">@lang('outlet.deliveryNo')</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            {{ Form::text('delivery_no_in', '', array('class'=>'form-control delivery-no','autocomplete'=>'off', 'id'=>'delivery-no-in')) }}
                           </div>
                         </div>
                       </div>
@@ -94,15 +141,15 @@
                 </div>
               </div>
               <!-- Transaction Out -->
-              <div id="trx-out"> 
+              <div id="trx-out">
                 <div class="form-wrapper">
-                  {!! Form::open(['url' => '/outlet/transaction/out/process', 'class'=>'form-trx']) !!}
+                  {!! Form::open(['url' => route('outlet.trxOutProcess'), 'class'=>'form-trx']) !!}
                     <div class="form-group">
                       <div class="container-fluid">
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="trx-out-date">Transaction Date</label>
+                              <label for="trx-out-date">@lang('outlet.trxDate')</label>
                             </div>
                           </div>
                           <div class="col-md-4">
@@ -116,7 +163,7 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="product-name-out">Product</label>
+                              <label for="product-name-out">@lang('outlet.product')</label>
                             </div>
                           </div>
                           <div class="col-md-4 product-container">
@@ -132,7 +179,22 @@
                         <div class="row">
                           <div class="col-md-2">
                             <div class="form-label">
-                              <label for="qty-out">Quantity</label>
+                              <label for="batch-out">@lang('outlet.batchNo')</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            {{ Form::text('batch_no_out', '', array('class'=>'form-control batch-no','autocomplete'=>'off', 'id'=>'batch-no-out')) }}
+                          </div>
+                          <div class="col-md-4" id="exp-date-out"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-md-2">
+                            <div class="form-label">
+                              <label for="qty-out">@lang('outlet.qty')</label>
                             </div>
                           </div>
                           <div class="col-md-4">

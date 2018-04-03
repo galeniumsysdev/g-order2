@@ -15,16 +15,6 @@
 					</div>
 					<div class="details col-sm-6">
 						<h3 class="product-title">{{$product->title}}</h3>
-						<!--<div class="rating">
-							<div class="stars">
-								<span class="fa fa-star checked"></span>
-								<span class="fa fa-star checked"></span>
-								<span class="fa fa-star checked"></span>
-								<span class="fa fa-star"></span>
-								<span class="fa fa-star"></span>
-							</div>
-							<span class="review-no">41 reviews</span>
-						</div>-->
 						<p class="product-description">
 							@if(config('app.locale')=="en")
 								{!!html_entity_decode($product->description_en)!!}
@@ -62,7 +52,15 @@
 							</select>
 						</div>
             <div class ="clearfix">
-              <a href="" onclick="addCart('{{$product->id}}');return false;" class="btn btn-success pull-right" role="button">Add to cart</a>
+							@if((Auth::user()->can('Create PO')))
+								@if($polineexist->where('product_id',$product->id)->count()>0)
+									 <span class="btn btn-sm btn-info btn-block"><i class="fa fa-shopping-cart" aria-hidden="true"></i> {{$polineexist->where('product_id',$product->id)->sum('qty_request')}}&nbsp; {{$polineexist->where('product_id',$product->id)->first()->uom}}</span>
+								@else
+									 <!--<a onclick="addCart('{{$product->id}}');return false;" href="#" class="btn btn-success btn-block"  role="button" id="addCart2-{{$product->id}}">@lang('shop.AddToCart')</a>-->
+									 <a href="" onclick="addCart('{{$product->id}}');return false;" class="btn btn-success pull-right" role="button" id="addCart2-{{$product->id}}">Add to cart</a>
+								@endif
+							@endif
+
             </div>
 						@endif
 					</div>
