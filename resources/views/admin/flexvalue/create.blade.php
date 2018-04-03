@@ -12,10 +12,9 @@
 
   <div class="form-group">
     <label for="name">Group</label>
-    <select name="master" class="form-control" required="required">
-      <option value="">--Pilih Salah Satu--</option>
-      @foreach($group as $g)
-      <option value="{{$g->master}}">{{$g->master}}</option>
+    <select name="master" class="form-control" required="required">      
+      @foreach($group as $key=>$g)
+      <option value="{{$key}}">{{$g}}</option>
       @endforeach
     </select>
     @if ($errors->has('master'))
