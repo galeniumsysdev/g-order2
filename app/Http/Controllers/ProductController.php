@@ -214,9 +214,9 @@ class ProductController extends Controller
                   and cat.parent not like 'TollIn')";
           }
           if (!empty(Auth::user()->customer->masa_berlaku)) $masaberlaku =Auth::user()->customer->masa_berlaku; else $masaberlaku = date_create("2017-01-01");
-          if(Auth::user()->customer->ijin_pbf==0 or $masaberlaku < now() ){
+          if(Auth::user()->customer->ijin_pbf==0 or $masaberlaku < \Carbon\Carbon::now()->toDateString() ){
             $sqlproduct .= " and p.tipe_dot not in ('BIRU','MERAH','HIJAU')";
-          }elseif(Auth::user()->customer->ijin_pbf==2 and  $masaberlaku >= now()){/*jika ijin toko bat*/
+          }elseif(Auth::user()->customer->ijin_pbf==2 and  $masaberlaku >= \Carbon\Carbon::now()->toDateString()){/*jika ijin toko bat*/
             $sqlproduct .= " and p.tipe_dot not in ('MERAH')";
           }
 
