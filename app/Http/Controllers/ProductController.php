@@ -213,6 +213,12 @@ class ProductController extends Controller
                   and cp.flex_value = cat.flex_value
                   and cat.parent not like 'TollIn')";
           }
+          if (!empty(Auth::user()->customer->masa_berlaku)) $masaberlaku =Auth::user()->customer->masa_berlaku; else $masaberlaku = date_create("2017-01-01");
+          if(Auth::user()->customer->ijin_pbf==0 or $masaberlaku < now() ){
+            $sqlproduct .= " and p.tipe_dot not in ('BIRU','MERAH','HIJAU')";
+          }elseif(Auth::user()->customer->ijin_pbf==2 and  $masaberlaku >= now()){/*jika ijin toko bat*/
+            $sqlproduct .= " and p.tipe_dot not in ('MERAH')";
+          }
 
           if(Auth::user()->hasRole('Apotik/Klinik') or Auth::user()->hasRole('Outlet'))
           {
@@ -226,11 +232,11 @@ class ProductController extends Controller
             {
               if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik']))
               {
-                $sqlproduct .= " and p.tipe_dot != ('Merah')";
+                $sqlproduct .= " and p.tipe_dot != 'MERAH'";
               }
               if(!in_array(Auth::user()->customer->categoryOutlet->name,['Apotik', 'PBF', 'Rumah Sakit/Klinik','Toko Obat Berijin']))
               {
-                $sqlproduct .= " and p.tipe_dot != ('Biru')";
+                $sqlproduct .= " and p.tipe_dot != 'BIRU'";
               }
             }
 
@@ -501,14 +507,15 @@ class ProductController extends Controller
   {
     //$product=Product::find($id);
     $categories = Category::where('enabled_flag','=','Y')->get();
+    $tipedot=array('NO DOT'=>'Tanpa Dot','HIJAU'=>'Hijau','BIRU'=>'Biru','MERAH'=>'Merah');
     $product = DB::table('products as p')
               ->leftjoin('category_products as cp','p.id','=','cp.product_id')
               ->leftjoin('categories as c', 'cp.flex_value','=','c.flex_value')
               ->where('p.id','=',$id)
-              ->select('p.id as id','p.title','p.itemcode','p.description','p.description_en','p.imagePath','p.satuan_primary','c.description as category_name','c.flex_value','c.parent','p.inventory_item_id','p.enabled_flag','p.pareto','p.long_description')
+              ->select('p.id as id','p.title','p.itemcode','p.description','p.description_en','p.imagePath','p.satuan_primary','c.description as category_name','c.flex_value','c.parent','p.inventory_item_id','p.enabled_flag','p.pareto','p.long_description','p.tipe_dot')
               ->first();
     //dd($product) ;
-    return view('admin.product.edit',['product' => $product,'categories'=>$categories,'menu'=>'product']);
+    return view('admin.product.edit',['product' => $product,'categories'=>$categories,'menu'=>'product','tipedot'=>$tipedot]);
   }
 
   public function update(Request $request,$id)
@@ -561,6 +568,7 @@ class ProductController extends Controller
     $product->description =$request->id_descr;
     $product->description_en =$request->en_descr;
     $product->long_description = $request->generik;
+    $product->tipe_dot=$request->dot_obat;
     $product->save();
     if($request->category){
       $product->categories()->detach();
@@ -1128,7 +1136,7 @@ class ProductController extends Controller
               $disc2 =$operand_product->operand;
               $amountdisc2=$tmpprice*$disc2/100;
               $tmpprice =$tmpprice-$amountdisc2;
-              echo "tempprice2".$tmpprice."<br>";
+              //echo "tempprice2".$tmpprice."<br>";
             }else{
               $disc2 =0;
               $amountdisc2=0;
@@ -1137,6 +1145,8 @@ class ProductController extends Controller
             if($tmpprice!=$product->unit_price)
             {
               DB::rollback();
+              $product->unit_price=$tmpprice;
+              $product->save();DB::commit();
               return redirect()->back()
                            ->with('msg','Please check price again!');
             }

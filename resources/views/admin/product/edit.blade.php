@@ -57,9 +57,17 @@
              </span>
          @endif
     </div>
-           <div class="thumbnail">
+     <div class="thumbnail">
            <img id="profile-img-tag" data-src="holder.js/100%x180" alt="100%x180" style="height: 180px; width: 180px; display: block;" src="{{ asset('img/'.$product->imagePath) }}" data-holder-rendered="true">
-           </div>
+     </div>
+     <div class="form-group">
+       <label for="description">Tipe Dot</label>
+       <select name="dot_obat" class="form-control">         
+         @foreach($tipedot as $key=>$tipe)
+         <option value="{{$key}}" {{$product->tipe_dot==$key?'selected':''}}>{{$tipe}}</option>
+         @endforeach
+       </select>
+     </div>
      <div class="form-group">
        <label for="pareto" class="control-label col-sm-2" style="text-align:left!important;padding-left:0px;">Pareto Product</label>
        <div class="col-sm-10">

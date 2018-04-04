@@ -27,15 +27,11 @@
   }
 }
 </style>
+<!-- Owl Stylesheets -->
+<link rel="stylesheet" href="{{asset('assets/owlcarousel/assets/owl.carousel.min.css')}}">
+<link rel="stylesheet" href="{{asset('assets/owlcarousel/assets/owl.theme.default.min.css')}}">
 @endsection
 @section('content')
-
-
-    <!-- Owl Stylesheets -->
-    <link rel="stylesheet" href="{{asset('assets/owlcarousel/assets/owl.carousel.min.css')}}">
-    <link rel="stylesheet" href="{{asset('assets/owlcarousel/assets/owl.theme.default.min.css')}}">
-
-
     <div class="container">
       @include('shop.carausel')
     </div>
@@ -46,6 +42,20 @@
     @php($flexfield->products = $flexfield->products->filter(function($p){
       return $p->getRealPrice(Auth::user()->id,$p->satuan_primary)>0;
     }))
+    @if (!empty(Auth::user()->customer->masa_berlaku))
+      @php($masaberlaku =Auth::user()->customer->masa_berlaku)
+    @else
+      @php($masaberlaku = date_create("2017-01-01"))
+    @endif
+    @if(Auth::user()->customer->ijin_pbf==0 or $masaberlaku < \Carbon\Carbon::now()->toDateString() ){
+      @php($flexfield->products = $flexfield->products->reject(function($p){
+        return in_array($p->tipe_dot,array('MERAH','BIRU','HIJAU'));
+      }))
+    @elseif(Auth::user()->customer->ijin_pbf==2 and  $masaberlaku >= \Carbon\Carbon::now()->toDateString()){
+      @php($flexfield->products = $flexfield->products->filter(function($p){
+        return $p->tipe_dot!='MERAH';
+      }))
+    @endif
     <div class="container">
       <br>
       <h4><strong>{{$flexfield->description}}</strong></h4>
