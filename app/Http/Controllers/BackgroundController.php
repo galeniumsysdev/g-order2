@@ -79,11 +79,26 @@ class BackgroundController extends Controller
                     $oraSO=$this->getSalesOrder($h->notrx,$sl);
                     if(!is_null($oraSO))
                     {
+                      if($oraSO->inventory_item_id!=$sl->inventory_item_id)
+                      {
+                        $newproducts = Product::where('inventory_item_id',$oraSO->inventory_item_id)->first();
+                        if($newproducts){
+                          $sl->product_id =$newproducts->id;
+                          $sl->inventory_item_id = $oraSO->inventory_item_id;
+                          $sl->uom_primary = $newproducts->satuan_primary;
+                          $sl->conversion_qty = $newproducts->getConversion($sl->uom);
+                        }
+                      }
                       echo "qty:".$oraSO->ordered_quantity."<br>";
                       $sl->qty_confirm =$oraSO->ordered_quantity_primary;
                       //$sl->qty_confirm_primary=$oraSO->ordered_quantity_primary;
-                      $sl->list_price=$oraSO->unit_list_price/$oraSO->ordered_quantity;
-                      $sl->unit_price=$oraSO->amount/$oraSO->ordered_quantity;
+                      if($oraSO->ordered_quantity!=0){
+                        $sl->list_price=$oraSO->unit_list_price/$oraSO->ordered_quantity;
+                        $sl->unit_price=$oraSO->amount/$oraSO->ordered_quantity;
+                      }else{
+                        $sl->list_price=$oraSO->unit_list_price;
+                        $sl->unit_price=$oraSO->amount;
+                      }
                       $sl->tax_amount=$oraSO->tax_value;
                       $sl->amount=$oraSO->unit_list_price;
                       $sl->disc_reg_amount = null;
@@ -1084,7 +1099,7 @@ class BackgroundController extends Controller
       echo "notrx:".$notrx.", uom:".$line->uom."<br>";
       $connoracle = DB::connection('oracle');
       if($connoracle){
-        $oraSO=$connoracle->selectone("select sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) as ordered_quantity
+        $oraSO=$connoracle->selectone("select ola.inventory_item_id, sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) as ordered_quantity
                   , sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom_primary."')) as ordered_quantity_primary
                   , sum(ordered_quantity*unit_selling_price) as amount
                   , sum(ordered_quantity*unit_list_price) as unit_list_price
@@ -1094,11 +1109,13 @@ class BackgroundController extends Controller
                 where oha.headeR_id=ola.header_id
                     and nvl(ola.attribute1,oha.orig_sys_document_ref) = '".$notrx."'
                     and nvl(ola.attribute2,ola.orig_sys_line_ref) = '".$line->line_id."'
-                    and ola.inventory_item_id = '".$line->inventory_item_id."'
                     and ola.line_category_code ='ORDER'
-                    and nvl(ola.CANCELLED_FLAG,'N')='N'
+                    and nvl(oha.CANCELLED_FLAG,'N')='N'
                     and oha.flow_status_code ='BOOKED'
-                having sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) <> 0");
+                group by ola.inventory_item_id
+                ");
+                //and ola.inventory_item_id = '".$line->inventory_item_id."'
+                //having sum(ordered_quantity*inv_convert.inv_um_convert(ola.inventory_item_id,ola.order_quantity_uom, '".$line->uom."')) <> 0
 
         if($oraSO)
         {
@@ -1186,11 +1203,11 @@ class BackgroundController extends Controller
                         ->whereNull('ola.attribute1')
                         ->whereNull('ola.attribute2')
                         ->where('ola.line_category_code','=','ORDER')
-                        ->whereExists(function($query){
+                      /*  ->whereExists(function($query){
                             $query->select(DB::raw(1))
                                   ->from('oe_price_adjustments as opa')
                                   ->whereRaw(' opa.header_id=ola.headeR_id and opa.line_id = ola.line_id');
-                        })
+                        })*/
                         ->select('ola.headeR_id', 'ola.line_id', 'ola.ORDERED_QUANTITY', 'ola.INVENTORY_ITEM_ID'
                                 , 'ola.ORDERED_QUANTITY', 'ola.unit_list_price'
                                 , 'ola.ORDER_QUANTITY_UOM', 'ola.unit_selling_price'
