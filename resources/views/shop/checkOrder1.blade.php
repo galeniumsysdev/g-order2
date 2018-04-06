@@ -176,7 +176,11 @@
                                 <input type="hidden" name="uom[{{$id}}]" value="{{ $uom }}">
                             </td>
                   					<td data-th="@lang('shop.qtyorder')" class="text-center xs-only-text-left">
+                                @if($header->status>0)
+                                {{ (float)$qtyconfirm }}
+                                @else
                                 {{ (float)$qtyrequest }}
+                                @endif
                   					</td>
 
                             @if($header->status>0 or (Auth::user()->customer_id==$header->distributor_id and $header->status==0))
