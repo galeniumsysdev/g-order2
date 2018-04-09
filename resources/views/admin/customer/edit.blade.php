@@ -166,7 +166,39 @@
                       											@endif
                                         </div>
                                       </div>
+                                  <div class="form-group">
+                                    <label class="control-label col-sm-2" for="ijin_pbf">Berijin :</label>
+                                    <div class="col-sm-4">
+                                       @foreach($dataijin as $key=>$value)
+                                        <input type="radio"  name="ijin_pbf" value="{{$key}}" {{old('ijin_pbf')?old('ijin_pbf'):$customer->ijin_pbf==$key?"checked=checked":""}}> {{$value}}<br>
+                                       @endforeach
+                                    </div>
+                                  </div>
 
+                                  <div class="form-group" id="ijin_flag">
+                                    <label class="control-label col-sm-2" for="noijin">No Ijin :</label>
+                                    <div class="col-sm-4 {{$errors->has('noijin')?'has-error':''}}" >
+                                      <input type="text" name="noijin" class="form-control" value="{{old('noijin')?old('noijin'):$customer->no_ijin}}">
+                                      @if ($errors->has('noijin'))
+                                          <span class="help-block">
+                                              <strong>{{ $errors->first('noijin') }}</strong>
+                                          </span>
+                                      @endif
+                                    </div>
+                                    <label class="control-label col-sm-2" for="expdate">Masa Berlaku :</label>
+                                    <div class="input-group col-sm-3 date {{$errors->has('masaberlaku')?'has-error':''}}" id="datetimepicker1">
+                                      <input type="text" name="masaberlaku" class="form-control" value="{{is_null(old('masaberlaku')?old('masaberlaku'):$customer->masa_berlaku)?'':(old('masaberlaku')?old('masaberlaku'):date_format(date_create($customer->masa_berlaku),'%d %F %Y'))}}" autocomplete="off" id="masaberlaku">
+                                      <span class="input-group-addon">
+                                          <span class="glyphicon glyphicon-calendar"></span>
+                                      </span>
+                                      @if ($errors->has('masaberlaku'))
+                                          <div><label class="help-block text-danger">
+                                              <strong>{{ $errors->first('masaberlaku') }}</strong>
+                                          </label></div>
+                                      @endif
+
+                                    </div>
+                                  </div>
 
 
                                     @if($customer->Status=="R")
@@ -336,6 +368,10 @@ window.Laravel = {
 <script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
 <link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css">
+<link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
+<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+<script src="{{ asset('js/moment-with-locales.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datetimepicker.min.js') }}"></script>
 
 <script src="{{ asset('js/customer.js') }}"></script>
 <script>

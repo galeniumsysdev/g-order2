@@ -43,6 +43,7 @@ class CustomerController extends Controller
       ->select('role_user.role_id')
       ->where('Users.id','=',$id)
       ->first();
+    $dataijin = array(0=>'Tidak Berijin',1=>'Ijin PBF',2=>'Ijin Toko Obat');
     if (isset($user->customer_id)){
       $customer = $user->customer;
       $customer_contacts = $customer->contact()->where('contact_type','<>', 'EMAIL')->get();
@@ -82,7 +83,7 @@ class CustomerController extends Controller
                         ->select ('c.id as distributor_id','c.customer_name as distributor_name','b.approval','b.keterangan','b.inactive','b.end_date_active')
                         ->where('d.id','=',$id)
                         ->get();
-          return view('admin.customer.edit',compact('user','customer','customer_contacts','customer_email','customer_sites','categories','roles','groupdcs','groupdcid','roleid','distributors','notif_id'));
+          return view('admin.customer.edit',compact('user','customer','customer_contacts','customer_email','customer_sites','categories','roles','groupdcs','groupdcid','roleid','distributors','notif_id','dataijin'));
       }elseif(Auth::user()->ability(array('Distributor', 'Principal', 'Distributor Cabang','IT Galenium'),'')  )
       {
           if($customer->categoryOutlet){
@@ -100,7 +101,7 @@ class CustomerController extends Controller
           if(Auth::user()->hasRole('IT Galenium')) {
               $menu = "custYasa";
               //return redirect()->route('')
-              return view('admin.oracle.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','notif_id','menu'))
+              return view('admin.oracle.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','notif_id','menu','dataijin'))
               ->withMessage('Data Berhasil diubah');
           }
           $outletdist = OutletDistributor::where([
@@ -109,7 +110,7 @@ class CustomerController extends Controller
             ])->first();
 
             if($outletdist){
-              return view('admin.customer.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','outletdist','notif_id'));
+              return view('admin.customer.show',compact('user','customer','email','categoryoutlet','subgroupname','groupdc','customer_sites','customer_contacts','outletdist','notif_id','dataijin'));
             }else{
               abort(403, 'Unauthorized action.');
             }
@@ -247,6 +248,12 @@ class CustomerController extends Controller
           Image::make($avatar)->resize(300, 300)->save( public_path('uploads/avatars/' . $filename));
           $user->avatar = $filename;
         }
+        if($request->ijin_pbf!=0){
+          $this->validate($request, [
+              'noijin' => 'required',
+              'masaberlaku' =>'required|date',
+          ]);
+        }
 
         if(isset($request->name)) $user->name=$request->name;
         $user->save();
@@ -257,7 +264,15 @@ class CustomerController extends Controller
         $customer->tax_reference = $request->npwp;
         if (isset($request->name)) $customer->customer_name = $request->name;
         $customer->outlet_type_id =$request->category;
-
+        if($request->ijin_pbf!=0){
+          $customer->ijin_pbf=$request->ijin_pbf;
+          $customer->no_ijin=$request->noijin;
+          $customer->masa_berlaku=date('Y-m-d',strtotime($request->masaberlaku));
+        }else{
+          $customer->ijin_pbf=$request->ijin_pbf;
+          $customer->no_ijin=null;
+          $customer->masa_berlaku=null;
+        }
         $sites = $customer->sites()->where('primary_flag','=','Y')->first();
         if($sites)
         {

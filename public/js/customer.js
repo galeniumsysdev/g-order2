@@ -1,4 +1,10 @@
 var baseurl = $('#baseurl').val() ;
+if($('#masaberlaku').length){
+    $('#datetimepicker1').datetimepicker({
+        format: "DD MMMM YYYY",
+        locale: "en"
+    });
+}
 function ubah(old){
     var cat_id =$('#groupdc').val();
     $.get(baseurl+'/ajax-subcat?cat_id='+cat_id,function(data){
@@ -104,6 +110,19 @@ function load_data(query,id)
 
 
   $(document).ready(function() {
+    if ($('input[type=radio][name=ijin_pbf]:checked').val()!=0) {
+        $('#ijin_flag').show();
+    }else{
+        $('#ijin_flag').hide();
+    }
+    $('input[type=radio][name=ijin_pbf]').change(function() {
+         if (this.value == 0) {
+             $('#ijin_flag').hide();
+         }
+         else {
+             $('#ijin_flag').show();
+         }
+     });
     checkrole();
     if($('#listdistributor').length){
       	$('#listdistributor').DataTable({
