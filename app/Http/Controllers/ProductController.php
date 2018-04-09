@@ -611,10 +611,11 @@ class ProductController extends Controller
         return view('shop.shopping-cart',['products'=>null]);
       }
       $oldCart = Session::get('cart');*/
-      $distributorid = $request->dist;
-      if($distributorid=='')
+      if ($request->isMethod('get')) $distributorid = $request->old('dist_id');
+      else $distributorid = $request->dist_id;
+      if($distributorid=='' and $request->isMethod('post'))
       {
-        return redirect()->back()->withInput()->withErrors(['dist'=>'Distributor is required']);
+        return redirect()->back()->withInput()->withErrors(['dist_id'=>'Distributor is required']);
       }
       $headerpo = PoDraftHeader::where('customer_id','=',Auth::user()->customer_id)->first();
       if($headerpo){
