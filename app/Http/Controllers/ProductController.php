@@ -1015,20 +1015,20 @@ class ProductController extends Controller
             }
 
           }else{
-            return redirect()->back()->with('msg', 'Ship to not found');
+            return redirect()->back()->withInput()->with('msg', 'Ship to not found');
           }
           $alamatbillto=$request->billto;
           if ($alamatbillto=="")
           {
             //redirect back
-              return redirect()->back()->with('msg', 'Bill to not found');
+              return redirect()->back()->withInput()->with('msg', 'Bill to not found');
           }else{
             $oraclebillid = CustomerSite::where('id','=',$alamatbillto)->select('site_use_id')->first();
             if($oraclebillid)
             {
               $billid = $oraclebillid->site_use_id;
             }else{
-                return redirect()->back()->with('msg', 'Bill to not found');
+                return redirect()->back()->withInput()->with('msg', 'Bill to not found');
             }
           }
         }
@@ -1149,6 +1149,7 @@ class ProductController extends Controller
               $product->unit_price=$tmpprice;
               $product->save();DB::commit();
               return redirect()->back()
+                          ->withInput()
                            ->with('msg','Please check price again!');
             }
           }else{
