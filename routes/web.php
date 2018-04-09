@@ -83,7 +83,7 @@ Route::get('/shopping-cart',[
     'uses' => 'ProductController@getCart'
     ,'as' => 'product.shoppingCart'
   ]);
-  Route::post('/checkout/{distributorid?}',[
+  Route::match(['get','post'],'/checkout/{distributorid?}',[
       'uses' => 'ProductController@checkOut'
       ,'as' => 'product.checkOut'
     ]);
