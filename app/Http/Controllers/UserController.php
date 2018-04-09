@@ -197,7 +197,7 @@ class UserController extends Controller
     public function oracleIndex()
     {
         $customers = Customer::whereNotNull('oracle_customer_id')
-                    ->where('status','=','A')
+                    //->where('status','=','A')
                     ->orderBy('customer_name','asc')->get();
           /*$customers = DB::table('customers as c')->leftjoin('users as u','c.id','=','u.customer_id')->leftjoin('role_user as ru','u.id','=','ru.user_id')
                       ->leftjoin('roles as r','ru.role_id','=','r.id')
@@ -213,7 +213,7 @@ class UserController extends Controller
     {
       DB::enableQueryLog();
         $groupid=null;
-        $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+        $customer = Customer::whereNotNull('oracle_customer_id')//->where('status','=','A')
                     ->where('id','=',$id)
                     ->orderBy('customer_name','asc')->first();
         $provinces = DB::table('provinces')->get();
@@ -237,14 +237,15 @@ class UserController extends Controller
               				$join->on('distributor_mappings.data_id','=','co.id');
               				$join->on('distributor_mappings.data','=',DB::raw("'category_outlets'"));
               			})
-                    ->where('distributor_id','=',$customer->id)
+                    ->where('distributor_id','=',$id)
                     ->select('distributor_mappings.id','data',db::raw("case when data = 'regencies' then r.name else co.name end name"))
                     ->get();
+        $dataijin = array(0=>'Tidak Berijin',1=>'Ijin PBF',2=>'Ijin Toko Obat');
         return view('admin.oracle.customershow',['customer'=>$customer,'customer_sites'=>$customer_sites
                                                 ,'customer_contacts'=>$customer_contacts,'roles'=>$roles
                                                 ,'principals'=>$principals,'mappings'=>$mappings
                                                 ,'menu'=>'customer-oracle','groups'=>$group,'groupid'=>$groupid
-                                                , 'provinces'=>$provinces,'categories'=>$categories
+                                                , 'provinces'=>$provinces,'categories'=>$categories,'dataijin'=>$dataijin
                                               ]);
     }
 
@@ -255,10 +256,24 @@ class UserController extends Controller
         //dd($request->all());
         if($request->save_customer=="Send" or $request->save_customer=="Save")
         {
-          $customer = Customer::whereNotNull('oracle_customer_id')->where('status','=','A')
+          $customer = Customer::whereNotNull('oracle_customer_id')//->where('status','=','A')
                       ->where('id','=',$id)
                       ->orderBy('customer_name','asc')->first();
           //dd($customer);
+          if($request->ijin_pbf!=0)
+          {
+            $this->validate($request, [
+                'noijin' => 'required',
+                'masaberlaku' =>'required|date',
+            ]);
+            $customer->ijin_pbf=$request->ijin_pbf;
+            $customer->no_ijin=$request->noijin;
+            $customer->masa_berlaku=date('Y-m-d',strtotime($request->masaberlaku));
+          }else{
+            $customer->ijin_pbf=$request->ijin_pbf;
+            $customer->no_ijin=null;
+            $customer->masa_berlaku=null;
+          }
           if($customer->customer_class_code=="OUTLET" and $request->psc_flag=="1")
           {
             $this->validate($request, [
@@ -273,6 +288,10 @@ class UserController extends Controller
           $customer->export_flag = $request->export_flag;
           $customer->tollin_flag = $request->tollin_flag;
           $customer->price_list_id = $request->price;
+          if($request->status=="A")
+          {
+            $customer->status='A';
+          }else $customer->status='I';
           $customer->save();
           if($request->distributor!="")
           {
@@ -286,6 +305,8 @@ class UserController extends Controller
               $this->validate($request, [
                   'email' => 'required|email|unique:users,email,'.$usercustomer->id
               ]);
+              if($request->status=="A" and $usercustomer->register_flag==1) $usercustomer->validate_flag=1;
+              elseif($request->status!="A" and $usercustomer->register_flag==1) $usercustomer->validate_flag=0;
               $usercustomer->email = $request->email;
               $usercustomer->save();
           }else{

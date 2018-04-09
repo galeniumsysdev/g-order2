@@ -1,4 +1,10 @@
 var baseurl = window.Laravel.url;
+if($('#masaberlaku').length){
+    $('#datetimepicker1').datetimepicker({
+        format: "DD MMMM YYYY",
+        locale: "en"
+    });
+}
 $(function() {
     $('#addMapping').on("show.bs.modal", function (e) {
       if($(e.relatedTarget).data('id')=="kombinasi"){
@@ -77,7 +83,21 @@ function getAllCategories(){
 
   }
 }
+
 $(document).ready(function() {
+  if ($('input[type=radio][name=ijin_pbf]:checked').val()!=0) {
+      $('#ijin_flag').show();
+  }else{
+      $('#ijin_flag').hide();
+  }
+  $('input[type=radio][name=ijin_pbf]').change(function() {
+       if (this.value == 0) {
+           $('#ijin_flag').hide();
+       }
+       else {
+           $('#ijin_flag').show();
+       }
+   });
   $('#province-div').hide();
   var table=  $('#mapping-table').DataTable({
           "processing": true,
