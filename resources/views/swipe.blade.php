@@ -47,11 +47,11 @@
     @else
       @php($masaberlaku = date_create("2017-01-01"))
     @endif
-    @if(Auth::user()->customer->ijin_pbf==0 or $masaberlaku < \Carbon\Carbon::now()->toDateString() ){
+    @if(Auth::user()->customer->ijin_pbf==0 or $masaberlaku < \Carbon\Carbon::now()->toDateString() )
       @php($flexfield->products = $flexfield->products->reject(function($p){
         return in_array($p->tipe_dot,array('MERAH','BIRU','HIJAU'));
       }))
-    @elseif(Auth::user()->customer->ijin_pbf==2 and  $masaberlaku >= \Carbon\Carbon::now()->toDateString()){
+    @elseif(Auth::user()->customer->ijin_pbf==2 and  $masaberlaku >= \Carbon\Carbon::now()->toDateString())
       @php($flexfield->products = $flexfield->products->filter(function($p){
         return $p->tipe_dot!='MERAH';
       }))
