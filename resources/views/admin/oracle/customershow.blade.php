@@ -5,6 +5,8 @@ input[type="text"]:readonly {
   background: #dddddd;
 }
 </style>
+<link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
+<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
 @endsection
 @section('content')
     <div class="row" >
@@ -66,23 +68,19 @@ input[type="text"]:readonly {
                             <div class="col-sm-4">
                               <input type="text" name="tax" class="form-control" value="{{$customer->tax_reference}}" readonly>
                             </div>
+                            <label class="control-label col-sm-2" for="npwp">PKP/Non PKP :</label>
+                            <div class="col-sm-4">
+                              <input type="text" name="category_code" class="form-control" value="{{$customer->customer_category_code}}" readonly>
+                            </div>
                           </div>
                           <div class="form-group">
                             <label class="control-label col-sm-2" for="npwp">Customer Number :</label>
                             <div class="col-sm-4">
                               <input type="text" name="customer_number" value="{{$customer->customer_number}}" class="form-control" readonly>
                             </div>
-                          </div>
-                          <div class="form-group">
                             <label class="control-label col-sm-2" for="npwp">Classification :</label>
                             <div class="col-sm-4">
                               <input type="text" name="customer_class_code" class="form-control" value="{{$customer->customer_class_code}}" readonly>
-                            </div>
-                          </div>
-                          <div class="form-group">
-                            <label class="control-label col-sm-2" for="npwp">PKP/Non PKP :</label>
-                            <div class="col-sm-4">
-                              <input type="text" name="category_code" class="form-control" value="{{$customer->customer_category_code}}" readonly>
                             </div>
                           </div>
                           <div class="form-group">
@@ -99,17 +97,6 @@ input[type="text"]:readonly {
                                 @endforeach
                               </select>
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label class="control-label col-sm-2" for="pscpharma">Jenis Produk :</label>
-                            <div class="col-sm-10">
-                                 <input type="checkbox"  name="pharma_flag" value="1" {{$customer->pharma_flag=="1"?"checked=checked":""}} > Non PSC/Pharma<br>
-                                 <input type="checkbox"  name="psc_flag" value="1"  {{$customer->psc_flag=="1"?"checked=checked":""}}> PSC<br>
-                                 <input type="checkbox"  name="export_flag" value="1" {{$customer->export_flag=="1"?"checked=checked":""}}> Export<br>
-                                 <input type="checkbox"  name="tollin_flag" value="1" {{$customer->tollin_flag=="1"?"checked=checked":""}}> Toll-In<br>
-                            </div>
-                          </div>
-                          <div class="form-group">
                             <label class="control-label col-sm-2" for="pscpharma">Distributor :</label>
                             <div class="col-sm-4">
                                  <select name="distributor" class="form-control">
@@ -120,11 +107,51 @@ input[type="text"]:readonly {
                                  </select>
                             </div>
                           </div>
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="pscpharma">Jenis Produk :</label>
+                            <div class="col-sm-4">
+                                 <input type="checkbox"  name="pharma_flag" value="1" {{$customer->pharma_flag=="1"?"checked=checked":""}} > Non PSC/Pharma<br>
+                                 <input type="checkbox"  name="psc_flag" value="1"  {{$customer->psc_flag=="1"?"checked=checked":""}}> PSC<br>
+                                 <input type="checkbox"  name="export_flag" value="1" {{$customer->export_flag=="1"?"checked=checked":""}}> Export<br>
+                                 <input type="checkbox"  name="tollin_flag" value="1" {{$customer->tollin_flag=="1"?"checked=checked":""}}> Toll-In<br>
+                            </div>
+                            <label class="control-label col-sm-2" for="ijin_pbf">Berijin :</label>
+                            <div class="col-sm-4">
+                               @foreach($dataijin as $key=>$value)
+                                <input type="radio"  name="ijin_pbf" value="{{$key}}" {{(old('ijin_pbf')?old('ijin_pbf'):$customer->ijin_pbf)==$key ?"checked=checked":""}}> {{$value}}<br>
+                               @endforeach
+                            </div>
+                          </div>
+                          <div class="form-group" id="ijin_flag">
+                            <label class="control-label col-sm-2" for="noijin">No Ijin :</label>
+                            <div class="col-sm-4">
+                              <input type="text" name="noijin" class="form-control" value="{{$customer->no_ijin}}">
+                              @if ($errors->has('noijin'))
+                                  <span class="help-block">
+                                      <strong>{{ $errors->first('noijin') }}</strong>
+                                  </span>
+                              @endif
+                            </div>
+                            <label class="control-label col-sm-2" for="expdate">Masa Berlaku :</label>
+                            <div class="input-group col-sm-3 date" id="datetimepicker1">
+                              <input type="text" name="masaberlaku" class="form-control" value="{{is_null($customer->masa_berlaku)?'':date_format(date_create($customer->masa_berlaku),'%d %F %Y')}}" autocomplete="off" id="masaberlaku">
+                              <span class="input-group-addon">
+                                  <span class="glyphicon glyphicon-calendar"></span>
+                              </span>
+                            </div>
+                            <div>
+                              @if ($errors->has('masaberlaku'))
+                                  <br><span class="help-block">
+                                      <strong>{{ $errors->first('masaberlaku') }}</strong>
+                                  </span>
+                              @endif
+                            </div>
+                          </div>
 
                           @if($customer->customer_class_code=="OUTLET")
                           <div class="form-group" id="divkategori">
                               <label for="kategori" class="control-label col-sm-2"><strong>@lang('label.category') :</strong></label>
-                              <div class="col-sm-10">
+                              <div class="col-sm-4">
                                   <select class="form-control" name="categoryoutlet" required>
                                     @foreach($categories as $category)
                                                           @if($customer->outlet_type_id==$category->id)
@@ -186,6 +213,12 @@ input[type="text"]:readonly {
                             </div>
                           </div>
 
+                          <div class="form-group">
+                            <label class="control-label col-sm-2" for="status">Status :</label>
+                            <div class="col-sm-4">
+                              <input type="checkbox" name="status" value="A" class="form-check-input" {{$customer->Status=='A'?'checked=checked':''}}> Aktif
+                            </div>
+                          </div>
 
                           <div class="form-group" id="status">
                               <div class="col-sm-12">
@@ -416,6 +449,8 @@ input[type="text"]:readonly {
 <script src="//cdn.datatables.net/responsive/2.2.0/js/dataTables.responsive.min.js"></script>
 <link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.0/css/responsive.dataTables.min.css">
+<script src="{{ asset('js/moment-with-locales.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datetimepicker.min.js') }}"></script>
 <script src="{{ asset('js/customeroracle.js') }}"></script>
 
 <script type="text/javascript">

@@ -88,6 +88,39 @@
                                         </div>
                                     </div>
                                   @endif
+                                  <div class="form-group">
+                                    <label class="control-label col-sm-2" for="ijin_pbf">Berijin :</label>
+                                    <div class="col-sm-4">
+                                       @foreach($dataijin as $key=>$value)
+                                        <input type="radio"  name="ijin_pbf" value="{{$key}}" {{old('ijin_pbf')?old('ijin_pbf'):$customer->ijin_pbf==$key?"checked=checked":""}}> {{$value}}<br>
+                                       @endforeach
+                                    </div>
+                                  </div>
+
+                                  <div class="form-group" id="ijin_flag">
+                                    <label class="control-label col-sm-2" for="noijin">No Ijin :</label>
+                                    <div class="col-sm-4 {{$errors->has('noijin')?'has-error':''}}" >
+                                      <input type="text" name="noijin" class="form-control" value="{{old('noijin')?old('noijin'):$customer->no_ijin}}">
+                                      @if ($errors->has('noijin'))
+                                          <span class="help-block">
+                                              <strong>{{ $errors->first('noijin') }}</strong>
+                                          </span>
+                                      @endif
+                                    </div>
+                                    <label class="control-label col-sm-2" for="expdate">Masa Berlaku :</label>
+                                    <div class="input-group col-sm-3 date {{$errors->has('masaberlaku')?'has-error':''}}" id="datetimepicker1">
+                                      <input type="text" name="masaberlaku" class="form-control" value="{{is_null(old('masaberlaku')?old('masaberlaku'):$customer->masa_berlaku)?'':(old('masaberlaku')?old('masaberlaku'):date_format(date_create($customer->masa_berlaku),'%d %F %Y'))}}" autocomplete="off" id="masaberlaku">
+                                      <span class="input-group-addon">
+                                          <span class="glyphicon glyphicon-calendar"></span>
+                                      </span>
+                                      @if ($errors->has('masaberlaku'))
+                                          <div><label class="help-block text-danger">
+                                              <strong>{{ $errors->first('masaberlaku') }}</strong>
+                                          </label></div>
+                                      @endif
+
+                                    </div>
+                                  </div>
 
                                   <div class="form-group" id="status">
                                       @if(is_null($outletdist->approval))
@@ -180,4 +213,7 @@
 <script src="{{ asset('js/bootstrap3-typeahead.min.js') }}"></script>
 <script src="{{ asset('js/ui/1.12.1/jquery-ui.js') }}"></script>
 <script src="{{ asset('js/approvalcustomer.js') }}"></script>
+<link href="{{ asset('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
+<link href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+<script src="{{ asset('js/moment-with-locales.js') }}"></script>
 @endsection

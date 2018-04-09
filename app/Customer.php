@@ -11,7 +11,7 @@ class Customer extends Model
   public $incrementing = false;
   protected $fillable = [
       'id','customer_number', 'customer_name','oracle_customer_id', 'status', 'customer_category_code','customer_class_code','primary_salesrep_id','tax_reference','tax_code','price_list_id','order_type_id','customer_name_phonetic','pharma_flag','psc_flag'
-      ,'outlet_type_id','subgroup_dc_id','longitude','langitude','id_approval_psc','id_approval_pharma','date_approval_psc','date_approval_pharma','keterangan','export_flag','tollin_flag','parent_dist','payment_term_name','created_by','last_update_by'
+      ,'outlet_type_id','subgroup_dc_id','longitude','langitude','id_approval_psc','id_approval_pharma','date_approval_psc','date_approval_pharma','keterangan','export_flag','tollin_flag','parent_dist','payment_term_name','created_by','last_update_by','ijin_pbf','no_ijin','masa_berlaku'
   ];
 
   public function users()
