@@ -12,7 +12,7 @@
   @if($products)
   <form class="form-horizontal" action="{{route('product.checkOut')}}" method="post">
     {{ csrf_field() }}
-  <div class="row">
+  <div>
         <div class="col-sm-8 col-md-8 col-md-offset-2 col-sm-offset-2">
           <div class="form-group {{ $errors->has('dist') ? ' has-error' : '' }}">
             <label class="control-label col-sm-3" for="no_order">@lang('shop.supplier') :</label>
@@ -35,7 +35,7 @@
           </div>
         </div>
   </div>
-  <div class="row">
+  <div>
     <div class="col-sm-8 col-md-8 col-md-offset-2 col-sm-offset-2">
       <table id="cart" class="table table-hover table-condensed">
   			<thead>
@@ -53,7 +53,7 @@
           @php ($id  = $product->product_id."-".$product->uom)
   				<tr>
   					<td data-th="@lang('shop.Product')">
-  						<div class="row">
+  						<div>
   							<div class="col-sm-2 hidden-xs"><img src="{{ asset('img//'.$product->item->imagePath) }}" alt="..." class="img-responsive"/></div>
   							<div class="col-sm-10">
                   <input type="hidden" value="{{$product->product_id}}" id="id-{{$product->product_id}}">
@@ -123,7 +123,7 @@
 </div>
 </form>
   @else
-    <div class="row">
+    <div>
       <div class="col-sm-6 col-md-6 col-md-offset-3 col-sm-offset-3">
         <h2>@lang('shop.NoItem')</h2>
       </div>
