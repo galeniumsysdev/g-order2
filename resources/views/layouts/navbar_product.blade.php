@@ -75,15 +75,8 @@
                       @if(Auth::user()->can('Create PO'))
                         <ul class="nav navbar-right-xs pull-right visible-xs">
                           <li>
-<<<<<<< HEAD
-                            <!--<a href="{{url('/home')}}" title="@lang('label.showall') Notification"><i class="fa fa-bell fa-lg"></i>
-                            &nbsp;<span class="badge">{{count(Auth::user()->unreadNotifications)}}</span>
-                          </a>-->
-                          <notification :email="{{json_encode(Auth::user()->email)}}" :count="{{json_encode(count(Auth::user()->unreadNotifications))}}" :notif="{{json_encode(Auth::user()->unreadNotifications->take(5))}}"></notification>
-=======
                             <a href="{{ route('product.shoppingCart')}}" title="@lang('label.shopcart')"><i class="fa fa-shopping-cart fa-lg" aria-hidden="true"></i>
                             <span class="badge" id="shopcart2">{{ isset($countbrg)?$countbrg:"" }}</span></a>
->>>>>>> cb24a41aad8674d2d11700dc77ea69bf6610bacc
                           </li>
                         </ul>
                       @endif
