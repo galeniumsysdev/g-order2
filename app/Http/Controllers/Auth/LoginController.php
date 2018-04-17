@@ -49,7 +49,26 @@ class LoginController extends Controller
 
             return $this->sendLockoutResponse($request);
         }
-        $request->remember = true;
+        $ios =false;
+        if ((strpos($_SERVER['HTTP_USER_AGENT'], 'Mobile/') !== false) && (strpos($_SERVER['HTTP_USER_AGENT'], 'Safari/') == false)) {
+            $ios =true;
+        }
+        try{
+          if(isset($_SERVER['HTTP_X_REQUESTED_WITH']))
+          $android = $_SERVER['HTTP_X_REQUESTED_WITH'] == "mobileapps.yasa.g_order";
+          else $android=false;
+        }catch (Exception $e) {
+          $android =false;
+        } catch (\Throwable $e) {
+          $android =false;
+        }
+        if($android or $ios)
+        {
+          $request->remember = true;
+          \Config::set('session.expire_on_close', false);
+        }else{
+          \Config::set('session.expire_on_close', true);
+        }
         if ($this->attemptLogin($request)) {
             return $this->sendLoginResponse($request);
         }
@@ -65,7 +84,7 @@ class LoginController extends Controller
     protected function attemptLogin(Request $request)
     {
         return $this->guard()->attempt(
-            $this->credentials($request), true
+            $this->credentials($request), $request->has("remember")
         );
     }
 
@@ -91,5 +110,5 @@ class LoginController extends Controller
       }
     }
 
-  
+
 }
