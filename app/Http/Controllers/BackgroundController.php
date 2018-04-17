@@ -606,7 +606,7 @@ class BackgroundController extends Controller
                           , 'price_list_id'
                           , 'order_type_id'
                           , 'customer_name_phonetic'
-                          , 'rt.name as payment_term','ac.orig_system_reference' )
+                          , 'rt.name as payment_term','ac.orig_system_reference','ac.attribute4','ac.attribute5' )
                     ->orderBy('customer_number','asc')
                     ->get();
         if(count($customers)){
@@ -623,6 +623,7 @@ class BackgroundController extends Controller
             $pharma_flag=null;
             $export_flag=null;
             $tollin_flag=null;
+            $ijinpbf =0;
             if($c->customer_class_code == 'DISTRIBUTOR PSC' or $c->customer_class_code=='OUTLET')
             {
               $psc_flag="1";
@@ -633,6 +634,9 @@ class BackgroundController extends Controller
             }elseif($c->customer_class_code == 'EXPORT'){
               $export_flag="1";
             }
+
+            if($c->attribute4!='' and !is_null($c->attribute4)) $ijinpbf=1;
+
 
               $existscustomer = Customer::where('id',$c->orig_system_reference)->first();
 
@@ -645,8 +649,7 @@ class BackgroundController extends Controller
                 ,'customer_category_code'=>$c->customer_category_code,'customer_class_code'=>$c->customer_class_code
                 ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
                 ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
-                ,'payment_term_name'=>$c->payment_term
-                ,
+                ,'payment_term_name'=>$c->payment_term,'no_ijin'=>$c->attribute4,'masa_berlaku'=>$c->attribute5,'ijin_pbf'=>$ijinpbf
                 ]
               );
               $sheetcustomer[]=[$c->customer_id,$c->customer_number,$c->customer_name,'merge with'.$existscustomer->id];
@@ -658,6 +661,7 @@ class BackgroundController extends Controller
                 ,'primary_salesrep_id'=>$c->primary_salesrep_id,'tax_reference'=>$c->tax_reference,'tax_code'=>$c->tax_code
                 ,'price_list_id'=>$c->price_list_id,'order_type_id'=>$c->order_type_id,'customer_name_phonetic'=>$c->customer_name_phonetic
                 ,'payment_term_name'=>$c->payment_term,'psc_flag'=>$psc_flag,'pharma_flag'=>$pharma_flag,'export_flag'=>$export_flag,'tollin_flag'=>$tollin_flag
+                ,'no_ijin'=>$c->attribute4,'masa_berlaku'=>$c->attribute5,'ijin_pbf'=>$ijinpbf
                 ]
               );
               $sheetcustomer[]=[$c->customer_id,$c->customer_number,$c->customer_name,'update/insert'];
