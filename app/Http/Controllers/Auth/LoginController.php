@@ -64,10 +64,10 @@ class LoginController extends Controller
         }
         if($android or $ios)
         {
-          $request->remember = true;
-          \Config::set('session.expire_on_close', false);
+          if (!$request->has('remember')) $request->request->add(['remember'=>'on']);
+          config(['session.expire_on_close' => false]);
         }else{
-          \Config::set('session.expire_on_close', true);
+          config(['session.expire_on_close' => true]);
         }
         if ($this->attemptLogin($request)) {
             return $this->sendLoginResponse($request);
@@ -84,7 +84,7 @@ class LoginController extends Controller
     protected function attemptLogin(Request $request)
     {
         return $this->guard()->attempt(
-            $this->credentials($request), $request->has("remember")
+            $this->credentials($request), $request->has('remember')
         );
     }
 
