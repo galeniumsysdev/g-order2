@@ -10,7 +10,11 @@ use App\User;
 use DB;
 use Auth;
 use File;
+use App\CsvData;
+use App\Contact;
 use Carbon\Carbon;
+use App\Http\Requests\CsvImportRequest;
+use Maatwebsite\Excel\Facades\Excel;
 //use App\Notifications\RejectCmo;
 use App\Events\PusherBroadcaster;
 use App\Notifications\PushNotif;
@@ -98,6 +102,116 @@ class FilesController extends Controller
       return redirect()->to('/uploadCMO')->withMessage(trans('pesan.successupload'));
   }
 
+  public function handleUploadcsv(Request $request)
+  {
+    $path = $request->file('csv_file')->getRealPath();
+
+      if ($request->has('header')) {
+          $data = Excel::load($path, function($reader) {})->get()->toArray();
+      } else {
+          $data = array_map('str_getcsv', file($path));
+      }
+
+      if (count($data) > 0) {
+          if ($request->has('header')) {
+              $csv_header_fields = [];
+              foreach ($data[0] as $key => $value) {
+                  $csv_header_fields[] = $key;
+              }
+          }
+          $csv_data = array_slice($data, 0, 2);
+
+          $csv_data_file = CsvData::create([
+              'csv_filename' => $request->file('csv_file')->getClientOriginalName(),
+              'csv_header' => $request->has('header'),
+              'csv_data' => json_encode($data)
+          ]);
+      } else {
+          return redirect()->back();
+      }
+
+      return view('import_fields', compact( 'csv_header_fields', 'csv_data', 'csv_data_file'));
+      //if($request->hasFile('file')) {
+      //     $file1 = $request->file('filecsv');
+      //     //$file2 = $request->file('fileexcel');
+      //     $distributorid=Auth::user()->customer_id;
+      //     $allowedFileTypes = config('constant.allowedFileTypes');
+      //     $maxFileSize = config('constant.maxFileSize');
+      //     $version=0;
+      //     $rules = [
+      //         'filecsv' => 'required|mimes:csv,txt',
+      //         //'fileexcel' => 'required|mimes:xls,xlsx',
+      //     ];
+      //     $version =DB::table('files_cmo')->where([
+      //       ['distributor_id','=',Auth::user()->customer_id],
+      //       ['period','=',$request->period]
+      //       ])->max('version');
+      //       if(is_null($version))
+      //       {
+      //         $version=0;
+      //       }else{
+      //         $version=$version+1;
+      //       }
+      //
+      //     $this->validate($request, $rules);
+      //     $fileName1 = $request->period.'_'.$distributorid.'_'.$version.'.'.$file1->getClientOriginalExtension();
+      //     //$fileName2 = $request->period."_".$distributorid."_".$version.".".$file2->getClientOriginalExtension();
+      //     //$fileName1 = $file1->getClientOriginalName()."_".$version;
+      //     //$fileName2 = $file2->getClientOriginalName()."_".$version;
+      //     //dd($fileName1."-".$fileName2);
+      //     $destinationPath = config('constant.fileDestinationPath');
+      //     $uploaded = Storage::put($destinationPath.'/'.$fileName1, file_get_contents($file1->getRealPath()));
+      //   //  $uploaded2 = Storage::put($destinationPath.'/'.$fileName2, file_get_contents($file2->getRealPath()));
+      //
+      //     //$bln=substr($request->period,-2,2);
+      //   //  $thn=substr($request->period,0,4);
+      //   //dd($bln.'-'.$thn."-".$version);
+      //     if($uploaded) {
+      //         $filecmo = FileCMO::create([
+      //           'distributor_id' =>Auth::user()->customer_id,
+      //           'version'=>$version,
+      //           'period'=>$request->period,
+      //           'bulan'=>$bln,
+      //           'tahun'=>$thn,
+      //           'file_pdf' => $fileName1,
+      //           'file_excel' => $fileName2
+      //         ]);
+      //     }
+      // //}
+      // $content = 'Distributor '.Auth::user()->name.' telah mengupload file CMO period:'. $request->period;
+      // if($version!=0)
+      // {
+      //   $content .=  'versi ke '.$version.'<br>';
+      // }
+      // $content .='Silahkan buka aplikasi eOrder untuk memdownload file.<br>' ;
+      // $data=[
+      //   'title' => 'Upload CMO',
+      //   'message' => 'File CMO period #'.$request->period.' versi '.$version.' telah diupload oleh '.Auth::user()->name,
+      //   'id' => $filecmo->id,
+      //   'href' => route('files.readnotif'),
+      //   'mail' => [
+      //     'greeting'=>'File CMO period #'.$request->period.' oleh '.Auth::user()->name,
+      //     'content' =>$content,
+      //   ]
+      // ];
+      // $cust_Yasa=config('constant.customer_yasa', 'GPL1000001');
+      // $userYasa = User::whereExists(function ($query) use($cust_Yasa) {
+      //       $query->select(DB::raw(1))
+      //             ->from('customers as c')
+      //             ->whereRaw("users.customer_id = c.id and c.customer_number = '".$cust_Yasa."'");
+      //   })->get();
+      // if($userYasa)
+      // {
+      //   foreach($userYasa as $yasa){
+      //     $data['email'] = $yasa->email;
+      //     $yasa->notify(new PushNotif($data));
+      //   }
+      // }
+      // return redirect()->to('/uploadCMO')->withMessage(trans('pesan.successupload'));
+  }
+
+
+
   public function upload() {
       /*$directory = config('constant.fileDestinationPath');
       $files = Storage::files('$directory');
@@ -124,6 +238,84 @@ class FilesController extends Controller
               ->latest()->first();
       return view('files.upload')->with(array('files' => $files,'period'=>$period,'periodint'=>$periodint,'filereject'=>$filereject));
   }
+
+
+  public function privacy() {
+      /*$directory = config('constant.fileDestinationPath');
+      $files = Storage::files('$directory');
+      var_dump($files);*/
+
+      return view('privacy_policy');
+  }
+
+
+  public function privacy_policy() {
+      /*$directory = config('constant.fileDestinationPath');
+      $files = Storage::files('$directory');
+      var_dump($files);*/
+
+      return view('privacy');
+  }
+
+  public function uploadcsv() {
+      /*$directory = config('constant.fileDestinationPath');
+      $files = Storage::files('$directory');
+      var_dump($files);*/
+      $period = date('M-Y', strtotime('+1 month'));
+
+      $periodint = date('Ym', strtotime('+1 month'));
+      //var_dump($periodint);
+      $files = DB::table('files_cmo')
+              ->where([
+                        ['distributor_id','=',Auth::user()->customer_id],
+                        ['period','=',$periodint]
+                      ])
+              ->where(function ($query) {
+                $query->whereNull('approve')
+                      ->orwhere('approve', '=', 1);
+              })->latest()->first();
+      $filereject = DB::table('files_cmo')
+              ->where([
+                        ['distributor_id','=',Auth::user()->customer_id],
+                        ['period','=',$periodint]
+                      ])
+              ->where('approve', '=', 0)
+              ->latest()->first();
+      return view('files.uploadcsv')->with(array('files' => $files,'period'=>$period,'periodint'=>$periodint,'filereject'=>$filereject));
+  }
+
+
+
+  public function parseImport(CsvImportRequest $request)
+{
+  $path = $request->file('csv_file')->getRealPath();
+
+      if ($request->has('header')) {
+          $data = Excel::load($path, function($reader) {})->get()->toArray();
+      } else {
+          $data = array_map('str_getcsv', file($path));
+      }
+
+      if (count($data) > 0) {
+          if ($request->has('header')) {
+              $csv_header_fields = [];
+              foreach ($data[0] as $key => $value) {
+                  $csv_header_fields[] = $key;
+              }
+          }
+          $csv_data = array_slice($data, 0, 2);
+
+          $csv_data_file = CsvData::create([
+              'csv_filename' => $request->file('csv_file')->getClientOriginalName(),
+              'csv_header' => $request->has('header'),
+              'csv_data' => json_encode($data)
+          ]);
+      } else {
+          return redirect()->back();
+      }
+
+      return view('import_fields', compact( 'csv_header_fields', 'csv_data', 'csv_data_file'));
+}
 
   public function downfunc($id = '') {
        if($id){

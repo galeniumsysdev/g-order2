@@ -454,9 +454,14 @@ class UserController extends Controller
       $distcabang = Customer::where('id','=',$id)->first();
       $alamat = CustomerSite::where([['customer_id','=',$id],['site_use_code','=','SHIP_TO']])->orderBy('created_at','asc')->first();
       $provinces = DB::table('provinces')->get();
+	if ($alamat){
       $regencies = DB::table('regencies')->where('province_id','=',$alamat->province_id)->get();
       $districts = DB::table('districts')->where('regency_id','=',$alamat->city_id)->get();
       $villages = DB::table('villages')->where('district_id','=',$alamat->district_id)->get();
+      } else{ $regencies = DB::table('regencies')->where('province_id','=',0)->get();
+      $districts = DB::table('districts')->where('regency_id','=',0)->get();
+      $villages = DB::table('villages')->where('district_id','=',0)->get();
+      }
       $roles = DB::table('roles')->whereIn('name',['Distributor','Distributor Cabang'])->get();
       return view('admin.oracle.cabangedit',['customer'=>$distcabang,'alamat'=>$alamat,'roles'=>$roles,'provinces'=>$provinces,'menu'=>'customer-cabang'
                   ,'regencies'=>$regencies,'districts'=>$districts,'villages'=>$villages
@@ -619,7 +624,28 @@ class UserController extends Controller
           throw $e;
         }
         return redirect()->route('usercabang.edit',$id)->with('message','Successfully edit data');
-      }elseif($request->action_mapping == "delete")
+      }elseif($request->save_customer=="Send")
+      {
+        DB::beginTransaction();
+        try{
+          $user = User::where('customer_id','=',$id)->first();
+          $this->validate($request, [
+              'customer_name' => 'required',
+              'email' => 'required|email|unique:users,email,'.$user->id.',id',
+          ]);
+		  $user->email=$request->email;
+		  $user->validate_flag=1;
+            if(empty($user->api_token)) $user->api_token =str_random(60);
+            $user->save();
+            $user->notify(new InvitationUser($user));
+			DB::commit();
+		}catch(\Exception $e) {
+          DB::rollback();
+          throw $e;
+        }
+		return redirect()->route('usercabang.edit',$id)
+                            ->with('message','Successfully Send Email');
+	  }elseif($request->action_mapping == "delete")
       {
         DB::beginTransaction();
         try{
@@ -964,7 +990,7 @@ class UserController extends Controller
             });
           });
           $data=$data->select('customers.*','co.name as cat_name')->get();
-          //dd(DB::getQueryLog());
+          //var_dump(DB::getQueryLog());
           foreach($data as $d)
           {
             $d->ada='T';
@@ -979,14 +1005,19 @@ class UserController extends Controller
                         return ($value->customer_class_code ==null or $value->customer_class_code=="OUTLET");
                     });
           if($oldoutlet->count()>0 and $data->count()>0)
-          {
+          { if($dist->customer_number==config('constant.customer_yasa')) 
+	     {
+		$oldoutlet =$oldoutlet->filter(function ($value, $key) {
+                        return ($value->customer_number ==null and $value->status=="A");
+                    });
+	     }
             $deletemapping = $oldoutlet->whereNotIn('id',$data->pluck('id')->unique());
             if($deletemapping->count()>0)
             {
               $dist->delete_mapping = $deletemapping;
             }
           }
-      }
+      } 
       $menu = "";
       return view('admin.oracle.mappingoutlet',compact('id','dists','menu','deletemapping'));
 
@@ -1036,6 +1067,7 @@ class UserController extends Controller
                           ->first();
             if(is_array($dist) and $distributor)
             {
+		$dist = array_unique($dist);
               foreach($dist as $keyoutlet=>$outlet)
               {
                 $distributor->hasOutlet()->attach($outlet);

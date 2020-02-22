@@ -31,7 +31,7 @@ class PriceController extends Controller
               ->whereRaw("now() <= ifnull(qpd.end_date_active,DATE_ADD(now(),INTERVAL 1 day))")
               ->whereraw("ifnull(qpd.orig_org_id,'".config('constant.org_id')."')= '".config('constant.org_id')."'")
               ->select('qlh.name as price_name','p.title as itemdesc','p.itemcode','p.id','qpd.list_header_id','qpd.list_line_id','qpd.operand'
-                      ,DB::raw("(select customer_name from customers as c where c.oracle_customer_id = qpd.customer_id ) as cust_name")
+                      ,DB::raw("ifnull((select customer_name from customers as c where c.oracle_customer_id = qpd.customer_id ),qpd.customer_id) as cust_name")
                       , 'qpd.start_date_active','qpd.end_date_active'
                       );
 

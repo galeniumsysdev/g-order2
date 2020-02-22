@@ -34,7 +34,7 @@ use Maatwebsite\Excel\Writers\LaravelExcelWriter;
 class BackgroundController extends Controller
 {
     public function getStatusOrderOracle()
-    {
+    {set_time_limit(0);  
       DB::beginTransaction();
       try{
       $request= DB::table('tbl_request')->where('event','=','SalesOrder')
@@ -58,7 +58,7 @@ class BackgroundController extends Controller
                   ['approve','=',1],
                   ['status','>=',0],
                   ['status','<=',3],
-                  //['notrx','=','PO-20180207-II-00008']
+                 // ['notrx','>=','PO-20180703-VII-00009'],['notrx','<=','PO-20180717-VII-00041']
         ])->get();
         if($headers){
           foreach($headers as $h)
@@ -130,7 +130,7 @@ class BackgroundController extends Controller
                   //$oraheader = $connoracle->selectone('select min(booked_date)');
                   $newline =$this->getadjustmentHeaderSO($h->notrx,$h->id);
                   $oraheader = $connoracle->selectone("select min(booked_date) as booked_date from oe_order_headers_all oha
-                                where  oha.flow_status_code ='BOOKED' and exists (select 1 from oe_ordeR_lines_all ola
+                                where  oha.flow_status_code in ('BOOKED') and exists (select 1 from oe_ordeR_lines_all ola
                                             where ola.headeR_id =oha.headeR_id
                                               and nvl(ola.attribute1,oha.orig_sys_document_ref)='".$h->notrx."')");
                   //dd($oraheader);
@@ -1021,7 +1021,7 @@ class BackgroundController extends Controller
               ->first();
             if($my_so_ship){
               if($ship->released_status=="C")/*closing*/
-              {
+              {echo "update closing<br>";
                 $my_so_ship->qty_backorder = intval($my_so_ship->qty_backorder)+$my_so_ship->qty_shipping - $ship->picked_quantity;
                 $my_so_ship->qty_shipping = $ship->picked_quantity;
                 $my_so_ship->batchno = $ship->lot_number;
@@ -1115,7 +1115,7 @@ class BackgroundController extends Controller
                     and nvl(ola.attribute2,ola.orig_sys_line_ref) = '".$line->line_id."'
                     and ola.line_category_code ='ORDER'
                     and nvl(oha.CANCELLED_FLAG,'N')='N'
-                    and oha.flow_status_code ='BOOKED'
+                    and oha.flow_status_code in ('BOOKED')
                 group by ola.inventory_item_id
                 ");
                 //and ola.inventory_item_id = '".$line->inventory_item_id."'
@@ -1435,6 +1435,7 @@ class BackgroundController extends Controller
       if($connoracle){
         $master_products = $connoracle->table('mtl_system_items as msi')
             ->where('customer_order_enabled_flag','=','Y')
+->where('segment1','like','4%')
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
                       ->from('mtl_parameters as mp')
@@ -1511,6 +1512,18 @@ class BackgroundController extends Controller
       if($connoracle){
         $datadiskon=[];
         $connoracle->enableQueryLog();
+	/*delete data diskon yg manual*/
+	$listheader2 = $connoracle->table('qp_list_headers')
+                    ->where('automatic_flag','=','N')
+                    ->select('list_header_id')
+                    ->get();
+	 if($listheader2->count()>0)
+        {
+	   $delqlh = QpListHeaders::whereIn('list_header_id',$listheader2->pluck('list_header_id')->toArray())
+                    ->delete();
+          $delqdiskon = QpPricingDiskon::whereIn('list_header_id',$listheader2->pluck('list_header_id')->toArray())
+                    ->delete();
+	 }
         /*delete data yg end_date_active berakhir*/
         $listheader = $connoracle->table('qp_list_headers')
                     ->where('list_type_code','!=','PRL')
@@ -1532,8 +1545,9 @@ class BackgroundController extends Controller
 	//echo "insert pricing diskon:<br>";
 	 /*insert pricing diskon*/
         $modifiers = $connoracle->table('gpl_pricing_diskon_v')
-                      ->whereraw('nvl(end_date_active,sysdate+1)>= trunc(sysdate)')
+                      ->whereraw('nvl(end_date_active,sysdate+1)>= trunc(sysdate)')//->whereraw('list_header_id=13094')
 			->whereNotIn('list_header_id', $listheader->pluck('list_header_id')->toArray())
+			->where('automatic_flag','=','Y')
 			->whereNotNull('customer_number')
                       ->whereraw("last_update_date>=to_date('".date_format($tglskrg,'Y-m-d')."','rrrr-mm-dd')")
                       ->get();
@@ -1677,10 +1691,11 @@ class BackgroundController extends Controller
 
     public function getPromoBonus($tglskrg=null)
     {
-      //$tglskrg = date_create("2017-01-01");
+      $tglskrg = date_create("2018-01-01");
       $sheetarray=[];
       $databonus=[];
       DB::beginTransaction();
+DB::connection()->enableQueryLog();
       try{
         /*getPromo*/
         $connoracle = DB::connection('oracle');
@@ -1688,6 +1703,8 @@ class BackgroundController extends Controller
         $qp_bonus = $connoracle->table('qp_list_headers as qlh')
                     ->join('qp_modifier_summary_v as qms','qlh.list_header_id','qms.list_header_id')
                     ->whereraw("qlh.list_type_code='PRO'")
+		      ->where('qlh.automatic_flag','Y')
+//->whereraw("qlh.list_header_id in (252153,253119,253132) ")
                     ->whereraw("sysdate between nvl(qlh.start_date_active,'01-jan-2017') and nvl(qlh.end_date_Active,sysdate+1)")
                     ->whereraw("sysdate between nvl(qms.start_date_active,'01-jan-2017') and nvl(qms.end_date_Active,sysdate+1)")
                     ->wherenotexists(function($query){
@@ -1813,6 +1830,8 @@ class BackgroundController extends Controller
               $customerlines=$customerlines->select('oracle_customer_id','customer_name','customer_number','id')
                       ->get();
               //print_r($customer->getBindings() );
+//print_r($connoracle->getQueryLog());
+
               //dd(DB::getQueryLog());
               //dd($customerlines);
               if($customerlines->count()>0){
@@ -2029,11 +2048,15 @@ class BackgroundController extends Controller
           $query->whereraw("customer_class_code ".$kondisi);
         elseif($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE2")
           $query->whereraw("oracle_customer_id ".$kondisi);
+	 elseif($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE11")
+	   $query->whereraw("oracle_customer_id in (select oracle_customer_id from customer_sites as cs where cs.customer_id = customers.id and cs.site_use_id ".$kondisi.")");
       }else{
         if ($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE1")
           $query->orwhereraw("customer_class_code ".$kondisi);
         elseif($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE2")
           $query->orwhereraw("oracle_customer_id ".$kondisi);
+	 elseif($qualifier->qualifier_attribute=="QUALIFIER_ATTRIBUTE11")
+	   $query->orwhereraw("oracle_customer_id in (select oracle_customer_id from customer_sites as cs where cs.customer_id = customers.id and cs.site_use_id ".$kondisi.")");	 
       }
       return $query;
     }

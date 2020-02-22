@@ -228,8 +228,12 @@
                             @php($curr = "$")
                           @endif
                   				<tr>
-                            <td> Discount Reguler: Rp. {{number_format($header->disc_reg,2)}}</td>
-            					      <td colspan="{{$colgab}}" style="text-align:right">
+                                @if($header->currency=='IDR')
+					 <td> Discount Reguler: Rp. {{number_format($header->disc_reg,2)}}</td>	      
+				    @else
+					<td></td> 
+				    @endif
+<td colspan="{{$colgab}}" style="text-align:right">
                               <strong>SubTotal: {{$curr}}</strong>
                             </td>
                   					<td style="text-align:right"><strong id="totprice2">
@@ -242,7 +246,11 @@
                             @endif
                   				</tr>
                           <tr>
+@if($header->currency=='IDR')
                             <td>Discount Promo: Rp. {{number_format($header->disc_product,2)}}</td>
+@else
+<td></td>
+@endif
                             <td colspan="{{$colgab}}" style="text-align:right">
                               <strong>@lang('shop.Tax'): {{$curr}}</strong>
                             </td>
@@ -262,7 +270,11 @@
                             @endif
                   				</tr>
                           <tr>
+@if($header->currency=='IDR')
                             <td>Total Discount   : Rp. {{number_format( ($header->disc_product+$header->disc_reg),2)}}</td>
+@else
+<td></td>
+@endif
                             <td colspan="{{$colgab}}" style="text-align:right">
                               <strong>Total: {{$curr}}<strong>
                             </td>

@@ -3,7 +3,7 @@ var baseurl = window.Laravel.url;
 $(document).ready(function(){
   if($('#email-spv').length){
     $('#change-email').hide();
-    $.get(window.Laravel.url+"/dpl/ajax/asmspv",
+    $.get(window.Laravel.url+"/dpl/ajax/asmspv/",
       function (data) {
         $('#email-spv').typeahead({
             source: data,

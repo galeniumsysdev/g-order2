@@ -54,7 +54,7 @@
                               @if($map->ada=="T")
                                 <input type="hidden" name="insertarray[{{$dist_id}}][]" value="{{$map->id}}">
                               @endif
-                              <td>{{$map->customer_name}}</td>
+                              <td>{{$map->customer_name.'('.$map->id.')'}}</td>
                               <td>{{$map->sites->where('site_use_code','SHIP_TO')->pluck('province')->unique()}}</td>
                               <td>{{$map->sites->where('site_use_code','SHIP_TO')->pluck('city')->unique()}}</td>
                               <td>
@@ -109,7 +109,7 @@
                               @foreach($deldist->delete_mapping as $delete)
                               @php($i+=1)
                               <input type='hidden' name="delarray[{{$delid}}][]" value="{{$delete->id}}">
-                                <td>{{$delete->customer_name}}</td>
+                                <td>{{$delete->customer_name.'('.$delete->id.')'}}</td>
                                 <td>{{$delete->sites->where('site_use_code','SHIP_TO')->pluck('province')->unique()}}</td>
                                 <td>{{$delete->sites->where('site_use_code','SHIP_TO')->pluck('city')->unique()}}</td>
                                 <td>
@@ -123,7 +123,11 @@
 
                                 @endif
                               </td>
-                                <td>{{$delete->categoryOutlet->name}}</td>
+                                @if($delete->categoryOutlet)
+					<td>{{$delete->categoryOutlet->name}}</td>
+				    @else
+					<td></td>
+				    @endif
                               @if($deldist->delete_mapping->count()!=$i)
                               <tr><td>{{$delname}}</td>
                               @endif

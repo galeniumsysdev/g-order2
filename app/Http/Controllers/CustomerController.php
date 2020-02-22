@@ -541,7 +541,7 @@ class CustomerController extends Controller
                   ->get();
       if($request->isMethod('post'))
       {
-        $outlets = Customer::wherenull('oracle_customer_id');
+        $outlets = Customer::where('status','A');//wherenull('oracle_customer_id');
         $outlets =$outlets->leftjoin('category_outlets as co','co.id','=','customers.outlet_type_id');
         $outlets =$outlets->leftjoin('subgroup_datacenters as sdc','sdc.id','=','customers.subgroup_dc_id');
         if($request->name)

@@ -46,7 +46,7 @@ class OrgStructureController extends Controller
 					 ->leftjoin('role_user as ru','ru.user_id','u.id')
 					 ->leftjoin('roles as r','r.id','ru.role_id')
 					 ->where('org_structure.id',$user_id)
-					 ->select('org_structure.*','u.email','r.id as role_id','r.name as role_name')->first();
+					 ->select('org_structure.*','u.id as userid','u.email','r.id as role_id','r.name as role_name')->first();
 
   	$users_sup = User::select('users.*','org_structure.*','users.id as user_id')
   								->leftjoin('org_structure','org_structure.user_id','users.id')

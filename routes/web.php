@@ -35,6 +35,10 @@ Route::get('/ajax-subcat',function () {
     return Response::json($subcategories);
 });
 
+
+Route::get('/privacy_policy','FilesController@privacy');
+Route::get('/privacy','FilesController@privacy_policy');
+
 Route::get('/ajax/shiptoaddr', 'CustomerController@ajaxSearchAlamat');
 Route::post('/ajax/addMappingType', 'UserController@ajaxAddMappingType')->name('ajax.addmapping.type');
 Route::get('/ajax/getMappingType/{id?}', 'UserController@ajaxGetMappingType')->name('ajax.mapping.getdata');
@@ -327,6 +331,15 @@ Route::group(['middleware' => ['permission:UploadCMO']], function () {
         return response()->download(storage_path('app/uploads/'.$file));
     });
 });
+
+Route::group(['middleware' => ['permission:CheckStatusSO']], function () {
+    Route::get('uploadCSV', 'FilesController@uploadcsv')->name('files.uploadcsv');
+    Route::post('/parseImport', 'FilesController@parseImport');
+    Route::get('/downloadCSV/{file}', function ($file='') {
+        return response()->download(storage_path('app/uploads/'.$file));
+    });
+});
+
 Route::group(['middleware' => ['permission:DownloadCMO']], function () {
   Route::get('viewAlldownloadfile/{id?}', 'FilesController@downfunc')->name('files.viewfile');
   Route::get('/downloadCMO/{file}', function ($file='') {

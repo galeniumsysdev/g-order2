@@ -12,13 +12,13 @@ var tryAPIGeolocation = function() {
         apiGeolocationSuccess({coords: {latitude: success.location.lat, longitude: success.location.lng}});
   })
   .fail(function(err) {
-    document.getElementById("btnlogin").disabled =true;
+    //document.getElementById("btnlogin").disabled =true;
     alert("API Geolocation error! \n\n"+err);
   });
 };
 
 var browserGeolocationSuccess = function(position) {
-    //alert("Browser geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
+    alert("Browser geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
     success(position);
 };
 

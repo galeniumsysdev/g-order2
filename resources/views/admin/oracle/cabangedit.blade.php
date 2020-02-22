@@ -15,7 +15,7 @@
             {{method_field('PATCH')}}
             {{ csrf_field() }}
             <input type="hidden" value="{{$customer->id}}" id="customer_id">
-            <input type="hidden" name="siteid" value="{{$alamat->id}}">
+            <input type="hidden" name="siteid" value="{{$alamat?$alamat->id:''}}">
             <div class="form-group">
               <label class="control-label col-sm-2" for="name">Distributor Pusat :</label>
               <div class="col-sm-10">
@@ -77,12 +77,12 @@
                             @foreach($provinces as $province)
                               @if($alamat)
                                 @if($alamat->province_id==$province->id)
-                                  <option selected='selected' value="{{$province->id}}">{{$province->name}}</option>
+                                  <option selected='selected' value="{{$province?$province->id:''}}">{{$province?$province->name:''}}</option>
                                 @else
-                                  <option value="{{$province->id}}">{{$province->name}}</option>
+                                  <option value="{{$province?$province->id:''}}">{{$province?$province->name:''}}</option>
                                 @endif
                               @else
-                                <option value="{{$province->id}}">{{$province->name}}</option>
+                                <option value="{{$province?$province->id:''}}">{{$province?$province->name:''}}</option>
                               @endif
                             @endforeach
                           </select>
@@ -102,7 +102,11 @@
                           <select name="city" class="form-control" id="city" onchange="getListDistrict(this.value,{{$alamat?$alamat->district_id:''}})" required>
                             <option value="">--</option>
                             @foreach($regencies as $reg)
+@if($alamat)
                             <option value="{{$reg->id}}" {{ ($reg->id==$alamat->city_id)?'selected=selected':''}}>{{$reg->name}}</option>
+@else
+				<option value="{{$reg->id}}">{{$reg->name}}</option>
+@endif
                             @endforeach
                           </select>
                             <!--<input id="city" type="city" class="form-control" name="city" value="{{ old('city') }}" required>-->
@@ -123,7 +127,11 @@
                             <select name="district" class="form-control" id="district" onchange="getListSubdistrict(this.value,{{$alamat?$alamat->state_id:''}})" required>
                               <option value="">--</option>
                               @foreach($districts as $d)
+					@if($alamat)
                               <option value="{{$d->id}}" {{ ($d->id==$alamat->district_id)?'selected=selected':''}}>{{$d->name}}</option>
+					@else
+					<option value="{{$d->id}}">{{$d->name}}</option>
+					@endif
                               @endforeach
                             </select>
 
@@ -142,7 +150,11 @@
                           <select name="subdistricts" class="form-control" id="subdistricts" required>
                             <option value="">--</option>
                             @foreach($villages as $v)
+@if($alamat)
                             <option value="{{$v->id}}" {{ ($v->id==$alamat->state_id)?'selected=selected':''}}>{{$v->name}}</option>
+@else
+				<option value="{{$v->id}}">{{$v->name}}</option>
+@endif
                             @endforeach
                           </select>
                             <!--<input id="districts" type="districts" class="form-control" name="districts" value="{{ old('districts') }}">-->
@@ -159,8 +171,11 @@
                         <label for="postal_code" class="col-sm-2 control-label">@lang('label.postalcode')</label>
 
                         <div class="col-sm-8">
+@if($alamat)
                             <input id="postal_code" type="postal_code" class="form-control" name="postal_code" value="{{ old('postal_code')?old('postal_code'):$alamat->postalcode }}">
-
+@else
+				<input id="postal_code" type="postal_code" class="form-control" name="postal_code" value="{{ old('postal_code')?old('postal_code'):'' }}">
+@endif
                             @if ($errors->has('postal_code'))
                                 <span class="help-block">
                                     <strong>{{ $errors->first('postal_code') }}</strong>
@@ -195,6 +210,11 @@
                           @if(isset($customer->parent_dist))
                             <a href="{{route('useroracle.show',$customer->parent_dist)}}" class="btn btn-warning">Distributor Pusat</a>
                           @endif
+			      @if(isset($customer->user))
+                                  @if($customer->user->register_flag==0)
+                                    <button type="submit" name="save_customer" value="Send" class="btn btn-success">Send Invitation Email</button>
+                                  @endif
+                                @endif
                       </div>
                     </div>
                   </div>
@@ -216,7 +236,7 @@
                       <div class="pull">
                           <button type="button" class="btn btn-sm btn-success"  class="add-mapping" data-toggle="modal" data-target="#addMapping" data-id="cross"> Add New Mapping</button>
                           <button class="btn btn-sm btn-danger" name="action_mapping" value="delete">Delete</button>
-                        <!--  <a href="{{route('customer.mappingOutlet',$customer->id)}}" target="_blank" class="btn btn-sm btn-primary">Preview Outlet</a>-->
+                          <a href="{{route('customer.mappingOutlet',$customer->id)}}" target="_blank" class="btn btn-sm btn-primary">Preview Outlet</a>
                       </div>
                     </div>
                   </div>

@@ -1211,8 +1211,9 @@ class DPLController extends Controller {
 			$data = DB::table('users as u')
 					->join('role_user as ru','u.id','=','ru.user_id')
 					->join('roles as r','ru.role_id','=','r.id')
-					->where('r.name','=',$posisi)
+					//->where('r.name','=',$posisi)
 					->where('u.register_flag','=',1);
+
 			if	(Auth::check())
 			{
 				if($posisi=="SPV" and !is_null($id)){
@@ -1223,17 +1224,17 @@ class DPLController extends Controller {
 									});
 				}elseif(Auth::user()->hasRole($posisi) and ($posisi=="ASM" or $posisi="SPV"))
 				{
-					$data=$data->where('u.id','=',Auth::user()->id);
+					$data=$data->where('r.name','=',$posisi)->where('u.id','=',Auth::user()->id);
 				}elseif($posisi=="SPV" and Auth::user()->hasRole('ASM'))
 				{
-					$data=$data->WhereExists(function($query2){
+					$data=$data->where('r.name','=',$posisi)->WhereExists(function($query2){
 							$query2->select(DB::raw(1))
 										->from('org_structure as os')
 										->whereRaw("os.user_id = u.id and directsup_user_id = '".Auth::user()->id."'");
 									});
 				}elseif($posisi=="ASM" and Auth::user()->hasRole('SPV'))
 				{
-					$data=$data->WhereExists(function($query2){
+					$data=$data->where('r.name','=',$posisi)->WhereExists(function($query2){
 							$query2->select(DB::raw(1))
 										->from('org_structure as os')
 										->whereRaw("os.directsup_user_id = u.id and os.user_id = '".Auth::user()->id."'");
